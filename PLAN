@@ -1,0 +1,6 @@
+- listen for added and removed disks
+- mount added
+- unmount removed
+- separate interface to remove
+- scan disks on startup
+- configuration
