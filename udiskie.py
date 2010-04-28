@@ -9,6 +9,17 @@ system_bus = dbus.SystemBus()
 
 def device_added(device):
     print 'device added: %s' % (device,)
+    device_object = system_bus.get_object('org.freedesktop.UDisks', device)
+    properties_iface = dbus.Interface(device_object,
+                                      dbus_interface='org.freedesktop.DBus.Properties')
+    id_usage = properties_iface.Get('org.freedesktop.UDisks.Device', 'IdUsage')
+    if id_usage == 'filesystem':
+        filesystem = properties_iface.Get('org.freedsktop.UDisks.Device',
+                                          'IdType')
+        # TOOD - removable?
+        mount_path = device_object.FilesystemMount(filesystem, [],
+                                                   dbus_interface='org.freedesktop.UDisks.Device')
+        print 'mounted at: %s' % (mount_path,)
 
 def device_changed(device):
     print 'device changed: %s' % (device,)
