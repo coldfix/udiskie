@@ -38,20 +38,27 @@ def unmount_all():
             logger.debug('Skipping unhandled device %s' % (device,))
 
 def cli(args):
-    logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger('udiskie.umount.cli')
     parser = optparse.OptionParser()
     parser.add_option('-a', '--all', action='store_true',
                       dest='all', default=False,
                       help='all devices')
+    parser.add_option('-v', '--verbose', action='store_true',
+                      dest='verbose', default=False,
+                      help='verbose output')
     (options, args) = parser.parse_args(args)
+
+    log_level = logging.INFO
+    if options.verbose:
+        log_level = logging.DEBUG
+    logging.basicConfig(level=log_level, format='%(message)s')
 
     if options.all:
         unmount_all()
     else:
-        print args
         if len(args) == 0:
             logger.warn('No devices provided for unmount')
+            return 1
 
         for path in args:
             unmount(path)
