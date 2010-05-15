@@ -1,4 +1,2 @@
-- Hook up logging
-- Add -a option for udiskie-umount
 - Move udiskie to the udiskie package infrastructure
 - Scan disks on startup
