@@ -4,4 +4,4 @@ if __name__ == '__main__':
     import sys
     import udiskie.umount
 
-    udiskie.umount.cli(sys.argv)
+    udiskie.umount.cli(sys.argv[1:])
