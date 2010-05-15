@@ -2,10 +2,7 @@ import logging
 
 import dbus
 
-from udiskie import system_bus
-from udiskie.names import UDISKS_OBJECT, UDISKS_DEVICE_INTERFACE
 import udiskie.device
-import udiskie.util
 
 def unmount(path):
     """Unmount a filesystem
