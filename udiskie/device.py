@@ -11,7 +11,11 @@ class Device:
     def __init__(self, bus, device_path):
         self.log = logging.getLogger('udiskie.device.Device')
         self.bus = bus
+        self.device_path = device_path
         self.device = self.bus.get_object(UDISKS_OBJECT, device_path)
+
+    def __str__(self):
+        return self.device_path
 
     def _get_property(self, property):
         return self.device.Get(UDISKS_DEVICE_INTERFACE, property,
