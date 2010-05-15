@@ -15,24 +15,31 @@ def _get_property(device, prop):
 def find_device(path):
     logger = logging.getLogger('udiskie.util.find_device')
 
+    found = []
+
     for device in _get_all_devices():
         logger.debug('examining %s' % (device,))
 
         mounted_paths = _get_property(device, 'DeviceMountPaths')
         if path in mounted_paths:
-            return device
+            found.append(device)
 
         # device path
         device_file = _get_property(device, 'DeviceFile')
         if path == device_file:
-            return device
+            found.append(device)
+
+    return found
 
 def handleable(device_path):
     """Check if the device should be handled by udiskie.
     
     Right now this just means that the device is removable."""
 
-    return _get_property(device_path, 'DeviceIsRemovable')
+    removable = _get_property(device_path, 'DeviceIsRemovable')
+    logger = logging.getLogger('udiskie.util.handleable')
+    logger.debug('device_path: %s, removable: %s' % (device_path, removable))
+    return removable
 
 def mounted(device_path):
     """Check if the device is currently mounted."""

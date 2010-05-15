@@ -1,7 +1,10 @@
 import logging
 
+import dbus
+
 from udiskie import system_bus
 from udiskie.names import UDISKS_OBJECT, UDISKS_DEVICE_INTERFACE
+import udiskie.device
 import udiskie.util
 
 def unmount(path):
@@ -10,17 +13,20 @@ def unmount(path):
     The filesystem must match the criteria for a filesystem mountable by
     udiskie.  path is either the physical device node (e.g. /dev/sdb1) or the
     mount point (e.g. /media/Foo)."""
-    
+
+    bus = dbus.SystemBus()
     logger = logging.getLogger('udiskie.umount.unmount')
-    device_path = udiskie.util.find_device(path)
-    if udiskie.util.handleable(device_path) \
-       and udiskie.util.mounted(device_path):
-        logger.info('Unmounting %s (udisks path: %s)' % (path, device_path))
-        device_object = system_bus.get_object(UDISKS_OBJECT, device_path)
-        device_object.FilesystemUnmount([],
-                                        dbus_interface=UDISKS_DEVICE_INTERFACE)
-        logger.info('Finished unmounting %s' % (path,))
+    for device in udiskie.device.get_all(bus):
+        if path in device.mount_paths() or path == device.device_file():
+            logger.debug('Found device owning "%s": "%s"' % (path, device))
+            if device.is_handleable() and device.is_mounted():
+                logger.info('Unmounting %s (device: %s)' % (path, device))
+                device.unmount()
+                logger.info('Finished unmounting %s' % (path,))
+            else:
+                logger.info('Skipping unhandled device %s' % (device_path,))
 
 def cli(args):
+    logging.basicConfig(level=logging.DEBUG)
     for path in args[1:]:
         unmount(path)
