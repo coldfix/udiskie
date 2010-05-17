@@ -36,7 +36,7 @@ class Device:
         Currently this just means that the device is removable or that the
         device it is part of is removable."""
 
-        if self.is_removable():
+        if self.is_removable() and self.is_filesystem():
             return True
         else:
             if self.is_partition():
@@ -53,6 +53,16 @@ class Device:
 
     def device_file(self):
         return self._get_property('DeviceFile')
+
+    def is_filesystem(self):
+        return self._get_property('IdUsage') == 'filesystem'
+
+    def id_type(self):
+        return self._get_property('IdType')
+
+    def mount(self, filesystem, options):
+        self.device.FilesystemMount(filesystem, options,
+                                    dbus_interface=UDISKS_DEVICE_INTERFACE)
 
     def unmount(self):
         self.device.FilesystemUnmount([], dbus_interface=UDISKS_DEVICE_INTERFACE)
