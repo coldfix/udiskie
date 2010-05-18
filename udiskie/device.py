@@ -25,25 +25,31 @@ class Device:
         return self._get_property('PartitionSlave')
 
     def is_removable(self):
-        return self._get_property('DeviceIsRemovable')
+        """Is the device removable?
+
+        Also checks parent devices recursively because udisks doesn't report a
+        partition on a removable device as removable."""
+        if self._get_property('DeviceIsRemovable'):
+            return True
+        elif self.is_partition():
+            parent = Device(self.bus, self.partition_slave())
+            return parent.is_removable()
+        else:
+            return False
 
     def is_partition(self):
         return self._get_property('DeviceIsPartition')
 
     def is_handleable(self):
-        """Should this device be handled by udiskie.
+        """Should this device be handled by udiskie?
 
-        Currently this just means that the device is removable or that the
-        device it is part of is removable."""
+        Currently this just means that the device is removable and holds a
+        filesystem."""
 
         if self.is_removable() and self.is_filesystem():
             return True
         else:
-            if self.is_partition():
-                parent = Device(self.bus, self.partition_slave())
-                return parent.is_handleable()
-            else:
-                return False
+            return False
 
     def is_mounted(self):
         return self._get_property('DeviceIsMounted')
