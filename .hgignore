@@ -3,5 +3,6 @@ syntax: glob
 *.pyc
 
 # distutils files
+build/
 dist/
 MANIFEST
