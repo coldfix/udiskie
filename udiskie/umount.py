@@ -16,7 +16,7 @@ def unmount_device(device):
         device.unmount()
         logger.info('unmounted device %s' % (device,))
     else:
-        logger.info('skipping unhandled device %s' % (device,))
+        logger.debug('skipping unhandled device %s' % (device,))
 
 def unmount(path):
     """Unmount a filesystem
