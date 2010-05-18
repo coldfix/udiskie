@@ -1,2 +1,2 @@
-- distutils
 - Scan disks on startup
+- declare dependency on python-dbus
