@@ -1,2 +1,3 @@
 - Scan disks on startup
 - declare dependency on python-dbus
+- handle dbus restart
