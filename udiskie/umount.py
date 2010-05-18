@@ -5,6 +5,19 @@ import dbus
 
 import udiskie.device
 
+def unmount_device(device):
+    """Unmount a Device.
+
+    Checks to make sure the device is unmountable and then unmounts."""
+
+    logger = logging.getLogger('udiskie.umount.unmount_device')
+    if device.is_handleable() and device.is_mounted():
+        logger.debug('unmounting device %s' % (device,))
+        device.unmount()
+        logger.info('unmounted device %s' % (device,))
+    else:
+        logger.info('skipping unhandled device %s' % (device,))
+
 def unmount(path):
     """Unmount a filesystem
 
@@ -16,13 +29,8 @@ def unmount(path):
     bus = dbus.SystemBus()
     for device in udiskie.device.get_all(bus):
         if path in device.mount_paths() or path == device.device_file():
-            logger.debug('Found device owning "%s": "%s"' % (path, device))
-            if device.is_handleable() and device.is_mounted():
-                logger.debug('Unmounting %s (device: %s)' % (path, device))
-                device.unmount()
-                logger.info('Unmounted %s' % (path,))
-            else:
-                logger.info('Skipping unhandled device %s' % (device,))
+            logger.debug('found device owning "%s": "%s"' % (path, device))
+            unmount_device(device)
 
 def unmount_all():
     """Unmount all filesystems handleable by udiskie."""
@@ -30,12 +38,7 @@ def unmount_all():
     logger = logging.getLogger('udiskie.umount.unmount_all')
     bus = dbus.SystemBus()
     for device in udiskie.device.get_all(bus):
-        if device.is_handleable() and device.is_mounted():
-            logger.debug('Unmounting device: %s' % (device,))
-            device.unmount()
-            logger.info('Unmounted device: %s' % (device,))
-        else:
-            logger.debug('Skipping unhandled device %s' % (device,))
+        unmount_device(device)
 
 def cli(args):
     logger = logging.getLogger('udiskie.umount.cli')
