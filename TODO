@@ -1,4 +1,5 @@
-- Scan disks on startup
+- actually check for errors from udisks calls
 - declare dependency on python-dbus
 - handle dbus restart
 - properly daemonize
+- set the process name

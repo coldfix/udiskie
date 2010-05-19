@@ -21,13 +21,21 @@ class AutoMounter:
                                      signal_name='DeviceAdded',
                                      bus_name='org.freedesktop.UDisks')
 
+    def _mount_device(self, device):
+        if device.is_handleable():
+            filesystem = str(device.id_type())
+            options = []
+            device.mount(filesystem, options)
+            self.log.info('mounted device %s' % (device,))
+
+    def mount_present_devices(self):
+        """Mount handleable devices that are already present."""
+        for device in udiskie.device.get_all(self.bus):
+            self._mount_device(device)
+
     def device_added(self, device):
         self.log.debug('device added: %s' % (device,))
-        udevice = udiskie.device.Device(self.bus, device)
-        if udevice.is_handleable():
-            filesystem = str(udevice.id_type())
-            options = []
-            udevice.mount(filesystem, options)
+        self._mount_device(udiskie.device.Device(self.bus, device))
 
 
 def cli(args):
@@ -43,4 +51,5 @@ def cli(args):
     logging.basicConfig(level=log_level, format='%(message)s')
 
     mounter = AutoMounter()
+    mounter.mount_present_devices()
     return gobject.MainLoop().run()
