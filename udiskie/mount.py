@@ -22,7 +22,7 @@ class AutoMounter:
                                      bus_name='org.freedesktop.UDisks')
 
     def _mount_device(self, device):
-        if device.is_handleable():
+        if device.is_handleable() and not device.is_mounted():
             filesystem = str(device.id_type())
             options = []
             device.mount(filesystem, options)
