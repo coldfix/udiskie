@@ -25,8 +25,12 @@ class AutoMounter:
         if device.is_handleable() and not device.is_mounted():
             filesystem = str(device.id_type())
             options = []
-            device.mount(filesystem, options)
-            self.log.info('mounted device %s' % (device,))
+            try:
+                device.mount(filesystem, options)
+                self.log.info('mounted device %s' % (device,))
+            except dbus.exceptions.DBusException, dbus_err:
+                self.log.error('failed to mount device %s: %s' % (device,
+                                                                  dbus_err))
 
     def mount_present_devices(self):
         """Mount handleable devices that are already present."""

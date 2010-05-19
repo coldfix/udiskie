@@ -12,9 +12,12 @@ def unmount_device(device):
 
     logger = logging.getLogger('udiskie.umount.unmount_device')
     if device.is_handleable() and device.is_mounted():
-        logger.debug('unmounting device %s' % (device,))
-        device.unmount()
-        logger.info('unmounted device %s' % (device,))
+        try:
+            device.unmount()
+            logger.info('unmounted device %s' % (device,))
+        except dbus.exceptions.DBusException, dbus_err:
+            logger.error('failed to unmount device %s: %s' % (device,
+                                                              dbus_err))
     else:
         logger.debug('skipping unhandled device %s' % (device,))
 

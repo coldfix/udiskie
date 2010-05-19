@@ -1,4 +1,3 @@
-- actually check for errors from udisks calls
 - declare dependency on python-dbus
 - handle dbus restart
 - properly daemonize
