@@ -20,6 +20,9 @@ class AutoMounter:
         self.bus.add_signal_receiver(self.device_added,
                                      signal_name='DeviceAdded',
                                      bus_name='org.freedesktop.UDisks')
+        self.bus.add_signal_receiver(self.device_changed,
+                                     signal_name='DeviceChanged',
+                                     bus_name='org.freedesktop.UDisks')
 
     def _mount_device(self, device):
         if device.is_handleable() and not device.is_mounted():
@@ -40,6 +43,12 @@ class AutoMounter:
     def device_added(self, device):
         self.log.debug('device added: %s' % (device,))
         self._mount_device(udiskie.device.Device(self.bus, device))
+
+    def device_changed(self, device):
+        self.log.debug('device changed: %s' % (device,))
+        device = udiskie.device.Device(self.bus, device)
+        if not device.is_mounted():
+            self._mount_device(device)
 
 
 def cli(args):
