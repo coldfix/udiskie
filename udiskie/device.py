@@ -40,16 +40,37 @@ class Device:
     def is_partition(self):
         return self._get_property('DeviceIsPartition')
 
+    def is_systeminternal(self):
+        return self._get_property('DeviceIsSystemInternal')
+
+    def is_opticaldisc(self):
+        return self._get_property('DeviceIsOpticalDisc')
+
+    def is_hasmedia(self):
+        return self._get_property('DeviceIsMediaAvailable')
+
     def is_handleable(self):
         """Should this device be handled by udiskie?
 
         Currently this just means that the device is removable and holds a
         filesystem."""
 
-        if self.is_removable() and self.is_filesystem():
-            return True
-        else:
+        if self.is_systeminternal():
             return False
+
+        if self.is_opticaldisc():
+            if self.is_hasmedia() and self.is_filesystem():
+                return True
+            else:
+                return False
+
+        if self.is_removable():
+            if self.is_filesystem():
+                return True
+            else:
+                return False
+
+        return False
 
     def is_mounted(self):
         return self._get_property('DeviceIsMounted')
