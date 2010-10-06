@@ -26,6 +26,9 @@ class AutoMounter:
         self.bus.add_signal_receiver(self.device_added,
                                      signal_name='DeviceAdded',
                                      bus_name='org.freedesktop.UDisks')
+        self.bus.add_signal_receiver(self.device_removed,
+                                     signal_name='DeviceRemoved',
+                                     bus_name='org.freedesktop.UDisks')
         self.bus.add_signal_receiver(self.device_changed,
                                      signal_name='DeviceChanged',
                                      bus_name='org.freedesktop.UDisks')
@@ -48,7 +51,15 @@ class AutoMounter:
 
     def device_added(self, device):
         self.log.debug('device added: %s' % (device,))
+        # Since the device just appeared we don't want the old state.
+        if device in self.last_device_state:
+            del self.last_device_state[device]
         self._mount_device(udiskie.device.Device(self.bus, device))
+
+    def device_removed(self, device):
+        self.log.debug('device removed: %s' % (device,))
+        if device in self.last_device_state:
+            del self.last_device_state[device]
 
     def device_changed(self, device):
         self.log.debug('device changed: %s' % (device,))
