@@ -6,9 +6,15 @@ import gobject
 
 import udiskie.device
 
+class DeviceState:
+    def __init__(self, mounted):
+        self.mounted = mounted
+
+
 class AutoMounter:
     def __init__(self, bus=None):
         self.log = logging.getLogger('udiskie.mount.AutoMounter')
+        self.last_device_state = {}
 
         if not bus:
             from dbus.mainloop.glib import DBusGMainLoop
@@ -46,9 +52,11 @@ class AutoMounter:
 
     def device_changed(self, device):
         self.log.debug('device changed: %s' % (device,))
-        device = udiskie.device.Device(self.bus, device)
-        if not device.is_mounted():
-            self._mount_device(device)
+        last_state = self.last_device_state.get(device)
+        udiskie_device = udiskie.device.Device(self.bus, device)
+        if (not last_state) or (not last_state.mounted):
+            self._mount_device(udiskie_device)
+        self.last_device_state[device] = DeviceState(udiskie_device.is_mounted())
 
 
 def cli(args):
