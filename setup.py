@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='udiskie',
-    version='0.3.3',
+    version='0.3.4',
     description='Removable disk automounter for udisks',
     author='Byron Clark',
     author_email='byron@theclarkfamily.name',
