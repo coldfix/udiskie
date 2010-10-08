@@ -1,0 +1,54 @@
+/////
+vim:set ts=4 sw=4 syntax=asciidoc noet:
+/////
+udiskie(8)
+==========
+
+Name
+----
+udiskie - automatic disk mounting service using udisks
+
+
+Synopsis
+--------
+'udiskie' [options]
+
+'udiskie-umount' [options|path]
+
+
+Description
+-----------
+*udiskie* uses udisks to automatically mount removable media, such as CDs and flash drives. It will mount the media in a new directory under \'+/media+', using the device name if available. It is lightweight and runs as a daemon.
+
+Options
+-------
+*-h, \--help*::
+	Show help message and exit
+
+*-v, \--verbose*::
+	Verbose output
+
+*-a, \--all*::
+	Unmount all devices (only for *udiskie-umount*)
+
+
+Example Usage[[EU]]
+-------------------
+Start *udiskie* in '~/.xinitrc':
+
+	udiskie &
+
+Unmount media:
+
+	udiskie-umount "/media/DEVICE NAME"
+
+
+See Also
+--------
+linkman:udisks[1]
+
+
+Authors
+-------
+Byron Clark <byron@theclarkfamily.name>
+
