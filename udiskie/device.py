@@ -37,6 +37,9 @@ class Device:
         else:
             return False
 
+    def is_partition_table(self):
+        return self._get_property('DeviceIsPartitionTable')
+
     def is_partition(self):
         return self._get_property('DeviceIsPartition')
 
@@ -56,6 +59,9 @@ class Device:
         filesystem."""
 
         if self.is_systeminternal():
+            return False
+
+        if self.is_partition_table():
             return False
 
         if self.is_opticaldisc():
