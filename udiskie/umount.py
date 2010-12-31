@@ -1,5 +1,6 @@
 import logging
 import optparse
+import os
 
 import dbus
 
@@ -67,4 +68,4 @@ def cli(args):
             return 1
 
         for path in args:
-            unmount(path)
+            unmount(os.path.normpath(path))

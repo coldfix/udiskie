@@ -1,4 +1,5 @@
 import logging
+import os
 
 DBUS_PROPS_INTERFACE = 'org.freedesktop.DBus.Properties'
 UDISKS_INTERFACE = 'org.freedesktop.UDisks'
@@ -82,10 +83,11 @@ class Device:
         return self._get_property('DeviceIsMounted')
 
     def mount_paths(self):
-        return self._get_property('DeviceMountPaths')
+        raw_paths = self._get_property('DeviceMountPaths')
+        return [os.path.normpath(path) for path in raw_paths]
 
     def device_file(self):
-        return self._get_property('DeviceFile')
+        return os.path.normpath(self._get_property('DeviceFile'))
 
     def is_filesystem(self):
         return self._get_property('IdUsage') == 'filesystem'
