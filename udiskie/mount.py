@@ -3,13 +3,9 @@ import optparse
 
 import dbus
 import gobject
+import pynotify
 
 import udiskie.device
-
-import os
-
-from pynotify import init as NotifyInitialize
-from pynotify import Notification
 
 class DeviceState:
     def __init__(self, mounted):
@@ -45,13 +41,16 @@ class AutoMounter:
             try:
                 device.mount(filesystem, options)
                 self.log.info('mounted device %s' % (device,))
-		Notification('Device mounted',
-                             '%s mounted on %s' % (os.path.basename(str(device)),
-                             	                   ', '.join(device.mount_paths())),
-                             'drive-removable-media').show()
             except dbus.exceptions.DBusException, dbus_err:
                 self.log.error('failed to mount device %s: %s' % (device,
                                                                   dbus_err))
+                return
+
+            mount_paths = ', '.join(device.mount_paths())
+            pynotify.Notification('Device mounted',
+                                  '%s mounted on %s' % (device.device_file(),
+                                                        mount_paths),
+                                  'drive-removable-media').show()
 
     def mount_present_devices(self):
         """Mount handleable devices that are already present."""
@@ -91,7 +90,7 @@ def cli(args):
         log_level = logging.DEBUG
     logging.basicConfig(level=log_level, format='%(message)s')
 
-    NotifyInitialize('udiskie.mount')
+    pynotify.init('udiskie.mount')
 
     mounter = AutoMounter()
     mounter.mount_present_devices()
