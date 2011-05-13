@@ -25,33 +25,11 @@ class Device:
     def partition_slave(self):
         return self._get_property('PartitionSlave')
 
-    def is_removable(self):
-        """Is the device removable?
-
-        Also checks parent devices recursively because udisks doesn't report a
-        partition on a removable device as removable."""
-        if self._get_property('DeviceIsRemovable'):
-            return True
-        elif self.is_partition():
-            parent = Device(self.bus, self.partition_slave())
-            return parent.is_removable()
-        else:
-            return False
-
     def is_partition_table(self):
         return self._get_property('DeviceIsPartitionTable')
 
-    def is_partition(self):
-        return self._get_property('DeviceIsPartition')
-
     def is_systeminternal(self):
         return self._get_property('DeviceIsSystemInternal')
-
-    def is_opticaldisc(self):
-        return self._get_property('DeviceIsOpticalDisc')
-
-    def is_hasmedia(self):
-        return self._get_property('DeviceIsMediaAvailable')
 
     def is_handleable(self):
         """Should this device be handled by udiskie?
@@ -59,25 +37,10 @@ class Device:
         Currently this just means that the device is removable and holds a
         filesystem."""
 
-        if self.is_systeminternal():
+        if self.is_filesystem() and not self.is_systeminternal():
+            return True
+        else:
             return False
-
-        if self.is_partition_table():
-            return False
-
-        if self.is_opticaldisc():
-            if self.is_hasmedia() and self.is_filesystem():
-                return True
-            else:
-                return False
-
-        if self.is_removable():
-            if self.is_filesystem():
-                return True
-            else:
-                return False
-
-        return False
 
     def is_mounted(self):
         return self._get_property('DeviceIsMounted')
