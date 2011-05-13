@@ -3,6 +3,7 @@ import optparse
 import os
 
 import dbus
+import pynotify
 
 import udiskie.device
 
@@ -19,6 +20,11 @@ def unmount_device(device):
         except dbus.exceptions.DBusException, dbus_err:
             logger.error('failed to unmount device %s: %s' % (device,
                                                               dbus_err))
+            return
+
+        pynotify.Notification('Device unmounted',
+                              '%s unmounted' % (device.device_file(),),
+                              'drive-removable-media').show()
     else:
         logger.debug('skipping unhandled device %s' % (device,))
 
@@ -59,6 +65,8 @@ def cli(args):
     if options.verbose:
         log_level = logging.DEBUG
     logging.basicConfig(level=log_level, format='%(message)s')
+
+    pynotify.init('udiskie.umount')
 
     if options.all:
         unmount_all()
