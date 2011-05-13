@@ -7,6 +7,17 @@ storage devices.
 
 .. _udisks: http://www.freedesktop.org/wiki/Software/udisks
 
+Dependencies
+------------
+
+- dbus-python_
+- pygobject_
+- notify-python_
+
+.. _dbus-python: http://dbus.freedesktop.org/releases/dbus-python/
+.. _pygobject: http://ftp.gnome.org/pub/gnome/sources/pygobject/
+.. _notify-python: http://www.galago-project.org/files/releases/source/notify-python/
+
 Permissions
 -----------
 
