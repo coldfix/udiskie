@@ -36,24 +36,26 @@ class AutoMounter:
                                      bus_name='org.freedesktop.UDisks')
 
     def _mount_device(self, device):
-        if device.is_handleable() and not device.is_mounted():
-            filesystem = str(device.id_type())
-            options = []
+        if device.is_handleable():
             try:
-                device.mount(filesystem, options)
-                self.log.info('mounted device %s' % (device,))
-            except dbus.exceptions.DBusException, dbus_err:
-                self.log.error('failed to mount device %s: %s' % (device,
-                                                                  dbus_err))
-                return
-
-            mount_paths = ', '.join(device.mount_paths())
-            pynotify.Notification('Device mounted',
-                                  '%s mounted on %s' % (device.device_file(),
-                                                        mount_paths),
-                                  'drive-removable-media').show()
-
-        self._store_device_state(device)
+                if not device.is_mounted():
+                    filesystem = str(device.id_type())
+                    options = []
+                    try:
+                        device.mount(filesystem, options)
+                        self.log.info('mounted device %s' % (device,))
+                    except dbus.exceptions.DBusException, dbus_err:
+                        self.log.error('failed to mount device %s: %s' % (device,
+                                                                          dbus_err))
+                        return
+	
+                    mount_paths = ', '.join(device.mount_paths())
+	            pynotify.Notification('Device mounted',
+	                                  '%s mounted on %s' % (device.device_file(),
+	                                                        mount_paths),
+	                                  'drive-removable-media').show()
+            finally:
+                self._store_device_state(device)
 
     def _store_device_state(self, device):
         state = DeviceState(device.is_mounted(),
