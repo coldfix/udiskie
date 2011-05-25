@@ -8,8 +8,9 @@ import pynotify
 import udiskie.device
 
 class DeviceState:
-    def __init__(self, mounted):
+    def __init__(self, mounted, has_media):
         self.mounted = mounted
+        self.has_media = has_media
 
 
 class AutoMounter:
@@ -52,6 +53,20 @@ class AutoMounter:
                                                         mount_paths),
                                   'drive-removable-media').show()
 
+        self._store_device_state(device)
+
+    def _store_device_state(self, device):
+        state = DeviceState(device.is_mounted(),
+                            device.has_media())
+        self.last_device_state[device.device_path] = state
+
+    def _remove_device_state(self, device):
+        if device.device_path in self.last_device_state:
+            del self.last_device_state[device.device_path]
+
+    def _get_device_state(self, device):
+        return self.last_device_state.get(device.device_path)
+
     def mount_present_devices(self):
         """Mount handleable devices that are already present."""
         for device in udiskie.device.get_all(self.bus):
@@ -59,23 +74,34 @@ class AutoMounter:
 
     def device_added(self, device):
         self.log.debug('device added: %s' % (device,))
+        udiskie_device = udiskie.device.Device(self.bus, device)
         # Since the device just appeared we don't want the old state.
-        if device in self.last_device_state:
-            del self.last_device_state[device]
-        self._mount_device(udiskie.device.Device(self.bus, device))
+        self._remove_device_state(udiskie_device)
+        self._mount_device(udiskie_device)
 
     def device_removed(self, device):
         self.log.debug('device removed: %s' % (device,))
-        if device in self.last_device_state:
-            del self.last_device_state[device]
+        self._remove_device_state(udiskie.device.Device(self.bus, device))
 
     def device_changed(self, device):
         self.log.debug('device changed: %s' % (device,))
-        last_state = self.last_device_state.get(device)
+
         udiskie_device = udiskie.device.Device(self.bus, device)
-        if (not last_state) or (not last_state.mounted):
+        last_state = self._get_device_state(udiskie_device)
+
+        if not last_state:
+            # First time we saw the device, try to mount it.
             self._mount_device(udiskie_device)
-        self.last_device_state[device] = DeviceState(udiskie_device.is_mounted())
+        else:
+            media_added = False
+            if udiskie_device.has_media() and not last_state.has_media:
+                media_added = True
+
+            if media_added and not last_state.mounted:
+                # Wasn't mounted before, but it has new media now.
+                self._mount_device(udiskie_device)
+
+        self._store_device_state(udiskie_device)
 
 
 def cli(args):

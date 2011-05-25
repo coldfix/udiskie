@@ -55,6 +55,9 @@ class Device:
     def is_filesystem(self):
         return self._get_property('IdUsage') == 'filesystem'
 
+    def has_media(self):
+        return self._get_property('DeviceIsMediaAvailable')
+
     def id_type(self):
         return self._get_property('IdType')
 
