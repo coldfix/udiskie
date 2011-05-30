@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Build a release tarball from source.
+# Usage:
+#   util/prepare_release -r <revision>
+# Resulting tarball will reside in dist/
+
+PYTHON=${PYTHON:-python}
+
+[ -d dist ] || mkdir dist
+TMPDEST=$(mktemp -d --tmpdir udiskie-release-XXXXXXXX)
+
+hg archive -t files "$@" "${TMPDEST}"
+hg log --style=changelog "$@" > "${TMPDEST}/CHANGES"
+
+pushd "${TMPDEST}"
+VERSION=$(${PYTHON} setup.py --version)
+${PYTHON} setup.py sdist
+popd
+
+cp "${TMPDEST}/dist/udiskie-${VERSION}.tar.gz" dist/
