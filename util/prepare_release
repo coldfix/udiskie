@@ -26,3 +26,5 @@ ${PYTHON} setup.py sdist
 popd
 
 cp "${TMPDEST}/dist/udiskie-${VERSION}.tar.gz" dist/
+
+rm -rf "${TMPDEST}"
