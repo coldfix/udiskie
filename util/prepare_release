@@ -5,13 +5,20 @@
 #   util/prepare_release -r <revision>
 # Resulting tarball will reside in dist/
 
+REVISION=tip
+while getopts "r:" OPTION; do
+    case ${OPTION} in
+        r) REVISION="${OPTARG}"
+    esac
+done
+
 PYTHON=${PYTHON:-python}
 
 [ -d dist ] || mkdir dist
 TMPDEST=$(mktemp -d --tmpdir udiskie-release-XXXXXXXX)
 
-hg archive -t files "$@" "${TMPDEST}"
-hg log --style=changelog "$@" > "${TMPDEST}/CHANGES"
+hg archive -t files -r "${REVISION}" "${TMPDEST}"
+hg log --style=changelog -r "${REVISION}:0" > "${TMPDEST}/CHANGES"
 
 pushd "${TMPDEST}"
 VERSION=$(${PYTHON} setup.py --version)
