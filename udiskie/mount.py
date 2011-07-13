@@ -1,3 +1,7 @@
+import warnings
+warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
+warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
+
 import logging
 import optparse
 
