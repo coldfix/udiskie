@@ -7,6 +7,7 @@ import optparse
 import os
 
 import dbus
+import gio
 import pynotify
 
 import udiskie.device
@@ -26,9 +27,12 @@ def unmount_device(device):
                                                               dbus_err))
             return
 
-        pynotify.Notification('Device unmounted',
-                              '%s unmounted' % (device.device_file(),),
-                              'drive-removable-media').show()
+        try:
+            pynotify.Notification('Device unmounted',
+                                  '%s unmounted' % (device.device_file(),),
+                                  'drive-removable-media').show()
+        except gio.Error:
+            pass
     else:
         logger.debug('skipping unhandled device %s' % (device,))
 

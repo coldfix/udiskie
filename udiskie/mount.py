@@ -7,6 +7,7 @@ import optparse
 
 import dbus
 import gobject
+import gio
 import pynotify
 
 import udiskie.device
@@ -54,10 +55,13 @@ class AutoMounter:
                         return
 
                     mount_paths = ', '.join(device.mount_paths())
-                pynotify.Notification('Device mounted',
-                                      '%s mounted on %s' % (device.device_file(),
-                                                            mount_paths),
-                                      'drive-removable-media').show()
+                    try:
+                        pynotify.Notification('Device mounted',
+                                              '%s mounted on %s' % (device.device_file(),
+                                                                    mount_paths),
+                                              'drive-removable-media').show()
+                    except gio.Error:
+                        pass
             finally:
                 self._store_device_state(device)
 
