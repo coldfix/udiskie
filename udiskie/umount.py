@@ -49,7 +49,7 @@ def unmount(path):
 def unmount_all():
     """Unmount all filesystems handleable by udiskie."""
 
-    logger = logging.getLogger('udiskie.umount.unmount_all')
+    logging.getLogger('udiskie.umount.unmount_all')
     bus = dbus.SystemBus()
     for device in udiskie.device.get_all(bus):
         unmount_device(device)
