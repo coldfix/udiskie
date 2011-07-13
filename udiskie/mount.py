@@ -52,12 +52,12 @@ class AutoMounter:
                         self.log.error('failed to mount device %s: %s' % (device,
                                                                           dbus_err))
                         return
-	
+
                     mount_paths = ', '.join(device.mount_paths())
-	            pynotify.Notification('Device mounted',
-	                                  '%s mounted on %s' % (device.device_file(),
-	                                                        mount_paths),
-	                                  'drive-removable-media').show()
+                pynotify.Notification('Device mounted',
+                                      '%s mounted on %s' % (device.device_file(),
+                                                            mount_paths),
+                                      'drive-removable-media').show()
             finally:
                 self._store_device_state(device)
 
