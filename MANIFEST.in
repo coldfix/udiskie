@@ -2,3 +2,4 @@ include doc/*.txt
 include doc/asciidoc.conf
 include doc/Makefile
 include CHANGES
+include COPYING
