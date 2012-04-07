@@ -11,6 +11,7 @@ import gio
 import pynotify
 
 import udiskie.device
+import udiskie.match
 
 class DeviceState:
     def __init__(self, mounted, has_media):
@@ -21,6 +22,7 @@ class DeviceState:
 class AutoMounter:
     def __init__(self, bus=None):
         self.log = logging.getLogger('udiskie.mount.AutoMounter')
+        self.filters = udiskie.match.FilterMatcher(('filters.conf',))
         self.last_device_state = {}
 
         if not bus:
@@ -44,10 +46,14 @@ class AutoMounter:
         if device.is_handleable():
             try:
                 if not device.is_mounted():
-                    filesystem = str(device.id_type())
-                    options = []
+                    fstype = str(device.id_type())
+                    options = self.filters.get_mount_options(device)
+
+                    S = 'attempting to mount device %s (%s:%s)'
+                    self.log.info(S % (device, fstype, options))
+
                     try:
-                        device.mount(filesystem, options)
+                        device.mount(fstype, options)
                         self.log.info('mounted device %s' % (device,))
                     except dbus.exceptions.DBusException, dbus_err:
                         self.log.error('failed to mount device %s: %s' % (device,

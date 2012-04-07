@@ -61,6 +61,9 @@ class Device:
     def id_type(self):
         return self._get_property('IdType')
 
+    def id_uuid(self):
+        return self._get_property('IdUuid')
+
     def mount(self, filesystem, options):
         self.device.FilesystemMount(filesystem, options,
                                     dbus_interface=UDISKS_DEVICE_INTERFACE)
