@@ -10,7 +10,8 @@ import dbus
 import gobject
 import gio
 import pynotify
-import xdg.BaseDirectory
+
+from xdg.BaseDirectory import xdg_config_home
 
 import udiskie.device
 import udiskie.match
@@ -24,7 +25,7 @@ class DeviceState:
 class AutoMounter:
     CONFIG_PATH = 'udiskie/filters.conf'
 
-    def __init__(self, bus=None, filter_files=None):
+    def __init__(self, bus=None, filter_file=None):
         self.log = logging.getLogger('udiskie.mount.AutoMounter')
         self.last_device_state = {}
 
@@ -35,10 +36,9 @@ class AutoMounter:
         else:
             self.bus = bus
 
-        if not filter_files:
-            base_paths = xdg.BaseDirectory.xdg_config_dirs
-            filter_files = [os.path.join(D, self.CONFIG_PATH) for D in base_paths]
-        self.filters = udiskie.match.FilterMatcher(filter_files)
+        if not filter_file:
+            filter_file = os.path.join(xdg_config_home, self.CONFIG_PATH)
+        self.filters = udiskie.match.FilterMatcher((filter_file,))
 
 
         self.bus.add_signal_receiver(self.device_added,
@@ -146,6 +146,6 @@ def cli(args):
 
     pynotify.init('udiskie.mount')
 
-    mounter = AutoMounter(bus=None, filter_files=options.filters)
+    mounter = AutoMounter(bus=None, filter_file=options.filters)
     mounter.mount_present_devices()
     return gobject.MainLoop().run()
