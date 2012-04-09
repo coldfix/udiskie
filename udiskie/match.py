@@ -69,6 +69,7 @@ class FilterMatcher:
     def _load_filters_from_config_files(self, config_files):
         filters = Filters()
 
+        self.log.debug('loading filters from %s' % (config_files,))
         parser = SafeConfigParser()
         parser.read(config_files)
 

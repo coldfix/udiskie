@@ -4,11 +4,13 @@ warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
 import logging
 import optparse
+import os
 
 import dbus
 import gobject
 import gio
 import pynotify
+import xdg.BaseDirectory
 
 import udiskie.device
 import udiskie.match
@@ -20,9 +22,10 @@ class DeviceState:
 
 
 class AutoMounter:
-    def __init__(self, bus=None):
+    CONFIG_PATH = 'udiskie/filters.conf'
+
+    def __init__(self, bus=None, filter_files=None):
         self.log = logging.getLogger('udiskie.mount.AutoMounter')
-        self.filters = udiskie.match.FilterMatcher(('filters.conf',))
         self.last_device_state = {}
 
         if not bus:
@@ -31,6 +34,12 @@ class AutoMounter:
             self.bus = dbus.SystemBus()
         else:
             self.bus = bus
+
+        if not filter_files:
+            base_paths = xdg.BaseDirectory.xdg_config_dirs
+            filter_files = [os.path.join(D, self.CONFIG_PATH) for D in base_paths]
+        self.filters = udiskie.match.FilterMatcher(filter_files)
+
 
         self.bus.add_signal_receiver(self.device_added,
                                      signal_name='DeviceAdded',
@@ -125,6 +134,9 @@ def cli(args):
     parser.add_option('-v', '--verbose', action='store_true',
                       dest='verbose', default=False,
                       help='verbose output')
+    parser.add_option('-f', '--filters', action='store',
+                      dest='filters', default=None,
+                      metavar='FILE', help='filter FILE')
     (options, args) = parser.parse_args(args)
 
     log_level = logging.INFO
@@ -134,6 +146,6 @@ def cli(args):
 
     pynotify.init('udiskie.mount')
 
-    mounter = AutoMounter()
+    mounter = AutoMounter(bus=None, filter_files=options.filters)
     mounter.mount_present_devices()
     return gobject.MainLoop().run()
