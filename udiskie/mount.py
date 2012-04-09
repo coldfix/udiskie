@@ -11,7 +11,10 @@ import gobject
 import gio
 import pynotify
 
-from xdg.BaseDirectory import xdg_config_home
+try:
+    from xdg.BaseDirectory import xdg_config_home
+except ImportError:
+    xdg_config_home = os.path.expanduser('~/.config')
 
 import udiskie.device
 import udiskie.match
