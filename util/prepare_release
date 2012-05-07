@@ -21,6 +21,7 @@ hg archive -t files -r "${REVISION}" "${TMPDEST}"
 hg log --style=changelog -r "${REVISION}:0" > "${TMPDEST}/CHANGES"
 
 pushd "${TMPDEST}"
+mv README.rst README
 VERSION=$(${PYTHON} setup.py --version)
 ${PYTHON} setup.py sdist
 popd
