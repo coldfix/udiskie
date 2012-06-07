@@ -7,12 +7,11 @@ import optparse
 import os
 
 import dbus
-import gio
-import pynotify
 
 import udiskie.device
+import udiskie.notify
 
-def unmount_device(device):
+def unmount_device(device, notify):
     """Unmount a Device.
 
     Checks to make sure the device is unmountable and then unmounts."""
@@ -27,16 +26,11 @@ def unmount_device(device):
                                                               dbus_err))
             return
 
-        try:
-            pynotify.Notification('Device unmounted',
-                                  '%s unmounted' % (device.device_file(),),
-                                  'drive-removable-media').show()
-        except gio.Error:
-            pass
+        notify(device.device_file())
     else:
         logger.debug('skipping unhandled device %s' % (device,))
 
-def unmount(path):
+def unmount(path, notify):
     """Unmount a filesystem
 
     The filesystem must match the criteria for a filesystem mountable by
@@ -48,14 +42,14 @@ def unmount(path):
     for device in udiskie.device.get_all(bus):
         if path in device.mount_paths() or path == device.device_file():
             logger.debug('found device owning "%s": "%s"' % (path, device))
-            unmount_device(device)
+            unmount_device(device, notify)
 
-def unmount_all():
+def unmount_all(notify):
     """Unmount all filesystems handleable by udiskie."""
 
     bus = dbus.SystemBus()
     for device in udiskie.device.get_all(bus):
-        unmount_device(device)
+        unmount_device(device, notify)
 
 def cli(args):
     logger = logging.getLogger('udiskie.umount.cli')
@@ -76,14 +70,17 @@ def cli(args):
         log_level = logging.DEBUG
     logging.basicConfig(level=log_level, format='%(message)s')
 
-    pynotify.init('udiskie.umount')
+    if options.suppress_notify:
+        notify = lambda *args: True
+    else:
+        notify = udiskie.notify.Notify('udiskie.umount').umount
 
     if options.all:
-        unmount_all()
+        unmount_all(notify)
     else:
         if len(args) == 0:
             logger.warn('No devices provided for unmount')
             return 1
 
         for path in args:
-            unmount(os.path.normpath(path))
+            unmount(os.path.normpath(path), notify)

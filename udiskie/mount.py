@@ -8,8 +8,6 @@ import os
 
 import dbus
 import gobject
-import gio
-import pynotify
 
 try:
     from xdg.BaseDirectory import xdg_config_home
@@ -18,6 +16,7 @@ except ImportError:
 
 import udiskie.device
 import udiskie.match
+import udiskie.notify
 
 class DeviceState:
     def __init__(self, mounted, has_media):
@@ -28,7 +27,7 @@ class DeviceState:
 class AutoMounter:
     CONFIG_PATH = 'udiskie/filters.conf'
 
-    def __init__(self, bus=None, filter_file=None):
+    def __init__(self, bus=None, filter_file=None, notify=None):
         self.log = logging.getLogger('udiskie.mount.AutoMounter')
         self.last_device_state = {}
 
@@ -43,6 +42,10 @@ class AutoMounter:
             filter_file = os.path.join(xdg_config_home, self.CONFIG_PATH)
         self.filters = udiskie.match.FilterMatcher((filter_file,))
 
+        if not notify:
+            self.notify = lambda *args: True
+        else:
+            self.notify = notify
 
         self.bus.add_signal_receiver(self.device_added,
                                      signal_name='DeviceAdded',
@@ -73,13 +76,7 @@ class AutoMounter:
                         return
 
                     mount_paths = ', '.join(device.mount_paths())
-                    try:
-                        pynotify.Notification('Device mounted',
-                                              '%s mounted on %s' % (device.device_file(),
-                                                                    mount_paths),
-                                              'drive-removable-media').show()
-                    except gio.Error:
-                        pass
+                    self.notify(device.device_file(), mount_paths)
             finally:
                 self._store_device_state(device)
 
@@ -150,8 +147,11 @@ def cli(args):
         log_level = logging.DEBUG
     logging.basicConfig(level=log_level, format='%(message)s')
 
-    pynotify.init('udiskie.mount')
+    if options.suppress_notify:
+        notify = None
+    else:
+        notify = udiskie.notify.Notify('udiskie.mount').mount
 
-    mounter = AutoMounter(bus=None, filter_file=options.filters)
+    mounter = AutoMounter(bus=None, filter_file=options.filters, notify=notify)
     mounter.mount_present_devices()
     return gobject.MainLoop().run()
