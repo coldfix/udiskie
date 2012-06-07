@@ -66,6 +66,9 @@ def cli(args):
     parser.add_option('-v', '--verbose', action='store_true',
                       dest='verbose', default=False,
                       help='verbose output')
+    parser.add_option('-s', '--suppress', action='store_true',
+                      dest='suppress_notify', default=False,
+                      help='suppress popup notifications')
     (options, args) = parser.parse_args(args)
 
     log_level = logging.INFO
