@@ -28,6 +28,9 @@ Options
 *-v, \--verbose*::
 	Verbose output
 
+*-s, \--suppress*::
+	Suppress pop-up notifications
+
 *-f, \--filters FILE*::
     Alternate filter configuration
 
