@@ -7,6 +7,12 @@ storage devices.
 
 .. _udisks: http://www.freedesktop.org/wiki/Software/udisks
 
+Maintainer Wanted
+-----------------
+
+I'm not longer using udiskie on my systems. The code still works, but it's been
+neglected for a while.
+
 Dependencies
 ------------
 
