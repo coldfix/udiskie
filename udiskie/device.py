@@ -46,14 +46,8 @@ class Device:
         return self._get_property('DeviceIsMounted')
 
     def is_unlocked(self):
-        """
-        Check if device is already unlocked.
-
-        It seems that the property 'DeviceIsLuks' shows whether the device
-        is known to luks. This is an indication that it is already unlocked.
-
-        """
-        return self.is_luks()
+        """Check if device is already unlocked."""
+        return self.is_luks() and self.luks_cleartext_holder()
 
     def mount_paths(self):
         raw_paths = self._get_property('DeviceMountPaths')
@@ -76,6 +70,9 @@ class Device:
 
     def luks_cleartext_slave(self):
         return self._get_property('LuksCleartextSlave')
+
+    def luks_cleartext_holder(self):
+        return self._get_property('LuksHolder')
 
     def is_luks_cleartext_slave(self, ignore = []):
         if not self.is_luks():
