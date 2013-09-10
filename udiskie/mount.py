@@ -78,6 +78,9 @@ class AutoMounter:
                     mount_paths = ', '.join(device.mount_paths())
                     self.notify(device.device_file(), mount_paths)
             elif device.is_crypto():
+                if device.is_unlocked():
+                    return
+
                 from distutils.spawn import find_executable
                 import subprocess
 

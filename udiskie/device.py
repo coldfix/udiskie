@@ -45,6 +45,16 @@ class Device:
     def is_mounted(self):
         return self._get_property('DeviceIsMounted')
 
+    def is_unlocked(self):
+        """
+        Check if device is already unlocked.
+
+        It seems that the property 'DeviceIsLuks' shows whether the device
+        is known to luks. This is an indication that it is already unlocked.
+
+        """
+        return self._get_property('DeviceIsLuks')
+
     def mount_paths(self):
         raw_paths = self._get_property('DeviceMountPaths')
         return [os.path.normpath(path) for path in raw_paths]
@@ -56,8 +66,7 @@ class Device:
         return self._get_property('IdUsage') == 'filesystem'
 
     def is_crypto(self):
-        return self._get_property('IdUsage') == 'crypto' and \
-                self._get_property('DeviceIsLuks')
+        return self._get_property('IdUsage') == 'crypto'
 
     def has_media(self):
         return self._get_property('DeviceIsMediaAvailable')
