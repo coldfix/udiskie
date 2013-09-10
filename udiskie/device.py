@@ -55,6 +55,10 @@ class Device:
     def is_filesystem(self):
         return self._get_property('IdUsage') == 'filesystem'
 
+    def is_crypto(self):
+        return self._get_property('IdUsage') == 'crypto' and \
+                self._get_property('DeviceIsLuks')
+
     def has_media(self):
         return self._get_property('DeviceIsMediaAvailable')
 
@@ -70,6 +74,17 @@ class Device:
 
     def unmount(self):
         self.device.FilesystemUnmount([], dbus_interface=UDISKS_DEVICE_INTERFACE)
+
+    def lock(self, options):
+        """Lock Luks device."""
+        return self.device.LuksLock(options,
+                                    dbus_interface=UDISKS_DEVICE_INTERFACE)
+
+    def unlock(self, password, options):
+        """Unlock Luks device."""
+        return self.device.LuksUnlock(password, options,
+                               dbus_interface=UDISKS_DEVICE_INTERFACE)
+
 
 
 def get_all(bus):
