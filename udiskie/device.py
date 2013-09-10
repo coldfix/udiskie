@@ -78,9 +78,9 @@ class Device:
         if not self.is_luks():
             return False
         for device in get_all(self.bus):
-            if device.is_mounted() and \
-                    device.is_luks_cleartext() and \
-                    device.luks_cleartext_slave() == self.device_path:
+            if (not device.is_filesystem() or device.is_mounted()) and (
+                    device.is_luks_cleartext() and
+                    device.luks_cleartext_slave() == self.device_path):
                 return True
         return False
 
