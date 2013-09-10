@@ -58,8 +58,8 @@ class AutoMounter:
                                      bus_name='org.freedesktop.UDisks')
 
     def _mount_device(self, device):
-        if device.is_handleable():
-            try:
+        try:
+            if device.is_handleable():
                 if not device.is_mounted():
                     fstype = str(device.id_type())
                     options = self.filters.get_mount_options(device)
@@ -77,8 +77,36 @@ class AutoMounter:
 
                     mount_paths = ', '.join(device.mount_paths())
                     self.notify(device.device_file(), mount_paths)
-            finally:
-                self._store_device_state(device)
+            elif device.is_crypto():
+                from distutils.spawn import find_executable
+                import subprocess
+
+                # enter password via zenity
+                zenity = find_executable('zenity')
+                if zenity is None:
+                    return
+
+                try:
+                    password = subprocess.check_output([zenity,
+                        '--entry', '--hide-text',
+                        '--title', 'Unlock encrypted device',
+                        '--text', 'Enter password for %s:' % (device,) ])
+                    password = password.rstrip('\n')
+                except subprocess.CalledProcessError, exc:
+                    # User pressed cancel
+                    return
+
+                # unlock device
+                try:
+                    device.unlock(password, '')
+                except dbus.exceptions.DBusException, dbus_err:
+                    self.log.error('failed to unlock device %s: %s'
+                                                % (device, dbus_err))
+                    self.notify('Failed to unlock %s' % (device,),
+                            'DBusException: %s\n' % (dbus_err,)
+                            + 'Try\n\tudisksctl unlock -b <device>')
+        finally:
+            self._store_device_state(device)
 
     def _store_device_state(self, device):
         state = DeviceState(device.is_mounted(),
