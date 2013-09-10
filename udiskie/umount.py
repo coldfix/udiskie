@@ -30,6 +30,28 @@ def unmount_device(device, notify):
     else:
         logger.debug('skipping unhandled device %s' % (device,))
 
+def lock_luks_device(device, notify):
+    if not device.is_luks_cleartext():
+        return
+
+    logger = logging.getLogger('udiskie.umount.lock_device')
+    slave_path = device.luks_cleartext_slave()
+    slave = udiskie.device.Device(device.bus, slave_path)
+
+    # stop this if still in use
+    if slave.is_luks_cleartext_slave():
+        return
+
+    try:
+        slave.lock([])
+        logger.info('locked device %s' % (slave,))
+
+    except dbus.exceptions.DBusException, dbus_err:
+        logger.error('failed to lock device %s: %s' % (device, dbus_err))
+        return
+
+    notify(slave.device_file())
+
 def unmount(path, notify):
     """Unmount a filesystem
 
@@ -39,17 +61,24 @@ def unmount(path, notify):
 
     logger = logging.getLogger('udiskie.umount.unmount')
     bus = dbus.SystemBus()
+    unmounted = []
     for device in udiskie.device.get_all(bus):
         if path in device.mount_paths() or path == device.device_file():
             logger.debug('found device owning "%s": "%s"' % (path, device))
             unmount_device(device, notify)
+            unmounted.append(device)
+    return unmounted
+
 
 def unmount_all(notify):
     """Unmount all filesystems handleable by udiskie."""
 
+    unmounted = []
     bus = dbus.SystemBus()
     for device in udiskie.device.get_all(bus):
         unmount_device(device, notify)
+        unmounted.append(device)
+    return unmounted
 
 def cli(args):
     logger = logging.getLogger('udiskie.umount.cli')
@@ -76,11 +105,16 @@ def cli(args):
         notify = udiskie.notify.Notify('udiskie.umount').umount
 
     if options.all:
-        unmount_all(notify)
+        unmounted = unmount_all(notify)
     else:
         if len(args) == 0:
             logger.warn('No devices provided for unmount')
             return 1
 
         for path in args:
-            unmount(os.path.normpath(path), notify)
+            unmounted = unmount(os.path.normpath(path), notify)
+
+    for device in unmounted:
+        notify = udiskie.notify.Notify('udiskie.umount').lock
+        lock_luks_device(device, notify)
+

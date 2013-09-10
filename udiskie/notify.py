@@ -20,3 +20,19 @@ class Notify:
                                   'drive-removable-media').show()
         except gio.Error:
             pass
+
+    def lock(self, device):
+        try:
+            pynotify.Notification('Device locked',
+                                  '%s locked' % (device,),
+                                  'drive-removable-media').show()
+        except gio.Error:
+            pass
+
+    def unlock(self, device):
+        try:
+            pynotify.Notification('Device unlocked',
+                                  '%s unlocked' % (device,),
+                                  'drive-removable-media').show()
+        except gio.Error:
+            pass
