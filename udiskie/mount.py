@@ -43,9 +43,9 @@ class AutoMounter:
         self.filters = udiskie.match.FilterMatcher((filter_file,))
 
         if not notify:
-            self.notify = lambda *args: True
+            self.notify = lambda ctx: lambda *args: True
         else:
-            self.notify = notify
+            self.notify = lambda ctx: getattr(notify, ctx)
 
         self.bus.add_signal_receiver(self.device_added,
                                      signal_name='DeviceAdded',
@@ -76,7 +76,7 @@ class AutoMounter:
                         return
 
                     mount_paths = ', '.join(device.mount_paths())
-                    self.notify(device.device_file(), mount_paths)
+                    self.notify('mount')(device.device_file(), mount_paths)
             elif device.is_crypto():
                 if device.is_unlocked():
                     return
@@ -100,14 +100,19 @@ class AutoMounter:
                     return
 
                 # unlock device
+                self.log.info('attempting to unlock device %s' % (device,))
                 try:
                     device.unlock(password, [])
+                    self.log.info('unlocked device %s' % (device,))
                 except dbus.exceptions.DBusException, dbus_err:
                     self.log.error('failed to unlock device %s: %s'
                                                 % (device, dbus_err))
-                    self.notify('Failed to unlock %s' % (device,),
+                    self.notify('unlock')('Failed to unlock %s' % (device,),
                             'DBusException: %s\n' % (dbus_err,)
                             + 'Try\n\tudisksctl unlock -b <device>')
+                    return
+
+                self.notify('unlock')(device.device_file())
         finally:
             self._store_device_state(device)
 
@@ -181,7 +186,8 @@ def cli(args):
     if options.suppress_notify:
         notify = None
     else:
-        notify = udiskie.notify.Notify('udiskie.mount').mount
+        notify = udiskie.notify.Notify('udiskie.mount')
+
 
     mounter = AutoMounter(bus=None, filter_file=options.filters, notify=notify)
     mounter.mount_present_devices()
