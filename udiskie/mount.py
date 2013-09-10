@@ -98,7 +98,7 @@ class AutoMounter:
 
                 # unlock device
                 try:
-                    device.unlock(password, '')
+                    device.unlock(password, [])
                 except dbus.exceptions.DBusException, dbus_err:
                     self.log.error('failed to unlock device %s: %s'
                                                 % (device, dbus_err))
