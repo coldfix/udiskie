@@ -31,8 +31,14 @@ def unmount_device(device, notify):
         logger.debug('skipping unhandled device %s' % (device,))
 
 def lock_luks_device(device, notify):
+    """
+    Lock the Luks device.
+
+    Return indicates success.
+
+    """
     if not device.is_luks_cleartext():
-        return
+        return False
 
     logger = logging.getLogger('udiskie.umount.lock_device')
     slave_path = device.luks_cleartext_slave()
@@ -40,7 +46,7 @@ def lock_luks_device(device, notify):
 
     # stop this if still in use
     if slave.is_luks_cleartext_slave():
-        return
+        return False
 
     try:
         slave.lock([])
@@ -48,9 +54,11 @@ def lock_luks_device(device, notify):
 
     except dbus.exceptions.DBusException, dbus_err:
         logger.error('failed to lock device %s: %s' % (device, dbus_err))
-        return
+        return False
 
     notify(slave.device_file())
+    return True
+
 
 def unmount(path, notify):
     """Unmount a filesystem
