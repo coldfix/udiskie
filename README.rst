@@ -19,10 +19,12 @@ Dependencies
 - dbus-python_
 - pygobject_
 - notify-python_
+- zenity_
 
 .. _dbus-python: http://dbus.freedesktop.org/releases/dbus-python/
 .. _pygobject: http://ftp.gnome.org/pub/gnome/sources/pygobject/
 .. _notify-python: http://www.galago-project.org/files/releases/source/notify-python/
+.. _zenity: http://freecode.com/projects/zenity
 
 Permissions
 -----------
