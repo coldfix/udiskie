@@ -66,15 +66,19 @@ class Device:
         return self._get_property('DeviceIsLuks')
 
     def is_luks_cleartext(self):
+        """Check whether this is a luks cleartext device."""
         return self._get_property('DeviceIsLuksCleartext')
 
     def luks_cleartext_slave(self):
+        """Get luks crypto device."""
         return self._get_property('LuksCleartextSlave')
 
     def luks_cleartext_holder(self):
+        """Get unlocked luks cleartext device."""
         return self._get_property('LuksHolder')
 
     def is_luks_cleartext_slave(self, ignore = []):
+        """Check whether the luks device is currently in use."""
         if not self.is_luks():
             return False
         for device in get_all(self.bus):
