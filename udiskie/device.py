@@ -53,7 +53,7 @@ class Device:
         is known to luks. This is an indication that it is already unlocked.
 
         """
-        return self._get_property('DeviceIsLuks')
+        return self.is_luks()
 
     def mount_paths(self):
         raw_paths = self._get_property('DeviceMountPaths')
@@ -67,6 +67,25 @@ class Device:
 
     def is_crypto(self):
         return self._get_property('IdUsage') == 'crypto'
+
+    def is_luks(self):
+        return self._get_property('DeviceIsLuks')
+
+    def is_luks_cleartext(self):
+        return self._get_property('DeviceIsLuksCleartext')
+
+    def luks_cleartext_slave(self):
+        return self._get_property('LuksCleartextSlave')
+
+    def is_luks_cleartext_slave(self, ignore = []):
+        if not self.is_luks():
+            return False
+        for device in get_all(self.bus):
+            if device.is_mounted() and \
+                    device.is_luks_cleartext() and \
+                    device.luks_cleartext_slave() == self.device_path:
+                return True
+        return False
 
     def has_media(self):
         return self._get_property('DeviceIsMediaAvailable')
