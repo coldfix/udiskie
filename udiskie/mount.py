@@ -17,6 +17,7 @@ except ImportError:
 import udiskie.device
 import udiskie.match
 import udiskie.notify
+import udiskie.prompt
 
 class DeviceState:
     def __init__(self, mounted, has_media):
@@ -27,7 +28,7 @@ class DeviceState:
 class AutoMounter:
     CONFIG_PATH = 'udiskie/filters.conf'
 
-    def __init__(self, bus=None, filter_file=None, notify=None):
+    def __init__(self, bus=None, filter_file=None, notify=None, prompt=None):
         self.log = logging.getLogger('udiskie.mount.AutoMounter')
         self.last_device_state = {}
 
@@ -46,6 +47,12 @@ class AutoMounter:
             self.notify = lambda ctx: lambda *args: True
         else:
             self.notify = lambda ctx: getattr(notify, ctx)
+
+        if not prompt:
+            self.prompt = lambda text, title: None
+        else:
+            self.prompt = prompt
+
 
         self.bus.add_signal_receiver(self.device_added,
                                      signal_name='DeviceAdded',
@@ -85,23 +92,11 @@ class AutoMounter:
             if device.is_unlocked():
                 return
 
-
-            from distutils.spawn import find_executable
-            import subprocess
-
-            # enter password via zenity
-            zenity = find_executable('zenity')
-            if zenity is None:
-                return
-
-            try:
-                password = subprocess.check_output([zenity,
-                    '--entry', '--hide-text',
-                    '--title', 'Unlock encrypted device',
-                    '--text', 'Enter password for %s:' % (device,) ])
-                password = password.rstrip('\n')
-            except subprocess.CalledProcessError, exc:
-                # User pressed cancel
+            # prompt user for password
+            password = self.prompt(
+                    'Enter password for %s:' % (device,),
+                    'Unlock encrypted device')
+            if password is None:
                 return
 
             # unlock device
@@ -110,11 +105,8 @@ class AutoMounter:
                 device.unlock(password, [])
                 self.log.info('unlocked device %s' % (device,))
             except dbus.exceptions.DBusException, dbus_err:
-                self.log.error('failed to unlock device %s: %s'
+                self.log.error('failed to unlock device %s:\n%s'
                                             % (device, dbus_err))
-                self.notify('unlock')('Failed to unlock %s' % (device,),
-                        'DBusException: %s\n' % (dbus_err,)
-                        + 'Try\n\tudisksctl unlock -b <device>')
                 return
 
             self.notify('unlock')(device.device_file())
@@ -179,6 +171,9 @@ def cli(args):
     parser.add_option('-s', '--suppress', action='store_true',
                       dest='suppress_notify', default=False,
                       help='suppress popup notifications')
+    parser.add_option('-P', '--password-prompt', action='store',
+                      dest='password_prompt', default='zenity',
+                      metavar='MODULE', help="replace password prompt")
     (options, args) = parser.parse_args(args)
 
     log_level = logging.INFO
@@ -191,7 +186,10 @@ def cli(args):
     else:
         notify = udiskie.notify.Notify('udiskie.mount')
 
+    prompt = udiskie.prompt.password(options.password_prompt)
 
-    mounter = AutoMounter(bus=None, filter_file=options.filters, notify=notify)
+    mounter = AutoMounter(
+            bus=None, filter_file=options.filters,
+            notify=notify, prompt=prompt)
     mounter.mount_present_devices()
     return gobject.MainLoop().run()
