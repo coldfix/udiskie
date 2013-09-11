@@ -58,63 +58,66 @@ class AutoMounter:
                                      bus_name='org.freedesktop.UDisks')
 
     def _mount_device(self, device):
-        try:
-            if device.is_handleable():
-                if not device.is_mounted():
-                    fstype = str(device.id_type())
-                    options = self.filters.get_mount_options(device)
-
-                    S = 'attempting to mount device %s (%s:%s)'
-                    self.log.info(S % (device, fstype, options))
-
-                    try:
-                        device.mount(fstype, options)
-                        self.log.info('mounted device %s' % (device,))
-                    except dbus.exceptions.DBusException, dbus_err:
-                        self.log.error('failed to mount device %s: %s' % (device,
-                                                                          dbus_err))
-                        return
-
-                    mount_paths = ', '.join(device.mount_paths())
-                    self.notify('mount')(device.device_file(), mount_paths)
-            elif device.is_crypto():
-                if device.is_unlocked():
+        if device.is_handleable():
+            try:
+                if device.is_mounted():
                     return
+                fstype = str(device.id_type())
+                options = self.filters.get_mount_options(device)
 
-                from distutils.spawn import find_executable
-                import subprocess
-
-                # enter password via zenity
-                zenity = find_executable('zenity')
-                if zenity is None:
-                    return
+                S = 'attempting to mount device %s (%s:%s)'
+                self.log.info(S % (device, fstype, options))
 
                 try:
-                    password = subprocess.check_output([zenity,
-                        '--entry', '--hide-text',
-                        '--title', 'Unlock encrypted device',
-                        '--text', 'Enter password for %s:' % (device,) ])
-                    password = password.rstrip('\n')
-                except subprocess.CalledProcessError, exc:
-                    # User pressed cancel
-                    return
-
-                # unlock device
-                self.log.info('attempting to unlock device %s' % (device,))
-                try:
-                    device.unlock(password, [])
-                    self.log.info('unlocked device %s' % (device,))
+                    device.mount(fstype, options)
+                    self.log.info('mounted device %s' % (device,))
                 except dbus.exceptions.DBusException, dbus_err:
-                    self.log.error('failed to unlock device %s: %s'
-                                                % (device, dbus_err))
-                    self.notify('unlock')('Failed to unlock %s' % (device,),
-                            'DBusException: %s\n' % (dbus_err,)
-                            + 'Try\n\tudisksctl unlock -b <device>')
+                    self.log.error('failed to mount device %s: %s' % (
+                                                        device, dbus_err))
                     return
 
-                self.notify('unlock')(device.device_file())
-        finally:
-            self._store_device_state(device)
+                mount_paths = ', '.join(device.mount_paths())
+                self.notify('mount')(device.device_file(), mount_paths)
+            finally:
+                self._store_device_state(device)
+
+        elif device.is_crypto():
+            if device.is_unlocked():
+                return
+
+
+            from distutils.spawn import find_executable
+            import subprocess
+
+            # enter password via zenity
+            zenity = find_executable('zenity')
+            if zenity is None:
+                return
+
+            try:
+                password = subprocess.check_output([zenity,
+                    '--entry', '--hide-text',
+                    '--title', 'Unlock encrypted device',
+                    '--text', 'Enter password for %s:' % (device,) ])
+                password = password.rstrip('\n')
+            except subprocess.CalledProcessError, exc:
+                # User pressed cancel
+                return
+
+            # unlock device
+            self.log.info('attempting to unlock device %s' % (device,))
+            try:
+                device.unlock(password, [])
+                self.log.info('unlocked device %s' % (device,))
+            except dbus.exceptions.DBusException, dbus_err:
+                self.log.error('failed to unlock device %s: %s'
+                                            % (device, dbus_err))
+                self.notify('unlock')('Failed to unlock %s' % (device,),
+                        'DBusException: %s\n' % (dbus_err,)
+                        + 'Try\n\tudisksctl unlock -b <device>')
+                return
+
+            self.notify('unlock')(device.device_file())
 
     def _store_device_state(self, device):
         state = DeviceState(device.is_mounted(),
