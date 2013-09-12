@@ -73,7 +73,7 @@ class Device:
         """Get unlocked luks cleartext device."""
         return self._get_property('LuksHolder')
 
-    def is_luks_cleartext_slave(self, ignore = []):
+    def is_luks_cleartext_slave(self):
         """Check whether the luks device is currently in use."""
         if not self.is_luks():
             return False
