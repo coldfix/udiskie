@@ -12,56 +12,88 @@ import udiskie.device
 import udiskie.notify
 
 def unmount_device(device, notify):
-    """Unmount a Device.
+    """
+    Unmount a Device.
 
-    Checks to make sure the device is unmountable and then unmounts."""
+    Checks to make sure the device is unmountable and then unmounts.
+    Return value indicates whether an action was performed successfully.
+    The special value `None` means unknown/unreliable.
 
+    """
     logger = logging.getLogger('udiskie.umount.unmount_device')
-    if device.is_handleable() and device.is_mounted():
-        try:
-            device.unmount()
-            logger.info('unmounted device %s' % (device,))
-        except dbus.exceptions.DBusException, dbus_err:
-            logger.error('failed to unmount device %s: %s' % (device,
-                                                              dbus_err))
-            return
-
-        notify(device.device_file())
-    else:
+    if not device.is_handleable() or not device.is_filesystem():
         logger.debug('skipping unhandled device %s' % (device,))
-
-def lock_luks_device(device, notify):
-    """
-    Lock the Luks device.
-
-    Return indicates success.
-
-    """
-    if not device.is_luks_cleartext():
         return False
-
-    logger = logging.getLogger('udiskie.umount.lock_device')
-    slave_path = device.luks_cleartext_slave()
-    slave = udiskie.device.Device(device.bus, slave_path)
-
-    # stop this if still in use
-    if slave.is_luks_cleartext_slave():
+    if not device.is_mounted():
+        logger.debug('skipping unmounted device %s' % (device,))
         return False
-
     try:
-        slave.lock([])
-        logger.info('locked device %s' % (slave,))
+        device.unmount()
+        logger.info('unmounted device %s' % (device,))
+    except dbus.exceptions.DBusException, dbus_err:
+        logger.error('failed to unmount device %s: %s' % (device,
+                                                            dbus_err))
+        return None
+    notify(device.device_file())
+    return True
 
+def lock_device(device, notify):
+    """
+    Lock device.
+
+    Checks to make sure the device is lockable, then locks.
+    Return value indicates whether an action was performed successfully.
+    The special value `None` means unknown/unreliable.
+
+    """
+    logger = logging.getLogger('udiskie.umount.lock_device')
+    if not device.is_handleable() or not device.is_crypto():
+        logger.debug('skipping unhandled device %s' % (device,))
+        return False
+    if not device.is_unlocked():
+        logger.debug('skipping locked device %s' % (device,))
+        return False
+    try:
+        device.lock([])
+        logger.info('locked device %s' % (device,))
     except dbus.exceptions.DBusException, dbus_err:
         logger.error('failed to lock device %s: %s' % (device, dbus_err))
-        return False
-
-    notify(slave.device_file())
+        return None
+    notify(device.device_file())
     return True
+
+def remove_device(device, notify):
+    """Unmount or lock the device depending on device type."""
+    logger = logging.getLogger('udiskie.umount.remove_device')
+    if not device.is_handleable():
+        logger.debug('skipping unhandled device %s' % (device,))
+        return False
+    if device.is_filesystem():
+        return unmount_device(device, notify('umount'))
+    elif device.is_crypto():
+        return lock_device(device, notify('lock'))
+
+def lock_slave(device, notify):
+    """
+    Lock the luks slave of this device.
+
+    Will not lock the slave if it is still used by any mounted file system.
+    Return value indicates success.
+
+    """
+    logger = logging.getLogger('udiskie.umount.lock_slave')
+    if not device.is_luks_cleartext():
+        logger.debug('skipping non-luks-cleartext device %s' % (device,))
+        return False
+    slave_path = device.luks_cleartext_slave()
+    slave = udiskie.device.Device(device.bus, slave_path)
+    if slave.is_luks_cleartext_slave():
+        return False
+    return lock_device(slave, notify)
 
 
 def unmount(path, notify):
-    """Unmount a filesystem
+    """Unmount or lock a filesystem
 
     The filesystem must match the criteria for a filesystem mountable by
     udiskie.  path is either the physical device node (e.g. /dev/sdb1) or the
@@ -73,8 +105,8 @@ def unmount(path, notify):
     for device in udiskie.device.get_all(bus):
         if path in device.mount_paths() or path == device.device_file():
             logger.debug('found device owning "%s": "%s"' % (path, device))
-            unmount_device(device, notify)
-            unmounted.append(device)
+            if remove_device(device, notify):
+                unmounted.append(device)
     return unmounted
 
 
@@ -84,8 +116,8 @@ def unmount_all(notify):
     unmounted = []
     bus = dbus.SystemBus()
     for device in udiskie.device.get_all(bus):
-        unmount_device(device, notify)
-        unmounted.append(device)
+        if unmount_device(device, notify):
+            unmounted.append(device)
     return unmounted
 
 def cli(args):
@@ -108,9 +140,10 @@ def cli(args):
     logging.basicConfig(level=log_level, format='%(message)s')
 
     if options.suppress_notify:
-        notify = lambda *args: True
+        notify = lambda ctx: lambda *args: True
     else:
-        notify = udiskie.notify.Notify('udiskie.umount').umount
+        notify_ = udiskie.notify.Notify('udiskie.umount')
+        notify = lambda ctx: getattr(notify_, ctx)
 
     if options.all:
         unmounted = unmount_all(notify)
@@ -122,7 +155,7 @@ def cli(args):
         for path in args:
             unmounted = unmount(os.path.normpath(path), notify)
 
+    # automatically lock unused luks slaves of unmounted devices
     for device in unmounted:
-        notify = udiskie.notify.Notify('udiskie.umount').lock
-        lock_luks_device(device, notify)
+        lock_slave(device, notify('lock'))
 

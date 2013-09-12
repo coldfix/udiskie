@@ -65,51 +65,83 @@ class AutoMounter:
                                      bus_name='org.freedesktop.UDisks')
 
     def _mount_device(self, device):
-        if device.is_handleable():
+        """
+        Mount the device if not already mounted.
+
+        Return value indicates whether an action was performed successfully.
+        The special value `None` means unknown/unreliable.
+
+        """
+        if not device.is_handleable() or not device.is_filesystem():
+            return False
+        if device.is_mounted():
+            return False
+
+        try:
+            fstype = str(device.id_type())
+            options = self.filters.get_mount_options(device)
+
+            S = 'attempting to mount device %s (%s:%s)'
+            self.log.info(S % (device, fstype, options))
+
             try:
-                if device.is_mounted():
-                    return
-                fstype = str(device.id_type())
-                options = self.filters.get_mount_options(device)
-
-                S = 'attempting to mount device %s (%s:%s)'
-                self.log.info(S % (device, fstype, options))
-
-                try:
-                    device.mount(fstype, options)
-                    self.log.info('mounted device %s' % (device,))
-                except dbus.exceptions.DBusException, dbus_err:
-                    self.log.error('failed to mount device %s: %s' % (
-                                                        device, dbus_err))
-                    return
-
-                mount_paths = ', '.join(device.mount_paths())
-                self.notify('mount')(device.device_file(), mount_paths)
-            finally:
-                self._store_device_state(device)
-
-        elif device.is_crypto():
-            if device.is_unlocked():
-                return
-
-            # prompt user for password
-            password = self.prompt(
-                    'Enter password for %s:' % (device,),
-                    'Unlock encrypted device')
-            if password is None:
-                return
-
-            # unlock device
-            self.log.info('attempting to unlock device %s' % (device,))
-            try:
-                device.unlock(password, [])
-                self.log.info('unlocked device %s' % (device,))
+                device.mount(fstype, options)
+                self.log.info('mounted device %s' % (device,))
             except dbus.exceptions.DBusException, dbus_err:
-                self.log.error('failed to unlock device %s:\n%s'
-                                            % (device, dbus_err))
-                return
+                self.log.error('failed to mount device %s: %s' % (
+                                                    device, dbus_err))
+                return False
 
-            self.notify('unlock')(device.device_file())
+            mount_paths = ', '.join(device.mount_paths())
+            self.notify('mount')(device.device_file(), mount_paths)
+        except:
+            return None
+        finally:
+            self._store_device_state(device)
+
+        return True
+
+    def _unlock_device(self, device):
+        """
+        Unlock the device if not already unlocked.
+
+        Return value indicates whether an action was performed successfully.
+        The special value `None` means unknown/unreliable.
+
+        """
+        if not device.is_handleable() or not device.is_crypto():
+            return False
+        if device.is_unlocked():
+            return False
+
+        # prompt user for password
+        password = self.prompt(
+                'Enter password for %s:' % (device,),
+                'Unlock encrypted device')
+        if password is None:
+            return False
+
+        # unlock device
+        self.log.info('attempting to unlock device %s' % (device,))
+        try:
+            device.unlock(password, [])
+            self.log.info('unlocked device %s' % (device,))
+        except dbus.exceptions.DBusException, dbus_err:
+            self.log.error('failed to unlock device %s:\n%s'
+                                        % (device, dbus_err))
+            return None
+
+        self.notify('unlock')(device.device_file())
+        return True
+
+    def _add_device(self, device):
+        """Mount or unlock the device depending on its type."""
+        if not device.is_handleable():
+            return False
+        if device.is_filesystem():
+            return self._mount_device(device)
+        elif device.is_crypto():
+            return self._unlock_device(device)
 
     def _store_device_state(self, device):
         state = DeviceState(device.is_mounted(),
@@ -126,14 +158,14 @@ class AutoMounter:
     def mount_present_devices(self):
         """Mount handleable devices that are already present."""
         for device in udiskie.device.get_all(self.bus):
-            self._mount_device(device)
+            self._add_device(device)
 
     def device_added(self, device):
         self.log.debug('device added: %s' % (device,))
         udiskie_device = udiskie.device.Device(self.bus, device)
         # Since the device just appeared we don't want the old state.
         self._remove_device_state(udiskie_device)
-        self._mount_device(udiskie_device)
+        self._add_device(udiskie_device)
 
     def device_removed(self, device):
         self.log.debug('device removed: %s' % (device,))
@@ -147,7 +179,7 @@ class AutoMounter:
 
         if not last_state:
             # First time we saw the device, try to mount it.
-            self._mount_device(udiskie_device)
+            self._add_device(udiskie_device)
         else:
             media_added = False
             if udiskie_device.has_media() and not last_state.has_media:
@@ -155,7 +187,7 @@ class AutoMounter:
 
             if media_added and not last_state.mounted:
                 # Wasn't mounted before, but it has new media now.
-                self._mount_device(udiskie_device)
+                self._add_device(udiskie_device)
 
         self._store_device_state(udiskie_device)
 
@@ -193,3 +225,4 @@ def cli(args):
             notify=notify, prompt=prompt)
     mounter.mount_present_devices()
     return gobject.MainLoop().run()
+

@@ -37,7 +37,7 @@ class Device:
         Currently this just means that the device is removable and holds a
         filesystem."""
 
-        if self.is_filesystem() and not self.is_systeminternal():
+        if (self.is_filesystem() or self.is_crypto()) and not self.is_systeminternal():
             return True
         else:
             return False
