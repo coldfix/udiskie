@@ -25,7 +25,7 @@ class DeviceState:
         self.has_media = has_media
 
 
-class AutoMounter:
+class Mounter:
     CONFIG_PATH = 'udiskie/filters.conf'
 
     def __init__(self, bus=None, filter_file=None, notify=None, prompt=None):
@@ -53,16 +53,6 @@ class AutoMounter:
         else:
             self.prompt = prompt
 
-
-        self.bus.add_signal_receiver(self.device_added,
-                                     signal_name='DeviceAdded',
-                                     bus_name='org.freedesktop.UDisks')
-        self.bus.add_signal_receiver(self.device_removed,
-                                     signal_name='DeviceRemoved',
-                                     bus_name='org.freedesktop.UDisks')
-        self.bus.add_signal_receiver(self.device_changed,
-                                     signal_name='DeviceChanged',
-                                     bus_name='org.freedesktop.UDisks')
 
     def _mount_device(self, device):
         """
@@ -160,6 +150,23 @@ class AutoMounter:
         for device in udiskie.device.get_all(self.bus):
             self._add_device(device)
 
+
+class AutoMounter(Mounter):
+
+    def __init__(self, bus=None, filter_file=None, notify=None, prompt=None):
+        Mounter.__init__(self, bus, filter_file, notify, prompt)
+
+        self.bus.add_signal_receiver(self.device_added,
+                                     signal_name='DeviceAdded',
+                                     bus_name='org.freedesktop.UDisks')
+        self.bus.add_signal_receiver(self.device_removed,
+                                     signal_name='DeviceRemoved',
+                                     bus_name='org.freedesktop.UDisks')
+        self.bus.add_signal_receiver(self.device_changed,
+                                     signal_name='DeviceChanged',
+                                     bus_name='org.freedesktop.UDisks')
+
+
     def device_added(self, device):
         self.log.debug('device added: %s' % (device,))
         udiskie_device = udiskie.device.Device(self.bus, device)
@@ -220,9 +227,22 @@ def cli(args):
 
     prompt = udiskie.prompt.password(options.password_prompt)
 
-    mounter = AutoMounter(
-            bus=None, filter_file=options.filters,
-            notify=notify, prompt=prompt)
-    mounter.mount_present_devices()
-    return gobject.MainLoop().run()
+    # run as a daemon
+    if len(args) == 0:
+        mounter = AutoMounter(
+                bus=None, filter_file=options.filters,
+                notify=notify, prompt=prompt)
+        mounter.mount_present_devices()
+        return gobject.MainLoop().run()
+
+    # only mount the desired devices
+    else:
+        mounter = Mounter(
+                bus=None, filter_file=options.filters,
+                notify=notify, prompt=prompt)
+
+        for path in args:
+            device = udiskie.device.get_device(mounter.bus, path)
+            if device:
+                mounter._add_device(device)
 
