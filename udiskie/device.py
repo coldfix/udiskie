@@ -120,3 +120,10 @@ def get_all(bus):
     udisks = bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH)
     for path in udisks.EnumerateDevices(dbus_interface=UDISKS_INTERFACE):
         yield Device(bus, path)
+
+def get_device(bus, path):
+    for device in get_all(bus):
+        if path in device.mount_paths() or path == device.device_file():
+            return device
+    return None
+

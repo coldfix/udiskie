@@ -101,13 +101,13 @@ def unmount(path, notify):
 
     logger = logging.getLogger('udiskie.umount.unmount')
     bus = dbus.SystemBus()
-    unmounted = []
-    for device in udiskie.device.get_all(bus):
-        if path in device.mount_paths() or path == device.device_file():
-            logger.debug('found device owning "%s": "%s"' % (path, device))
-            if remove_device(device, notify):
-                unmounted.append(device)
-    return unmounted
+
+    device = udiskie.device.get_device(bus, path)
+    if device:
+        logger.debug('found device owning "%s": "%s"' % (path, device))
+        if remove_device(device, notify):
+            return device
+    return None
 
 
 def unmount_all(notify):
@@ -152,8 +152,11 @@ def cli(args):
             logger.warn('No devices provided for unmount')
             return 1
 
+        unmounted = []
         for path in args:
-            unmounted = unmount(os.path.normpath(path), notify)
+            device = unmount(os.path.normpath(path), notify)
+            if device:
+                unmounted.append(device)
 
     # automatically lock unused luks slaves of unmounted devices
     for device in unmounted:
