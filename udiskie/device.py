@@ -124,8 +124,11 @@ def get_all(bus):
 def get_device(bus, path):
     logger = logging.getLogger('udiskie.device.get_device')
     for device in get_all(bus):
-        if path in device.mount_paths() or path == device.device_file():
+        if os.path.samefile(path, device.device_file()):
             return device
+        for p in device.mount_paths():
+            if os.path.samefile(path, p):
+                return device
     logger.warn('Device not found: %s' % path)
     return None
 
