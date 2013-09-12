@@ -29,7 +29,7 @@ class Mounter:
     CONFIG_PATH = 'udiskie/filters.conf'
 
     def __init__(self, bus=None, filter_file=None, notify=None, prompt=None):
-        self.log = logging.getLogger('udiskie.mount.AutoMounter')
+        self.log = logging.getLogger('udiskie.mount.Mounter')
         self.last_device_state = {}
 
         if not bus:
@@ -63,8 +63,10 @@ class Mounter:
 
         """
         if not device.is_handleable() or not device.is_filesystem():
+            self.log.debug('skipping unhandled device %s' % (device,))
             return False
         if device.is_mounted():
+            self.log.debug('skipping mounted device %s' % (device,))
             return False
 
         try:
@@ -80,12 +82,10 @@ class Mounter:
             except dbus.exceptions.DBusException, dbus_err:
                 self.log.error('failed to mount device %s: %s' % (
                                                     device, dbus_err))
-                return False
+                return None
 
             mount_paths = ', '.join(device.mount_paths())
             self.notify('mount')(device.device_file(), mount_paths)
-        except:
-            return None
         finally:
             self._store_device_state(device)
 
@@ -100,8 +100,10 @@ class Mounter:
 
         """
         if not device.is_handleable() or not device.is_crypto():
+            self.log.debug('skipping unhandled device %s' % (device,))
             return False
         if device.is_unlocked():
+            self.log.debug('skipping unlocked device %s' % (device,))
             return False
 
         # prompt user for password
@@ -115,7 +117,11 @@ class Mounter:
         self.log.info('attempting to unlock device %s' % (device,))
         try:
             device.unlock(password, [])
-            self.log.info('unlocked device %s' % (device,))
+            holder_dev = udiskie.device.Device(
+                    self.bus,
+                    device.luks_cleartext_holder())
+            holder_path = holder_dev.device_file()
+            self.log.info('unlocked device %s on %s' % (device, holder_path))
         except dbus.exceptions.DBusException, dbus_err:
             self.log.error('failed to unlock device %s:\n%s'
                                         % (device, dbus_err))
@@ -127,6 +133,7 @@ class Mounter:
     def add_device(self, device):
         """Mount or unlock the device depending on its type."""
         if not device.is_handleable():
+            self.log.debug('skipping unhandled device %s' % (device,))
             return False
         if device.is_filesystem():
             return self.mount_device(device)
@@ -155,6 +162,7 @@ class AutoMounter(Mounter):
 
     def __init__(self, bus=None, filter_file=None, notify=None, prompt=None):
         Mounter.__init__(self, bus, filter_file, notify, prompt)
+        self.log = logging.getLogger('udiskie.mount.AutoMounter')
 
         self.bus.add_signal_receiver(self.device_added,
                                      signal_name='DeviceAdded',
