@@ -54,7 +54,7 @@ class Mounter:
             self.prompt = prompt
 
 
-    def _mount_device(self, device):
+    def mount_device(self, device):
         """
         Mount the device if not already mounted.
 
@@ -91,7 +91,7 @@ class Mounter:
 
         return True
 
-    def _unlock_device(self, device):
+    def unlock_device(self, device):
         """
         Unlock the device if not already unlocked.
 
@@ -124,14 +124,14 @@ class Mounter:
         self.notify('unlock')(device.device_file())
         return True
 
-    def _add_device(self, device):
+    def add_device(self, device):
         """Mount or unlock the device depending on its type."""
         if not device.is_handleable():
             return False
         if device.is_filesystem():
-            return self._mount_device(device)
+            return self.mount_device(device)
         elif device.is_crypto():
-            return self._unlock_device(device)
+            return self.unlock_device(device)
 
     def _store_device_state(self, device):
         state = DeviceState(device.is_mounted(),
@@ -148,7 +148,7 @@ class Mounter:
     def mount_present_devices(self):
         """Mount handleable devices that are already present."""
         for device in udiskie.device.get_all(self.bus):
-            self._add_device(device)
+            self.add_device(device)
 
 
 class AutoMounter(Mounter):
@@ -172,7 +172,7 @@ class AutoMounter(Mounter):
         udiskie_device = udiskie.device.Device(self.bus, device)
         # Since the device just appeared we don't want the old state.
         self._remove_device_state(udiskie_device)
-        self._add_device(udiskie_device)
+        self.add_device(udiskie_device)
 
     def device_removed(self, device):
         self.log.debug('device removed: %s' % (device,))
@@ -186,7 +186,7 @@ class AutoMounter(Mounter):
 
         if not last_state:
             # First time we saw the device, try to mount it.
-            self._add_device(udiskie_device)
+            self.add_device(udiskie_device)
         else:
             media_added = False
             if udiskie_device.has_media() and not last_state.has_media:
@@ -194,7 +194,7 @@ class AutoMounter(Mounter):
 
             if media_added and not last_state.mounted:
                 # Wasn't mounted before, but it has new media now.
-                self._add_device(udiskie_device)
+                self.add_device(udiskie_device)
 
         self._store_device_state(udiskie_device)
 
@@ -244,5 +244,5 @@ def cli(args):
         for path in args:
             device = udiskie.device.get_device(mounter.bus, path)
             if device:
-                mounter._add_device(device)
+                mounter.add_device(device)
 
