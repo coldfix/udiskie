@@ -36,7 +36,7 @@ class Device:
 
         Currently this just means that the device is removable and holds a
         filesystem."""
-        return (self.is_filesystem() or self.is_crypto()) and not self.is_systeminternal():
+        return (self.is_filesystem() or self.is_crypto()) and not self.is_systeminternal()
 
     def is_mounted(self):
         return self._get_property('DeviceIsMounted')
