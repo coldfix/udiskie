@@ -209,6 +209,9 @@ class AutoMounter(Mounter):
 
 def cli(args):
     parser = optparse.OptionParser()
+    parser.add_option('-a', '--all', action='store_true',
+                      dest='all', default=False,
+                      help='mount all present devices')
     parser.add_option('-v', '--verbose', action='store_true',
                       dest='verbose', default=False,
                       help='verbose output')
@@ -235,22 +238,25 @@ def cli(args):
 
     prompt = udiskie.prompt.password(options.password_prompt)
 
+    # only mount the desired devices
+    if options.all or len(args) > 0:
+        mounter = Mounter(
+                bus=None, filter_file=options.filters,
+                notify=notify, prompt=prompt)
+
+        if options.all:
+            mounter.mount_present_devices()
+        else:
+            for path in args:
+                device = udiskie.device.get_device(mounter.bus, path)
+                if device:
+                    mounter.add_device(device)
+
     # run as a daemon
-    if len(args) == 0:
+    else:
         mounter = AutoMounter(
                 bus=None, filter_file=options.filters,
                 notify=notify, prompt=prompt)
         mounter.mount_present_devices()
         return gobject.MainLoop().run()
-
-    # only mount the desired devices
-    else:
-        mounter = Mounter(
-                bus=None, filter_file=options.filters,
-                notify=notify, prompt=prompt)
-
-        for path in args:
-            device = udiskie.device.get_device(mounter.bus, path)
-            if device:
-                mounter.add_device(device)
 
