@@ -1,16 +1,24 @@
 import logging
 import gobject
 
-import udiskie.notify
-import udiskie.mount
+import udiskie
 import udiskie.device
+import udiskie.mount
+import udiskie.notify
 
+class DeviceState:
+    def __init__(self, mounted, has_media):
+        self.mounted = mounted
+        self.has_media = has_media
 
-class AutoMounter(udiskie.mount.Mounter):
+class AutoMounter:
 
     def __init__(self, bus=None, filter_file=None, notify=None, prompt=None):
-        udiskie.mount.Mounter.__init__(self, bus, filter_file, notify, prompt)
         self.log = logging.getLogger('udiskie.mount.AutoMounter')
+        self.mounter = udiskie.mount.Mounter(bus, filter_file, notify, prompt)
+        self.bus = self.mounter.bus
+
+        self.last_device_state = {}
 
         self.bus.add_signal_receiver(self.device_added,
                                      signal_name='DeviceAdded',
@@ -26,9 +34,8 @@ class AutoMounter(udiskie.mount.Mounter):
     def device_added(self, device):
         self.log.debug('device added: %s' % (device,))
         udiskie_device = udiskie.device.Device(self.bus, device)
-        # Since the device just appeared we don't want the old state.
-        self._remove_device_state(udiskie_device)
-        self.add_device(udiskie_device)
+        self._store_device_state(udiskie_device)
+        self.mounter.add_device(udiskie_device)
 
     def device_removed(self, device):
         self.log.debug('device removed: %s' % (device,))
@@ -42,7 +49,7 @@ class AutoMounter(udiskie.mount.Mounter):
 
         if not last_state:
             # First time we saw the device, try to mount it.
-            self.add_device(udiskie_device)
+            self.mounter.add_device(udiskie_device)
         else:
             media_added = False
             if udiskie_device.has_media() and not last_state.has_media:
@@ -50,9 +57,22 @@ class AutoMounter(udiskie.mount.Mounter):
 
             if media_added and not last_state.mounted:
                 # Wasn't mounted before, but it has new media now.
-                self.add_device(udiskie_device)
+                self.mounter.add_device(udiskie_device)
 
         self._store_device_state(udiskie_device)
+
+
+    def _store_device_state(self, device):
+        state = DeviceState(device.is_mounted(),
+                            device.has_media())
+        self.last_device_state[device.device_path] = state
+
+    def _remove_device_state(self, device):
+        if device.device_path in self.last_device_state:
+            del self.last_device_state[device.device_path]
+
+    def _get_device_state(self, device):
+        return self.last_device_state.get(device.device_path)
 
 
 
@@ -79,7 +99,7 @@ def cli(args):
         mounter = AutoMounter(
                 bus=None, filter_file=options.filters,
                 notify=notify, prompt=prompt)
-        mounter.mount_present_devices()
+        mounter.mounter.mount_present_devices()
         return gobject.MainLoop().run()
 
 

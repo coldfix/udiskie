@@ -16,18 +16,12 @@ import udiskie.match
 import udiskie.notify
 import udiskie.prompt
 
-class DeviceState:
-    def __init__(self, mounted, has_media):
-        self.mounted = mounted
-        self.has_media = has_media
-
 
 class Mounter:
     CONFIG_PATH = 'udiskie/filters.conf'
 
     def __init__(self, bus=None, filter_file=None, notify=None, prompt=None):
         self.log = logging.getLogger('udiskie.mount.Mounter')
-        self.last_device_state = {}
 
         if not bus:
             from dbus.mainloop.glib import DBusGMainLoop
@@ -66,25 +60,22 @@ class Mounter:
             self.log.debug('skipping mounted device %s' % (device,))
             return False
 
+        fstype = str(device.id_type())
+        options = self.filters.get_mount_options(device)
+
+        S = 'attempting to mount device %s (%s:%s)'
+        self.log.info(S % (device, fstype, options))
+
         try:
-            fstype = str(device.id_type())
-            options = self.filters.get_mount_options(device)
+            device.mount(fstype, options)
+            self.log.info('mounted device %s' % (device,))
+        except dbus.exceptions.DBusException, dbus_err:
+            self.log.error('failed to mount device %s: %s' % (
+                                                device, dbus_err))
+            return None
 
-            S = 'attempting to mount device %s (%s:%s)'
-            self.log.info(S % (device, fstype, options))
-
-            try:
-                device.mount(fstype, options)
-                self.log.info('mounted device %s' % (device,))
-            except dbus.exceptions.DBusException, dbus_err:
-                self.log.error('failed to mount device %s: %s' % (
-                                                    device, dbus_err))
-                return None
-
-            mount_paths = ', '.join(device.mount_paths())
-            self.notify('mount')(device.device_file(), mount_paths)
-        finally:
-            self._store_device_state(device)
+        mount_paths = ', '.join(device.mount_paths())
+        self.notify('mount')(device.device_file(), mount_paths)
 
         return True
 
@@ -136,18 +127,6 @@ class Mounter:
             return self.mount_device(device)
         elif device.is_crypto():
             return self.unlock_device(device)
-
-    def _store_device_state(self, device):
-        state = DeviceState(device.is_mounted(),
-                            device.has_media())
-        self.last_device_state[device.device_path] = state
-
-    def _remove_device_state(self, device):
-        if device.device_path in self.last_device_state:
-            del self.last_device_state[device.device_path]
-
-    def _get_device_state(self, device):
-        return self.last_device_state.get(device.device_path)
 
     def mount_present_devices(self):
         """Mount handleable devices that are already present."""
