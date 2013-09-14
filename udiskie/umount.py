@@ -34,7 +34,7 @@ def unmount_device(device, notify):
         logger.error('failed to unmount device %s: %s' % (device,
                                                             dbus_err))
         return None
-    notify(device.device_file())
+    notify('umount')(device.device_file())
     return True
 
 def lock_device(device, notify):
@@ -59,7 +59,7 @@ def lock_device(device, notify):
     except dbus.exceptions.DBusException, dbus_err:
         logger.error('failed to lock device %s: %s' % (device, dbus_err))
         return None
-    notify(device.device_file())
+    notify('lock')(device.device_file())
     return True
 
 def remove_device(device, notify):
@@ -69,9 +69,9 @@ def remove_device(device, notify):
         logger.debug('skipping unhandled device %s' % (device,))
         return False
     if device.is_filesystem():
-        return unmount_device(device, notify('umount'))
+        return unmount_device(device, notify)
     elif device.is_crypto():
-        return lock_device(device, notify('lock'))
+        return lock_device(device, notify)
 
 def lock_slave(device, notify):
     """
@@ -160,5 +160,5 @@ def cli(args):
 
     # automatically lock unused luks slaves of unmounted devices
     for device in unmounted:
-        lock_slave(device, notify('lock'))
+        lock_slave(device, notify)
 
