@@ -4,9 +4,7 @@ warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
 import logging
 import os
-
 import dbus
-import gobject
 
 try:
     from xdg.BaseDirectory import xdg_config_home
@@ -157,54 +155,6 @@ class Mounter:
             self.add_device(device)
 
 
-class AutoMounter(Mounter):
-
-    def __init__(self, bus=None, filter_file=None, notify=None, prompt=None):
-        Mounter.__init__(self, bus, filter_file, notify, prompt)
-        self.log = logging.getLogger('udiskie.mount.AutoMounter')
-
-        self.bus.add_signal_receiver(self.device_added,
-                                     signal_name='DeviceAdded',
-                                     bus_name='org.freedesktop.UDisks')
-        self.bus.add_signal_receiver(self.device_removed,
-                                     signal_name='DeviceRemoved',
-                                     bus_name='org.freedesktop.UDisks')
-        self.bus.add_signal_receiver(self.device_changed,
-                                     signal_name='DeviceChanged',
-                                     bus_name='org.freedesktop.UDisks')
-
-
-    def device_added(self, device):
-        self.log.debug('device added: %s' % (device,))
-        udiskie_device = udiskie.device.Device(self.bus, device)
-        # Since the device just appeared we don't want the old state.
-        self._remove_device_state(udiskie_device)
-        self.add_device(udiskie_device)
-
-    def device_removed(self, device):
-        self.log.debug('device removed: %s' % (device,))
-        self._remove_device_state(udiskie.device.Device(self.bus, device))
-
-    def device_changed(self, device):
-        self.log.debug('device changed: %s' % (device,))
-
-        udiskie_device = udiskie.device.Device(self.bus, device)
-        last_state = self._get_device_state(udiskie_device)
-
-        if not last_state:
-            # First time we saw the device, try to mount it.
-            self.add_device(udiskie_device)
-        else:
-            media_added = False
-            if udiskie_device.has_media() and not last_state.has_media:
-                media_added = True
-
-            if media_added and not last_state.mounted:
-                # Wasn't mounted before, but it has new media now.
-                self.add_device(udiskie_device)
-
-        self._store_device_state(udiskie_device)
-
 def option_parser():
     import optparse
     parser = optparse.OptionParser()
@@ -226,7 +176,8 @@ def option_parser():
     return parser
 
 def cli(args):
-    options, args = option_parser().parse_args(args)
+    parser = option_parser()
+    options, posargs = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
 
     if options.suppress_notify:
@@ -236,28 +187,22 @@ def cli(args):
 
     prompt = udiskie.prompt.password(options.password_prompt)
 
+    mounter = Mounter(
+            bus=None, filter_file=options.filters,
+            notify=notify, prompt=prompt)
+
     # mount all present devices
     if options.all:
-        mounter = Mounter(
-                bus=None, filter_file=options.filters,
-                notify=notify, prompt=prompt)
         mounter.mount_present_devices()
 
     # only mount the desired devices
-    elif len(args) > 0:
-        mounter = Mounter(
-                bus=None, filter_file=options.filters,
-                notify=notify, prompt=prompt)
-        for path in args:
+    elif len(posargs) > 0:
+        for path in posargs:
             device = udiskie.device.get_device(mounter.bus, path)
             if device:
                 mounter.add_device(device)
 
-    # run as a daemon
+    # print command line options
     else:
-        mounter = AutoMounter(
-                bus=None, filter_file=options.filters,
-                notify=notify, prompt=prompt)
-        mounter.mount_present_devices()
-        return gobject.MainLoop().run()
+        parser.print_usage()
 

@@ -135,7 +135,7 @@ def option_parser():
 
 def cli(args):
     logger = logging.getLogger('udiskie.umount.cli')
-    (options, args) = option_parser().parse_args(args)
+    (options, posargs) = option_parser().parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
 
     if options.suppress_notify:
@@ -147,12 +147,12 @@ def cli(args):
     if options.all:
         unmounted = unmount_all(notify)
     else:
-        if len(args) == 0:
+        if len(posargs) == 0:
             logger.warn('No devices provided for unmount')
             return 1
 
         unmounted = []
-        for path in args:
+        for path in posargs:
             device = unmount(os.path.normpath(path), notify)
             if device:
                 unmounted.append(device)
