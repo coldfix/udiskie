@@ -3,7 +3,6 @@ warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
 import logging
-import optparse
 import os
 
 import dbus
@@ -120,24 +119,24 @@ def unmount_all(notify):
             unmounted.append(device)
     return unmounted
 
-def cli(args):
-    logger = logging.getLogger('udiskie.umount.cli')
+def option_parser():
+    import optparse
     parser = optparse.OptionParser()
     parser.add_option('-a', '--all', action='store_true',
                       dest='all', default=False,
                       help='all devices')
-    parser.add_option('-v', '--verbose', action='store_true',
-                      dest='verbose', default=False,
-                      help='verbose output')
+    parser.add_option('-v', '--verbose', action='store_const',
+                      dest='log_level', default=logging.INFO,
+                      const=logging.DEBUG, help='verbose output')
     parser.add_option('-s', '--suppress', action='store_true',
                       dest='suppress_notify', default=False,
                       help='suppress popup notifications')
-    (options, args) = parser.parse_args(args)
+    return parser
 
-    log_level = logging.INFO
-    if options.verbose:
-        log_level = logging.DEBUG
-    logging.basicConfig(level=log_level, format='%(message)s')
+def cli(args):
+    logger = logging.getLogger('udiskie.umount.cli')
+    (options, args) = option_parser().parse_args(args)
+    logging.basicConfig(level=options.log_level, format='%(message)s')
 
     if options.suppress_notify:
         notify = lambda ctx: lambda *args: True

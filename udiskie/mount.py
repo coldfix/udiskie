@@ -3,7 +3,6 @@ warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
 import logging
-import optparse
 import os
 
 import dbus
@@ -206,15 +205,15 @@ class AutoMounter(Mounter):
 
         self._store_device_state(udiskie_device)
 
-
-def cli(args):
+def option_parser():
+    import optparse
     parser = optparse.OptionParser()
     parser.add_option('-a', '--all', action='store_true',
                       dest='all', default=False,
                       help='mount all present devices')
-    parser.add_option('-v', '--verbose', action='store_true',
-                      dest='verbose', default=False,
-                      help='verbose output')
+    parser.add_option('-v', '--verbose', action='store_const',
+                      dest='log_level', default=logging.INFO,
+                      const=logging.DEBUG, help='verbose output')
     parser.add_option('-f', '--filters', action='store',
                       dest='filters', default=None,
                       metavar='FILE', help='filter FILE')
@@ -224,12 +223,11 @@ def cli(args):
     parser.add_option('-P', '--password-prompt', action='store',
                       dest='password_prompt', default='zenity',
                       metavar='MODULE', help="replace password prompt")
-    (options, args) = parser.parse_args(args)
+    return parser
 
-    log_level = logging.INFO
-    if options.verbose:
-        log_level = logging.DEBUG
-    logging.basicConfig(level=log_level, format='%(message)s')
+def cli(args):
+    options, args = option_parser().parse_args(args)
+    logging.basicConfig(level=options.log_level, format='%(message)s')
 
     if options.suppress_notify:
         notify = None
@@ -238,19 +236,22 @@ def cli(args):
 
     prompt = udiskie.prompt.password(options.password_prompt)
 
-    # only mount the desired devices
-    if options.all or len(args) > 0:
+    # mount all present devices
+    if options.all:
         mounter = Mounter(
                 bus=None, filter_file=options.filters,
                 notify=notify, prompt=prompt)
+        mounter.mount_present_devices()
 
-        if options.all:
-            mounter.mount_present_devices()
-        else:
-            for path in args:
-                device = udiskie.device.get_device(mounter.bus, path)
-                if device:
-                    mounter.add_device(device)
+    # only mount the desired devices
+    elif len(args) > 0:
+        mounter = Mounter(
+                bus=None, filter_file=options.filters,
+                notify=notify, prompt=prompt)
+        for path in args:
+            device = udiskie.device.get_device(mounter.bus, path)
+            if device:
+                mounter.add_device(device)
 
     # run as a daemon
     else:
