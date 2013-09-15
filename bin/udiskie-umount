@@ -2,6 +2,6 @@
 
 if __name__ == '__main__':
     import sys
-    import udiskie.umount
+    import udiskie.cli
 
-    sys.exit(udiskie.umount.cli(sys.argv[1:]))
+    sys.exit(udiskie.cli.umount(sys.argv[1:]))
