@@ -1,3 +1,8 @@
+"""
+Udiskie mount utilities.
+"""
+__all__ = ['Mounter', 'option_parser', 'cli']
+
 import warnings
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
@@ -13,37 +18,25 @@ except ImportError:
 
 import udiskie.device
 import udiskie.match
-import udiskie.notify
 import udiskie.prompt
+import udiskie.notify
+import udiskie.automount
+import udiskie.daemon
+
+from udiskie.common import system_bus
 
 
 class Mounter:
     CONFIG_PATH = 'udiskie/filters.conf'
 
-    def __init__(self, bus=None, filter_file=None, notify=None, prompt=None):
+    def __init__(self, bus, filter_file=None, prompt=None):
         self.log = logging.getLogger('udiskie.mount.Mounter')
-
-        if not bus:
-            from dbus.mainloop.glib import DBusGMainLoop
-            DBusGMainLoop(set_as_default=True)
-            self.bus = dbus.SystemBus()
-        else:
-            self.bus = bus
+        self.bus = bus
+        self.prompt = prompt
 
         if not filter_file:
             filter_file = os.path.join(xdg_config_home, self.CONFIG_PATH)
         self.filters = udiskie.match.FilterMatcher((filter_file,))
-
-        if not notify:
-            self.notify = lambda ctx: lambda *args: True
-        else:
-            self.notify = lambda ctx: getattr(notify, ctx)
-
-        if not prompt:
-            self.prompt = lambda text, title: None
-        else:
-            self.prompt = prompt
-
 
     def mount_device(self, device):
         """
@@ -75,7 +68,6 @@ class Mounter:
             return None
 
         mount_paths = ', '.join(device.mount_paths)
-        self.notify('mount')(device.device_file, mount_paths)
 
         return True
 
@@ -95,7 +87,7 @@ class Mounter:
             return False
 
         # prompt user for password
-        password = self.prompt(
+        password = self.prompt and self.prompt(
                 'Enter password for %s:' % (device,),
                 'Unlock encrypted device')
         if password is None:
@@ -114,8 +106,6 @@ class Mounter:
             self.log.error('failed to unlock device %s:\n%s'
                                         % (device, dbus_err))
             return None
-
-        self.notify('unlock')(device.device_file)
         return True
 
     def add_device(self, device):
@@ -130,7 +120,7 @@ class Mounter:
 
     def mount_present_devices(self):
         """Mount handleable devices that are already present."""
-        for device in udiskie.device.get_all(self.bus):
+        for device in udiskie.device.get_all_handleable(self.bus):
             self.add_device(device)
 
 
@@ -154,21 +144,30 @@ def option_parser():
                       metavar='MODULE', help="replace password prompt")
     return parser
 
-def cli(args):
+def cli(args, allow_daemon=False):
     parser = option_parser()
     options, posargs = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
 
-    if options.suppress_notify:
-        notify = None
-    else:
-        notify = udiskie.notify.Notify('udiskie.mount')
+    # establish connection to system bus
+    bus = system_bus()
 
+    # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
+    mounter = Mounter(bus=bus, filter_file=options.filters, prompt=prompt)
 
-    mounter = Mounter(
-            bus=None, filter_file=options.filters,
-            notify=notify, prompt=prompt)
+    # run udiskie daemon if needed
+    run_daemon = allow_daemon and not options.all and len(posargs) == 0
+    if run_daemon:
+        daemon = udiskie.daemon.Daemon(bus)
+
+    if run_daemon and not options.suppress_notify:
+        notify = udiskie.notify.Notify('udiskie.mount')
+        notify.connect(daemon)
+
+    if run_daemon:
+        automount = udiskie.automount.AutoMounter(mounter)
+        automount.connect(daemon)
 
     # mount all present devices
     if options.all:
@@ -180,6 +179,11 @@ def cli(args):
             device = udiskie.device.get_device(mounter.bus, path)
             if device:
                 mounter.add_device(device)
+
+    # run in daemon mode
+    elif run_daemon:
+        mounter.mount_present_devices()
+        return daemon.run()
 
     # print command line options
     else:

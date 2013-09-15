@@ -1,33 +1,29 @@
+"""
+Udisks wrapper utilities.
+
+These act as a convenience abstraction layer on the udisks dbus service.
+
+"""
+__all__ = ['Device', 'get_all', 'get_all_handleable', 'get_device']
+
 import logging
 import os
 import dbus
 
-DBUS_PROPS_INTERFACE = 'org.freedesktop.DBus.Properties'
+from udiskie.common import Properties as DbusProperties
+
+
 UDISKS_INTERFACE = 'org.freedesktop.UDisks'
 UDISKS_DEVICE_INTERFACE = 'org.freedesktop.UDisks.Device'
 
 UDISKS_OBJECT = 'org.freedesktop.UDisks'
 UDISKS_OBJECT_PATH = '/org/freedesktop/UDisks'
 
-class DbusProperties:
-    """
-    Dbus property map abstraction.
-
-    Properties of the object can be accessed as attributes.
-
-    """
-    def __init__(self, dbus_object, interface):
-        """Initialize a proxy object with standard dbus property interface."""
-        self.__proxy = dbus.Interface(
-                dbus_object,
-                dbus_interface=DBUS_PROPS_INTERFACE)
-        self.__interface = interface
-
-    def __getattr__(self, property):
-        """Retrieve the property via the dbus proxy."""
-        return self.__proxy.Get(self.__interface, property)
 
 class Device:
+    """
+    Wrapper class for org.freedesktop.UDisks.Device proxy objects.
+    """
     def __init__(self, bus, device_path):
         self.log = logging.getLogger('udiskie.device.Device')
         self.bus = bus
@@ -156,13 +152,20 @@ class Device:
         return self.method.LuksUnlock(password, options)
 
 
-
 def get_all(bus):
+    """Enumerate all device objects currently known to udisks."""
     udisks = bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH)
     for path in udisks.EnumerateDevices(dbus_interface=UDISKS_INTERFACE):
         yield Device(bus, path)
 
+def get_all_handleable(bus):
+    """Enumerate all handleable devices currently known to udisks."""
+    for device in get_all(bus):
+        if device.is_handleable:
+            yield device
+
 def get_device(bus, path):
+    """Get a device proxy by device name or any mount path of the device."""
     logger = logging.getLogger('udiskie.device.get_device')
     for device in get_all(bus):
         if os.path.samefile(path, device.device_file):

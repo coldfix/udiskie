@@ -1,3 +1,8 @@
+"""
+Filters for udiskie mount tools.
+"""
+__all__ = ['InvalidFilter', 'OptionFilter', 'Filters', 'FilterMatcher']
+
 from ConfigParser import SafeConfigParser
 import logging
 import re

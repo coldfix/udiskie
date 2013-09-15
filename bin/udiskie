@@ -2,6 +2,6 @@
 
 if __name__ == '__main__':
     import sys
-    import udiskie.automount
+    import udiskie.mount
 
-    sys.exit(udiskie.automount.cli(sys.argv[1:]))
+    sys.exit(udiskie.mount.cli(sys.argv[1:], allow_daemon=True))
