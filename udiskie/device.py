@@ -32,8 +32,9 @@ class Device:
         self.log = logging.getLogger('udiskie.device.Device')
         self.bus = bus
         self.device_path = device_path
-        self.device = self.bus.get_object(UDISKS_OBJECT, device_path)
-        self.property = DbusProperties(self.device, UDISKS_DEVICE_INTERFACE)
+        device_object = self.bus.get_object(UDISKS_OBJECT, device_path)
+        self.property = DbusProperties(device_object, UDISKS_DEVICE_INTERFACE)
+        self.method = dbus.Interface(device_object, UDISKS_DEVICE_INTERFACE)
 
     def __str__(self):
         return self.device_path
@@ -117,21 +118,18 @@ class Device:
         return self.property.IdUuid
 
     def mount(self, filesystem, options):
-        self.device.FilesystemMount(filesystem, options,
-                                    dbus_interface=UDISKS_DEVICE_INTERFACE)
+        self.method.FilesystemMount(filesystem, options)
 
     def unmount(self):
-        self.device.FilesystemUnmount([], dbus_interface=UDISKS_DEVICE_INTERFACE)
+        self.method.FilesystemUnmount([])
 
     def lock(self, options):
         """Lock Luks device."""
-        return self.device.LuksLock(options,
-                                    dbus_interface=UDISKS_DEVICE_INTERFACE)
+        return self.method.LuksLock(options)
 
     def unlock(self, password, options):
         """Unlock Luks device."""
-        return self.device.LuksUnlock(password, options,
-                               dbus_interface=UDISKS_DEVICE_INTERFACE)
+        return self.method.LuksUnlock(password, options)
 
 
 
