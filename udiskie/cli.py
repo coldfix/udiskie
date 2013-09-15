@@ -88,10 +88,10 @@ def mount(args, allow_daemon=False):
         daemon = udiskie.daemon.Daemon(bus, udisks=udisks)
     if run_daemon and not options.suppress_notify:
         notify = udiskie.notify.Notify('udiskie.mount')
-        notify.connect(daemon)
+        daemon.connect(notify)
     if run_daemon:
         automount = udiskie.automount.AutoMounter(mounter)
-        automount.connect(daemon)
+        daemon.connect(automount)
 
     # mount all present devices
     if options.all:

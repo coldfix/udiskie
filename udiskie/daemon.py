@@ -109,13 +109,23 @@ class Daemon:
         for handler in self.event_handlers[event]:
             handler(device, *args)
 
-    def connect(self, event, handler):
+    def connect(self, handler, event=None):
         """Connect an event handler."""
-        self.event_handlers[event].append(handler)
+        if event:
+            self.event_handlers[event].append(handler)
+        else:
+            for event in self.event_handlers:
+                if hasattr(handler, event):
+                    self.connect(getattr(handler, event), event)
 
-    def disconnect(self, event, handler):
+    def disconnect(self, handler, event=None):
         """Disconnect an event handler."""
-        self.event_handlers.remove(handler)
+        if event:
+            self.event_handlers.remove(handler)
+        else:
+            for event in self.event_handlers:
+                if hasattr(handler, event):
+                    self.disconnect(getattr(handler, event), event)
 
     # udisks event listeners
     def _device_added(self, device_name):

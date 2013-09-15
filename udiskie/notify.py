@@ -18,22 +18,8 @@ class Notify:
         """Initialize notifier."""
         pynotify.init(name)
 
-    def connect(self, daemon):
-        """Connect to udisks daemon."""
-        daemon.connect('device_mounted', self.mount)
-        daemon.connect('device_unmounted', self.umount)
-        daemon.connect('device_unlocked', self.unlock)
-        daemon.connect('device_locked', self.lock)
-
-    def disconnect(self, daemon):
-        """Disconnect from udisks daemon."""
-        daemon.disconnect('device_mounted', self.mount)
-        daemon.disconnect('device_unmounted', self.umount)
-        daemon.disconnect('device_unlocked', self.unlock)
-        daemon.disconnect('device_locked', self.lock)
-
     # event handlers:
-    def mount(self, device):
+    def device_mounted(self, device):
         try:
             device_file = device.device_file
             mount_path = device.mount_paths[0]
@@ -43,7 +29,7 @@ class Notify:
         except gio.Error:
             pass
 
-    def umount(self, device):
+    def device_umounted(self, device):
         try:
             device_file = device.device_file
             pynotify.Notification('Device unmounted',
@@ -52,7 +38,7 @@ class Notify:
         except gio.Error:
             pass
 
-    def lock(self, device):
+    def device_locked(self, device):
         try:
             device_file = device.device_file
             pynotify.Notification('Device locked',
@@ -61,7 +47,7 @@ class Notify:
         except gio.Error:
             pass
 
-    def unlock(self, device):
+    def device_unlocked(self, device):
         try:
             device_file = device.device_file
             pynotify.Notification('Device unlocked',
