@@ -199,7 +199,7 @@ def mount_holder(device, filter=None, prompt=None, udisks=None):
     udisks = udisks or get_udisks()
     holder_path = device.luks_cleartext_holder
     holder = udisks.Device(device.bus, holder_path)
-    return add_device(device, filter=filter, prompt=prompt, udisks=udisks)
+    return add_device(holder, filter=filter, prompt=prompt, udisks=udisks)
 
 def lock_slave(device, udisks=None):
     """
