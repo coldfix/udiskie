@@ -14,7 +14,7 @@ import dbus
 
 import sys
 
-from udiskie.device import Device, get_all_handleable
+from udiskie.udisks import Device, get_all_handleable
 
 
 class DeviceState:

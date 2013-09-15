@@ -31,7 +31,7 @@ class Device:
     Wrapper class for org.freedesktop.UDisks.Device proxy objects.
     """
     def __init__(self, bus, device_path):
-        self.log = logging.getLogger('udiskie.device.Device')
+        self.log = logging.getLogger('udiskie.udisks.Device')
         self.bus = bus
         self.device_path = device_path
         device_object = self.bus.get_object(UDISKS_OBJECT, device_path)
@@ -172,7 +172,7 @@ def get_all_handleable(bus):
 
 def get_device(bus, path):
     """Get a device proxy by device name or any mount path of the device."""
-    logger = logging.getLogger('udiskie.device.get_device')
+    logger = logging.getLogger('udiskie.udisks.get_device')
     for device in get_all(bus):
         if os.path.samefile(path, device.device_file):
             return device

@@ -16,7 +16,6 @@ import dbus
 
 import udiskie.match
 import udiskie.mount
-import udiskie.device
 import udiskie.prompt
 import udiskie.notify
 import udiskie.automount

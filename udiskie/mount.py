@@ -14,7 +14,7 @@ import sys
 import logging
 import dbus
 
-import udiskie.device
+import udiskie.udisks
 
 
 # mount/unmount
@@ -105,7 +105,7 @@ def unlock_device(device, prompt):
     log.info('attempting to unlock device %s' % (device,))
     try:
         device.unlock(password, [])
-        holder_dev = udiskie.device.Device(
+        holder_dev = udiskie.udisks.Device(
                 device.bus,
                 device.luks_cleartext_holder)
         holder_path = holder_dev.device_file
@@ -169,14 +169,14 @@ def remove_device(device):
 def mount_all(bus=None, filter=None, prompt=None):
     """Mount handleable devices that are already present."""
     bus = bus or dbus.SystemBus()
-    for device in udiskie.device.get_all_handleable(bus):
+    for device in udiskie.udisks.get_all_handleable(bus):
         add_device(device, filter, prompt)
 
 def unmount_all(bus=None):
     """Unmount all filesystems handleable by udiskie."""
     unmounted = []
     bus = bus or dbus.SystemBus()
-    for device in udiskie.device.get_all_handleable(bus):
+    for device in udiskie.udisks.get_all_handleable(bus):
         if unmount_device(device):
             unmounted.append(device)
     return unmounted
@@ -196,7 +196,7 @@ def mount_holder(device, filter=None, prompt=None):
         logger.debug('skipping locked or non-luks device %s' % (device,))
         return False
     holder_path = device.luks_cleartext_holder
-    holder = udiskie.device.Device(device.bus, holder_path)
+    holder = udiskie.udisks.Device(device.bus, holder_path)
     return add_device(device, filter=filter, prompt=prompt)
 
 def lock_slave(device):
@@ -212,7 +212,7 @@ def lock_slave(device):
         logger.debug('skipping non-luks-cleartext device %s' % (device,))
         return False
     slave_path = device.luks_cleartext_slave
-    slave = udiskie.device.Device(device.bus, slave_path)
+    slave = udiskie.udisks.Device(device.bus, slave_path)
     if slave.is_luks_cleartext_slave:
         return False
     return lock_device(slave)
@@ -229,7 +229,7 @@ def mount(path, bus=None, filter=None, prompt=None):
     """
     logger = logging.getLogger('udiskie.mount.unmount')
     bus = bus or dbus.SystemBus()
-    device = udiskie.device.get_device(bus, path)
+    device = udiskie.udisks.get_device(bus, path)
     if device:
         logger.debug('found device owning "%s": "%s"' % (path, device))
         if add_device(device, filter=filter, prompt=prompt):
@@ -247,7 +247,7 @@ def unmount(path, bus=None):
     """
     logger = logging.getLogger('udiskie.mount.unmount')
     bus = bus or dbus.SystemBus()
-    device = udiskie.device.get_device(bus, path)
+    device = udiskie.udisks.get_device(bus, path)
     if device:
         logger.debug('found device owning "%s": "%s"' % (path, device))
         if remove_device(device):
