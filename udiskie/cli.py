@@ -93,7 +93,7 @@ def mount(args, allow_daemon=False):
 
     # mount all present devices
     if options.all:
-        mounter.mount_present_devices()
+        mounter.mount_all()
 
     # only mount the desired devices
     elif len(posargs) > 0:
@@ -104,7 +104,7 @@ def mount(args, allow_daemon=False):
 
     # run in daemon mode
     elif run_daemon:
-        mounter.mount_present_devices()
+        mounter.mount_all()
         return daemon.run()
 
     # print command line options
