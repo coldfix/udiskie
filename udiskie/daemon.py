@@ -14,8 +14,6 @@ import dbus
 
 import sys
 
-from udiskie.udisks import Device, get_all_handleable
-
 
 class DeviceState:
     """
@@ -46,13 +44,14 @@ class Daemon:
     `disconnect` can be used to add or remove event handlers.
 
     """
-    def __init__(self, bus):
+    def __init__(self, bus, udisks):
         """
         Initialize object and start listening to udisks events.
         """
         self.log = logging.getLogger('udiskie.daemon.Daemon')
         self.bus = bus
         self.state = {}
+        self.udisks = udisks
 
         self.event_handlers = {
             'device_added': [],
@@ -66,7 +65,7 @@ class Daemon:
             'device_changed': [self.on_device_changed]
         }
 
-        for device in get_all_handleable(bus):
+        for device in self.udisks.get_all_handleable(bus):
             self._store_device_state(device)
 
         self.bus.add_signal_receiver(
@@ -121,7 +120,7 @@ class Daemon:
     # udisks event listeners
     def _device_added(self, device_name):
         try:
-            udevice = Device(self.bus, device_name)
+            udevice = self.udisks.Device(self.bus, device_name)
             if not udevice.is_handleable:
                 return
             self._store_device_state(udevice)
@@ -140,7 +139,7 @@ class Daemon:
 
     def _device_changed(self, device_name):
         try:
-            udevice = Device(self.bus, device_name)
+            udevice = self.udisks.Device(self.bus, device_name)
             if not udevice.is_handleable:
                 return
             old_state = self._get_device_state(udevice)
