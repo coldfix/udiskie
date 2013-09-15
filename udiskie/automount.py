@@ -52,7 +52,7 @@ class AutoMounter:
             self.mounter.add_device(udiskie_device)
         else:
             media_added = False
-            if udiskie_device.has_media() and not last_state.has_media:
+            if udiskie_device.has_media and not last_state.has_media:
                 media_added = True
 
             if media_added and not last_state.mounted:
@@ -63,8 +63,8 @@ class AutoMounter:
 
 
     def _store_device_state(self, device):
-        state = DeviceState(device.is_mounted(),
-                            device.has_media())
+        state = DeviceState(device.is_mounted,
+                            device.has_media)
         self.last_device_state[device.device_path] = state
 
     def _remove_device_state(self, device):

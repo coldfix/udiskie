@@ -53,14 +53,14 @@ class Mounter:
         The special value `None` means unknown/unreliable.
 
         """
-        if not device.is_handleable() or not device.is_filesystem():
+        if not device.is_handleable or not device.is_filesystem:
             self.log.debug('skipping unhandled device %s' % (device,))
             return False
-        if device.is_mounted():
+        if device.is_mounted:
             self.log.debug('skipping mounted device %s' % (device,))
             return False
 
-        fstype = str(device.id_type())
+        fstype = str(device.id_type)
         options = self.filters.get_mount_options(device)
 
         S = 'attempting to mount device %s (%s:%s)'
@@ -74,8 +74,8 @@ class Mounter:
                                                 device, dbus_err))
             return None
 
-        mount_paths = ', '.join(device.mount_paths())
-        self.notify('mount')(device.device_file(), mount_paths)
+        mount_paths = ', '.join(device.mount_paths)
+        self.notify('mount')(device.device_file, mount_paths)
 
         return True
 
@@ -87,10 +87,10 @@ class Mounter:
         The special value `None` means unknown/unreliable.
 
         """
-        if not device.is_handleable() or not device.is_crypto():
+        if not device.is_handleable or not device.is_crypto:
             self.log.debug('skipping unhandled device %s' % (device,))
             return False
-        if device.is_unlocked():
+        if device.is_unlocked:
             self.log.debug('skipping unlocked device %s' % (device,))
             return False
 
@@ -107,25 +107,25 @@ class Mounter:
             device.unlock(password, [])
             holder_dev = udiskie.device.Device(
                     self.bus,
-                    device.luks_cleartext_holder())
-            holder_path = holder_dev.device_file()
+                    device.luks_cleartext_holder)
+            holder_path = holder_dev.device_file
             self.log.info('unlocked device %s on %s' % (device, holder_path))
         except dbus.exceptions.DBusException, dbus_err:
             self.log.error('failed to unlock device %s:\n%s'
                                         % (device, dbus_err))
             return None
 
-        self.notify('unlock')(device.device_file())
+        self.notify('unlock')(device.device_file)
         return True
 
     def add_device(self, device):
         """Mount or unlock the device depending on its type."""
-        if not device.is_handleable():
+        if not device.is_handleable:
             self.log.debug('skipping unhandled device %s' % (device,))
             return False
-        if device.is_filesystem():
+        if device.is_filesystem:
             return self.mount_device(device)
-        elif device.is_crypto():
+        elif device.is_crypto:
             return self.unlock_device(device)
 
     def mount_present_devices(self):

@@ -39,18 +39,23 @@ class Device:
     def __str__(self):
         return self.device_path
 
+    # properties
+    @property
     def partition_slave(self):
         """Get the partition slave."""
         return self.property.PartitionSlave
 
+    @property
     def is_partition_table(self):
         """Check if the device is a partition table."""
         return self.property.DeviceIsPartitionTable
 
+    @property
     def is_systeminternal(self):
         """Check if the device is internal."""
         return self.property.DeviceIsSystemInternal
 
+    @property
     def is_handleable(self):
         """
         Should this device be handled by udiskie?
@@ -59,64 +64,83 @@ class Device:
         filesystem or the device is a LUKS encrypted volume.
 
         """
-        return (self.is_filesystem() or self.is_crypto()) and not self.is_systeminternal()
+        return (self.is_filesystem or self.is_crypto) and not self.is_systeminternal
 
+    @property
     def is_mounted(self):
         """Check if the device is mounted."""
         return self.property.DeviceIsMounted
 
+    @property
     def is_unlocked(self):
         """Check if device is already unlocked."""
-        return self.is_luks() and self.luks_cleartext_holder()
+        return self.is_luks and self.luks_cleartext_holder
 
+    @property
     def mount_paths(self):
         raw_paths = self.property.DeviceMountPaths
         return [os.path.normpath(path) for path in raw_paths]
 
+    @property
     def device_file(self):
         return os.path.normpath(self.property.DeviceFile)
 
+    @property
     def is_filesystem(self):
-        return self.property.IdUsage == 'filesystem'
+        return self.id_usage == 'filesystem'
 
+    @property
     def is_crypto(self):
-        return self.property.IdUsage == 'crypto'
+        return self.id_usage == 'crypto'
 
+    @property
     def is_luks(self):
         return self.property.DeviceIsLuks
 
+    @property
     def is_luks_cleartext(self):
         """Check whether this is a luks cleartext device."""
         return self.property.DeviceIsLuksCleartext
 
+    @property
     def luks_cleartext_slave(self):
         """Get luks crypto device."""
         return self.property.LuksCleartextSlave
 
+    @property
     def luks_cleartext_holder(self):
         """Get unlocked luks cleartext device."""
         return self.property.LuksHolder
 
+    @property
     def is_luks_cleartext_slave(self):
         """Check whether the luks device is currently in use."""
-        if not self.is_luks():
+        if not self.is_luks:
             return False
         for device in get_all(self.bus):
-            if (not device.is_filesystem() or device.is_mounted()) and (
-                    device.is_luks_cleartext() and
-                    device.luks_cleartext_slave() == self.device_path):
+            if (not device.is_filesystem or device.is_mounted) and (
+                    device.is_luks_cleartext and
+                    device.luks_cleartext_slave == self.device_path):
                 return True
         return False
 
+    @property
     def has_media(self):
         return self.property.DeviceIsMediaAvailable
 
+    @property
     def id_type(self):
         return self.property.IdType
 
+    @property
+    def id_usage(self):
+        return self.property.IdUsage
+
+    @property
     def id_uuid(self):
         return self.property.IdUuid
 
+    # methods
     def mount(self, filesystem, options):
         self.method.FilesystemMount(filesystem, options)
 
@@ -141,9 +165,9 @@ def get_all(bus):
 def get_device(bus, path):
     logger = logging.getLogger('udiskie.device.get_device')
     for device in get_all(bus):
-        if os.path.samefile(path, device.device_file()):
+        if os.path.samefile(path, device.device_file):
             return device
-        for p in device.mount_paths():
+        for p in device.mount_paths:
             if os.path.samefile(path, p):
                 return device
     logger.warn('Device not found: %s' % path)
