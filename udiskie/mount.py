@@ -4,28 +4,17 @@ Udiskie mount utilities.
 __all__ = ['Mounter']
 
 import logging
-import os
 import dbus
 
-try:
-    from xdg.BaseDirectory import xdg_config_home
-except ImportError:
-    xdg_config_home = os.path.expanduser('~/.config')
-
 import udiskie.device
-import udiskie.match
 
 class Mounter:
-    CONFIG_PATH = 'udiskie/filters.conf'
 
-    def __init__(self, bus, filter_file=None, prompt=None):
+    def __init__(self, bus, filter=None, prompt=None):
         self.log = logging.getLogger('udiskie.mount.Mounter')
-        self.bus = bus
+        self.bus = bus or dbus.SystemBus()
         self.prompt = prompt
-
-        if not filter_file:
-            filter_file = os.path.join(xdg_config_home, self.CONFIG_PATH)
-        self.filters = udiskie.match.FilterMatcher((filter_file,))
+        self.filter = filter
 
     def mount_device(self, device):
         """
@@ -43,7 +32,7 @@ class Mounter:
             return False
 
         fstype = str(device.id_type)
-        options = self.filters.get_mount_options(device)
+        options = self.filter.get_mount_options(device) if self.filter else []
 
         S = 'attempting to mount device %s (%s:%s)'
         self.log.info(S % (device, fstype, options))
@@ -57,7 +46,6 @@ class Mounter:
             return None
 
         mount_paths = ', '.join(device.mount_paths)
-
         return True
 
     def unlock_device(self, device):

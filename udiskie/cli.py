@@ -1,7 +1,10 @@
 """
 Udiskie CLI logic.
 """
-__all__ = ['mount_options', 'mount', 'umount_options', 'umount']
+__all__ = [
+    'load_filter',
+    'mount_program_options', 'mount',
+    'umount_program_options', 'umount']
 
 import warnings
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
@@ -11,6 +14,7 @@ import os
 import logging
 import dbus
 
+import udiskie.match
 import udiskie.mount
 import udiskie.umount
 import udiskie.device
@@ -20,7 +24,20 @@ import udiskie.automount
 import udiskie.daemon
 
 
-def mount_options():
+CONFIG_PATH = 'udiskie/filters.conf'
+
+def load_filter(filter_file=None):
+    """Load mount option filters."""
+    try:
+        from xdg.BaseDirectory import xdg_config_home
+    except ImportError:
+        xdg_config_home = os.path.expanduser('~/.config')
+    if not filter_file:
+        filter_file = os.path.join(xdg_config_home, CONFIG_PATH)
+    return udiskie.match.FilterMatcher((filter_file,))
+
+
+def mount_program_options():
     """
     Return the mount option parser for the mount command.
     """
@@ -48,7 +65,7 @@ def mount(args, allow_daemon=False):
     """
     Execute the mount/daemon command.
     """
-    parser = mount_options()
+    parser = mount_program_options()
     options, posargs = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
     run_daemon = allow_daemon and not options.all and len(posargs) == 0
@@ -61,8 +78,8 @@ def mount(args, allow_daemon=False):
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
-    mounter = udiskie.mount.Mounter(
-            bus=bus, filter_file=options.filters, prompt=prompt)
+    filter = load_filter(options.filters)
+    mounter = udiskie.mount.Mounter(bus=bus, filter=filter, prompt=prompt)
 
     # run udiskie daemon if needed
     if run_daemon:
@@ -95,8 +112,7 @@ def mount(args, allow_daemon=False):
         parser.print_usage()
 
 
-
-def umount_options():
+def umount_program_options():
     """
     Return the command line option parser for the umount command.
     """
@@ -113,12 +129,13 @@ def umount_options():
                       help='suppress popup notifications')
     return parser
 
+
 def umount(args):
     """
     Execute the umount command.
     """
     logger = logging.getLogger('udiskie.umount.cli')
-    (options, posargs) = umount_options().parse_args(args)
+    (options, posargs) = umount_program_options().parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
 
     if options.all:
