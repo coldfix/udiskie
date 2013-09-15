@@ -2,6 +2,12 @@
 Udisks wrapper utilities.
 
 These act as a convenience abstraction layer on the udisks dbus service.
+Requires Udisks 1.0.5 as described here:
+
+    http://udisks.freedesktop.org/docs/1.0.5/
+
+Note that (as this completely wraps the udisks dbus API) replacing this
+module will let you support Udisks2 or maybe even other services.
 
 """
 __all__ = ['Device', 'get_all', 'get_all_handleable', 'get_device']
