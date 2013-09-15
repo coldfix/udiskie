@@ -16,11 +16,11 @@ import dbus
 
 import udiskie.match
 import udiskie.mount
-import udiskie.device
 import udiskie.prompt
 import udiskie.notify
 import udiskie.automount
 import udiskie.daemon
+import udiskie.common
 
 
 CONFIG_PATH = 'udiskie/filters.conf'
@@ -75,14 +75,17 @@ def mount(args, allow_daemon=False):
         DBusGMainLoop(set_as_default=True)
     bus = dbus.SystemBus()
 
+    # for now: just use the default udisks
+    udisks = udiskie.common.get_udisks()
+
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
     filter = load_filter(options.filters)
-    mounter = udiskie.mount.Mounter(bus=bus, filter=filter, prompt=prompt)
+    mounter = udiskie.mount.Mounter(bus=bus, filter=filter, prompt=prompt, udisks=udisks)
 
     # run udiskie daemon if needed
     if run_daemon:
-        daemon = udiskie.daemon.Daemon(bus)
+        daemon = udiskie.daemon.Daemon(bus, udisks=udisks)
     if run_daemon and not options.suppress_notify:
         notify = udiskie.notify.Notify('udiskie.mount')
         notify.connect(daemon)
@@ -147,16 +150,19 @@ def umount(args):
         parser.print_usage()
         return 1
 
+    # for now: use udisks v1 service
+    udisks = udiskie.common.get_udisks()
+
     if options.all:
-        unmounted = udiskie.mount.unmount_all(bus=bus)
+        unmounted = udiskie.mount.unmount_all(bus=bus, udisks=udisks)
     else:
         unmounted = []
         for path in posargs:
-            device = udiskie.mount.unmount(os.path.normpath(path), bus=bus)
+            device = udiskie.mount.unmount(os.path.normpath(path), bus=bus, udisks=udisks)
             if device:
                 unmounted.append(device)
 
     # automatically lock unused luks slaves of unmounted devices
     for device in unmounted:
-        udiskie.mount.lock_slave(device)
+        udiskie.mount.lock_slave(device, udisks=udisks)
 

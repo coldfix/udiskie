@@ -1,11 +1,16 @@
 """
 Common utilities.
 """
-__all__ = ['Properties']
+__all__ = ['Properties', 'get_udisks', 'default_udisks']
 import dbus
 
-
 DBUS_PROPS_INTERFACE = 'org.freedesktop.DBus.Properties'
+default_udisks = 'udiskie.udisks'
+
+
+def get_udisks():
+    import importlib
+    return importlib.import_module(default_udisks)
 
 class Properties:
     """

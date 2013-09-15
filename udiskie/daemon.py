@@ -12,7 +12,7 @@ import gobject
 import logging
 import dbus
 
-from udiskie.device import Device, get_all_handleable
+import sys
 
 
 class DeviceState:
@@ -44,13 +44,14 @@ class Daemon:
     `disconnect` can be used to add or remove event handlers.
 
     """
-    def __init__(self, bus):
+    def __init__(self, bus, udisks):
         """
         Initialize object and start listening to udisks events.
         """
         self.log = logging.getLogger('udiskie.daemon.Daemon')
         self.bus = bus
         self.state = {}
+        self.udisks = udisks
 
         self.event_handlers = {
             'device_added': [],
@@ -64,7 +65,7 @@ class Daemon:
             'device_changed': [self.on_device_changed]
         }
 
-        for device in get_all_handleable(bus):
+        for device in self.udisks.get_all_handleable(bus):
             self._store_device_state(device)
 
         self.bus.add_signal_receiver(
@@ -119,30 +120,33 @@ class Daemon:
     # udisks event listeners
     def _device_added(self, device_name):
         try:
-            udevice = Device(self.bus, device_name)
+            udevice = self.udisks.Device(self.bus, device_name)
             if not udevice.is_handleable:
                 return
             self._store_device_state(udevice)
             self.trigger('device_added', udevice)
-        except dbus.exceptions.DBusException, err:
+        except dbus.exceptions.DBusException:
+            err = sys.exc_info()[1]
             self.log.error('%s(%s): %s' % ('device_added', device_name, err))
 
     def _device_removed(self, device_name):
         try:
             self.trigger('device_removed', device_name)
             self._remove_device_state(device_name)
-        except dbus.exceptions.DBusException, err:
+        except dbus.exceptions.DBusException:
+            err = sys.exc_info()[1]
             self.log.error('%s(%s): %s' % ('device_removed', device_name, err))
 
     def _device_changed(self, device_name):
         try:
-            udevice = Device(self.bus, device_name)
+            udevice = self.udisks.Device(self.bus, device_name)
             if not udevice.is_handleable:
                 return
             old_state = self._get_device_state(udevice)
             new_state = self._store_device_state(udevice)
             self.trigger('device_changed', udevice, old_state, new_state)
-        except dbus.exceptions.DBusException, err:
+        except dbus.exceptions.DBusException:
+            err = sys.exc_info()[1]
             self.log.error('%s(%s): %s' % ('device_changed', device_name, err))
 
     # internal state keeping
