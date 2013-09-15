@@ -32,16 +32,11 @@ class Mounter:
     def __init__(self, bus, filter_file=None, prompt=None):
         self.log = logging.getLogger('udiskie.mount.Mounter')
         self.bus = bus
+        self.prompt = prompt
 
         if not filter_file:
             filter_file = os.path.join(xdg_config_home, self.CONFIG_PATH)
         self.filters = udiskie.match.FilterMatcher((filter_file,))
-
-        if not prompt:
-            self.prompt = lambda text, title: None
-        else:
-            self.prompt = prompt
-
 
     def mount_device(self, device):
         """
@@ -92,7 +87,7 @@ class Mounter:
             return False
 
         # prompt user for password
-        password = self.prompt(
+        password = self.prompt and self.prompt(
                 'Enter password for %s:' % (device,),
                 'Unlock encrypted device')
         if password is None:
