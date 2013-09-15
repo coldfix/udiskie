@@ -111,7 +111,10 @@ def mount(args, allow_daemon=False):
     # run in daemon mode
     elif run_daemon:
         mounter.mount_all()
-        return daemon.run()
+        try:
+            return daemon.run()
+        except KeyboardInterrupt:
+            pass
 
     # print command line options
     else:
