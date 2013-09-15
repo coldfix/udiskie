@@ -12,6 +12,8 @@ import gobject
 import logging
 import dbus
 
+import sys
+
 from udiskie.device import Device, get_all_handleable
 
 
@@ -124,14 +126,16 @@ class Daemon:
                 return
             self._store_device_state(udevice)
             self.trigger('device_added', udevice)
-        except dbus.exceptions.DBusException, err:
+        except dbus.exceptions.DBusException:
+            err = sys.exc_info()[1]
             self.log.error('%s(%s): %s' % ('device_added', device_name, err))
 
     def _device_removed(self, device_name):
         try:
             self.trigger('device_removed', device_name)
             self._remove_device_state(device_name)
-        except dbus.exceptions.DBusException, err:
+        except dbus.exceptions.DBusException:
+            err = sys.exc_info()[1]
             self.log.error('%s(%s): %s' % ('device_removed', device_name, err))
 
     def _device_changed(self, device_name):
@@ -142,7 +146,8 @@ class Daemon:
             old_state = self._get_device_state(udevice)
             new_state = self._store_device_state(udevice)
             self.trigger('device_changed', udevice, old_state, new_state)
-        except dbus.exceptions.DBusException, err:
+        except dbus.exceptions.DBusException:
+            err = sys.exc_info()[1]
             self.log.error('%s(%s): %s' % ('device_changed', device_name, err))
 
     # internal state keeping

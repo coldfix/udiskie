@@ -10,6 +10,7 @@ __all__ = [
     'lock_luks_slave',
     'Mounter']
 
+import sys
 import logging
 import dbus
 
@@ -42,9 +43,9 @@ def mount_device(device, filter=None):
     try:
         device.mount(fstype, options)
         log.info('mounted device %s' % (device,))
-    except dbus.exceptions.DBusException, dbus_err:
-        log.error('failed to mount device %s: %s' % (
-                                            device, dbus_err))
+    except dbus.exceptions.DBusException:
+        err = sys.exc_info()[1]
+        log.error('failed to mount device %s: %s' % (device, err))
         return None
 
     mount_paths = ', '.join(device.mount_paths)
@@ -69,9 +70,9 @@ def unmount_device(device):
     try:
         device.unmount()
         logger.info('unmounted device %s' % (device,))
-    except dbus.exceptions.DBusException, dbus_err:
-        logger.error('failed to unmount device %s: %s' % (device,
-                                                            dbus_err))
+    except dbus.exceptions.DBusException:
+        err = sys.exc_info()[1]
+        logger.error('failed to unmount device %s: %s' % (device, err))
         return None
     return True
 
@@ -109,9 +110,9 @@ def unlock_device(device, prompt):
                 device.luks_cleartext_holder)
         holder_path = holder_dev.device_file
         log.info('unlocked device %s on %s' % (device, holder_path))
-    except dbus.exceptions.DBusException, dbus_err:
-        log.error('failed to unlock device %s:\n%s'
-                                    % (device, dbus_err))
+    except dbus.exceptions.DBusException:
+        err = sys.exc_info()[1]
+        log.error('failed to unlock device %s:\n%s' % (device, err))
         return None
     return True
 
@@ -134,8 +135,9 @@ def lock_device(device):
     try:
         device.lock([])
         logger.info('locked device %s' % (device,))
-    except dbus.exceptions.DBusException, dbus_err:
-        logger.error('failed to lock device %s: %s' % (device, dbus_err))
+    except dbus.exceptions.DBusException:
+        err = sys.exc_info()[1]
+        logger.error('failed to lock device %s: %s' % (device, err))
         return None
     return True
 
