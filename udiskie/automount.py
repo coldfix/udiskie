@@ -1,3 +1,8 @@
+"""
+Udiskie automounter daemon.
+"""
+__all__ = ['AutoMounter']
+
 import logging
 
 class AutoMounter:

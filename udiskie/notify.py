@@ -1,3 +1,8 @@
+"""
+Udiskie notification daemon.
+"""
+__all__ = ['Notify']
+
 import pynotify
 import gio
 

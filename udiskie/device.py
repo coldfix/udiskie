@@ -1,3 +1,11 @@
+"""
+Udisks wrapper utilities.
+
+These act as a convenience abstraction layer on the udisks dbus service.
+
+"""
+__all__ = ['Device', 'get_all', 'get_all_handleable', 'get_device']
+
 import logging
 import os
 import dbus

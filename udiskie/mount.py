@@ -1,3 +1,8 @@
+"""
+Udiskie mount utilities.
+"""
+__all__ = ['Mounter', 'option_parser', 'cli']
+
 import warnings
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
