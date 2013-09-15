@@ -1,7 +1,10 @@
 """
 Udiskie CLI logic.
 """
-__all__ = ['mount_options', 'mount', 'umount_options', 'umount']
+__all__ = [
+    'load_filter',
+    'mount_program_options', 'mount',
+    'umount_program_options', 'umount']
 
 import warnings
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
@@ -11,8 +14,8 @@ import os
 import logging
 import dbus
 
+import udiskie.match
 import udiskie.mount
-import udiskie.umount
 import udiskie.device
 import udiskie.prompt
 import udiskie.notify
@@ -20,7 +23,20 @@ import udiskie.automount
 import udiskie.daemon
 
 
-def mount_options():
+CONFIG_PATH = 'udiskie/filters.conf'
+
+def load_filter(filter_file=None):
+    """Load mount option filters."""
+    try:
+        from xdg.BaseDirectory import xdg_config_home
+    except ImportError:
+        xdg_config_home = os.path.expanduser('~/.config')
+    if not filter_file:
+        filter_file = os.path.join(xdg_config_home, CONFIG_PATH)
+    return udiskie.match.FilterMatcher((filter_file,))
+
+
+def mount_program_options():
     """
     Return the mount option parser for the mount command.
     """
@@ -48,7 +64,7 @@ def mount(args, allow_daemon=False):
     """
     Execute the mount/daemon command.
     """
-    parser = mount_options()
+    parser = mount_program_options()
     options, posargs = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
     run_daemon = allow_daemon and not options.all and len(posargs) == 0
@@ -61,8 +77,8 @@ def mount(args, allow_daemon=False):
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
-    mounter = udiskie.mount.Mounter(
-            bus=bus, filter_file=options.filters, prompt=prompt)
+    filter = load_filter(options.filters)
+    mounter = udiskie.mount.Mounter(bus=bus, filter=filter, prompt=prompt)
 
     # run udiskie daemon if needed
     if run_daemon:
@@ -76,27 +92,31 @@ def mount(args, allow_daemon=False):
 
     # mount all present devices
     if options.all:
-        mounter.mount_present_devices()
+        mounter.mount_all()
 
     # only mount the desired devices
     elif len(posargs) > 0:
+        mounted = []
         for path in posargs:
-            device = udiskie.device.get_device(mounter.bus, path)
+            device = mounter.mount(path)
             if device:
-                mounter.add_device(device)
+                mounted.append(device)
+        # automatically mount luks holders
+        for device in mounted:
+            mounter.mount_holder(device)
 
     # run in daemon mode
     elif run_daemon:
-        mounter.mount_present_devices()
+        mounter.mount_all()
         return daemon.run()
 
     # print command line options
     else:
         parser.print_usage()
+        return 1
 
 
-
-def umount_options():
+def umount_program_options():
     """
     Return the command line option parser for the umount command.
     """
@@ -113,28 +133,30 @@ def umount_options():
                       help='suppress popup notifications')
     return parser
 
+
 def umount(args):
     """
     Execute the umount command.
     """
-    logger = logging.getLogger('udiskie.umount.cli')
-    (options, posargs) = umount_options().parse_args(args)
+    parser = umount_program_options()
+    (options, posargs) = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
+    bus = dbus.SystemBus()
+
+    if len(posargs) == 0 and not options.all:
+        parser.print_usage()
+        return 1
 
     if options.all:
-        unmounted = udiskie.umount.unmount_all()
+        unmounted = udiskie.mount.unmount_all(bus=bus)
     else:
-        if len(posargs) == 0:
-            logger.warn('No devices provided for unmount')
-            return 1
-
         unmounted = []
         for path in posargs:
-            device = udiskie.umount.unmount(os.path.normpath(path))
+            device = udiskie.mount.unmount(os.path.normpath(path), bus=bus)
             if device:
                 unmounted.append(device)
 
     # automatically lock unused luks slaves of unmounted devices
     for device in unmounted:
-        udiskie.umount.lock_slave(device)
+        udiskie.mount.lock_slave(device)
 
