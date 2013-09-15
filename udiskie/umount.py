@@ -20,10 +20,10 @@ def unmount_device(device, notify):
 
     """
     logger = logging.getLogger('udiskie.umount.unmount_device')
-    if not device.is_handleable() or not device.is_filesystem():
+    if not device.is_handleable or not device.is_filesystem:
         logger.debug('skipping unhandled device %s' % (device,))
         return False
-    if not device.is_mounted():
+    if not device.is_mounted:
         logger.debug('skipping unmounted device %s' % (device,))
         return False
     try:
@@ -33,7 +33,7 @@ def unmount_device(device, notify):
         logger.error('failed to unmount device %s: %s' % (device,
                                                             dbus_err))
         return None
-    notify('umount')(device.device_file())
+    notify('umount')(device.device_file)
     return True
 
 def lock_device(device, notify):
@@ -46,10 +46,10 @@ def lock_device(device, notify):
 
     """
     logger = logging.getLogger('udiskie.umount.lock_device')
-    if not device.is_handleable() or not device.is_crypto():
+    if not device.is_handleable or not device.is_crypto:
         logger.debug('skipping unhandled device %s' % (device,))
         return False
-    if not device.is_unlocked():
+    if not device.is_unlocked:
         logger.debug('skipping locked device %s' % (device,))
         return False
     try:
@@ -58,18 +58,18 @@ def lock_device(device, notify):
     except dbus.exceptions.DBusException, dbus_err:
         logger.error('failed to lock device %s: %s' % (device, dbus_err))
         return None
-    notify('lock')(device.device_file())
+    notify('lock')(device.device_file)
     return True
 
 def remove_device(device, notify):
     """Unmount or lock the device depending on device type."""
     logger = logging.getLogger('udiskie.umount.remove_device')
-    if not device.is_handleable():
+    if not device.is_handleable:
         logger.debug('skipping unhandled device %s' % (device,))
         return False
-    if device.is_filesystem():
+    if device.is_filesystem:
         return unmount_device(device, notify)
-    elif device.is_crypto():
+    elif device.is_crypto:
         return lock_device(device, notify)
 
 def lock_slave(device, notify):
@@ -81,12 +81,12 @@ def lock_slave(device, notify):
 
     """
     logger = logging.getLogger('udiskie.umount.lock_slave')
-    if not device.is_luks_cleartext():
+    if not device.is_luks_cleartext:
         logger.debug('skipping non-luks-cleartext device %s' % (device,))
         return False
-    slave_path = device.luks_cleartext_slave()
+    slave_path = device.luks_cleartext_slave
     slave = udiskie.device.Device(device.bus, slave_path)
-    if slave.is_luks_cleartext_slave():
+    if slave.is_luks_cleartext_slave:
         return False
     return lock_device(slave, notify)
 

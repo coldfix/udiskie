@@ -81,8 +81,8 @@ class FilterMatcher:
 
     def get_mount_options(self, device):
         device_info = {
-            'fstype' : device.id_type(),
-            'uuid' : device.id_uuid().lower()
+            'fstype' : device.id_type,
+            'uuid' : device.id_uuid.lower()
         }
 
         mount_options = set()
