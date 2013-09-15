@@ -16,7 +16,6 @@ import dbus
 
 import udiskie.match
 import udiskie.mount
-import udiskie.umount
 import udiskie.device
 import udiskie.prompt
 import udiskie.notify
@@ -110,6 +109,7 @@ def mount(args, allow_daemon=False):
     # print command line options
     else:
         parser.print_usage()
+        return 1
 
 
 def umount_program_options():
@@ -134,24 +134,25 @@ def umount(args):
     """
     Execute the umount command.
     """
-    logger = logging.getLogger('udiskie.umount.cli')
-    (options, posargs) = umount_program_options().parse_args(args)
+    parser = umount_program_options()
+    (options, posargs) = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
+    bus = dbus.SystemBus()
+
+    if len(posargs) == 0 and not options.all:
+        parser.print_usage()
+        return 1
 
     if options.all:
-        unmounted = udiskie.umount.unmount_all()
+        unmounted = udiskie.mount.unmount_all(bus=bus)
     else:
-        if len(posargs) == 0:
-            logger.warn('No devices provided for unmount')
-            return 1
-
         unmounted = []
         for path in posargs:
-            device = udiskie.umount.unmount(os.path.normpath(path))
+            device = udiskie.mount.unmount(os.path.normpath(path), bus=bus)
             if device:
                 unmounted.append(device)
 
     # automatically lock unused luks slaves of unmounted devices
     for device in unmounted:
-        udiskie.umount.lock_slave(device)
+        udiskie.mount.lock_slave(device)
 

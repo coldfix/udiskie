@@ -2,8 +2,12 @@
 Udiskie mount utilities.
 """
 __all__ = [
-    'mount_device', 'unlock_device', 'add_device',
-    'mount_all',
+    'mount_device', 'unmount_device',
+    'unlock_device', 'lock_device',
+    'add_device', 'remove_device',
+    'mount_all', 'unmount_all',
+    'unmount',
+    'lock_luks_slave',
     'Mounter']
 
 import logging
@@ -12,6 +16,7 @@ import dbus
 import udiskie.device
 
 
+# mount/unmount
 def mount_device(device, filter=None):
     """
     Mount the device if not already mounted.
@@ -45,6 +50,33 @@ def mount_device(device, filter=None):
     mount_paths = ', '.join(device.mount_paths)
     return True
 
+def unmount_device(device):
+    """
+    Unmount a Device.
+
+    Checks to make sure the device is unmountable and then unmounts.
+    Return value indicates whether an action was performed successfully.
+    The special value `None` means unknown/unreliable.
+
+    """
+    logger = logging.getLogger('udiskie.mount.unmount_device')
+    if not device.is_handleable or not device.is_filesystem:
+        logger.debug('skipping unhandled device %s' % (device,))
+        return False
+    if not device.is_mounted:
+        logger.debug('skipping unmounted device %s' % (device,))
+        return False
+    try:
+        device.unmount()
+        logger.info('unmounted device %s' % (device,))
+    except dbus.exceptions.DBusException, dbus_err:
+        logger.error('failed to unmount device %s: %s' % (device,
+                                                            dbus_err))
+        return None
+    return True
+
+
+# unlock/lock (LUKS)
 def unlock_device(device, prompt):
     """
     Unlock the device if not already unlocked.
@@ -83,6 +115,32 @@ def unlock_device(device, prompt):
         return None
     return True
 
+def lock_device(device):
+    """
+    Lock device.
+
+    Checks to make sure the device is lockable, then locks.
+    Return value indicates whether an action was performed successfully.
+    The special value `None` means unknown/unreliable.
+
+    """
+    logger = logging.getLogger('udiskie.mount.lock_device')
+    if not device.is_handleable or not device.is_crypto:
+        logger.debug('skipping unhandled device %s' % (device,))
+        return False
+    if not device.is_unlocked:
+        logger.debug('skipping locked device %s' % (device,))
+        return False
+    try:
+        device.lock([])
+        logger.info('locked device %s' % (device,))
+    except dbus.exceptions.DBusException, dbus_err:
+        logger.error('failed to lock device %s: %s' % (device, dbus_err))
+        return None
+    return True
+
+
+# add/remove (unlock/lock or mount/unmount)
 def add_device(device, filter=None, prompt=None):
     """Mount or unlock the device depending on its type."""
     log = logging.getLogger('udiskie.mount.add_device')
@@ -94,13 +152,75 @@ def add_device(device, filter=None, prompt=None):
     elif device.is_crypto:
         return unlock_device(device, prompt)
 
+def remove_device(device):
+    """Unmount or lock the device depending on device type."""
+    logger = logging.getLogger('udiskie.mount.remove_device')
+    if not device.is_handleable:
+        logger.debug('skipping unhandled device %s' % (device,))
+        return False
+    if device.is_filesystem:
+        return unmount_device(device)
+    elif device.is_crypto:
+        return lock_device(device)
+
+# mount_all/unmount_all
 def mount_all(bus=None, filter=None, prompt=None):
     """Mount handleable devices that are already present."""
     bus = bus or dbus.SystemBus()
     for device in udiskie.device.get_all_handleable(bus):
         add_device(device, filter, prompt)
 
+def unmount_all(bus=None):
+    """Unmount all filesystems handleable by udiskie."""
+    unmounted = []
+    bus = bus or dbus.SystemBus()
+    for device in udiskie.device.get_all_handleable(bus):
+        if unmount_device(device):
+            unmounted.append(device)
+    return unmounted
 
+
+# lock a slave
+def lock_slave(device):
+    """
+    Lock the luks slave of this device.
+
+    Will not lock the slave if it is still used by any mounted file system.
+    Return value indicates success.
+
+    """
+    logger = logging.getLogger('udiskie.mount.lock_slave')
+    if not device.is_luks_cleartext:
+        logger.debug('skipping non-luks-cleartext device %s' % (device,))
+        return False
+    slave_path = device.luks_cleartext_slave
+    slave = udiskie.device.Device(device.bus, slave_path)
+    if slave.is_luks_cleartext_slave:
+        return False
+    return lock_device(slave)
+
+
+# mount/unmount by path
+def unmount(path, bus=None):
+    """
+    Unmount or lock a filesystem
+
+    The filesystem must match the criteria for a filesystem mountable by
+    udiskie.  path is either the physical device node (e.g. /dev/sdb1) or the
+    mount point (e.g. /media/Foo).
+
+    """
+    logger = logging.getLogger('udiskie.mount.unmount')
+    bus = bus or dbus.SystemBus()
+    device = udiskie.device.get_device(bus, path)
+    if device:
+        logger.debug('found device owning "%s": "%s"' % (path, device))
+        if remove_device(device):
+            return device
+    return None
+
+
+# utility class
 class Mounter:
     """
     Mount utility.
@@ -113,22 +233,41 @@ class Mounter:
         self.filter = filter
         self.prompt = prompt
 
+    # mount/unmount
     def mount_device(self, device, filter=None):
         return mount_device(device, filter=filter or self.filter)
+    def unmount_device(self, device):
+        return unmount_device(device)
 
+    # unlock/lock (LUKS)
     def unlock_device(self, device, prompt=None):
         return mount_device(device, filter=prompt or self.prompt)
+    def lock_device(self, device):
+        return lock_device(device)
 
+    # add/remove (unlock/lock or mount/unmount)
     def add_device(self, device, filter=None, prompt=None):
         return add_device(
                 device,
-                filter=filter or self.filter, 
+                filter=filter or self.filter,
                 prompt=prompt or self.prompt)
+    def remove_device(self, device):
+        return remove_device(device)
 
+    # mount_all/unmount_all
     def mount_all(self, filter=None, prompt=None):
         return mount_all(
                 self.bus,
                 filter=filter or self.filter,
                 prompt=prompt or self.prompt)
+    def unmount_all(self):
+        return unmount_all(self.bus)
 
+    # mount/unmount
+    def unmount(self, path):
+        return unmount(path, bus=self.bus)
+
+    # mount_holder/lock_slave
+    def lock_slave(self, device):
+        return lock_slave(device)
 
