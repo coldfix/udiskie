@@ -1,0 +1,7 @@
+*.pyc
+CHANGES
+
+# distutils files
+build/
+dist/
+MANIFEST
