@@ -3,15 +3,9 @@ Udiskie unmount utilities.
 """
 __all__ = [
     'unmount_device', 'lock_device', 'remove_device', 'lock_slave',
-    'unmount', 'unmount_all', 'option_parser', 'cli']
-
-import warnings
-warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
-warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
+    'unmount', 'unmount_all']
 
 import logging
-import os
-
 import dbus
 
 import udiskie.device
@@ -121,40 +115,4 @@ def unmount_all():
         if unmount_device(device):
             unmounted.append(device)
     return unmounted
-
-def option_parser():
-    import optparse
-    parser = optparse.OptionParser()
-    parser.add_option('-a', '--all', action='store_true',
-                      dest='all', default=False,
-                      help='all devices')
-    parser.add_option('-v', '--verbose', action='store_const',
-                      dest='log_level', default=logging.INFO,
-                      const=logging.DEBUG, help='verbose output')
-    parser.add_option('-s', '--suppress', action='store_true',
-                      dest='suppress_notify', default=False,
-                      help='suppress popup notifications')
-    return parser
-
-def cli(args):
-    logger = logging.getLogger('udiskie.umount.cli')
-    (options, posargs) = option_parser().parse_args(args)
-    logging.basicConfig(level=options.log_level, format='%(message)s')
-
-    if options.all:
-        unmounted = unmount_all()
-    else:
-        if len(posargs) == 0:
-            logger.warn('No devices provided for unmount')
-            return 1
-
-        unmounted = []
-        for path in posargs:
-            device = unmount(os.path.normpath(path))
-            if device:
-                unmounted.append(device)
-
-    # automatically lock unused luks slaves of unmounted devices
-    for device in unmounted:
-        lock_slave(device)
 

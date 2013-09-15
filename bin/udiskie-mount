@@ -4,4 +4,5 @@ if __name__ == '__main__':
     import sys
     import udiskie.cli
 
-    sys.exit(udiskie.cli.mount(sys.argv[1:], allow_daemon=True))
+    sys.exit(udiskie.cli.mount(sys.argv[1:], allow_daemon=False))
+
