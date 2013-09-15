@@ -96,10 +96,14 @@ def mount(args, allow_daemon=False):
 
     # only mount the desired devices
     elif len(posargs) > 0:
+        mounted = []
         for path in posargs:
-            device = udiskie.device.get_device(mounter.bus, path)
+            device = mounter.mount(path)
             if device:
-                mounter.add_device(device)
+                mounted.append(device)
+        # automatically mount luks holders
+        for device in mounted:
+            mounter.mount_holder(device)
 
     # run in daemon mode
     elif run_daemon:

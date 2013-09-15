@@ -180,7 +180,23 @@ def unmount_all(bus=None):
     return unmounted
 
 
-# lock a slave
+# mount a holder/lock a slave
+def mount_holder(device, filter=None, prompt=None):
+    """
+    Mount or unlock the holder device of this unlocked LUKS device.
+
+    Will not mount the holder if the device is not unlocked.
+    Return value indicates success
+
+    """
+    logger = logging.getLogger('udiskie.mount.lock_slave')
+    if not device.is_unlocked:
+        logger.debug('skipping locked or non-luks device %s' % (device,))
+        return False
+    holder_path = device.luks_cleartext_holder
+    holder = udiskie.device.Device(device.bus, holder_path)
+    return add_device(device, filter=filter, prompt=prompt)
+
 def lock_slave(device):
     """
     Lock the luks slave of this device.
@@ -201,6 +217,23 @@ def lock_slave(device):
 
 
 # mount/unmount by path
+def mount(path, bus=None, filter=None, prompt=None):
+    """
+    Mount or unlock a device.
+
+    The device must match the criteria for a filesystem mountable or
+    unlockable by udiskie.
+
+    """
+    logger = logging.getLogger('udiskie.mount.unmount')
+    bus = bus or dbus.SystemBus()
+    device = udiskie.device.get_device(bus, path)
+    if device:
+        logger.debug('found device owning "%s": "%s"' % (path, device))
+        if add_device(device, filter=filter, prompt=prompt):
+            return device
+    return None
+
 def unmount(path, bus=None):
     """
     Unmount or lock a filesystem
@@ -264,10 +297,20 @@ class Mounter:
         return unmount_all(self.bus)
 
     # mount/unmount
+    def mount(self, path, filter=None, prompt=None):
+        return mount(
+                path, bus=self.bus,
+                filter=filter or self.filter,
+                prompt=prompt or self.prompt)
     def unmount(self, path):
         return unmount(path, bus=self.bus)
 
     # mount_holder/lock_slave
+    def mount_holder(self, device, filter=None, prompt=None):
+        return mount_holder(
+                device,
+                filter=filter or self.filter,
+                prompt=prompt or self.prompt)
     def lock_slave(self, device):
         return lock_slave(device)
 
