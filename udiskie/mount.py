@@ -23,9 +23,6 @@ import udiskie.notify
 import udiskie.automount
 import udiskie.daemon
 
-from udiskie.common import system_bus
-
-
 class Mounter:
     CONFIG_PATH = 'udiskie/filters.conf'
 
@@ -148,23 +145,24 @@ def cli(args, allow_daemon=False):
     parser = option_parser()
     options, posargs = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
+    run_daemon = allow_daemon and not options.all and len(posargs) == 0
 
     # establish connection to system bus
-    bus = system_bus()
+    if run_daemon:
+        from dbus.mainloop.glib import DBusGMainLoop
+        DBusGMainLoop(set_as_default=True)
+    bus = dbus.SystemBus()
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
     mounter = Mounter(bus=bus, filter_file=options.filters, prompt=prompt)
 
     # run udiskie daemon if needed
-    run_daemon = allow_daemon and not options.all and len(posargs) == 0
     if run_daemon:
         daemon = udiskie.daemon.Daemon(bus)
-
     if run_daemon and not options.suppress_notify:
         notify = udiskie.notify.Notify('udiskie.mount')
         notify.connect(daemon)
-
     if run_daemon:
         automount = udiskie.automount.AutoMounter(mounter)
         automount.connect(daemon)

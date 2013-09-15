@@ -1,7 +1,7 @@
 """
 Common utilities.
 """
-__all__ = ['Properties', 'system_bus']
+__all__ = ['Properties']
 import dbus
 
 
@@ -24,19 +24,4 @@ class Properties:
     def __getattr__(self, property):
         """Retrieve the property via the dbus proxy."""
         return self.__proxy.Get(self.__interface, property)
-
-def system_bus():
-    """
-    Connect to system bus.
-
-    When called for the first time, dbus will be initialized to use a glib
-    mainloop.
-
-    """
-    if not system_bus.initialized:
-        from dbus.mainloop.glib import DBusGMainLoop
-        DBusGMainLoop(set_as_default=True)
-        system_bus.initialized = True
-    return dbus.SystemBus()
-system_bus.initialized = False
 
