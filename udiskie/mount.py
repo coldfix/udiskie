@@ -3,11 +3,8 @@ warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
 import logging
-import optparse
 import os
-
 import dbus
-import gobject
 
 try:
     from xdg.BaseDirectory import xdg_config_home
@@ -19,18 +16,12 @@ import udiskie.match
 import udiskie.notify
 import udiskie.prompt
 
-class DeviceState:
-    def __init__(self, mounted, has_media):
-        self.mounted = mounted
-        self.has_media = has_media
-
 
 class Mounter:
     CONFIG_PATH = 'udiskie/filters.conf'
 
     def __init__(self, bus=None, filter_file=None, notify=None, prompt=None):
         self.log = logging.getLogger('udiskie.mount.Mounter')
-        self.last_device_state = {}
 
         if not bus:
             from dbus.mainloop.glib import DBusGMainLoop
@@ -69,25 +60,22 @@ class Mounter:
             self.log.debug('skipping mounted device %s' % (device,))
             return False
 
+        fstype = str(device.id_type())
+        options = self.filters.get_mount_options(device)
+
+        S = 'attempting to mount device %s (%s:%s)'
+        self.log.info(S % (device, fstype, options))
+
         try:
-            fstype = str(device.id_type())
-            options = self.filters.get_mount_options(device)
+            device.mount(fstype, options)
+            self.log.info('mounted device %s' % (device,))
+        except dbus.exceptions.DBusException, dbus_err:
+            self.log.error('failed to mount device %s: %s' % (
+                                                device, dbus_err))
+            return None
 
-            S = 'attempting to mount device %s (%s:%s)'
-            self.log.info(S % (device, fstype, options))
-
-            try:
-                device.mount(fstype, options)
-                self.log.info('mounted device %s' % (device,))
-            except dbus.exceptions.DBusException, dbus_err:
-                self.log.error('failed to mount device %s: %s' % (
-                                                    device, dbus_err))
-                return None
-
-            mount_paths = ', '.join(device.mount_paths())
-            self.notify('mount')(device.device_file(), mount_paths)
-        finally:
-            self._store_device_state(device)
+        mount_paths = ', '.join(device.mount_paths())
+        self.notify('mount')(device.device_file(), mount_paths)
 
         return True
 
@@ -140,81 +128,21 @@ class Mounter:
         elif device.is_crypto():
             return self.unlock_device(device)
 
-    def _store_device_state(self, device):
-        state = DeviceState(device.is_mounted(),
-                            device.has_media())
-        self.last_device_state[device.device_path] = state
-
-    def _remove_device_state(self, device):
-        if device.device_path in self.last_device_state:
-            del self.last_device_state[device.device_path]
-
-    def _get_device_state(self, device):
-        return self.last_device_state.get(device.device_path)
-
     def mount_present_devices(self):
         """Mount handleable devices that are already present."""
         for device in udiskie.device.get_all(self.bus):
             self.add_device(device)
 
 
-class AutoMounter(Mounter):
-
-    def __init__(self, bus=None, filter_file=None, notify=None, prompt=None):
-        Mounter.__init__(self, bus, filter_file, notify, prompt)
-        self.log = logging.getLogger('udiskie.mount.AutoMounter')
-
-        self.bus.add_signal_receiver(self.device_added,
-                                     signal_name='DeviceAdded',
-                                     bus_name='org.freedesktop.UDisks')
-        self.bus.add_signal_receiver(self.device_removed,
-                                     signal_name='DeviceRemoved',
-                                     bus_name='org.freedesktop.UDisks')
-        self.bus.add_signal_receiver(self.device_changed,
-                                     signal_name='DeviceChanged',
-                                     bus_name='org.freedesktop.UDisks')
-
-
-    def device_added(self, device):
-        self.log.debug('device added: %s' % (device,))
-        udiskie_device = udiskie.device.Device(self.bus, device)
-        # Since the device just appeared we don't want the old state.
-        self._remove_device_state(udiskie_device)
-        self.add_device(udiskie_device)
-
-    def device_removed(self, device):
-        self.log.debug('device removed: %s' % (device,))
-        self._remove_device_state(udiskie.device.Device(self.bus, device))
-
-    def device_changed(self, device):
-        self.log.debug('device changed: %s' % (device,))
-
-        udiskie_device = udiskie.device.Device(self.bus, device)
-        last_state = self._get_device_state(udiskie_device)
-
-        if not last_state:
-            # First time we saw the device, try to mount it.
-            self.add_device(udiskie_device)
-        else:
-            media_added = False
-            if udiskie_device.has_media() and not last_state.has_media:
-                media_added = True
-
-            if media_added and not last_state.mounted:
-                # Wasn't mounted before, but it has new media now.
-                self.add_device(udiskie_device)
-
-        self._store_device_state(udiskie_device)
-
-
-def cli(args):
+def option_parser():
+    import optparse
     parser = optparse.OptionParser()
     parser.add_option('-a', '--all', action='store_true',
                       dest='all', default=False,
                       help='mount all present devices')
-    parser.add_option('-v', '--verbose', action='store_true',
-                      dest='verbose', default=False,
-                      help='verbose output')
+    parser.add_option('-v', '--verbose', action='store_const',
+                      dest='log_level', default=logging.INFO,
+                      const=logging.DEBUG, help='verbose output')
     parser.add_option('-f', '--filters', action='store',
                       dest='filters', default=None,
                       metavar='FILE', help='filter FILE')
@@ -224,12 +152,12 @@ def cli(args):
     parser.add_option('-P', '--password-prompt', action='store',
                       dest='password_prompt', default='zenity',
                       metavar='MODULE', help="replace password prompt")
-    (options, args) = parser.parse_args(args)
+    return parser
 
-    log_level = logging.INFO
-    if options.verbose:
-        log_level = logging.DEBUG
-    logging.basicConfig(level=log_level, format='%(message)s')
+def cli(args):
+    parser = option_parser()
+    options, posargs = parser.parse_args(args)
+    logging.basicConfig(level=options.log_level, format='%(message)s')
 
     if options.suppress_notify:
         notify = None
@@ -238,25 +166,22 @@ def cli(args):
 
     prompt = udiskie.prompt.password(options.password_prompt)
 
-    # only mount the desired devices
-    if options.all or len(args) > 0:
-        mounter = Mounter(
-                bus=None, filter_file=options.filters,
-                notify=notify, prompt=prompt)
+    mounter = Mounter(
+            bus=None, filter_file=options.filters,
+            notify=notify, prompt=prompt)
 
-        if options.all:
-            mounter.mount_present_devices()
-        else:
-            for path in args:
-                device = udiskie.device.get_device(mounter.bus, path)
-                if device:
-                    mounter.add_device(device)
-
-    # run as a daemon
-    else:
-        mounter = AutoMounter(
-                bus=None, filter_file=options.filters,
-                notify=notify, prompt=prompt)
+    # mount all present devices
+    if options.all:
         mounter.mount_present_devices()
-        return gobject.MainLoop().run()
+
+    # only mount the desired devices
+    elif len(posargs) > 0:
+        for path in posargs:
+            device = udiskie.device.get_device(mounter.bus, path)
+            if device:
+                mounter.add_device(device)
+
+    # print command line options
+    else:
+        parser.print_usage()
 
