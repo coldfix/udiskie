@@ -23,4 +23,19 @@ setup(
         'bin/udiskie-umount',
         'bin/udiskie-mount'
     ],
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Console',
+        'Environment :: X11 Applications',
+        'Intended Audience :: Developers',
+        'Intended Audience :: End Users/Desktop',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python',
+        'License :: OSI Approved :: MIT License',
+        'Topic :: Desktop Environment',
+        'Topic :: Software Development',
+        'Topic :: System :: Filesystems',
+        'Topic :: System :: Hardware',
+        'Topic :: Utilities',
+    ],
 )
