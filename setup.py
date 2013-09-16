@@ -1,3 +1,4 @@
+# encoding: utf-8
 from distutils.core import setup
 
 setup(
@@ -6,7 +7,9 @@ setup(
     description='Removable disk automounter for udisks',
     author='Byron Clark',
     author_email='byron@theclarkfamily.name',
-    url='http://bitbucket.org/byronclark/udiskie',
+    maintainer='Thomas Gläßle',
+    maintainer_email='t_glaessle@gmx.de',
+    url='https://github.com/coldfix/udiskie',
     license='MIT',
     packages=[
         'udiskie',

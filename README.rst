@@ -7,12 +7,6 @@ storage devices.
 
 .. _udisks: http://www.freedesktop.org/wiki/Software/udisks
 
-Maintainer Wanted
------------------
-
-I'm not longer using udiskie on my systems. The code still works, but it's been
-neglected for a while.
-
 Dependencies
 ------------
 
@@ -76,5 +70,12 @@ Make sure to change the setting for ``allow_inactive`` to 'yes':
       </defaults>
     </action>
 
+Contributing
+------------
+
+*udiskie* is developed on github_. Feel free to contribute patches as pull
+requests as you see fit.
+
+.. _github: https://github.com/coldfix/udiskie
 
 
