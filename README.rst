@@ -78,4 +78,13 @@ requests as you see fit.
 
 .. _github: https://github.com/coldfix/udiskie
 
+Try to be consistent with `PEP 8` guidelines as far as possible and test
+everything. Furthermore, your commit messages should start with a
+capitalized verb for consistency. Unless your modification is completely
+trivial, also add a message body to your commit.
+
+.. _`PEP 8`: http://www.python.org/dev/peps/pep-0008/
+
+Where possible dependency injection should be used to keep the module
+easily testable.
 
