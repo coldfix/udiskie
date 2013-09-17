@@ -1,8 +1,12 @@
 # encoding: utf-8
 from distutils.core import setup
 
-with open('README.rst') as readme:
-    long_description = readme.read()
+try:
+    f = open('README.rst')
+    long_description = f.read()
+    f.close()
+except:
+    long_description = None
 
 setup(
     name='udiskie',
