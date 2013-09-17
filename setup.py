@@ -1,5 +1,5 @@
 # encoding: utf-8
-from distutils.core import setup
+from setuptools import setup
 
 try:
     f = open('README.rst')
@@ -26,6 +26,8 @@ setup(
         'bin/udiskie',
         'bin/udiskie-umount',
         'bin/udiskie-mount'
+    ],
+    install_requires=[
     ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
