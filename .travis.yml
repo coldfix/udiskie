@@ -7,6 +7,10 @@ python:
   - "3.3"
   - "pypy"
 install:
+  - sudo apt-get -qy update
+  - sudo apt-get -qy install zenity
+  - sudo apt-get -qy install python-dbus python-gobject python-notify2
+  - sudo apt-get -qy install python3-dbus python3-gobject python3-notify2
   - pip install . --use-mirrors
 script:
   - nosetests
