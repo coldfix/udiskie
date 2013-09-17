@@ -29,7 +29,7 @@ class Notify:
         except gio.Error:
             pass
 
-    def device_umounted(self, device):
+    def device_unmounted(self, device):
         try:
             device_file = device.device_file
             pynotify.Notification('Device unmounted',
