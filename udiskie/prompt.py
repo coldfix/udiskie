@@ -3,7 +3,6 @@ Udiskie user prompt utility.
 """
 __all__ = ['password']
 
-import importlib
 import subprocess
 from distutils.spawn import find_executable
 
