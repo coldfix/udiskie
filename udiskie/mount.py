@@ -78,7 +78,7 @@ def unmount_device(device):
 
 
 # unlock/lock (LUKS)
-def unlock_device(device, prompt, udisks=None):
+def unlock_device(device, prompt=None, udisks=None):
     """
     Unlock the device if not already unlocked.
 
@@ -95,6 +95,9 @@ def unlock_device(device, prompt, udisks=None):
         return False
 
     # prompt user for password
+    if not prompt:
+        import udiskie.prompt
+        prompt = udiskie.prompt.password('zenity')
     password = prompt and prompt(
             'Enter password for %s:' % (device,),
             'Unlock encrypted device')
