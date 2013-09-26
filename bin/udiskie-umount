@@ -1,7 +1,0 @@
-#! /usr/bin/env python
-
-if __name__ == '__main__':
-    import sys
-    import udiskie.cli
-
-    sys.exit(udiskie.cli.umount(sys.argv[1:]))

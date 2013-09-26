@@ -42,11 +42,13 @@ setup(
     packages=[
         'udiskie',
     ],
-    scripts=[
-        'bin/udiskie',
-        'bin/udiskie-umount',
-        'bin/udiskie-mount'
-    ],
+    entry_points={
+        'console_scripts': [
+            'udiskie = udiskie.cli:daemon',
+            'udiskie-mount = udiskie.cli:mount',
+            'udiskie-umount = udiskie.cli:umount',
+        ],
+    },
     install_requires=[
     ],
     classifiers=[
