@@ -30,7 +30,7 @@ except:
 
 setup(
     name='udiskie',
-    version='0.5.0-1',
+    version='0.5.1',
     description='Removable disk automounter for udisks',
     long_description=long_description,
     author='Byron Clark',
@@ -40,6 +40,9 @@ setup(
     url='https://github.com/coldfix/udiskie',
     license='MIT',
     packages=[
+        'udiskie',
+    ],
+    namespace_packages=[
         'udiskie',
     ],
     entry_points={
