@@ -186,18 +186,19 @@ def umount(args=None):
 
     # for now: use udisks v1 service
     udisks = udiskie.udisks.Udisks.create(bus)
+    mounter = udiskie.mount.Mounter(udisks=udisks)
 
     if options.all:
-        unmounted = udiskie.mount.unmount_all(udisks=udisks)
+        unmounted = mounter.unmount_all()
     else:
         unmounted = []
         for path in posargs:
-            device = udiskie.mount.unmount(os.path.normpath(path), udisks=udisks)
+            device = mounter.unmount(os.path.normpath(path))
             if device:
                 unmounted.append(device)
 
     # automatically lock unused luks slaves of unmounted devices
     for device in unmounted:
-        udiskie.mount.lock_slave(device, udisks=udisks)
+        mounter.lock_slave(device)
     return 0
 
