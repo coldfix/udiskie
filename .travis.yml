@@ -11,6 +11,7 @@ install:
   - sudo apt-get -qy install zenity
   - sudo apt-get -qy install python-dbus python-gobject python-notify2
   - sudo apt-get -qy install python3-dbus python3-gobject python3-notify2
-  - pip install . --use-mirrors
+  - python setup.py sdist
+  - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
 script:
   - nosetests
