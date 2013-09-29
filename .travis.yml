@@ -8,8 +8,14 @@ python:
   - "pypy"
 install:
   - sudo apt-get -qy update
-  - sudo apt-get -qy install zenity libdbus-1-dev libdbus-glib-1-dev
-  - PREFIX=$VIRTUAL_ENV ./build_requirements.sh
+  - sudo apt-get -qy install
+            zenity
+            libdbus-1-dev libdbus-glib-1-dev
+            gobject-introspection libgirepository1.0-dev
+            libcairo2-dev
+            python-cairo-dev python3-cairo-dev python3-dev
+  # try to install dependencies but don't insist:
+  - PREFIX=$VIRTUAL_ENV ./build_requirements.sh || true
   - python setup.py sdist
   - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
 script:
