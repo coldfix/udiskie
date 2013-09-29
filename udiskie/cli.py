@@ -100,7 +100,12 @@ def daemon(args=None):
     # run udiskie daemon if needed
     daemon = udiskie.daemon.Daemon(udisks=udisks)
     if not options.suppress_notify:
-        notify = udiskie.notify.Notify('udiskie.mount')
+        try:
+            import notify2 as notify_service
+        except ImportError:
+            import pynotify as notify_service
+        notify_service.init('udiskie.mount')
+        notify = udiskie.notify.Notify(notify_service)
         daemon.connect(notify)
     automount = udiskie.automount.AutoMounter(mounter)
     daemon.connect(automount)

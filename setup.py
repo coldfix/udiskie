@@ -52,6 +52,9 @@ setup(
             'udiskie-umount = udiskie.cli:umount',
         ],
     },
+    extras_require={
+        'notifications': ['notify2']
+    },
     install_requires=[
     ],
     classifiers=[
