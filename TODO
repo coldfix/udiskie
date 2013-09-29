@@ -2,11 +2,10 @@
 - properly daemonize
 - set the process name
 
-- nosetest config in setup.cfg ?
-- dependency injection for notifier
-- make notifier and automounting optional (command line argument)
-- create daemon command line argument
-- use DI in udiskie.cli
-- move is_handleable check to udiskie.mount
-- do not restrict to external drives in general
+- make either notifier and automounting optional (command line argument)
 - udisks2
+- TESTS
+
+- use DI in udiskie.cli ?
+- move is_handleable check to udiskie.mount ?
+- do not restrict to external drives in general ?
