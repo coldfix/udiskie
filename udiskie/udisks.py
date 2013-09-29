@@ -144,17 +144,19 @@ class Device(DBusProxy):
         return self.property.IdUuid
 
     # methods
-    def mount(self, filesystem, options):
+    def mount(self, filesystem=None, options=[]):
+        if filesystem is None:
+            filesystem = self.id_type
         self.method.FilesystemMount(filesystem, options)
 
-    def unmount(self):
-        self.method.FilesystemUnmount([])
+    def unmount(self, options=[]):
+        self.method.FilesystemUnmount(options)
 
-    def lock(self, options):
+    def lock(self, options=[]):
         """Lock Luks device."""
         return self.method.LuksLock(options)
 
-    def unlock(self, password, options):
+    def unlock(self, password, options=[]):
         """Unlock Luks device."""
         return self.method.LuksUnlock(password, options)
 
