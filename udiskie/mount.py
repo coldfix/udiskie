@@ -18,6 +18,9 @@ class Mounter(object):
         """
         Initialize mounter with the given defaults.
 
+        The parameters are not guaranteed to keep their order and should
+        always be passed as keyword arguments.
+
         If udisks is None only the xxx_device methods will work.
         If prompt is None device unlocking will not work.
 
@@ -47,18 +50,15 @@ class Mounter(object):
         filter = filter or self.filter
         options = filter.get_mount_options(device) if filter else []
 
-        S = 'attempting to mount device %s (%s:%s)'
-        log.info(S % (device, fstype, options))
-
+        log.info('attempting to mount device %s (%s:%s)' % (device, fstype, options))
         try:
             device.mount(fstype, options)
-            log.info('mounted device %s' % (device,))
         except device.Exception:
             err = sys.exc_info()[1]
             log.error('failed to mount device %s: %s' % (device, err))
             return None
 
-        mount_paths = ', '.join(device.mount_paths)
+        log.info('mounted device %s' % (device,))
         return True
 
     def unmount_device(self, device):

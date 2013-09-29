@@ -4,8 +4,8 @@ Udiskie CLI logic.
 __all__ = [
     # utility:
     'load_filter',
+    'common_program_options',
     'mount_program_options',
-    'umount_program_options',
     # entry points:
     'daemon',
     'mount',
@@ -28,8 +28,6 @@ import udiskie.prompt
 import udiskie.notify
 import udiskie.automount
 import udiskie.daemon
-import udiskie.common
-
 
 CONFIG_PATH = 'udiskie/filters.conf'
 
@@ -37,65 +35,52 @@ CONFIG_PATH = 'udiskie/filters.conf'
 #----------------------------------------
 # Utility functions
 #----------------------------------------
-
 def load_filter(filter_file=None):
     """Load mount option filters."""
-    try:
-        from xdg.BaseDirectory import xdg_config_home
-    except ImportError:
-        xdg_config_home = os.path.expanduser('~/.config')
     if not filter_file:
+        try:
+            from xdg.BaseDirectory import xdg_config_home
+        except ImportError:
+            xdg_config_home = os.path.expanduser('~/.config')
         filter_file = os.path.join(xdg_config_home, CONFIG_PATH)
     return udiskie.match.FilterMatcher((filter_file,))
 
+def common_program_options():
+    """
+    Return a command line option parser for options common to all modes.
+    """
+    import optparse
+    parser = optparse.OptionParser()
+    parser.add_option('-v', '--verbose', action='store_const',
+                      dest='log_level', default=logging.INFO,
+                      const=logging.DEBUG, help='verbose output')
+    return parser
 
 def mount_program_options():
     """
     Return the mount option parser for the mount command.
     """
-    import optparse
-    parser = optparse.OptionParser()
-    parser.add_option('-v', '--verbose', action='store_const',
-                      dest='log_level', default=logging.INFO,
-                      const=logging.DEBUG, help='verbose output')
+    parser = common_program_options()
     parser.add_option('-f', '--filters', action='store',
                       dest='filters', default=None,
                       metavar='FILE', help='filter FILE')
-    parser.add_option('-s', '--suppress', action='store_true',
-                      dest='suppress_notify', default=False,
-                      help='suppress popup notifications')
     parser.add_option('-P', '--password-prompt', action='store',
                       dest='password_prompt', default='zenity',
                       metavar='MODULE', help="replace password prompt")
-    return parser
-
-def umount_program_options():
-    """
-    Return the command line option parser for the umount command.
-    """
-    import optparse
-    parser = optparse.OptionParser()
-    parser.add_option('-a', '--all', action='store_true',
-                      dest='all', default=False,
-                      help='all devices')
-    parser.add_option('-v', '--verbose', action='store_const',
-                      dest='log_level', default=logging.INFO,
-                      const=logging.DEBUG, help='verbose output')
-    parser.add_option('-s', '--suppress', action='store_true',
-                      dest='suppress_notify', default=False,
-                      help='suppress popup notifications')
     return parser
 
 
 #----------------------------------------
 # Entry points
 #----------------------------------------
-
 def daemon(args=None):
     """
     Execute udiskie as a daemon.
     """
     parser = mount_program_options()
+    parser.add_option('-s', '--suppress', action='store_true',
+                      dest='suppress_notify', default=False,
+                      help='suppress popup notifications')
     options, posargs = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
 
@@ -170,12 +155,14 @@ def mount(args=None):
         parser.print_usage()
         return 1
 
-
 def umount(args=None):
     """
     Execute the umount command.
     """
-    parser = umount_program_options()
+    parser = common_program_options()
+    parser.add_option('-a', '--all', action='store_true',
+                      dest='all', default=False,
+                      help='all devices')
     (options, posargs) = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
     bus = dbus.SystemBus()
