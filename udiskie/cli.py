@@ -19,6 +19,7 @@ warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 import os
 import logging
 import dbus
+import gobject
 
 import udiskie.match
 import udiskie.mount
@@ -120,10 +121,9 @@ def daemon(args=None):
 
     mounter.mount_all()
     try:
-        return daemon.run()
+        return gobject.MainLoop().run()
     except KeyboardInterrupt:
-        pass
-    return 0
+        return 0
 
 def mount(args=None):
     """

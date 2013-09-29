@@ -8,10 +8,8 @@ event.
 """
 __all__ = ['Daemon']
 
-import gobject
 import logging
 import dbus
-
 import sys
 
 
@@ -80,10 +78,6 @@ class Daemon(object):
                 self._device_changed,
                 signal_name='DeviceChanged',
                 bus_name='org.freedesktop.UDisks')
-
-    def run(self):
-        """Run main loop."""
-        return gobject.MainLoop().run()
 
     # events
     def on_device_changed(self, udevice, old_state, new_state):
