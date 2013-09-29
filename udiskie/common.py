@@ -12,7 +12,7 @@ def get_udisks():
     import importlib
     return importlib.import_module(default_udisks)
 
-class Properties:
+class Properties(object):
     """
     Dbus property map abstraction.
 

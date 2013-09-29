@@ -3,7 +3,7 @@ Udiskie automounter daemon.
 """
 __all__ = ['AutoMounter']
 
-class AutoMounter:
+class AutoMounter(object):
     """
     Automatically mount newly added media.
     """

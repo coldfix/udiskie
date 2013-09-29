@@ -19,7 +19,7 @@ class InvalidFilter(Exception):
         return 'Invalid Filter: %s' % (self.value,)
 
 
-class OptionFilter:
+class OptionFilter(object):
     # This list also defines the order in which the filters are
     # processed. Should go from least specific to most specific.
     VALID_PARAMETERS = (
@@ -43,7 +43,7 @@ class OptionFilter:
         return str(self)
 
 
-class Filters:
+class Filters(object):
     def __init__(self):
         self.option_filters = []
         self.log = logging.getLogger('udiskie.match.Filters')
@@ -68,7 +68,7 @@ class Filters:
         return [F for F in self.option_filters if F.parameter == parameter]
 
 
-class FilterMatcher:
+class FilterMatcher(object):
     MOUNT_OPTIONS_SECTION = 'mount_options'
 
     def __init__(self, config_files):

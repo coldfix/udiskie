@@ -26,7 +26,7 @@ UDISKS_OBJECT = 'org.freedesktop.UDisks'
 UDISKS_OBJECT_PATH = '/org/freedesktop/UDisks'
 
 
-class Device:
+class Device(object):
     """
     Wrapper class for org.freedesktop.UDisks.Device proxy objects.
     """

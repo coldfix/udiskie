@@ -15,7 +15,7 @@ import dbus
 import sys
 
 
-class DeviceState:
+class DeviceState(object):
     """
     State information struct for devices.
     """
@@ -26,7 +26,7 @@ class DeviceState:
         self.has_media = has_media
         self.unlocked = unlocked
 
-class Daemon:
+class Daemon(object):
     """
     Udisks listener daemon.
 

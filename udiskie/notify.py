@@ -6,7 +6,7 @@ __all__ = ['Notify']
 import pynotify
 import gio
 
-class Notify:
+class Notify(object):
     """
     Notification tool.
 

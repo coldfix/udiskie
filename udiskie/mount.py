@@ -260,7 +260,7 @@ def unmount(path, bus=None, udisks=None):
 
 
 # utility class
-class Mounter:
+class Mounter(object):
     """
     Mount utility.
 
