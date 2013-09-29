@@ -1,16 +1,13 @@
 """
 Common utilities.
 """
-__all__ = ['DBusProperties', 'get_udisks', 'default_udisks']
-import dbus
+__all__ = ['DBusProperties', 'get_udisks']
 
-DBUS_PROPS_INTERFACE = 'org.freedesktop.DBus.Properties'
-default_udisks = 'udiskie.udisks'
-
+from dbus import Interface
 
 def get_udisks():
-    import importlib
-    return importlib.import_module(default_udisks)
+    from . import udisks
+    return udisks
 
 class DBusProperties(object):
     """
@@ -19,11 +16,11 @@ class DBusProperties(object):
     Properties of the object can be accessed as attributes.
 
     """
-    def __init__(self, dbus_object, interface):
+    def __init__(self, dbus_object, interface, Ifc=Interface):
         """Initialize a proxy object with standard dbus property interface."""
-        self.__proxy = dbus.Interface(
+        self.__proxy = Ifc(
                 dbus_object,
-                dbus_interface=DBUS_PROPS_INTERFACE)
+                dbus_interface='org.freedesktop.DBus.Properties')
         self.__interface = interface
 
     def __getattr__(self, property):
