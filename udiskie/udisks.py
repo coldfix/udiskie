@@ -16,7 +16,7 @@ import logging
 import os
 import dbus
 
-from udiskie.common import Properties as DbusProperties
+from udiskie.common import DBusProperties
 
 
 UDISKS_INTERFACE = 'org.freedesktop.UDisks'
@@ -35,7 +35,7 @@ class Device(object):
         self.bus = bus
         self.device_path = device_path
         device_object = self.bus.get_object(UDISKS_OBJECT, device_path)
-        self.property = DbusProperties(device_object, UDISKS_DEVICE_INTERFACE)
+        self.property = DBusProperties(device_object, UDISKS_DEVICE_INTERFACE)
         self.method = dbus.Interface(device_object, UDISKS_DEVICE_INTERFACE)
 
     def __str__(self):

@@ -1,7 +1,7 @@
 """
 Common utilities.
 """
-__all__ = ['Properties', 'get_udisks', 'default_udisks']
+__all__ = ['DBusProperties', 'get_udisks', 'default_udisks']
 import dbus
 
 DBUS_PROPS_INTERFACE = 'org.freedesktop.DBus.Properties'
@@ -12,7 +12,7 @@ def get_udisks():
     import importlib
     return importlib.import_module(default_udisks)
 
-class Properties(object):
+class DBusProperties(object):
     """
     Dbus property map abstraction.
 
