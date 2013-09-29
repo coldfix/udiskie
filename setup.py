@@ -1,31 +1,22 @@
 # encoding: utf-8
-from __future__ import print_function
 from setuptools import setup
 import sys
 
 # check availability of runtime dependencies
-import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument('-f', '--force', dest="force",
-        action="store_true", default=False)
-args, sys.argv = parser.parse_known_args(sys.argv)
-if not args.force:
-    try:
-        import dbus
-        import gobject
-        import pynotify
-    except ImportError:
-        err = sys.exc_info()[1]
-        print("Missing runtime dependency:", err)
-        print("Use --force if you want to continue anyway.")
-        sys.exit(1)
+try:
+    import dbus
+    import gobject
+    import pynotify
+except ImportError:
+    err = sys.exc_info()[1]
+    print("Missing runtime dependency: %s" % err)
 
 # read long_description from README.rst
 try:
     f = open('README.rst')
     long_description = f.read()
     f.close()
-except:
+except IOError:
     long_description = None
 
 setup(
