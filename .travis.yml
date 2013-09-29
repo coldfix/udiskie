@@ -8,9 +8,8 @@ python:
   - "pypy"
 install:
   - sudo apt-get -qy update
-  - sudo apt-get -qy install zenity
-  - sudo apt-get -qy install python-dbus python-gobject python-notify2
-  - sudo apt-get -qy install python3-dbus python3-gobject python3-notify2
+  - sudo apt-get -qy install zenity libdbus-1-dev libdbus-glib-1-dev
+  - PREFIX=$VIRTUAL_ENV ./build_requirements.sh
   - python setup.py sdist
   - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
 script:
