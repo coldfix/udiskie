@@ -21,6 +21,7 @@ import logging
 import dbus
 import gobject
 
+import udiskie.udisks
 import udiskie.match
 import udiskie.mount
 import udiskie.prompt
@@ -104,15 +105,15 @@ def daemon(args=None):
     bus = dbus.SystemBus()
 
     # for now: just use the default udisks
-    udisks = udiskie.common.get_udisks()
+    udisks = udiskie.udisks.Udisks.create(bus)
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
     filter = load_filter(options.filters)
-    mounter = udiskie.mount.Mounter(bus=bus, filter=filter, prompt=prompt, udisks=udisks)
+    mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=udisks)
 
     # run udiskie daemon if needed
-    daemon = udiskie.daemon.Daemon(bus, udisks=udisks)
+    daemon = udiskie.daemon.Daemon(udisks=udisks)
     if not options.suppress_notify:
         notify = udiskie.notify.Notify('udiskie.mount')
         daemon.connect(notify)
@@ -140,12 +141,12 @@ def mount(args=None):
     bus = dbus.SystemBus()
 
     # for now: just use the default udisks
-    udisks = udiskie.common.get_udisks()
+    udisks = udiskie.udisks.Udisks.create(bus)
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
     filter = load_filter(options.filters)
-    mounter = udiskie.mount.Mounter(bus=bus, filter=filter, prompt=prompt, udisks=udisks)
+    mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=udisks)
 
     # mount all present devices
     if options.all:
@@ -184,14 +185,14 @@ def umount(args=None):
         return 1
 
     # for now: use udisks v1 service
-    udisks = udiskie.common.get_udisks()
+    udisks = udiskie.udisks.Udisks.create(bus)
 
     if options.all:
-        unmounted = udiskie.mount.unmount_all(bus=bus, udisks=udisks)
+        unmounted = udiskie.mount.unmount_all(udisks=udisks)
     else:
         unmounted = []
         for path in posargs:
-            device = udiskie.mount.unmount(os.path.normpath(path), bus=bus, udisks=udisks)
+            device = udiskie.mount.unmount(os.path.normpath(path), udisks=udisks)
             if device:
                 unmounted.append(device)
 

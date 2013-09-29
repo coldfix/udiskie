@@ -10,13 +10,11 @@ Note that (as this completely wraps the udisks dbus API) replacing this
 module will let you support Udisks2 or maybe even other services.
 
 """
-__all__ = ['Device', 'get_all', 'get_all_handleable', 'get_device']
+__all__ = ['Device', 'Udisks']
 
 import logging
 import os
-import dbus
-
-from udiskie.common import DBusProperties
+from udiskie.common import DBusProxy
 
 
 UDISKS_INTERFACE = 'org.freedesktop.UDisks'
@@ -26,20 +24,23 @@ UDISKS_OBJECT = 'org.freedesktop.UDisks'
 UDISKS_OBJECT_PATH = '/org/freedesktop/UDisks'
 
 
-class Device(object):
+class Device(DBusProxy):
     """
     Wrapper class for org.freedesktop.UDisks.Device proxy objects.
     """
-    def __init__(self, bus, device_path):
+    # construction
+    def __init__(self, bus, proxy):
         self.log = logging.getLogger('udiskie.udisks.Device')
+        super(Device, self).__init__(proxy, UDISKS_DEVICE_INTERFACE)
         self.bus = bus
-        self.device_path = device_path
-        device_object = self.bus.get_object(UDISKS_OBJECT, device_path)
-        self.property = DBusProperties(device_object, UDISKS_DEVICE_INTERFACE)
-        self.method = dbus.Interface(device_object, UDISKS_DEVICE_INTERFACE)
 
+    @classmethod
+    def create(cls, bus, object_path):
+        return cls(bus, bus.get_object(UDISKS_OBJECT, object_path))
+
+    # string representation
     def __str__(self):
-        return self.device_path
+        return self.object_path
 
     # properties
     @property
@@ -119,10 +120,10 @@ class Device(object):
         """Check whether the luks device is currently in use."""
         if not self.is_luks:
             return False
-        for device in get_all(self.bus):
+        for device in Udisks(self.bus).get_all():
             if (not device.is_filesystem or device.is_mounted) and (
                     device.is_luks_cleartext and
-                    device.luks_cleartext_slave == self.device_path):
+                    device.luks_cleartext_slave == self.proxy.object_path):
                 return True
         return False
 
@@ -158,28 +159,50 @@ class Device(object):
         return self.method.LuksUnlock(password, options)
 
 
-def get_all(bus=None):
-    """Enumerate all device objects currently known to udisks."""
-    bus = bus or dbus.SystemBus()
-    udisks = bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH)
-    for path in udisks.EnumerateDevices(dbus_interface=UDISKS_INTERFACE):
-        yield Device(bus, path)
+class Udisks(DBusProxy):
+    """
+    """
+    # Construction
+    def __init__(self, bus, proxy):
+        super(Udisks, self).__init__(proxy, UDISKS_INTERFACE)
+        self.bus = bus
 
-def get_all_handleable(bus=None):
-    """Enumerate all handleable devices currently known to udisks."""
-    for device in get_all(bus):
-        if device.is_handleable:
-            yield device
+    @classmethod
+    def create(cls, bus):
+        return cls(bus, bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH))
 
-def get_device(path, bus=None):
-    """Get a device proxy by device name or any mount path of the device."""
-    logger = logging.getLogger('udiskie.udisks.get_device')
-    for device in get_all(bus):
-        if os.path.samefile(path, device.device_file):
-            return device
-        for p in device.mount_paths:
-            if os.path.samefile(path, p):
+    # instantiation of device objects
+    def create_device(self, object_path):
+        """Create a Device instance from object path."""
+        return Device.create(self.bus, object_path)
+
+    # Methods
+    def get_all(self):
+        """Enumerate all device objects currently known to udisks."""
+        for path in self.method.EnumerateDevices():
+            yield self.create_device(path)
+
+    def get_all_handleable(self):
+        """Enumerate all handleable devices currently known to udisks."""
+        for device in self.get_all():
+            if device.is_handleable:
+                yield device
+
+    def get_device(self, path):
+        """
+        Get a device proxy by device name or any mount path of the device.
+
+        This searches through all accessible devices and compares device
+        path as well as mount pathes.
+
+        """
+        logger = logging.getLogger('udiskie.udisks.get_device')
+        for device in self.get_all():
+            if os.path.samefile(path, device.device_file):
                 return device
-    logger.warn('Device not found: %s' % path)
-    return None
+            for p in device.mount_paths:
+                if os.path.samefile(path, p):
+                    return device
+        logger.warn('Device not found: %s' % path)
+        return None
 
