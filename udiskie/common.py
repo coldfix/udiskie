@@ -1,18 +1,12 @@
 """
-Common utilities.
+Common DBus utilities.
 """
-__all__ = ['Properties', 'get_udisks', 'default_udisks']
-import dbus
+__all__ = ['DBusProperties', 'DBusProxy']
 
-DBUS_PROPS_INTERFACE = 'org.freedesktop.DBus.Properties'
-default_udisks = 'udiskie.udisks'
+from dbus import Interface
+from dbus.exceptions import DBusException
 
-
-def get_udisks():
-    import importlib
-    return importlib.import_module(default_udisks)
-
-class Properties:
+class DBusProperties(object):
     """
     Dbus property map abstraction.
 
@@ -21,12 +15,26 @@ class Properties:
     """
     def __init__(self, dbus_object, interface):
         """Initialize a proxy object with standard dbus property interface."""
-        self.__proxy = dbus.Interface(
+        self.__proxy = Interface(
                 dbus_object,
-                dbus_interface=DBUS_PROPS_INTERFACE)
+                dbus_interface='org.freedesktop.DBus.Properties')
         self.__interface = interface
 
     def __getattr__(self, property):
         """Retrieve the property via the dbus proxy."""
         return self.__proxy.Get(self.__interface, property)
+
+class DBusProxy(object):
+    """
+    DBus proxy object.
+
+    Provides property and method bindings.
+
+    """
+    def __init__(self, proxy, interface):
+        self.Exception = DBusException
+        self.proxy = proxy
+        self.object_path = proxy.object_path
+        self.property = DBusProperties(self.proxy, interface)
+        self.method = Interface(self.proxy, interface)
 

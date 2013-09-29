@@ -8,14 +8,11 @@ event.
 """
 __all__ = ['Daemon']
 
-import gobject
 import logging
-import dbus
-
 import sys
 
 
-class DeviceState:
+class DeviceState(object):
     """
     State information struct for devices.
     """
@@ -26,7 +23,7 @@ class DeviceState:
         self.has_media = has_media
         self.unlocked = unlocked
 
-class Daemon:
+class Daemon(object):
     """
     Udisks listener daemon.
 
@@ -44,12 +41,11 @@ class Daemon:
     `disconnect` can be used to add or remove event handlers.
 
     """
-    def __init__(self, bus, udisks):
+    def __init__(self, udisks):
         """
         Initialize object and start listening to udisks events.
         """
         self.log = logging.getLogger('udiskie.daemon.Daemon')
-        self.bus = bus
         self.state = {}
         self.udisks = udisks
 
@@ -65,25 +61,21 @@ class Daemon:
             'device_changed': [self.on_device_changed]
         }
 
-        for device in self.udisks.get_all_handleable(bus):
+        for device in self.udisks.get_all_handleable():
             self._store_device_state(device)
 
-        self.bus.add_signal_receiver(
+        udisks.bus.add_signal_receiver(
                 self._device_added,
                 signal_name='DeviceAdded',
                 bus_name='org.freedesktop.UDisks')
-        self.bus.add_signal_receiver(
+        udisks.bus.add_signal_receiver(
                 self._device_removed,
                 signal_name='DeviceRemoved',
                 bus_name='org.freedesktop.UDisks')
-        self.bus.add_signal_receiver(
+        udisks.bus.add_signal_receiver(
                 self._device_changed,
                 signal_name='DeviceChanged',
                 bus_name='org.freedesktop.UDisks')
-
-    def run(self):
-        """Run main loop."""
-        return gobject.MainLoop().run()
 
     # events
     def on_device_changed(self, udevice, old_state, new_state):
@@ -128,49 +120,49 @@ class Daemon:
                     self.disconnect(getattr(handler, event), event)
 
     # udisks event listeners
-    def _device_added(self, device_name):
+    def _device_added(self, object_path):
         try:
-            udevice = self.udisks.Device(self.bus, device_name)
+            udevice = self.udisks.create_device(object_path)
             if not udevice.is_handleable:
                 return
             self._store_device_state(udevice)
             self.trigger('device_added', udevice)
-        except dbus.exceptions.DBusException:
+        except self.udisks.Exception:
             err = sys.exc_info()[1]
-            self.log.error('%s(%s): %s' % ('device_added', device_name, err))
+            self.log.error('%s(%s): %s' % ('device_added', object_path, err))
 
-    def _device_removed(self, device_name):
+    def _device_removed(self, object_path):
         try:
-            self.trigger('device_removed', device_name)
-            self._remove_device_state(device_name)
-        except dbus.exceptions.DBusException:
+            self.trigger('device_removed', object_path)
+            self._remove_device_state(object_path)
+        except self.udisks.Exception:
             err = sys.exc_info()[1]
-            self.log.error('%s(%s): %s' % ('device_removed', device_name, err))
+            self.log.error('%s(%s): %s' % ('device_removed', object_path, err))
 
-    def _device_changed(self, device_name):
+    def _device_changed(self, object_path):
         try:
-            udevice = self.udisks.Device(self.bus, device_name)
+            udevice = self.udisks.create_device(object_path)
             if not udevice.is_handleable:
                 return
-            old_state = self._get_device_state(udevice)
+            old_state = self._get_device_state(object_path)
             new_state = self._store_device_state(udevice)
             self.trigger('device_changed', udevice, old_state, new_state)
-        except dbus.exceptions.DBusException:
+        except self.udisks.Exception:
             err = sys.exc_info()[1]
-            self.log.error('%s(%s): %s' % ('device_changed', device_name, err))
+            self.log.error('%s(%s): %s' % ('device_changed', object_path, err))
 
     # internal state keeping
     def _store_device_state(self, device):
-        self.state[device.device_path] = DeviceState(
+        self.state[device.object_path] = DeviceState(
             device.is_mounted,
             device.has_media,
             device.is_unlocked)
-        return self.state[device.device_path]
+        return self.state[device.object_path]
 
-    def _remove_device_state(self, device_name):
-        if device_name in self.state:
-            del self.state[device_name]
+    def _remove_device_state(self, object_path):
+        if object_path in self.state:
+            del self.state[object_path]
 
-    def _get_device_state(self, device):
-        return self.state.get(device.device_path)
+    def _get_device_state(self, object_path):
+        return self.state.get(object_path)
 
