@@ -170,7 +170,6 @@ def remove_device(device):
 # mount_all/unmount_all
 def mount_all(bus=None, filter=None, prompt=None, udisks=None):
     """Mount handleable devices that are already present."""
-    bus = bus or dbus.SystemBus()
     udisks = udisks or get_udisks()
     for device in udisks.get_all_handleable(bus):
         add_device(device, filter, prompt, udisks=udisks)
@@ -178,7 +177,6 @@ def mount_all(bus=None, filter=None, prompt=None, udisks=None):
 def unmount_all(bus=None, udisks=None):
     """Unmount all filesystems handleable by udiskie."""
     unmounted = []
-    bus = bus or dbus.SystemBus()
     udisks = udisks or get_udisks()
     for device in udisks.get_all_handleable(bus):
         if unmount_device(device):
@@ -234,9 +232,8 @@ def mount(path, bus=None, filter=None, prompt=None, udisks=None):
 
     """
     logger = logging.getLogger('udiskie.mount.unmount')
-    bus = bus or dbus.SystemBus()
     udisks = udisks or get_udisks()
-    device = udisks.get_device(bus, path)
+    device = udisks.get_device(path, bus)
     if device:
         logger.debug('found device owning "%s": "%s"' % (path, device))
         if add_device(device, filter=filter, prompt=prompt, udisks=udisks):
@@ -253,9 +250,8 @@ def unmount(path, bus=None, udisks=None):
 
     """
     logger = logging.getLogger('udiskie.mount.unmount')
-    bus = bus or dbus.SystemBus()
     udisks = udisks or get_udisks()
-    device = udisks.get_device(bus, path)
+    device = udisks.get_device(path, bus)
     if device:
         logger.debug('found device owning "%s": "%s"' % (path, device))
         if remove_device(device):

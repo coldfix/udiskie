@@ -158,19 +158,20 @@ class Device:
         return self.method.LuksUnlock(password, options)
 
 
-def get_all(bus):
+def get_all(bus=None):
     """Enumerate all device objects currently known to udisks."""
+    bus = bus or dbus.SystemBus()
     udisks = bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH)
     for path in udisks.EnumerateDevices(dbus_interface=UDISKS_INTERFACE):
         yield Device(bus, path)
 
-def get_all_handleable(bus):
+def get_all_handleable(bus=None):
     """Enumerate all handleable devices currently known to udisks."""
     for device in get_all(bus):
         if device.is_handleable:
             yield device
 
-def get_device(bus, path):
+def get_device(path, bus=None):
     """Get a device proxy by device name or any mount path of the device."""
     logger = logging.getLogger('udiskie.udisks.get_device')
     for device in get_all(bus):
