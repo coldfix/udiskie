@@ -78,8 +78,9 @@ exitcode=0
 
 # perform installation
 #acquire $pycairo && waf_install || exitcode=$?
-acquire $pygobject && install || exitcode=$?
-acquire $dbus_python && install || exitcode=$?
+
+python -c "import gobject" || acquire $pygobject && install || exitcode=$?
+python -c "import dbus" || acquire $dbus_python && install || exitcode=$?
 
 # signal failure
 exit $exitcode

@@ -1,23 +1,46 @@
 language: python
+
+# Restrict testing to system native python versions.
+# This means that binary distributions can be used for the dependencies.
+# Travis runs on Ubuntu 12.04 LTS currently. :(
 python:
-  - "2.5"
-  - "2.6"
+  # - "2.5"
+  # - "2.6"
   - "2.7"
   - "3.2"
-  - "3.3"
-  - "pypy"
-install:
+  # - "3.3"
+  # - "pypy"
+ 
+# Inherit system site packages for use in virtualenv:
+virtualenv:
+  system_site_packages: true
+
+# Install dependencies that are hard to install:
+# (these can't be built via setuptools)
+before_install:
   - sudo apt-get -qy update
   - sudo apt-get -qy install
-            zenity
             ubuntu-system-service
-            libdbus-1-dev libdbus-glib-1-dev
-            gobject-introspection libgirepository1.0-dev
-            libcairo2-dev
-            python-cairo-dev python3-cairo-dev python3-dev
-  # try to install dependencies but don't insist:
-  - PREFIX=$VIRTUAL_ENV ./build_requirements.sh || true
+            python-gobject python3-gobject
+            python-dbus python3-dbus
+
+  # Development files for custom builds:
+  # (build works for python2.x but fails on python3 since configure scripts
+  # can't find python headers in virtualenv)
+  # - sudo apt-get -qy install
+  #           libdbus-1-dev libdbus-glib-1-dev
+  #           gobject-introspection libgirepository1.0-dev
+  #           libcairo2-dev python-cairo-dev python3-cairo-dev
+
+# Setup (performed within virtualenv)
+install:
+  # Manually build dependencies (but don't insist):
+  # - PREFIX=$VIRTUAL_ENV ./build_requirements.sh || true
+
+  # Install package
   - python setup.py sdist
   - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
+
+# Actual tests:
 script:
   - nosetests
