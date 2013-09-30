@@ -2,10 +2,6 @@
 Udiskie CLI logic.
 """
 __all__ = [
-    # utility:
-    'load_filter',
-    'common_program_options',
-    'mount_program_options',
     # entry points:
     'daemon',
     'mount',
