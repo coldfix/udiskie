@@ -14,10 +14,7 @@ warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
 import os
 import logging
-import dbus
-import gobject
 
-import udiskie.udisks
 import udiskie.match
 import udiskie.mount
 import udiskie.prompt
@@ -65,11 +62,22 @@ def mount_program_options():
                       metavar='MODULE', help="replace password prompt")
     return parser
 
+def connect_udisks(bus):
+    """
+    Return a connection to the first udisks service found available.
+
+    TODO: This should check if the udisks service is accessible and if not
+    try to connect to udisks2 service.
+
+    """
+    import udiskie.udisks
+    return udiskie.udisks.Udisks.create(bus)
+
 
 #----------------------------------------
 # Entry points
 #----------------------------------------
-def daemon(args=None):
+def daemon(args=None, udisks=None):
     """
     Execute udiskie as a daemon.
     """
@@ -82,11 +90,14 @@ def daemon(args=None):
 
     # establish connection to system bus
     from dbus.mainloop.glib import DBusGMainLoop
+    import gobject
     DBusGMainLoop(set_as_default=True)
-    bus = dbus.SystemBus()
 
     # for now: just use the default udisks
-    udisks = udiskie.udisks.Udisks.create(bus)
+    if udisks is None:
+        import dbus
+        bus = dbus.SystemBus()
+        udisks = connect_udisks(bus)
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
@@ -112,7 +123,7 @@ def daemon(args=None):
     except KeyboardInterrupt:
         return 0
 
-def mount(args=None):
+def mount(args=None, udisks=None):
     """
     Execute the mount command.
     """
@@ -123,11 +134,11 @@ def mount(args=None):
     options, posargs = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
 
-    # establish connection to system bus
-    bus = dbus.SystemBus()
-
     # for now: just use the default udisks
-    udisks = udiskie.udisks.Udisks.create(bus)
+    if udisks is None:
+        import dbus
+        bus = dbus.SystemBus()
+        udisks = connect_udisks(bus)
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
@@ -156,7 +167,7 @@ def mount(args=None):
         parser.print_usage()
         return 1
 
-def umount(args=None):
+def umount(args=None, udisks=None):
     """
     Execute the umount command.
     """
@@ -166,14 +177,16 @@ def umount(args=None):
                       help='all devices')
     (options, posargs) = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
-    bus = dbus.SystemBus()
 
     if len(posargs) == 0 and not options.all:
         parser.print_usage()
         return 1
 
     # for now: use udisks v1 service
-    udisks = udiskie.udisks.Udisks.create(bus)
+    if udisks is None:
+        import dbus
+        bus = dbus.SystemBus()
+        udisks = connect_udisks(bus)
     mounter = udiskie.mount.Mounter(udisks=udisks)
 
     if options.all:
