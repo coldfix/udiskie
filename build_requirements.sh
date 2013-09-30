@@ -82,5 +82,5 @@ acquire $pygobject && install || exitcode=$?
 acquire $dbus_python && install || exitcode=$?
 
 # signal failure
-return $exitcode
+exit $exitcode
 
