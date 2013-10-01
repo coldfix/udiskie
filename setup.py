@@ -51,6 +51,9 @@ setup(
         # 'PyGObject',
         # 'dbus-python',
     ],
+    tests_require=[
+        'python-dbusmock>=0.7.2'
+    ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',

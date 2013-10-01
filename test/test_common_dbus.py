@@ -6,81 +6,70 @@ dbus-python API the tests are not very comprehensive. In the hope that
 python-dbus is tested thoroughly, we need only check that the wiring works
 at all.
 
-Still, the tests should be improved to have better defined behaviour.
-
 """
 # test utility
-import unittest
 import dbus
-import socket
+import dbusmock
 
 # tested library:
 from udiskie.common import DBusProxy
 
 
-class TestDBusProxy(unittest.TestCase):
+class TestDBusProxy(dbusmock.DBusTestCase):
     """
     Test that the udiskie.common.DBusProxy class is working correctly.
 
-    More specifically only the .method member is tested here. If the test
-    fails this might be due to inavailability of the requested object.
+    More specifically the .method and the .property (class DBusProperties)
+    members are tested to work as expected.
 
     """
+    @classmethod
+    def setUpClass(cls):
+        cls.start_system_bus()
+        cls.bus = cls.get_dbus(True)
+
     def setUp(self):
-        self.bus = dbus.SystemBus()
-        self.obj = self.bus.get_object("org.freedesktop.DBus",
-                                       "/org/freedesktop/DBus")
-        self.proxy = DBusProxy(self.obj,
-                               "org.freedesktop.DBus.Introspectable")
+        self.srv = self.spawn_server('com.example.Simple',
+                                     '/com/example/Simple',
+                                     'com.example.Simple',
+                                     system_bus=True)
+        self.obj, = self.bus.get_object('com.example.Simple',
+                                       '/com/example/Simple'),
+        self.mock_prox = dbus.Interface(self.obj, dbusmock.MOCK_IFACE)
+        self.mock_prox.AddMethod('', 'Square', 'i', 'i',
+                                 'ret = args[0]*args[0]')
+        self.mock_prox.AddProperty('', 'Foo', 'foo')
+        self.mock_prox.AddProperty('', 'Bar', 'bar')
+        self.prox = DBusProxy(self.obj, 'com.example.Simple')
+
+    def tearDown(self):
+        self.srv.terminate()
+        self.srv.wait()
 
     def test_method_working(self):
         """Test that valid method call via the .method member will succeed."""
-        self.assertTrue(
-            isinstance(self.proxy.method.Introspect(), dbus.String))
+        self.assertEqual(self.prox.method.Square(3), 9)
+        self.assertEqual(self.prox.method.Square(4), 16)
 
     def test_method_failing(self):
         """Test that invalid method call will result in correct exception."""
         try:
-            self.proxy.method.SurelyThisMethodDoesNotExistOnTheDBusObject()
-        except self.proxy.Exception:
+            self.prox.method.SurelyThisMethodDoesNotExistOnTheDBusObject()
+        except self.prox.Exception:
             pass
         else:
             assert False
 
-
-class TestDBusProperty(unittest.TestCase):
-    """
-    Test the DBusProxy.property member (class DBusProperty).
-
-    NOTE: this test may fail if org.freedesktop.hostname1 is not available.
-    If you can come up with any standard dbus object containing properties,
-    this test should be adapted!
-
-    """
-    def setUp(self):
-        self.bus = dbus.SystemBus()
-        self.obj = self.bus.get_object("org.freedesktop.hostname1",
-                                       "/org/freedesktop/hostname1")
-        self.proxy = DBusProxy(self.obj,
-                               "org.freedesktop.hostname1")
-
     def test_property_working(self):
-        """
-        Test that the attribute access works as expected.
-
-        This test may be somewhat risky:
-        Is the hostname well-defined enough?
-
-        """
-        self.assertEqual(
-            str(self.proxy.property.Hostname),
-            socket.gethostname())
+        """Test that the attribute access works as expected."""
+        self.assertEqual(str(self.prox.property.Foo), 'foo')
+        self.assertEqual(str(self.prox.property.Bar), 'bar')
 
     def test_property_failing(self):
         """Test that invalid property access will result in exception."""
         try:
-            self.proxy.property.SurelyThisPropertyDoesNotExistOnTheDBusObject
-        except self.proxy.Exception:
+            self.prox.property.SurelyThisPropertyDoesNotExistOnTheDBusObject
+        except self.prox.Exception:
             pass
         else:
             assert False

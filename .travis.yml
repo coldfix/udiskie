@@ -20,7 +20,6 @@ virtualenv:
 before_install:
   - sudo apt-get -qy update
   - sudo apt-get -qy install
-            ubuntu-system-service
             python-gobject python3-gobject
             python-dbus python3-dbus
 
@@ -36,6 +35,9 @@ before_install:
 install:
   # Manually build dependencies (but don't insist):
   # - PREFIX=$VIRTUAL_ENV ./build_requirements.sh || true
+
+  # For testing:
+  - pip install python-dbusmock
 
   # Install package
   - python setup.py sdist
