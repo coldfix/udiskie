@@ -116,11 +116,11 @@ class Mounter(object):
         log.info('attempting to unlock device %s' % (device,))
         try:
             device.unlock(password, [])
-            udisks = udisks or get_udisks()
-            holder_dev = udisks.create_device(device.luks_cleartext_holder)
+            holder_dev = self.udisks.create_device(
+                device.luks_cleartext_holder)
             holder_path = holder_dev.device_file
             log.info('unlocked device %s on %s' % (device, holder_path))
-        except udisks.Exception:
+        except self.udisks.Exception:
             err = sys.exc_info()[1]
             log.error('failed to unlock device %s:\n%s' % (device, err))
             return None
