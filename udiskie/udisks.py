@@ -30,12 +30,19 @@ class Device(DBusProxy):
     """
     # construction
     def __init__(self, bus, proxy):
+        """
+        Initialize an instance with the given dbus proxy object.
+
+        proxy must be an object acquired by a call to bus.get_object().
+
+        """
         self.log = logging.getLogger('udiskie.udisks.Device')
         super(Device, self).__init__(proxy, UDISKS_DEVICE_INTERFACE)
         self.bus = bus
 
     @classmethod
     def create(cls, bus, object_path):
+        """Find the object on the specified bus."""
         return cls(bus, bus.get_object(UDISKS_OBJECT, object_path))
 
     # string representation
@@ -81,11 +88,13 @@ class Device(DBusProxy):
 
     @property
     def mount_paths(self):
+        """Return list of active mount paths."""
         raw_paths = self.property.DeviceMountPaths
         return [os.path.normpath(path) for path in raw_paths]
 
     @property
     def device_file(self):
+        """The filesystem path of the device block file."""
         return os.path.normpath(self.property.DeviceFile)
 
     @property
@@ -141,15 +150,18 @@ class Device(DBusProxy):
 
     @property
     def id_uuid(self):
+        """Device UUID."""
         return self.property.IdUuid
 
     # methods
     def mount(self, filesystem=None, options=[]):
+        """Mount filesystem."""
         if filesystem is None:
             filesystem = self.id_type
         self.method.FilesystemMount(filesystem, options)
 
     def unmount(self, options=[]):
+        """Unmount filesystem."""
         self.method.FilesystemUnmount(options)
 
     def lock(self, options=[]):
@@ -163,14 +175,26 @@ class Device(DBusProxy):
 
 class Udisks(DBusProxy):
     """
+    Udisks dbus service wrapper.
+
+    This is a dbus proxy object to the org.freedesktop.UDisks interface of
+    the udisks service object.
+
     """
     # Construction
     def __init__(self, bus, proxy):
+        """
+        Initialize an instance with the given dbus proxy object.
+
+        proxy must be an object acquired by a call to bus.get_object().
+
+        """
         super(Udisks, self).__init__(proxy, UDISKS_INTERFACE)
         self.bus = bus
 
     @classmethod
     def create(cls, bus):
+        """Connect to the udisks service on the specified bus."""
         return cls(bus, bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH))
 
     # instantiation of device objects
