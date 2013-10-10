@@ -49,14 +49,53 @@ class Device(DBusProxy):
         return self.property.PartitionSlave
 
     @property
+    def is_partition(self):
+        """Check if the device has a partition slave."""
+        return self.property.DeviceIsPartition
+
+    @property
     def is_partition_table(self):
         """Check if the device is a partition table."""
         return self.property.DeviceIsPartitionTable
 
     @property
+    def is_drive(self):
+        """Check if the device is a drive."""
+        return self.property.DeviceIsDrive
+
+    @property
+    def drive(self):
+        """
+        Get the drive that owns this device.
+
+        The returned Device object is not guaranteed to be a drive.
+
+        """
+        if self.is_partition:
+            return self.create(self.bus, self.partition_slave).drive
+        else:
+            return self
+
+    @property
+    def is_detachable(self):
+        """Check if the drive that owns this device can be detached."""
+        drive = self.drive
+        return self.property.DriveCanDetach
+
+    @property
+    def is_ejectable(self):
+        """Check if the drive that owns this device can be ejected."""
+        return self.property.DriveIsMediaEjectable
+
+    @property
     def is_systeminternal(self):
         """Check if the device is internal."""
         return self.property.DeviceIsSystemInternal
+
+    @property
+    def is_external(self):
+        """Check if the device is external."""
+        return not self.is_systeminternal
 
     @property
     def is_handleable(self):
@@ -67,7 +106,7 @@ class Device(DBusProxy):
         filesystem or the device is a LUKS encrypted volume.
 
         """
-        return (self.is_filesystem or self.is_crypto) and not self.is_systeminternal
+        return (self.is_filesystem or self.is_crypto) and self.is_external
 
     @property
     def is_mounted(self):
@@ -159,6 +198,14 @@ class Device(DBusProxy):
     def unlock(self, password, options=[]):
         """Unlock Luks device."""
         return self.method.LuksUnlock(password, options)
+
+    def eject(self, options=[]):
+        """Eject media from the device."""
+        return self.method.DriveEject(options)
+
+    def detach(self, options=[]):
+        """Detach the device by e.g. powering down the physical port."""
+        return self.method.DriveDetach(options)
 
 
 class Udisks(DBusProxy):
