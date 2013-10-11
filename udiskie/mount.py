@@ -205,10 +205,16 @@ class Mounter(object):
         logger = logging.getLogger('udiskie.mount.eject_device')
         drive = device.drive
         if drive.is_drive and drive.is_ejectable:
-            if force:
-                return drive.eject(['unmount'])
-            else:
-                return drive.eject([])
+            try:
+                if force:
+                    drive.eject(['unmount'])
+                else:
+                    drive.eject([])
+                logger.info('ejected device %s' % (device,))
+                return True
+            except drive.Exception:
+                logger.warning('failed to eject device %s' % (device,))
+                return False
         else:
             logger.debug('drive not ejectable: %s' % drive)
             return False
@@ -220,7 +226,13 @@ class Mounter(object):
         if drive.is_drive and drive.is_detachable:
             if force:
                 self.remove_device(drive, force=True)
-            return drive.detach([])
+            try:
+                drive.detach([])
+                logger.info('detached device %s' % (device,))
+                return True
+            except drive.Exception:
+                logger.warning('failed to detach device %s' % (device,))
+                return False
         else:
             logger.debug('drive not detachable: %s' % drive)
             return False
@@ -243,18 +255,28 @@ class Mounter(object):
         """Eject all ejectable devices."""
         ejected = []
         for device in self.udisks.get_all():
-            if device.is_drive and device.is_external and device.is_ejectable:
-                if self.eject_device(device, force=True):
+            try:
+                if (device.is_drive and
+                    device.is_external and
+                    device.is_ejectable and
+                    eject_device(device, force=True)):
                     ejected.append(device)
+            except device.Exception:
+                pass
         return ejected
 
     def detach_all(self):
         """Detach all detachable devices."""
         detached = []
         for device in self.udisks.get_all():
-            if device.is_drive and device.is_external and device.is_detachable:
-                if self.detach_device(device, force=True):
+            try:
+                if (device.is_drive and
+                    device.is_external and
+                    device.is_detachable and
+                    self.detach_device(device, force=True)):
                     detached.append(device)
+            except device.Exception:
+                pass
         return detached
 
     # mount a holder/lock a slave
@@ -310,7 +332,7 @@ class Mounter(object):
                 return device
         return None
 
-    def unmount(self, path):
+    def unmount(self, path, force=False):
         """
         Unmount or lock a filesystem
 
@@ -323,12 +345,12 @@ class Mounter(object):
         device = self.udisks.get_device(path)
         if device:
             logger.debug('found device owning "%s": "%s"' % (path, device))
-            if self.remove_device(device):
+            if self.remove_device(device, force=force):
                 return device
         return None
 
     # eject media/detach drive
-    def eject(self, path):
+    def eject(self, path, force=False):
         """
         Eject media from the device.
 
@@ -340,13 +362,13 @@ class Mounter(object):
         device = self.udisks.get_device(path)
         if device:
             logger.debug('found device owning "%s": "%s"' % (path, device))
-            if self.eject_device(device):
+            if self.eject_device(device, force=force):
                 return device
         else:
             logger.warning('no found device owning "%s"' % (path))
             return None
 
-    def detach(self, path):
+    def detach(self, path, force=False):
         """
         Eject media from the device.
 
@@ -358,7 +380,7 @@ class Mounter(object):
         device = self.udisks.get_device(path)
         if device:
             logger.debug('found device owning "%s": "%s"' % (path, device))
-            if self.detach_device(device):
+            if self.detach_device(device, force=force):
                 return device
         else:
             logger.warning('no found device owning "%s"' % (path))
