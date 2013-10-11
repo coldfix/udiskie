@@ -266,13 +266,19 @@ class Udisks(DBusProxy):
         """Enumerate all device objects currently known to udisks."""
         return map(self.create_device, self.method.EnumerateDevices())
 
-    devices = property(get_all)
+    @property
+    def devices(self):
+        """List of all devices."""
+        return list(self.get_all())
 
     def get_all_handleable(self):
         """Enumerate all handleable devices currently known to udisks."""
         return (dev for dev in self.devices if dev.is_handleable)
 
-    handleable_devices = property(get_all_handleable)
+    @property
+    def handleable_devices(self):
+        """List of all handleable devices."""
+        return list(self.get_all_handleable())
 
     def get_device(self, path):
         """
