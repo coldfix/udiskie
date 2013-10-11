@@ -42,6 +42,15 @@ class Device(DBusProxy):
     def __str__(self):
         return self.object_path
 
+    def __eq__(self, other):
+        if isinstance(other, Device):
+            return self.object_path == other.object_path
+        else:
+            return self.object_path == str(other)
+
+    def __ne__(self, other):
+        return not (self == other)
+
     # properties
     @property
     def partition_slave(self):
@@ -160,10 +169,10 @@ class Device(DBusProxy):
         """Check whether the luks device is currently in use."""
         if not self.is_luks:
             return False
-        for device in Udisks(self.bus).get_all():
+        for device in Udisks.create(self.bus).get_all():
             if (not device.is_filesystem or device.is_mounted) and (
                     device.is_luks_cleartext and
-                    device.luks_cleartext_slave == self.proxy.object_path):
+                    device.luks_cleartext_slave == self.object_path):
                 return True
         return False
 
