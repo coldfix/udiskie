@@ -8,13 +8,13 @@ Name
 ----
 udiskie - automatic disk mounting service using udisks
 
-
 Synopsis
 --------
-'udiskie' [options]
+'udiskie' [-hvfPs]
 
-'udiskie-umount' [options|path]
+'udiskie-mount' [-hvfP] (-a | DEVICE...) 
 
+'udiskie-umount' [-hved] (-a | PATH...)
 
 Description
 -----------
@@ -23,20 +23,28 @@ Description
 Options
 -------
 *-h, \--help*::
-	Show help message and exit
+	Show help message and exit.
 
 *-v, \--verbose*::
-	Verbose output
+	Verbose output.
+
+*-f FILE, \--filters=<file>*::
+    Alternate filter configuration.
+
+*-P PROMPT, \--password-prompt=PROMPT*::
+	Password prompt to use for unlocking. Default is 'zenity'. This must be an executable that receives as its first two arguments the text and title to display and should print the password to its stdout.
 
 *-s, \--suppress*::
-	Suppress pop-up notifications
-
-*-f, \--filters FILE*::
-    Alternate filter configuration
+	Suppress pop-up notifications.
 
 *-a, \--all*::
-	Unmount all devices (only for *udiskie-umount*)
+	Mount or unmount all external devices.
 
+*-e, \--eject*::
+	Eject media from the drive.
+
+*-d, \--detach*::
+	Detach drive by e.g. powering down its physical port.
 
 Example Usage[[EU]]
 -------------------
@@ -44,10 +52,13 @@ Start *udiskie* in '~/.xinitrc':
 
 	udiskie &
 
-Unmount media:
+Unmount media and power down USB device:
 
-	udiskie-umount "/media/DEVICE NAME"
+	udiskie-umount --detach /media/Sticky
 
+Mount all media:
+
+	udiskie-mount /dev/sdb1
 
 Filters
 -------
@@ -64,7 +75,6 @@ uuid.9d53-13ba: noexec,nodev
 See Also
 --------
 linkman:udisks[1]
-
 
 Authors
 -------
