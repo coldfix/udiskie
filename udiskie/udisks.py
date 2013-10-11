@@ -82,6 +82,8 @@ class Device(DBusProxy):
         """
         if self.is_partition:
             return self.create(self.bus, self.partition_slave).drive
+        elif self.is_luks_cleartext:
+            return self.create(self.bus, self.luks_cleartext_slave).drive
         else:
             return self
 
