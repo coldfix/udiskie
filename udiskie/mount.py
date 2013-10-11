@@ -163,12 +163,12 @@ class Mounter(object):
         elif device.is_crypto:
             return self.unlock_device(device, prompt)
 
-    def remove_device(self, device, recursive=False):
+    def remove_device(self, device, force=False):
         """
         Unmount or lock the device depending on device type.
 
-        If `recursive` is True recursively unmount/unlock all devices that
-        this device is a root device of.
+        If `force` is True recursively unmount/unlock all devices that are
+        contained by this device.
 
         """
         logger = logging.getLogger('udiskie.mount.remove_device')
@@ -177,15 +177,15 @@ class Mounter(object):
         elif device.is_crypto:
             if not device.is_unlocked:
                 return False
-            if recursive:
+            if force:
                 self.remove_device(
                     device.create(device.bus, device.luks_cleartext_holder),
-                    recursive=True)
+                    force=True)
             return self.lock_device(device)
-        elif recursive and device.is_partition_table:
+        elif force and device.is_partition_table:
             for dev in self.udisks.get_all_handleable():
                 if dev.is_partition and dev.partition_slave == drive:
-                    ret = self.remove_device(dev, recursive=True)
+                    ret = self.remove_device(dev, force=True)
                     if ret is None:
                         success = None
                     else:
@@ -195,22 +195,26 @@ class Mounter(object):
             return False
 
     # eject/detach device
-    def eject_device(self, device):
+    def eject_device(self, device, force=False):
         """Eject a device after unmounting all its mounted filesystems."""
         logger = logging.getLogger('udiskie.mount.eject_device')
         drive = device.drive
         if drive.is_drive and drive.is_ejectable:
-            return drive.eject(['unmount'])
+            if force:
+                return drive.eject(['unmount'])
+            else:
+                return drive.eject([])
         else:
             logger.debug('drive not ejectable: %s' % drive)
             return False
 
-    def detach_device(self, device):
+    def detach_device(self, device, force=False):
         """Detach a device after unmounting all its mounted filesystems."""
         logger = logging.getLogger('udiskie.mount.eject_device')
         drive = device.drive
         if drive.is_drive and drive.is_detachable:
-            self.remove_device(device)
+            if force:
+                self.remove_device(drive, force=True)
             return drive.detach([])
         else:
             logger.debug('drive not detachable: %s' % drive)
@@ -235,7 +239,7 @@ class Mounter(object):
         ejected = []
         for device in self.udisks.get_all():
             if device.is_drive and not device.is_systeminternal:
-                if self.eject_device(device):
+                if self.eject_device(device, force=True):
                     ejected.append(device)
         return ejected
 
@@ -244,7 +248,7 @@ class Mounter(object):
         detached = []
         for device in self.udisks.get_all():
             if device.is_drive and not device.is_systeminternal:
-                if self.detach_device(device):
+                if self.detach_device(device, force=True):
                     detached.append(device)
         return detached
 
