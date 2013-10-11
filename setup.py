@@ -1,15 +1,28 @@
 # encoding: utf-8
 from setuptools import setup
-import sys
 
 # check availability of runtime dependencies
-try:
-    import dbus
-    import gobject
-    import pynotify
-except ImportError:
-    err = sys.exc_info()[1]
-    print("Missing runtime dependency: %s" % err)
+def check_any(*packages):
+    """Issue a warning if none of the packages is available."""
+    errors = []
+    for package in packages:
+        try:
+            __import__(package)
+            return True
+        except ImportError:
+            import sys
+            errors.append(sys.exc_info()[1])
+    if len(errors) == 1:
+        print("Missing runtime dependency: %s" % errors[0])
+    else:
+        print("Missing runtime dependencies:")
+        for err in errors:
+            print("\t%s" % err)
+    return False
+
+check_any('dbus')
+check_any('gobject')
+check_any('pynotify', 'notify2')
 
 # read long_description from README.rst
 try:
