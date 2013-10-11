@@ -49,11 +49,25 @@ class Device(DBusProxy):
     def __str__(self):
         return self.object_path
 
+    def __eq__(self, other):
+        if isinstance(other, Device):
+            return self.object_path == other.object_path
+        else:
+            return self.object_path == str(other)
+
+    def __ne__(self, other):
+        return not (self == other)
+
     # properties
     @property
     def partition_slave(self):
-        """Get the partition slave."""
-        return self.property.PartitionSlave
+        """Get the partition slave (container)."""
+        return self.property.PartitionSlave if self.is_partition else None
+
+    @property
+    def is_partition(self):
+        """Check if the device has a partition slave."""
+        return self.property.DeviceIsPartition
 
     @property
     def is_partition_table(self):
@@ -61,9 +75,44 @@ class Device(DBusProxy):
         return self.property.DeviceIsPartitionTable
 
     @property
+    def is_drive(self):
+        """Check if the device is a drive."""
+        return self.property.DeviceIsDrive
+
+    @property
+    def drive(self):
+        """
+        Get the drive containing this device.
+
+        The returned Device object is not guaranteed to be a drive.
+
+        """
+        if self.is_partition:
+            return self.create(self.bus, self.partition_slave).drive
+        elif self.is_luks_cleartext:
+            return self.create(self.bus, self.luks_cleartext_slave).drive
+        else:
+            return self
+
+    @property
+    def is_detachable(self):
+        """Check if the drive that owns this device can be detached."""
+        return self.property.DriveCanDetach if self.is_drive else None
+
+    @property
+    def is_ejectable(self):
+        """Check if the drive that owns this device can be ejected."""
+        return self.property.DriveIsMediaEjectable if self.is_drive else None
+
+    @property
     def is_systeminternal(self):
         """Check if the device is internal."""
         return self.property.DeviceIsSystemInternal
+
+    @property
+    def is_external(self):
+        """Check if the device is external."""
+        return not self.is_systeminternal
 
     @property
     def is_handleable(self):
@@ -74,7 +123,7 @@ class Device(DBusProxy):
         filesystem or the device is a LUKS encrypted volume.
 
         """
-        return (self.is_filesystem or self.is_crypto) and not self.is_systeminternal
+        return (self.is_filesystem or self.is_crypto) and self.is_external
 
     @property
     def is_mounted(self):
@@ -84,11 +133,13 @@ class Device(DBusProxy):
     @property
     def is_unlocked(self):
         """Check if device is already unlocked."""
-        return self.is_luks and self.luks_cleartext_holder
+        return self.luks_cleartext_holder if self.is_luks else None
 
     @property
     def mount_paths(self):
         """Return list of active mount paths."""
+        if not self.is_mounted:
+            return []
         raw_paths = self.property.DeviceMountPaths
         return [os.path.normpath(path) for path in raw_paths]
 
@@ -117,22 +168,22 @@ class Device(DBusProxy):
     @property
     def luks_cleartext_slave(self):
         """Get luks crypto device."""
-        return self.property.LuksCleartextSlave
+        return self.property.LuksCleartextSlave if self.is_luks_cleartext else None
 
     @property
     def luks_cleartext_holder(self):
         """Get unlocked luks cleartext device."""
-        return self.property.LuksHolder
+        return self.property.LuksHolder if self.is_luks else None
 
     @property
     def is_luks_cleartext_slave(self):
         """Check whether the luks device is currently in use."""
         if not self.is_luks:
             return False
-        for device in Udisks(self.bus).get_all():
+        for device in Udisks.create(self.bus).get_all():
             if (not device.is_filesystem or device.is_mounted) and (
                     device.is_luks_cleartext and
-                    device.luks_cleartext_slave == self.proxy.object_path):
+                    device.luks_cleartext_slave == self.object_path):
                 return True
         return False
 
@@ -172,6 +223,14 @@ class Device(DBusProxy):
         """Unlock Luks device."""
         return self.method.LuksUnlock(password, options)
 
+    def eject(self, options=[]):
+        """Eject media from the device."""
+        return self.method.DriveEject(options)
+
+    def detach(self, options=[]):
+        """Detach the device by e.g. powering down the physical port."""
+        return self.method.DriveDetach(options)
+
 
 class Udisks(DBusProxy):
     """
@@ -205,14 +264,15 @@ class Udisks(DBusProxy):
     # Methods
     def get_all(self):
         """Enumerate all device objects currently known to udisks."""
-        for path in self.method.EnumerateDevices():
-            yield self.create_device(path)
+        return map(self.create_device, self.method.EnumerateDevices())
+
+    devices = property(get_all)
 
     def get_all_handleable(self):
         """Enumerate all handleable devices currently known to udisks."""
-        for device in self.get_all():
-            if device.is_handleable:
-                yield device
+        return (dev for dev in self.devices if dev.is_handleable)
+
+    handleable_devices = property(get_all_handleable)
 
     def get_device(self, path):
         """

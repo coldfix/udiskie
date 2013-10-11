@@ -175,6 +175,12 @@ def umount(args=None, udisks=None):
     parser.add_option('-a', '--all', action='store_true',
                       dest='all', default=False,
                       help='all devices')
+    parser.add_option('-e', '--eject', action='store_true',
+                      dest='eject', default=False,
+                      help='Eject drive')
+    parser.add_option('-d', '--detach', action='store_true',
+                      dest='detach', default=False,
+                      help='Detach drive')
     (options, posargs) = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
 
@@ -189,14 +195,28 @@ def umount(args=None, udisks=None):
         udisks = connect_udisks(bus)
     mounter = udiskie.mount.Mounter(udisks=udisks)
 
+    unmounted = []
     if options.all:
-        unmounted = mounter.unmount_all()
+        if options.eject or options.detach:
+            if options.eject:
+                mounter.eject_all()
+            if options.detach:
+                mounter.detach_all()
+        else:
+            unmounted = mounter.unmount_all()
     else:
         unmounted = []
         for path in posargs:
-            device = mounter.unmount(os.path.normpath(path))
-            if device:
-                unmounted.append(device)
+            if options.eject or options.detach:
+                path = os.path.normpath(path)
+                if options.eject:
+                    mounter.eject(path)
+                if options.detach:
+                    mounter.detach(path)
+            else:
+                device = mounter.unmount(os.path.normpath(path))
+                if device:
+                    unmounted.append(device)
 
     # automatically lock unused luks slaves of unmounted devices
     for device in unmounted:
