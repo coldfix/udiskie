@@ -75,7 +75,7 @@ class Device(DBusProxy):
     @property
     def drive(self):
         """
-        Get the drive that owns this device.
+        Get the drive containing this device.
 
         The returned Device object is not guaranteed to be a drive.
 
@@ -230,6 +230,7 @@ class Udisks(DBusProxy):
 
     @classmethod
     def create(cls, bus):
+        """Conect to udisks bus."""
         return cls(bus, bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH))
 
     # instantiation of device objects
@@ -240,14 +241,15 @@ class Udisks(DBusProxy):
     # Methods
     def get_all(self):
         """Enumerate all device objects currently known to udisks."""
-        for path in self.method.EnumerateDevices():
-            yield self.create_device(path)
+        return map(self.create_device, self.method.EnumerateDevices())
+
+    devices = property(get_all)
 
     def get_all_handleable(self):
         """Enumerate all handleable devices currently known to udisks."""
-        for device in self.get_all():
-            if device.is_handleable:
-                yield device
+        return (dev for dev in self.devices if dev.is_handleable)
+
+    handleable_devices = property(get_all_handleable)
 
     def get_device(self, path):
         """

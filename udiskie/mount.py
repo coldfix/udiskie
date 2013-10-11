@@ -240,7 +240,7 @@ class Mounter(object):
         """Eject all ejectable devices."""
         ejected = []
         for device in self.udisks.get_all():
-            if device.is_drive and not device.is_systeminternal:
+            if device.is_drive and device.is_external and device.is_ejectable:
                 if self.eject_device(device, force=True):
                     ejected.append(device)
         return ejected
@@ -249,7 +249,7 @@ class Mounter(object):
         """Detach all detachable devices."""
         detached = []
         for device in self.udisks.get_all():
-            if device.is_drive and not device.is_systeminternal:
+            if device.is_drive and device.is_external and device.is_detachable:
                 if self.detach_device(device, force=True):
                     detached.append(device)
         return detached
