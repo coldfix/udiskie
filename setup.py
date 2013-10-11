@@ -34,7 +34,7 @@ except IOError:
 
 setup(
     name='udiskie',
-    version='0.5.1',
+    version='0.5.2',
     description='Removable disk automounter for udisks',
     long_description=long_description,
     author='Byron Clark',
