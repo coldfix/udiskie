@@ -201,9 +201,9 @@ def umount(args=None):
             if options.eject or options.detach:
                 path = os.path.normpath(path)
                 if options.eject:
-                    mounter.eject(path)
+                    mounter.eject(path, force=True)
                 if options.detach:
-                    mounter.detach(path)
+                    mounter.detach(path, force=True)
             else:
                 device = mounter.unmount(os.path.normpath(path))
                 if device:

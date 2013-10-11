@@ -329,7 +329,7 @@ class Mounter(object):
                 return device
         return None
 
-    def unmount(self, path):
+    def unmount(self, path, force=False):
         """
         Unmount or lock a filesystem
 
@@ -342,12 +342,12 @@ class Mounter(object):
         device = self.udisks.get_device(path)
         if device:
             logger.debug('found device owning "%s": "%s"' % (path, device))
-            if self.remove_device(device):
+            if self.remove_device(device, force=force):
                 return device
         return None
 
     # eject media/detach drive
-    def eject(self, path):
+    def eject(self, path, force=False):
         """
         Eject media from the device.
 
@@ -359,13 +359,13 @@ class Mounter(object):
         device = self.udisks.get_device(path)
         if device:
             logger.debug('found device owning "%s": "%s"' % (path, device))
-            if self.eject_device(device):
+            if self.eject_device(device, force=force):
                 return device
         else:
             logger.warning('no found device owning "%s"' % (path))
             return None
 
-    def detach(self, path):
+    def detach(self, path, force=False):
         """
         Eject media from the device.
 
@@ -377,7 +377,7 @@ class Mounter(object):
         device = self.udisks.get_device(path)
         if device:
             logger.debug('found device owning "%s": "%s"' % (path, device))
-            if self.detach_device(device):
+            if self.detach_device(device, force=force):
                 return device
         else:
             logger.warning('no found device owning "%s"' % (path))
