@@ -202,10 +202,16 @@ class Mounter(object):
         logger = logging.getLogger('udiskie.mount.eject_device')
         drive = device.drive
         if drive.is_drive and drive.is_ejectable:
-            if force:
-                return drive.eject(['unmount'])
-            else:
-                return drive.eject([])
+            try:
+                if force:
+                    drive.eject(['unmount'])
+                else:
+                    drive.eject([])
+                logger.info('ejected device %s' % (device,))
+                return True
+            except drive.Exception:
+                logger.warning('failed to eject device %s' % (device,))
+                return False
         else:
             logger.debug('drive not ejectable: %s' % drive)
             return False
@@ -217,7 +223,13 @@ class Mounter(object):
         if drive.is_drive and drive.is_detachable:
             if force:
                 self.remove_device(drive, force=True)
-            return drive.detach([])
+            try:
+                drive.detach([])
+                logger.info('detached device %s' % (device,))
+                return True
+            except drive.Exception:
+                logger.warning('failed to detach device %s' % (device,))
+                return False
         else:
             logger.debug('drive not detachable: %s' % drive)
             return False
