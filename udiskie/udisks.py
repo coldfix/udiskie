@@ -45,8 +45,8 @@ class Device(DBusProxy):
     # properties
     @property
     def partition_slave(self):
-        """Get the partition slave."""
-        return self.property.PartitionSlave
+        """Get the partition slave (container)."""
+        return self.property.PartitionSlave if self.is_partition else None
 
     @property
     def is_partition(self):
@@ -79,13 +79,12 @@ class Device(DBusProxy):
     @property
     def is_detachable(self):
         """Check if the drive that owns this device can be detached."""
-        drive = self.drive
-        return self.property.DriveCanDetach
+        return self.property.DriveCanDetach if self.is_drive else None
 
     @property
     def is_ejectable(self):
         """Check if the drive that owns this device can be ejected."""
-        return self.property.DriveIsMediaEjectable
+        return self.property.DriveIsMediaEjectable if self.is_drive else None
 
     @property
     def is_systeminternal(self):
@@ -116,10 +115,12 @@ class Device(DBusProxy):
     @property
     def is_unlocked(self):
         """Check if device is already unlocked."""
-        return self.is_luks and self.luks_cleartext_holder
+        return self.luks_cleartext_holder if self.is_luks else None
 
     @property
     def mount_paths(self):
+        if not self.is_mounted:
+            return []
         raw_paths = self.property.DeviceMountPaths
         return [os.path.normpath(path) for path in raw_paths]
 
@@ -147,12 +148,12 @@ class Device(DBusProxy):
     @property
     def luks_cleartext_slave(self):
         """Get luks crypto device."""
-        return self.property.LuksCleartextSlave
+        return self.property.LuksCleartextSlave if self.is_luks_cleartext else None
 
     @property
     def luks_cleartext_holder(self):
         """Get unlocked luks cleartext device."""
-        return self.property.LuksHolder
+        return self.property.LuksHolder if self.is_luks else None
 
     @property
     def is_luks_cleartext_slave(self):
