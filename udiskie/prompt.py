@@ -6,7 +6,6 @@ __all__ = ['password']
 import subprocess
 from distutils.spawn import find_executable
 
-
 def password(prompt_name):
     """
     Create a password prompt function.
@@ -37,7 +36,7 @@ def password(prompt_name):
 
     def password_prompt(text, title):
         try:
-            return doprompt(text, title).rstrip('\n')
+            return doprompt(text, title).decode('utf-8').rstrip('\n')
         except subprocess.CalledProcessError:
             return None
 
