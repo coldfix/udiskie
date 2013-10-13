@@ -10,7 +10,7 @@ udiskie - automatic disk mounting service using udisks
 
 Synopsis
 --------
-'udiskie' [-hvfPs]
+'udiskie' [-hvfPst]
 
 'udiskie-mount' [-hvfP] (-a | DEVICE...) 
 
@@ -36,6 +36,9 @@ Options
 
 *-s, \--suppress*::
 	Suppress pop-up notifications.
+
+*-s, \--tray*::
+	Show tray icon.
 
 *-a, \--all*::
 	Mount or unmount all external devices.

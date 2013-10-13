@@ -2,9 +2,10 @@
 udiskie
 =======
 
-udiskie is a simple daemon that uses udisks_ to automatically mount removable
-storage devices. It also provides a user level CLI for mount and unmount
-operations.
+udiskie is a simple daemon that uses udisks_ to automatically mount
+removable storage devices. This daemon comes with optional mount
+notifications and gtk tray icon. It also provides a user level CLI for mount
+and unmount operations.
 
 .. _udisks: http://www.freedesktop.org/wiki/Software/udisks
 
@@ -54,7 +55,7 @@ This configuration allows all members of the storage group to run udiskie.
 Alternatively, change the setting for ``allow_inactive`` to *yes* in the
 file ``/usr/share/polkit-1/actions/org.freedesktop.udisks.policy``:
 
-::
+.. code-block:: xml
 
     <action id="org.freedesktop.udisks.filesystem-mount">
         ...
