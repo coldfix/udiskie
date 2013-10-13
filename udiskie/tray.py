@@ -52,7 +52,7 @@ def create_menu(udisks=None,
     if mounter is None:
         from udiskie.mount import Mounter
         from udiskie.prompt import password
-        mounter = Mounter(prompt=password, udisks=udisks)
+        mounter = Mounter(prompt=password(), udisks=udisks)
 
     setdefault(icons, {
         'mount': gtk.STOCK_APPLY,

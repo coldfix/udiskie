@@ -6,7 +6,7 @@ __all__ = ['password']
 import subprocess
 from distutils.spawn import find_executable
 
-def password(prompt_name):
+def password(prompt_name='zenity'):
     """
     Create a password prompt function.
     """
