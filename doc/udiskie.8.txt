@@ -12,7 +12,7 @@ Synopsis
 --------
 'udiskie' [-hvfPst]
 
-'udiskie-mount' [-hvfP] (-a | DEVICE...) 
+'udiskie-mount' [-hvfP] (-a | DEVICE...)
 
 'udiskie-umount' [-hved] (-a | PATH...)
 
@@ -49,6 +49,24 @@ Options
 *-d, \--detach*::
 	Detach drive by e.g. powering down its physical port.
 
+Dependencies
+------------
+
+*dbus-python*::
+	required for all operation modes.
+
+*PyGObject*::
+	to run the automount/notification daemon (provides the main loop)
+
+*notify-python* or *notify2*::
+	for mount notifications
+
+*zenity*::
+	to unlock LUKS devices
+
+*PyGTK*::
+	to show the system tray icon
+
 Example Usage[[EU]]
 -------------------
 Start *udiskie* in '~/.xinitrc':
@@ -78,6 +96,18 @@ uuid.9d53-13ba: noexec,nodev
 See Also
 --------
 linkman:udisks[1]
+
+http://dbus.freedesktop.org/releases/dbus-python
+
+http://ftp.gnome.org/pub/gnome/sources/pygobject/
+
+http://www.galago-project.org/files/releases/source/notify-python
+
+https://pypi.python.org/pypi/notify2
+
+http://freecode.com/projects/zenity
+
+http://www.pygtk.org
 
 Authors
 -------
