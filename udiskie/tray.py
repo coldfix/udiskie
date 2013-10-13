@@ -1,8 +1,15 @@
 """
 Tray icon for udiskie.
 """
+__all__ = ['create_menu',
+           'create_statusicon',
+           'connect_statusicon',
+           'main']
+
 import gtk
 from functools import partial
+from collections import namedtuple
+from itertools import chain
 
 
 def setdefault(self, other):
@@ -11,11 +18,111 @@ def setdefault(self, other):
         self.setdefault(k, v)
 
 
+TreeNode = namedtuple('TreeNode',
+                      ['root', 'branches',
+                       'device', 'label', 'methods'])
+Action = namedtuple('Action', ['label', 'device', 'method'])
+Branch = namedtuple('Branch', ['label', 'groups'])
+
+
+def device_tree(udisks):
+    """
+    Return the device hierarchy as list of TreeNodes
+    """
+    devices = {}
+    rootnode = TreeNode(None, [], None, "", [])
+
+    def find_node(object_path):
+        if object_path in devices:
+            return devices[object_path]
+        else:
+            return mknode(udisks.create_device(object_path))
+
+    def mknode(device):
+        # methods
+        methods = []
+        label = device.device_file
+        if device.is_filesystem:
+            if device.is_mounted:
+                methods.append('unmount')
+                label = device.mount_paths[0]
+            else:
+                methods.append('mount')
+        elif device.is_crypto:
+            if device.is_unlocked:
+                methods.append('lock')
+            else:
+                methods.append('unlock')
+        if device.is_ejectable:
+            methods.append('eject')
+        if device.is_detachable:
+            methods.append('detach')
+
+        # root
+        if device.is_partition:
+            root = find_node(device.partition_slave)
+        elif device.is_luks_cleartext:
+            root = find_node(device.luks_cleartext_slave)
+        else:
+            root = rootnode
+
+        node = TreeNode(root, [], device, label, methods)
+        devices[device.object_path] = node
+        root.branches.append(node)
+        return node
+
+    for device in udisks.get_all_handleable():
+        if device.object_path not in devices:
+            mknode(device)
+
+    return rootnode
+
+def simple_menu(node):
+    return Branch(
+        label=node.label,
+        groups=[
+            [flatten_menu(branch)
+             for branch in node.branches],
+            [Action(node.label, node.device, method)
+             for method in node.methods],
+        ])
+
+def flat_menu(node):
+    def actions(node, presentation):
+        return [Action(presentation, node.device, method)
+                for method in node.methods]
+
+    def leaves(node, outer_methods, presentation):
+        if not presentation or (node.device.is_mounted or
+                                not node.device.is_luks_cleartext):
+            presentation = node.label
+        if node.branches:
+            return chain.from_iterable(
+                leaves(branch,
+                       actions(node, presentation) + outer_methods,
+                       presentation)
+                for branch in node.branches)
+        elif len(node.methods) + len(outer_methods) > 0:
+            return Branch(
+                label=presentation,
+                groups=[list(chain(actions(node,
+                                           presentation),
+                                   outer_methods))]),
+        else:
+            return ()
+
+    return Branch(
+        label=node.label,
+        groups=[list(leaves(node, [], ""))])
+
+
 def create_menu(udisks=None,
                 mounter=None,
                 labels={},
                 icons={},
-                actions={}):
+                actions={},
+                style=flat_menu,
+                flat=False):
     """
     Create menu for udiskie mount operations.
 
@@ -24,6 +131,7 @@ def create_menu(udisks=None,
     :param dict labels: Labels for menu items
     :param dict icons: Icons for menu items
     :param dict actions: Actions for menu items
+    :param bool flat: Create a flattened menu
 
     If either ``udisks`` and or ``mounter`` is ``None`` default versions
     will be imported from the udiskie package.
@@ -52,7 +160,7 @@ def create_menu(udisks=None,
     if mounter is None:
         from udiskie.mount import Mounter
         from udiskie.prompt import password
-        mounter = Mounter(prompt=password, udisks=udisks)
+        mounter = Mounter(prompt=password(), udisks=udisks)
 
     setdefault(icons, {
         'mount': gtk.STOCK_APPLY,
@@ -104,48 +212,29 @@ def create_menu(udisks=None,
             icons[action],
             lambda _: actions[action](*bind))
 
-    # create menu items for these actions
-    menu = gtk.Menu()
-    for device in udisks.get_all_handleable():
-        submenu = gtk.Menu()
+    def mkmenu(menu_node):
+        menu = gtk.Menu()
+        separate = False
+        for group in menu_node.groups:
+            if len(group) > 0:
+                if separate:
+                    menu.append(gtk.SeparatorMenuItem())
+                separate = True
+            for node in group:
+                if isinstance(node, Action):
+                    menu.append(item(
+                        node.method,
+                        feed=[node.label],
+                        bind=[node.device]))
+                else:
+                    menu.append(create_menuitem(
+                        node.label,
+                        icon=None,
+                        onclick=mkmenu(node)))
+        return menu
 
-        # primary operation:
-        display = device.device_file
-        if device.is_filesystem:
-            if device.is_mounted:
-                action = 'unmount'
-                display = device.mount_paths[0]
-            else:
-                action = 'mount'
-        elif device.is_crypto:
-            if device.is_unlocked:
-                action = 'lock'
-            else:
-                action = 'unlock'
-        submenu.append(item(
-            action, 
-            feed=[display],
-            bind=[device]))
-
-        # additional operations
-        drive = device.drive
-        if actions['eject'] and drive.is_ejectable:
-            submenu.append(item(
-                'eject',
-                feed=[drive.device_file],
-                bind=[drive]))
-
-        if actions['detach'] and drive.is_detachable:
-            submenu.append(item(
-                'detach',
-                feed=[drive.device_file],
-                bind=[drive]))
-
-        # append the submenu
-        menu.append(create_menuitem(
-            display,
-            icons[action],
-            onclick=submenu))
+    # create udisks actions items
+    menu = mkmenu(flat_menu(device_tree(udisks)))
 
     # append menu item for closing the application
     if actions['quit']:
