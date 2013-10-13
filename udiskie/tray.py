@@ -128,17 +128,18 @@ def create_menu(udisks=None,
             bind=[device]))
 
         # additional operations
-        if actions['eject'] and device.is_ejectable:
+        drive = device.drive
+        if actions['eject'] and drive.is_ejectable:
             submenu.append(item(
                 'eject',
-                feed=[device.drive.device_file],
-                bind=[device.drive]))
+                feed=[drive.device_file],
+                bind=[drive]))
 
-        if actions['detach'] and device.is_detachable:
+        if actions['detach'] and drive.is_detachable:
             submenu.append(item(
                 'detach',
-                feed=[device.drive.device_file],
-                bind=[device.drive]))
+                feed=[drive.device_file],
+                bind=[drive]))
 
         # append the submenu
         menu.append(create_menuitem(
