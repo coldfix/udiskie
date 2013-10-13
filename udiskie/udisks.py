@@ -51,6 +51,15 @@ class Device(DBusProxy):
     def __ne__(self, other):
         return not (self == other)
 
+    # check if the device is a valid udisks object
+    @property
+    def is_valid(self):
+        try:
+            self.property.DeviceFile
+            return True
+        except self.Exception:
+            return False
+
     # properties
     @property
     def partition_slave(self):
@@ -240,16 +249,27 @@ class Udisks(DBusProxy):
 
     # Methods
     def get_all(self):
-        """Enumerate all device objects currently known to udisks."""
-        return map(self.create_device, self.method.EnumerateDevices())
+        """
+        Enumerate all device objects currently known to udisks.
 
-    devices = property(get_all)
+        NOTE: returns only devices that are still valid. This protects from
+        race conditions inside udiskie.
+
+        """
+        for object_path in self.method.EnumerateDevices():
+            dev = self.create_device(object_path)
+            if dev.is_valid:
+                yield dev
 
     def get_all_handleable(self):
-        """Enumerate all handleable devices currently known to udisks."""
-        return (dev for dev in self.devices if dev.is_handleable)
+        """
+        Enumerate all handleable devices currently known to udisks.
 
-    handleable_devices = property(get_all_handleable)
+        NOTE: returns only devices that are still valid. This protects from
+        race conditions inside udiskie.
+
+        """
+        return (dev for dev in self.get_all() if dev.is_handleable)
 
     def get_device(self, path):
         """
