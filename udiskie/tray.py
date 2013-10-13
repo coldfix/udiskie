@@ -1,14 +1,78 @@
 """
 Tray icon for udiskie.
 """
+__all__ = ['create_menu',
+           'create_statusicon',
+           'connect_statusicon',
+           'main']
+
 import gtk
 from functools import partial
+from collections import namedtuple
 
 
 def setdefault(self, other):
     """Merge two dictionaries like .update() but don't overwrite values."""
     for k,v in other.items():
         self.setdefault(k, v)
+
+
+TreeNode = namedtuple('TreeNode',
+                      ['root', 'branches',
+                       'device', 'label', 'methods'])
+
+
+def device_tree(udisks):
+    """
+    Return the device hierarchy as list of TreeNodes
+    """
+    devices = {}
+
+    def find_node(object_path):
+        if object_path in devices:
+            return devices[object_path]
+        else:
+            return mknode(udisks.create_device(object_path))
+
+    def mknode(device):
+        # methods
+        methods = []
+        label = device.device_file
+        if device.is_filesystem:
+            if device.is_mounted:
+                methods.append('unmount')
+                label = device.mount_paths[0]
+            else:
+                methods.append('mount')
+        elif device.is_crypto:
+            if device.is_unlocked:
+                methods.append('lock')
+            else:
+                methods.append('unlock')
+        if device.is_ejectable:
+            methods.append('eject')
+        if device.is_detachable:
+            methods.append('detach')
+
+        # root
+        if device.is_partition:
+            root = find_node(device.partition_slave)
+        elif device.is_luks_cleartext:
+            root = find_node(device.luks_cleartext_slave)
+        else:
+            root = None
+
+        node = TreeNode(root, [], device, label, methods)
+        devices[device.object_path] = node
+        if root:
+            root.branches.append(node)
+        return node
+
+    for device in udisks.get_all_handleable():
+        if device.object_path not in devices:
+            mknode(device)
+
+    return list(dev for _,dev in devices.items() if dev.root is None)
 
 
 def create_menu(udisks=None,
@@ -104,48 +168,30 @@ def create_menu(udisks=None,
             icons[action],
             lambda _: actions[action](*bind))
 
+    def insert_submenu(menu, node):
+        if len(node.branches) + len(node.methods) > 1:
+            submenu = gtk.Menu()
+        else:
+            submenu = menu
+        for branch in node.branches:
+            insert_submenu(submenu, branch)
+        if len(node.branches) > 0 and len(node.methods) > 0:
+            submenu.append(gtk.SeparatorMenuItem())
+        for method in node.methods:
+            submenu.append(item(
+                method,
+                feed=[node.label],
+                bind=[node.device]))
+        if submenu is not menu:
+            menu.append(create_menuitem(
+                node.label,
+                icon=None,
+                onclick=submenu))
+
     # create menu items for these actions
     menu = gtk.Menu()
-    for device in udisks.get_all_handleable():
-        submenu = gtk.Menu()
-
-        # primary operation:
-        display = device.device_file
-        if device.is_filesystem:
-            if device.is_mounted:
-                action = 'unmount'
-                display = device.mount_paths[0]
-            else:
-                action = 'mount'
-        elif device.is_crypto:
-            if device.is_unlocked:
-                action = 'lock'
-            else:
-                action = 'unlock'
-        submenu.append(item(
-            action, 
-            feed=[display],
-            bind=[device]))
-
-        # additional operations
-        drive = device.drive
-        if actions['eject'] and drive.is_ejectable:
-            submenu.append(item(
-                'eject',
-                feed=[drive.device_file],
-                bind=[drive]))
-
-        if actions['detach'] and drive.is_detachable:
-            submenu.append(item(
-                'detach',
-                feed=[drive.device_file],
-                bind=[drive]))
-
-        # append the submenu
-        menu.append(create_menuitem(
-            display,
-            icons[action],
-            onclick=submenu))
+    for root in device_tree(udisks):
+        insert_submenu(menu, root)
 
     # append menu item for closing the application
     if actions['quit']:
