@@ -255,28 +255,22 @@ class Mounter(object):
         """Eject all ejectable devices."""
         ejected = []
         for device in self.udisks.get_all():
-            try:
-                if (device.is_drive and
-                    device.is_external and
-                    device.is_ejectable and
-                    eject_device(device, force=True)):
-                    ejected.append(device)
-            except device.Exception:
-                pass
+            if (device.is_drive and
+                device.is_external and
+                device.is_ejectable and
+                eject_device(device, force=True)):
+                ejected.append(device)
         return ejected
 
     def detach_all(self):
         """Detach all detachable devices."""
         detached = []
         for device in self.udisks.get_all():
-            try:
-                if (device.is_drive and
-                    device.is_external and
-                    device.is_detachable and
-                    self.detach_device(device, force=True)):
-                    detached.append(device)
-            except device.Exception:
-                pass
+            if (device.is_drive and
+                device.is_external and
+                device.is_detachable and
+                self.detach_device(device, force=True)):
+                detached.append(device)
         return detached
 
     # mount a holder/lock a slave
