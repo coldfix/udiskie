@@ -23,6 +23,7 @@ def check_any(*packages):
 check_any('dbus')
 check_any('gobject')
 check_any('pynotify', 'notify2')
+check_any('gtk')
 
 # read long_description from README.rst
 try:
@@ -63,6 +64,7 @@ setup(
         # Currently not building out of the box:
         # 'PyGObject',
         # 'dbus-python',
+        # 'pygtk>=2.10',
     ],
     tests_require=[
         'python-dbusmock>=0.7.2'

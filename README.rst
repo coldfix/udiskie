@@ -2,9 +2,10 @@
 udiskie
 =======
 
-udiskie is a simple daemon that uses udisks_ to automatically mount removable
-storage devices. It also provides a user level CLI for mount and unmount
-operations.
+udiskie is a simple daemon that uses udisks_ to automatically mount
+removable storage devices. This daemon comes with optional mount
+notifications and gtk tray icon. It also provides a user level CLI for mount
+and unmount operations.
 
 .. _udisks: http://www.freedesktop.org/wiki/Software/udisks
 
@@ -16,12 +17,14 @@ Dependencies
 - pygobject_ to run the automount/notification daemon (provides the main loop)
 - notify-python_ or notify2_ for mount notifications
 - zenity_ to unlock LUKS devices
+- pygtk_ to show the system tray icon
 
 .. _dbus-python: http://dbus.freedesktop.org/releases/dbus-python/
 .. _pygobject: http://ftp.gnome.org/pub/gnome/sources/pygobject/
 .. _notify-python: http://www.galago-project.org/files/releases/source/notify-python/
 .. _notify2: https://pypi.python.org/pypi/notify2
 .. _zenity: http://freecode.com/projects/zenity
+.. _pygtk: http://www.pygtk.org
 
 
 Permissions
@@ -52,7 +55,7 @@ This configuration allows all members of the storage group to run udiskie.
 Alternatively, change the setting for ``allow_inactive`` to *yes* in the
 file ``/usr/share/polkit-1/actions/org.freedesktop.udisks.policy``:
 
-::
+.. code-block:: xml
 
     <action id="org.freedesktop.udisks.filesystem-mount">
         ...

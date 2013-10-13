@@ -14,22 +14,16 @@ warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
 import os
 import logging
-
-import udiskie.match
-import udiskie.mount
-import udiskie.prompt
-import udiskie.notify
-import udiskie.automount
-import udiskie.daemon
+from functools import partial
 
 CONFIG_PATH = 'udiskie/filters.conf'
-
 
 #----------------------------------------
 # Utility functions
 #----------------------------------------
 def load_filter(filter_file=None):
     """Load mount option filters."""
+    import udiskie.match
     if not filter_file:
         try:
             from xdg.BaseDirectory import xdg_config_home
@@ -81,32 +75,42 @@ def daemon(args=None, udisks=None):
     """
     Execute udiskie as a daemon.
     """
+    import gobject
+    import udiskie.automount
+    import udiskie.daemon
+    import udiskie.mount
+    import udiskie.prompt
+
     parser = mount_program_options()
     parser.add_option('-s', '--suppress', action='store_true',
                       dest='suppress_notify', default=False,
                       help='suppress popup notifications')
+    parser.add_option('-t', '--tray', action='store_true',
+                      dest='tray', default=False,
+                      help='show tray icon')
     options, posargs = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
-
-    # establish connection to system bus
-    from dbus.mainloop.glib import DBusGMainLoop
-    import gobject
-    DBusGMainLoop(set_as_default=True)
 
     # for now: just use the default udisks
     if udisks is None:
         import dbus
+        from dbus.mainloop.glib import DBusGMainLoop
+        DBusGMainLoop(set_as_default=True)
         bus = dbus.SystemBus()
         udisks = connect_udisks(bus)
+
+    # create daemon
+    daemon = udiskie.daemon.Daemon(udisks=udisks)
+    mainloop = gobject.MainLoop()
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
     filter = load_filter(options.filters)
     mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=udisks)
 
-    # run udiskie daemon if needed
-    daemon = udiskie.daemon.Daemon(udisks=udisks)
+    # notifications (optional):
     if not options.suppress_notify:
+        import udiskie.notify
         try:
             import notify2 as notify_service
         except ImportError:
@@ -114,12 +118,24 @@ def daemon(args=None, udisks=None):
         notify_service.init('udiskie.mount')
         notify = udiskie.notify.Notify(notify_service)
         daemon.connect(notify)
+
+    # tray icon (optional):
+    if options.tray:
+        import udiskie.tray
+        create_menu = partial(udiskie.tray.create_menu,
+                              udisks=udisks,
+                              mounter=mounter,
+                              actions={'quit': mainloop.quit})
+        statusicon = udiskie.tray.create_statusicon()
+        connection = udiskie.tray.connect_statusicon(statusicon, create_menu)
+
+    # automounter
     automount = udiskie.automount.AutoMounter(mounter)
     daemon.connect(automount)
 
     mounter.mount_all()
     try:
-        return gobject.MainLoop().run()
+        return mainloop.run()
     except KeyboardInterrupt:
         return 0
 
@@ -127,6 +143,9 @@ def mount(args=None, udisks=None):
     """
     Execute the mount command.
     """
+    import udiskie.mount
+    import udiskie.prompt
+
     parser = mount_program_options()
     parser.add_option('-a', '--all', action='store_true',
                       dest='all', default=False,
@@ -171,6 +190,8 @@ def umount(args=None, udisks=None):
     """
     Execute the umount command.
     """
+    import udiskie.mount
+
     parser = common_program_options()
     parser.add_option('-a', '--all', action='store_true',
                       dest='all', default=False,
