@@ -16,12 +16,14 @@ Dependencies
 - pygobject_ to run the automount/notification daemon (provides the main loop)
 - notify-python_ or notify2_ for mount notifications
 - zenity_ to unlock LUKS devices
+- pygtk_ to show the system tray icon
 
 .. _dbus-python: http://dbus.freedesktop.org/releases/dbus-python/
 .. _pygobject: http://ftp.gnome.org/pub/gnome/sources/pygobject/
 .. _notify-python: http://www.galago-project.org/files/releases/source/notify-python/
 .. _notify2: https://pypi.python.org/pypi/notify2
 .. _zenity: http://freecode.com/projects/zenity
+.. _pygtk: http://www.pygtk.org
 
 
 Permissions
