@@ -2,6 +2,7 @@
 Tray icon for udiskie.
 """
 import gtk
+from functools import partial
 
 
 def setdefault(self, other):
@@ -75,9 +76,9 @@ def create_menu(udisks=None,
         'mount': mounter.mount_device,
         'unmount': mounter.unmount_device,
         'unlock': mounter.unlock_device,
-        'lock': mounter.lock_device,
-        'eject': mounter.eject_device,
-        'detach': mounter.detach_device,
+        'lock': partial(mounter.remove_device, force=True),
+        'eject': partial(mounter.eject_device, force=True),
+        'detach': partial(mounter.detach_device, force=True),
         'quit': gtk.main_quit, })
 
     def create_menuitem(label, icon, onclick):
