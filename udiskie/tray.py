@@ -9,6 +9,7 @@ __all__ = ['create_menu',
 import gtk
 from functools import partial
 from collections import namedtuple
+from itertools import chain
 
 
 def setdefault(self, other):
@@ -20,6 +21,8 @@ def setdefault(self, other):
 TreeNode = namedtuple('TreeNode',
                       ['root', 'branches',
                        'device', 'label', 'methods'])
+Action = namedtuple('Action', ['label', 'device', 'method'])
+Branch = namedtuple('Branch', ['label', 'groups'])
 
 
 def device_tree(udisks):
@@ -27,6 +30,7 @@ def device_tree(udisks):
     Return the device hierarchy as list of TreeNodes
     """
     devices = {}
+    rootnode = TreeNode(None, [], None, "", [])
 
     def find_node(object_path):
         if object_path in devices:
@@ -60,26 +64,65 @@ def device_tree(udisks):
         elif device.is_luks_cleartext:
             root = find_node(device.luks_cleartext_slave)
         else:
-            root = None
+            root = rootnode
 
         node = TreeNode(root, [], device, label, methods)
         devices[device.object_path] = node
-        if root:
-            root.branches.append(node)
+        root.branches.append(node)
         return node
 
     for device in udisks.get_all_handleable():
         if device.object_path not in devices:
             mknode(device)
 
-    return list(dev for _,dev in devices.items() if dev.root is None)
+    return rootnode
+
+def simple_menu(node):
+    return Branch(
+        label=node.label,
+        groups=[
+            [flatten_menu(branch)
+             for branch in node.branches],
+            [Action(node.label, node.device, method)
+             for method in node.methods],
+        ])
+
+def flat_menu(node):
+    def actions(node, presentation):
+        return [Action(presentation, node.device, method)
+                for method in node.methods]
+
+    def leaves(node, outer_methods, presentation):
+        if not presentation or (node.device.is_mounted or
+                                not node.device.is_luks_cleartext):
+            presentation = node.label
+        if node.branches:
+            return chain.from_iterable(
+                leaves(branch,
+                       actions(node, presentation) + outer_methods,
+                       presentation)
+                for branch in node.branches)
+        elif len(node.methods) + len(outer_methods) > 0:
+            return Branch(
+                label=presentation,
+                groups=[list(chain(actions(node,
+                                           presentation),
+                                   outer_methods))]),
+        else:
+            return ()
+
+    return Branch(
+        label=node.label,
+        groups=[list(leaves(node, [], ""))])
 
 
 def create_menu(udisks=None,
                 mounter=None,
                 labels={},
                 icons={},
-                actions={}):
+                actions={},
+                style=flat_menu,
+                flat=False):
     """
     Create menu for udiskie mount operations.
 
@@ -88,6 +131,7 @@ def create_menu(udisks=None,
     :param dict labels: Labels for menu items
     :param dict icons: Icons for menu items
     :param dict actions: Actions for menu items
+    :param bool flat: Create a flattened menu
 
     If either ``udisks`` and or ``mounter`` is ``None`` default versions
     will be imported from the udiskie package.
@@ -168,30 +212,29 @@ def create_menu(udisks=None,
             icons[action],
             lambda _: actions[action](*bind))
 
-    def insert_submenu(menu, node):
-        if len(node.branches) + len(node.methods) > 1:
-            submenu = gtk.Menu()
-        else:
-            submenu = menu
-        for branch in node.branches:
-            insert_submenu(submenu, branch)
-        if len(node.branches) > 0 and len(node.methods) > 0:
-            submenu.append(gtk.SeparatorMenuItem())
-        for method in node.methods:
-            submenu.append(item(
-                method,
-                feed=[node.label],
-                bind=[node.device]))
-        if submenu is not menu:
-            menu.append(create_menuitem(
-                node.label,
-                icon=None,
-                onclick=submenu))
+    def mkmenu(menu_node):
+        menu = gtk.Menu()
+        separate = False
+        for group in menu_node.groups:
+            if len(group) > 0:
+                if separate:
+                    menu.append(gtk.SeparatorMenuItem())
+                separate = True
+            for node in group:
+                if isinstance(node, Action):
+                    menu.append(item(
+                        node.method,
+                        feed=[node.label],
+                        bind=[node.device]))
+                else:
+                    menu.append(create_menuitem(
+                        node.label,
+                        icon=None,
+                        onclick=mkmenu(node)))
+        return menu
 
-    # create menu items for these actions
-    menu = gtk.Menu()
-    for root in device_tree(udisks):
-        insert_submenu(menu, root)
+    # create udisks actions items
+    menu = mkmenu(flat_menu(device_tree(udisks)))
 
     # append menu item for closing the application
     if actions['quit']:
