@@ -108,7 +108,7 @@ class Mounter(object):
         # prompt user for password
         prompt = prompt or self.prompt
         password = prompt and prompt(
-                'Enter password for %s:' % (device,),
+                'Enter password for %s:' % (device.device_presentation,),
                 'Unlock encrypted device')
         if password is None:
             return False

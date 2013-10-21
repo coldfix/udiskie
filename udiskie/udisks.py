@@ -158,6 +158,11 @@ class Device(DBusProxy):
         return os.path.normpath(self.property.DeviceFile)
 
     @property
+    def device_presentation(self):
+        """The device file path to present to the user."""
+        return self.property.DeviceFilePresentation
+
+    @property
     def is_filesystem(self):
         return self.id_usage == 'filesystem'
 

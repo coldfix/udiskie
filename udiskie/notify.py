@@ -22,7 +22,7 @@ class Notify(object):
 
     # event handlers:
     def device_mounted(self, device):
-        device_file = device.device_file
+        device_file = device.device_presentation
         mount_path = device.mount_paths[0]
         self.notify.Notification(
             'Device mounted',
@@ -30,21 +30,21 @@ class Notify(object):
             'drive-removable-media').show()
 
     def device_unmounted(self, device):
-        device_file = device.device_file
+        device_file = device.device_presentation
         self.notify.Notification(
             'Device unmounted',
             '%s unmounted' % (device_file,),
             'drive-removable-media').show()
 
     def device_locked(self, device):
-        device_file = device.device_file
+        device_file = device.device_presentation
         self.notify.Notification(
             'Device locked',
             '%s locked' % (device_file,),
             'drive-removable-media').show()
 
     def device_unlocked(self, device):
-        device_file = device.device_file
+        device_file = device.device_presentation
         self.notify.Notification(
             'Device unlocked',
             '%s unlocked' % (device_file,),

@@ -41,7 +41,7 @@ def device_tree(udisks):
     def mknode(device):
         # methods
         methods = []
-        label = device.device_file
+        label = device.device_presentation
         if device.is_filesystem:
             if device.is_mounted:
                 methods.append('unmount')
