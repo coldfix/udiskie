@@ -136,3 +136,7 @@ class FilterMatcher(object):
         return list(set(chain.from_iterable(
             filt(device) for filt in self.filters)))
 
+    def is_ignored(self, device):
+        """Check if the device should be ignored by udiskie."""
+        return '__ignore__' in self.get_mount_options(device)
+
