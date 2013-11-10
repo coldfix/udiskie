@@ -30,7 +30,7 @@ def load_filter(filter_file=None):
         except ImportError:
             xdg_config_home = os.path.expanduser('~/.config')
         filter_file = os.path.join(xdg_config_home, CONFIG_PATH)
-    return udiskie.match.FilterMatcher((filter_file,))
+    return udiskie.match.FilterMatcher.from_config_file(filter_file)
 
 def common_program_options():
     """
