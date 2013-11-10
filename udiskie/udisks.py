@@ -124,17 +124,6 @@ class Device(DBusProxy):
         return not self.is_systeminternal
 
     @property
-    def is_handleable(self):
-        """
-        Should this device be handled by udiskie?
-
-        Currently this just means that the device is removable and holds a
-        filesystem or the device is a LUKS encrypted volume.
-
-        """
-        return (self.is_filesystem or self.is_crypto) and self.is_external
-
-    @property
     def is_mounted(self):
         """Check if the device is mounted."""
         return self.property.DeviceIsMounted
@@ -288,16 +277,6 @@ class Udisks(DBusProxy):
             dev = self.create_device(object_path)
             if dev.is_valid:
                 yield dev
-
-    def get_all_handleable(self):
-        """
-        Enumerate all handleable devices currently known to udisks.
-
-        NOTE: returns only devices that are still valid. This protects from
-        race conditions inside udiskie.
-
-        """
-        return (dev for dev in self.get_all() if dev.is_handleable)
 
     def get_device(self, path):
         """
