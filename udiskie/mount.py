@@ -388,7 +388,7 @@ class Mounter(object):
         filesystem or the device is a LUKS encrypted volume.
 
         """
-        return (device.is_filesystem or device.is_crypto) and device.is_external
+        return device.is_external
 
     def get_all_handleable(self):
         """
