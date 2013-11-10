@@ -11,12 +11,9 @@ except ImportError:
 import logging
 import re
 
-class InvalidFilter(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return 'Invalid Filter: %s' % (self.value,)
+class InvalidFilter(ValueError):
+    """Inapropriate filter configuration file."""
+    pass
 
 
 class OptionFilter(object):
