@@ -25,21 +25,15 @@ Action = namedtuple('Action', ['label', 'device', 'method'])
 Branch = namedtuple('Branch', ['label', 'groups'])
 
 
-def device_tree(udisks):
+def device_tree(devices):
     """
-    Return the device hierarchy as list of TreeNodes
+    Return the device hierarchy as list of TreeNodes.
+
+    :param iterable devices: list of devices to be shown
+
     """
-    devices = {}
-    rootnode = TreeNode(None, [], None, "", [])
-
-    def find_node(object_path):
-        if object_path in devices:
-            return devices[object_path]
-        else:
-            return mknode(udisks.create_device(object_path))
-
     def mknode(device):
-        # methods
+        # determine available methods
         methods = []
         label = device.device_presentation
         if device.is_filesystem:
@@ -57,25 +51,24 @@ def device_tree(udisks):
             methods.append('eject')
         if device.is_detachable:
             methods.append('detach')
-
-        # root
+        # find the root device:
         if device.is_partition:
-            root = find_node(device.partition_slave)
+            root = device.partition_slave
         elif device.is_luks_cleartext:
-            root = find_node(device.luks_cleartext_slave)
+            root = device.luks_cleartext_slave
         else:
-            root = rootnode
+            root = None
+        # in this first step leave branches empty
+        return device.object_path,TreeNode(root, [], device, label, methods)
 
-        node = TreeNode(root, [], device, label, methods)
-        devices[device.object_path] = node
-        root.branches.append(node)
-        return node
+    device_nodes = dict(map(mknode, devices))
 
-    for device in udisks.get_all_handleable():
-        if device.object_path not in devices:
-            mknode(device)
-
+    # create the hierarchy
+    rootnode = TreeNode(None, [], None, "", [])
+    for object_path,node in device_nodes.items():
+        device_nodes.get(node.root, rootnode).branches.append(node)
     return rootnode
+
 
 def simple_menu(node):
     return Branch(
@@ -153,11 +146,11 @@ def create_menu(udisks=None,
     set to ``None``.
 
     """
-    if udisks is None:
-        from dbus import SystemBus
-        from udiskie.udisks import Udisks
-        udisks = Udisks.create(SystemBus())
     if mounter is None:
+        if udisks is None:
+            from dbus import SystemBus
+            from udiskie.udisks import Udisks
+            udisks = Udisks.create(SystemBus())
         from udiskie.mount import Mounter
         from udiskie.prompt import password
         mounter = Mounter(prompt=password(), udisks=udisks)
@@ -233,8 +226,8 @@ def create_menu(udisks=None,
                         onclick=mkmenu(node)))
         return menu
 
-    # create udisks actions items
-    menu = mkmenu(flat_menu(device_tree(udisks)))
+    # create actions items
+    menu = mkmenu(flat_menu(device_tree(mounter.get_all_handleable())))
 
     # append menu item for closing the application
     if actions['quit']:

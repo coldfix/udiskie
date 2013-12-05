@@ -61,7 +61,7 @@ class Daemon(object):
             'device_changed': [self.on_device_changed]
         }
 
-        for device in self.udisks.get_all_handleable():
+        for device in self.udisks.get_all():
             self._store_device_state(device)
 
         udisks.bus.add_signal_receiver(
@@ -123,8 +123,6 @@ class Daemon(object):
     def _device_added(self, object_path):
         try:
             udevice = self.udisks.create_device(object_path)
-            if not udevice.is_handleable:
-                return
             self._store_device_state(udevice)
             self.trigger('device_added', udevice)
         except self.udisks.Exception:
@@ -142,8 +140,6 @@ class Daemon(object):
     def _device_changed(self, object_path):
         try:
             udevice = self.udisks.create_device(object_path)
-            if not udevice.is_handleable:
-                return
             old_state = self._get_device_state(object_path)
             new_state = self._store_device_state(udevice)
             self.trigger('device_changed', udevice, old_state, new_state)

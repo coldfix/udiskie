@@ -41,7 +41,7 @@ class Mounter(object):
 
         """
         log = logging.getLogger('udiskie.mount.mount_device')
-        if not device.is_handleable or not device.is_filesystem:
+        if not self.is_handleable(device) or not device.is_filesystem:
             log.debug('skipping unhandled device %s' % (device,))
             return False
         if device.is_mounted:
@@ -73,7 +73,7 @@ class Mounter(object):
 
         """
         logger = logging.getLogger('udiskie.mount.unmount_device')
-        if not device.is_handleable or not device.is_filesystem:
+        if not self.is_handleable(device) or not device.is_filesystem:
             logger.debug('skipping unhandled device %s' % (device,))
             return False
         if not device.is_mounted:
@@ -98,7 +98,7 @@ class Mounter(object):
 
         """
         log = logging.getLogger('udiskie.mount.unlock_device')
-        if not device.is_handleable or not device.is_crypto:
+        if not self.is_handleable(device) or not device.is_crypto:
             log.debug('skipping unhandled device %s' % (device,))
             return False
         if device.is_unlocked:
@@ -138,7 +138,7 @@ class Mounter(object):
 
         """
         logger = logging.getLogger('udiskie.mount.lock_device')
-        if not device.is_handleable or not device.is_crypto:
+        if not self.is_handleable(device) or not device.is_crypto:
             logger.debug('skipping unhandled device %s' % (device,))
             return False
         if not device.is_unlocked:
@@ -158,7 +158,7 @@ class Mounter(object):
     def add_device(self, device, filter=None, prompt=None):
         """Mount or unlock the device depending on its type."""
         log = logging.getLogger('udiskie.mount.add_device')
-        if not device.is_handleable:
+        if not self.is_handleable(device):
             log.debug('skipping unhandled device %s' % (device,))
             return False
         if device.is_filesystem:
@@ -187,7 +187,7 @@ class Mounter(object):
             return self.lock_device(device)
         elif force and device.is_partition_table:
             success = True
-            for dev in self.udisks.get_all_handleable():
+            for dev in self.get_all_handleable():
                 if dev.is_partition and dev.partition_slave == device:
                     ret = self.remove_device(dev, force=True)
                     if ret is None:
@@ -240,13 +240,13 @@ class Mounter(object):
     # mount_all/unmount_all
     def mount_all(self, filter=None, prompt=None):
         """Mount handleable devices that are already present."""
-        for device in self.udisks.get_all_handleable():
+        for device in self.get_all_handleable():
             self.add_device(device, filter, prompt)
 
     def unmount_all(self):
         """Unmount all filesystems handleable by udiskie."""
         unmounted = []
-        for device in self.udisks.get_all_handleable():
+        for device in self.get_all_handleable():
             if self.unmount_device(device):
                 unmounted.append(device)
         return unmounted
@@ -379,3 +379,27 @@ class Mounter(object):
         else:
             logger.warning('no found device owning "%s"' % (path))
             return None
+
+    def is_handleable(self, device):
+        """
+        Should this device be handled by udiskie?
+
+        Currently this just means that the device is removable and holds a
+        filesystem or the device is a LUKS encrypted volume.
+
+        """
+        if self.filter:
+            return device.is_external and not self.filter.is_ignored(device)
+        else:
+            return device.is_external
+
+    def get_all_handleable(self):
+        """
+        Enumerate all handleable devices currently known to udisks.
+
+        NOTE: returns only devices that are still valid. This protects from
+        race conditions inside udiskie.
+
+        """
+        return filter(self.is_handleable, self.udisks.get_all())
+
