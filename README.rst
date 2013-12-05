@@ -41,7 +41,7 @@ udiskie requires permission for the following PolicyKit_ actions:
 
 These are usually granted when using a desktop environment. If your login
 session is not properly activated you may need to customize your PolicyKit
-settings.
+settings. Create the file ``/etc/polkit-1/localauthority/50-local.d/10-udiskie.pkla`` with the following contents:
 
 ::
 
