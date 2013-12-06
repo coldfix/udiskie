@@ -57,6 +57,11 @@ fstype.vfat = ro,nouser''')
             self.filter_matcher.is_ignored(
                 TestDev('/nomatch', 'vfat', 'no-matching-id')))
 
+    try:
+        unittest.TestCase.assertItemsEqual
+    except AttributeError:
+        assertItemsEqual = unittest.TestCase.assertCountEqual
+
     def test_options(self):
         """Test the FilterMatcher.get_mount_options() method."""
         self.assertItemsEqual(
