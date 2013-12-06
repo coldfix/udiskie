@@ -11,6 +11,15 @@ __all__ = ['Daemon']
 import logging
 import sys
 
+class Job(object):
+    """
+    Job information struct for devices.
+    """
+    __slots__ = ['id', 'percentage']
+
+    def __init__(self, id, percentage):
+        self.id = id
+        self.percentage = percentage
 
 class DeviceState(object):
     """
@@ -47,35 +56,43 @@ class Daemon(object):
         """
         self.log = logging.getLogger('udiskie.daemon.Daemon')
         self.state = {}
+        self.jobs = {}
         self.udisks = udisks
 
-        self.event_handlers = {
-            'device_added': [],
-            'device_removed': [],
-            'device_mounted': [],
-            'device_unmounted': [],
-            'media_added': [],
-            'media_removed': [],
-            'device_unlocked': [],
-            'device_locked': [],
-            'device_changed': [self.on_device_changed]
-        }
+        event_stems = [
+            'device_add',
+            'device_remov',
+            'device_mount',
+            'device_unmount',
+            'media_add',
+            'media_remov',
+            'device_unlock',
+            'device_lock',
+            'device_chang', ]
 
-        for device in self.udisks.get_all():
-            self._store_device_state(device)
+        self.event_handlers = {}
+        for stem in event_stems:
+            self.event_handlers[stem + 'ed'] = []
+            self.event_handlers[stem + 'ing'] = []
+
+        self.connect(self.on_device_changed, 'device_changed')
 
         udisks.bus.add_signal_receiver(
-                self._device_added,
-                signal_name='DeviceAdded',
-                bus_name='org.freedesktop.UDisks')
+            self._device_added,
+            signal_name='DeviceAdded',
+            bus_name='org.freedesktop.UDisks')
         udisks.bus.add_signal_receiver(
-                self._device_removed,
-                signal_name='DeviceRemoved',
-                bus_name='org.freedesktop.UDisks')
+            self._device_removed,
+            signal_name='DeviceRemoved',
+            bus_name='org.freedesktop.UDisks')
         udisks.bus.add_signal_receiver(
-                self._device_changed,
-                signal_name='DeviceChanged',
-                bus_name='org.freedesktop.UDisks')
+            self._device_changed,
+            signal_name='DeviceChanged',
+            bus_name='org.freedesktop.UDisks')
+        udisks.bus.add_signal_receiver(
+            self._device_job_changed,
+            signal_name='DeviceJobChanged',
+            bus_name='org.freedesktop.UDisks')
 
     # events
     def on_device_changed(self, udevice, old_state, new_state):
@@ -84,12 +101,8 @@ class Daemon(object):
             self.trigger('device_added', udevice)
             return
         d = {}
-        d['device_mounted'] = new_state.mounted and not old_state.mounted
-        d['device_unmounted'] = old_state.mounted and not new_state.mounted
         d['media_added'] = new_state.has_media and not old_state.has_media
         d['media_removed'] = old_state.has_media and not new_state.has_media
-        d['device_unlocked'] = new_state.unlocked and not old_state.unlocked
-        d['device_locked'] = old_state.unlocked and not new_state.unlocked
         for event in d:
             if d[event]:
                 self.trigger(event, udevice)
@@ -146,6 +159,40 @@ class Daemon(object):
         except self.udisks.Exception:
             err = sys.exc_info()[1]
             self.log.error('%s(%s): %s' % ('device_changed', object_path, err))
+
+    # NOTE: it seems the udisks1 documentation for DeviceJobChanged is
+    # fatally incorrect!
+    def _device_job_changed(self,
+                            object_path,
+                            job_in_progress,
+                            job_id,
+                            job_initiated_by_user,
+                            job_is_cancellable,
+                            job_percentage):
+
+        """Detect type of event and trigger appropriate event handlers."""
+        try:
+            event_mapping = {
+                'FilesystemMount': 'device_mount',
+                'FilesystemUnmount': 'device_unmount',
+                'LuksUnlock': 'device_unlock',
+                'LuksLock': 'device_lock', }
+            if not job_in_progress and object_path in self.jobs:
+                job_id = self.jobs[object_path].id
+
+            if job_id in event_mapping:
+                event_name = event_mapping[job_id]
+                dev = self.udisks.create_device(object_path)
+                if job_in_progress:
+                    self.trigger(event_name + 'ing', dev, job_percentage)
+                    self.jobs[object_path] = Job(job_id, job_percentage)
+                else:
+                    self.trigger(event_name + 'ed', dev)
+                    del self.jobs[object_path]
+        except self.udisks.Exception:
+            err = sys.exc_info()[1]
+            self.log.error('%s(%s): %s' % ('_device_job_changed', object_path, err))
+
 
     # internal state keeping
     def _store_device_state(self, device):
