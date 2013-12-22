@@ -64,8 +64,8 @@ def connect_udisks(bus):
     try to connect to udisks2 service.
 
     """
-    import udiskie.udisks
-    return udiskie.udisks.Udisks.create(bus)
+    import udiskie.udisks1
+    return udiskie.udisks1.Udisks.create(bus)
 
 
 #----------------------------------------
