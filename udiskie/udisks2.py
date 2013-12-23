@@ -2,120 +2,288 @@
 Udisks wrapper utilities.
 
 These act as a convenience abstraction layer on the udisks dbus service.
-Requires Udisks 1.0.5 as described here:
+Requires Udisks 2.XXX as described here:
 
-    http://udisks.freedesktop.org/docs/1.0.5/
+    http://udisks.freedesktop.org/docs/XXX
 
-Note that (as this completely wraps the udisks dbus API) replacing this
-module will let you support Udisks2 or maybe even other services.
+This wraps the dbus API of Udisks2 providing a common interface with the
+udisks1 module.
 
 """
-__all__ = ['Device', 'Udisks']
+__all__ = ['Udisks']
 
-import logging
-import os
 from udiskie.common import DBusProxy
 
 
 UDISKS_INTERFACE = 'org.freedesktop.UDisks2'
-
 UDISKS_OBJECT = 'org.freedesktop.UDisks2'
 UDISKS_OBJECT_PATH = '/org/freedesktop/UDisks2'
 
 
-class Device(DBusProxy):
+#----------------------------------------
+# Internal helper classes
+#----------------------------------------
+
+class AttrDictView(object):
+    """Provide attribute access view to a dictionary."""
+    def __init__(self, data):
+        self.__data = data
+
+    def __getattr__(self, key):
+        try:
+            return self.__data[key]
+        except KeyError:
+            raise AttributeError
+
+class DeviceInterface(object):
+    """Provide attribute access to a single interface on a dbus object."""
+    def __init__(self, proxy, data):
+        """
+        Initialize wrapper.
+
+        :param DBusProxy proxy: for dynamic property/method lookup
+        :param dict data: for static property lookup
+
+        """
+        self.proxy = proxy
+        self.data = data
+
+    @property
+    def t(self):
+        """
+        Access object properties statically via table lookup.
+
+        This access method is to be preferred over the dynamic property
+        lookup in most cases as it is immune to a number of race
+        conditions.
+
+        """
+        return AttrDictView(self.data)
+
+    @property
+    def p(self):
+        """Access object properties dynamically via dbus."""
+        return self.proxy.property
+
+    @property
+    def m(self):
+        """Access object methods dynamically via dbus."""
+        return self.proxy.method
+
+class NoneServer(object):
+    """Yield None when asked for any attribute."""
+    def __getattr__(self, key):
+        return None
+
+class NullInterface(object):
+    """Interface not available."""
+    def __init__(self, name):
+        self.name = name
+
+    def __bool__(self):
+        return False
+
+    @property
+    def t(self):
+        """Access object properties statically via table lookup."""
+        return NoneServer()
+
+    @property
+    def p(self):
+        """Access object properties dynamically via dbus."""
+        raise RuntimeError("Interface not available: %s" % self.name)
+
+    @property
+    def m(self):
+        """Access object methods dynamically via dbus."""
+        raise RuntimeError("Interface not available: %s" % self.name)
+
+
+#----------------------------------------
+# Device wrapper
+#----------------------------------------
+
+class Device(object):
     """
-    Wrapper class for org.freedesktop.UDisks.Device proxy objects.
+    Wrapper class for dbus objects representing devices.
+
+    The property read access is provided via static table lookup. The
+    methods use
+
     """
-    # construction
-    def __init__(self, bus, proxy):
+    def __init__(self, udisks, object_path):
         """
         Initialize an instance with the given dbus proxy object.
 
         proxy must be an object acquired by a call to bus.get_object().
 
         """
-        self.log = logging.getLogger('udiskie.udisks.Device')
-        super(Device, self).__init__(proxy, UDISKS_DEVICE_INTERFACE)
-        self.bus = bus
+        self.udisks = udisks
+        self.object = udisks.bus.get_object(UDISKS_OBJECT, object_path)
+        self.object_path = object_path
 
-    @classmethod
-    def create(cls, bus, object_path):
-        """Find the object on the specified bus."""
-        return cls(bus, bus.get_object(UDISKS_OBJECT, object_path))
-
-    # string representation
     def __str__(self):
+        """Show as object_path."""
         return self.object_path
 
     def __eq__(self, other):
+        """Comparison by object_path."""
         if isinstance(other, Device):
             return self.object_path == other.object_path
         else:
             return self.object_path == str(other)
 
     def __ne__(self, other):
+        """Comparison by object_path."""
         return not (self == other)
 
-    # check if the device is a valid udisks object
+    @property
+    class I(object):
+        """Lookup device interfaces via attribute access."""
+        def __init__(self, device):
+            self.obj = device.object
+            self.tab = device.udisks.devices.get(device.object_path)
+
+        def __getattr__(self, key):
+            """Return a wrapper for the requested interface."""
+            key = UDISKS_INTERFACE + '.' + key
+            try:
+                return DeviceInterface(DBusProxy(self.obj, key),
+                                       self.tab[key])
+            except:
+                return NullInterface(key)
+
+    # availability of interfaces
     @property
     def is_valid(self):
-        try:
-            self.property.DeviceFile
-            return True
-        except self.Exception:
-            return False
-
-    # properties
-    @property
-    def partition_slave(self):
-        """Get the partition slave (container)."""
-        return self.property.PartitionSlave if self.is_partition else None
-
-    @property
-    def is_partition(self):
-        """Check if the device has a partition slave."""
-        return self.property.DeviceIsPartition
-
-    @property
-    def is_partition_table(self):
-        """Check if the device is a partition table."""
-        return self.property.DeviceIsPartitionTable
+        """Check if any interface is available for this object path."""
+        return self.object_path in self.udisks.devices
 
     @property
     def is_drive(self):
         """Check if the device is a drive."""
-        return self.property.DeviceIsDrive
+        return bool(self.I.Drive)
 
     @property
-    def drive(self):
-        """
-        Get the drive containing this device.
+    def is_block(self):
+        """Check if the device is a block device."""
+        return bool(self.I.Block)
 
-        The returned Device object is not guaranteed to be a drive.
+    @property
+    def is_partition_table(self):
+        """Check if the device is a partition table."""
+        return bool(self.I.PartitionTable)
 
-        """
-        if self.is_partition:
-            return self.create(self.bus, self.partition_slave).drive
-        elif self.is_luks_cleartext:
-            return self.create(self.bus, self.luks_cleartext_slave).drive
-        else:
-            return self
+    @property
+    def is_partition(self):
+        """Check if the device has a partition slave."""
+        return bool(self.I.Partition)
 
+    @property
+    def is_filesystem(self):
+        """Check if the device is a filesystem."""
+        return bool(self.I.Filesystem)
+
+    @property
+    def is_luks(self):
+        """Check if the device is a LUKS container."""
+        return bool(self.I.Encrypted)
+
+    #----------------------------------------
+    # Drive
+    #----------------------------------------
+
+    # Drive properties
     @property
     def is_detachable(self):
         """Check if the drive that owns this device can be detached."""
-        return self.property.DriveCanDetach if self.is_drive else None
+        return bool(self.I.Drive.t.CanPowerOff)
 
     @property
     def is_ejectable(self):
         """Check if the drive that owns this device can be ejected."""
-        return self.property.DriveIsMediaEjectable if self.is_drive else None
+        return bool(self.I.Drive.t.Ejectable)
+
+    @property
+    def has_media(self):
+        """Check if there is media available in the drive."""
+        return bool(self.I.Drive.t.MediaAvailable)
+
+    # Drive methods
+    def eject(self, options=[]):
+        """Eject media from the device."""
+        return self.I.Drive.m.Eject(options)
+
+    def detach(self, options=[]):
+        """Detach the device by e.g. powering down the physical port."""
+        return self.I.Drive.m.PowerOff(options)
+
+    #----------------------------------------
+    # Block
+    #----------------------------------------
+
+    # Block properties
+    @property
+    def device_file(self):
+        """The filesystem path of the device block file."""
+        return str(self.I.Block.t.Device or '')
+
+    @property
+    def device_presentation(self):
+        """The device file path to present to the user."""
+        return str(self.I.Block.t.PreferredDevice or '')
+
+    @property
+    def device_size(self):
+        """The size of the device in bytes."""
+        return self.I.Block.t.Size
+
+    @property
+    def id_usage(self):
+        """Device usage class, for example 'filesystem' or 'crypto'."""
+        return str(self.I.Block.t.IdUsage or '')
+
+    @property
+    def is_crypto(self):
+        return self.id_usage == 'crypto'
+
+    @property
+    def id_type(self):
+        """"
+        Return IdType property.
+
+        This field provides further detail on IdUsage, for example:
+
+        IdUsage     'filesystem'    'crypto'
+        IdType      'ext4'          'crypto_LUKS'
+
+        """
+        return str(self.I.Block.t.IdType or '')
+
+    @property
+    def id_label(self):
+        """Label of the device if available."""
+        return str(self.I.Block.t.IdLabel or '')
+
+    @property
+    def id_uuid(self):
+        """Device UUID."""
+        return str(self.I.Block.t.IdUUID or '')
+
+    @property
+    def luks_cleartext_slave(self):
+        """Get wrapper to the LUKS crypto device."""
+        return self.udisks.create_device(self.I.Block.t.CryptoBackingDevice)
+
+    @property
+    def is_luks_cleartext(self):
+        """Check whether this is a luks cleartext device."""
+        return bool(self.luks_cleartext_slave)
 
     @property
     def is_systeminternal(self):
         """Check if the device is internal."""
-        return self.property.DeviceIsSystemInternal
+        return bool(self.I.Block.t.HintSystem)    # FIXME
 
     @property
     def is_external(self):
@@ -123,116 +291,89 @@ class Device(DBusProxy):
         return not self.is_systeminternal
 
     @property
+    def drive(self):
+        """Get wrapper to the drive containing this device."""
+        if self.is_drive:
+            return self
+        cleartext = self.luks_cleartext_slave
+        if cleartext:
+            return cleartext.drive
+        if self.is_block:
+            return self.udisks.create_device(self.I.Block.t.Drive)
+        return None
+
+    #----------------------------------------
+    # Partition
+    #----------------------------------------
+
+    # Partition properties
+    @property
+    def partition_slave(self):
+        """Get the partition slave (container)."""
+        return self.udisks.create_device(self.I.Partition.t.Table)
+
+    #----------------------------------------
+    # Filesystem
+    #----------------------------------------
+
+    # Filesystem properties
+    @property
     def is_mounted(self):
         """Check if the device is mounted."""
-        return self.property.DeviceIsMounted
-
-    @property
-    def is_unlocked(self):
-        """Check if device is already unlocked."""
-        return self.luks_cleartext_holder if self.is_luks else None
+        return bool(self.I.Filesystem.t.MountPoints)
 
     @property
     def mount_paths(self):
         """Return list of active mount paths."""
-        if not self.is_mounted:
-            return []
-        raw_paths = self.property.DeviceMountPaths
-        return [os.path.normpath(path) for path in raw_paths]
+        return list(self.I.Filesystem.t.MountPoints or ())
 
-    @property
-    def device_file(self):
-        """The filesystem path of the device block file."""
-        return os.path.normpath(self.property.DeviceFile)
+    # Filesystem methods
+    def mount(self, filesystem=None, options=[]):
+        """Mount filesystem."""
+        return self.I.Filesystem.m.Mount(filesystem or self.id_type, options)
 
-    @property
-    def device_presentation(self):
-        """The device file path to present to the user."""
-        return self.property.DeviceFilePresentation
+    def unmount(self, options=[]):
+        """Unmount filesystem."""
+        return self.I.Filesystem.m.Unmount(options)
 
-    @property
-    def is_filesystem(self):
-        return self.id_usage == 'filesystem'
+    #----------------------------------------
+    # Encrypted
+    #----------------------------------------
 
-    @property
-    def is_crypto(self):
-        return self.id_usage == 'crypto'
-
-    @property
-    def is_luks(self):
-        return self.property.DeviceIsLuks
-
-    @property
-    def is_luks_cleartext(self):
-        """Check whether this is a luks cleartext device."""
-        return self.property.DeviceIsLuksCleartext
-
-    @property
-    def luks_cleartext_slave(self):
-        """Get luks crypto device."""
-        return self.property.LuksCleartextSlave if self.is_luks_cleartext else None
-
+    # Encrypted properties
     @property
     def luks_cleartext_holder(self):
-        """Get unlocked luks cleartext device."""
-        return self.property.LuksHolder if self.is_luks else None
+        """Get wrapper to the unlocked luks cleartext device."""
+        if not self.is_luks:
+            return None
+        for device in self.udisks.get_all():
+            if device.luks_cleartext_slave == self:
+                return device
+        return None
+
+    @property
+    def is_unlocked(self):
+        """Check if device is already unlocked."""
+        return bool(self.luks_cleartext_holder)
 
     @property
     def is_luks_cleartext_slave(self):
         """Check whether the luks device is currently in use."""
-        if not self.is_luks:
-            return False
-        for device in Udisks.create(self.bus).get_all():
-            if (not device.is_filesystem or device.is_mounted) and (
-                    device.is_luks_cleartext and
-                    device.luks_cleartext_slave == self.object_path):
-                return True
-        return False
+        return bool(self.luks_cleartext_holder)     # FIXME
 
-    @property
-    def has_media(self):
-        return self.property.DeviceIsMediaAvailable
-
-    @property
-    def id_type(self):
-        return self.property.IdType
-
-    @property
-    def id_usage(self):
-        return self.property.IdUsage
-
-    @property
-    def id_uuid(self):
-        """Device UUID."""
-        return self.property.IdUuid
-
-    # methods
-    def mount(self, filesystem=None, options=[]):
-        """Mount filesystem."""
-        if filesystem is None:
-            filesystem = self.id_type
-        self.method.FilesystemMount(filesystem, options)
-
-    def unmount(self, options=[]):
-        """Unmount filesystem."""
-        self.method.FilesystemUnmount(options)
+    # Encrypted methods
+    def unlock(self, password, options=[]):
+        """Unlock Luks device."""
+        return self.I.Encrypted.m.Unlock(password, options)
 
     def lock(self, options=[]):
         """Lock Luks device."""
-        return self.method.LuksLock(options)
+        return self.I.Encrypted.m.Lock(options)
 
-    def unlock(self, password, options=[]):
-        """Unlock Luks device."""
-        return self.method.LuksUnlock(password, options)
 
-    def eject(self, options=[]):
-        """Eject media from the device."""
-        return self.method.DriveEject(options)
-
-    def detach(self, options=[]):
-        """Detach the device by e.g. powering down the physical port."""
-        return self.method.DriveDetach(options)
-
+#----------------------------------------
+# udisks service wrapper
+#----------------------------------------
 
 class Udisks(DBusProxy):
     """
@@ -252,7 +393,10 @@ class Udisks(DBusProxy):
         """
         super(Udisks, self).__init__(proxy, 'org.freedesktop.DBus.ObjectManager')
         self.bus = bus
+        self.devices = {}
 
+    def listen(self):
+        """Listen to state changes to provide automatic synchronization."""
         self.bus.add_signal_receiver(
             self._interface_added,
             signal_name='InterfaceAdded',
@@ -261,37 +405,49 @@ class Udisks(DBusProxy):
             self._interface_removed,
             signal_name='InterfaceRemoved',
             bus_name=UDISKS_OBJECT)
+        self.sync()
+
+    def _interface_added(self, object_path, interfaces_and_properties):
+        """Internal method."""
+        self.devices[object_path] = interfaces_and_properties
+
+    def _interface_removed(self, object_path, interfaces):
+        """Internal method."""
+        for interface in interfaces:
+            del self.devices[object_path][interface]
+        if not self.devices[object_path]:
+            del self.devices[object_path]
+
+    def sync(self):
+        """Synchronize state."""
         self.devices = self.method.GetManagedObjects()
-
-    def _interface_added():
-        pass
-
-    def _interface_removed():
-        pass
 
     @classmethod
     def create(cls, bus):
         """Connect to the udisks service on the specified bus."""
-        return cls(bus, bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH))
+        udisks = cls(bus, bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH))
+        udisks.sync()
+        return udisks
+
+    @classmethod
+    def daemon(cls, bus):
+        """Connect to the udisks service on the specified bus."""
+        udisks = cls(bus, bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH))
+        udisks.listen()
+        return udisks
 
     # instantiation of device objects
     def create_device(self, object_path):
         """Create a Device instance from object path."""
-        return Device.create(self.bus, object_path, self.devices[object_path])
+        if object_path in self.devices:
+            return Device(self, object_path)
+        else:
+            return None
 
     # Methods
     def get_all(self):
-        """
-        Enumerate all device objects currently known to udisks.
-
-        NOTE: returns only devices that are still valid. This protects from
-        race conditions inside udiskie.
-
-        """
-        for object_path in self.devices:
-            dev = self.create_device(object_path)
-            if dev.is_valid:
-                yield dev
+        """Enumerate all device objects currently known to udisks."""
+        return map(self.create_device, self.devices)
 
     def get_device(self, path):
         """
@@ -301,13 +457,13 @@ class Udisks(DBusProxy):
         path as well as mount pathes.
 
         """
-        logger = logging.getLogger('udiskie.udisks2.get_device')
+        import os
+        samefile = lambda f: f and os.path.samefile(f, path)
         for device in self.get_all():
-            if os.path.samefile(path, device.device_file):
+            if samefile(device.device_file):
                 return device
             for p in device.mount_paths:
-                if os.path.samefile(path, p):
+                if samefile(p):
                     return device
-        logger.warn('Device not found: %s' % path)
         return None
 
