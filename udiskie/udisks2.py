@@ -21,6 +21,21 @@ UDISKS_OBJECT_PATH = '/org/freedesktop/UDisks2'
 
 
 #----------------------------------------
+# byte array to string conversion
+#----------------------------------------
+
+def tostr(ay):
+    """Convert data from dbus queries to strings."""
+    if ay is None:
+        return ''
+    elif isinstance(ay, str):
+        return ay
+    elif isinstance(ay, bytes):
+        return ay.decode('utf-8')
+    else: # dbus.Array([dbus.Byte]) or any similar sequence type:
+        return b''.join(map(chr, ay)).rstrip(chr(0)).decode('utf-8')
+
+#----------------------------------------
 # Internal helper classes
 #----------------------------------------
 
@@ -226,12 +241,12 @@ class Device(object):
     @property
     def device_file(self):
         """The filesystem path of the device block file."""
-        return str(self.I.Block.t.Device or '')
+        return tostr(self.I.Block.t.Device)
 
     @property
     def device_presentation(self):
         """The device file path to present to the user."""
-        return str(self.I.Block.t.PreferredDevice or '')
+        return tostr(self.I.Block.t.PreferredDevice)
 
     @property
     def device_size(self):
@@ -241,7 +256,7 @@ class Device(object):
     @property
     def id_usage(self):
         """Device usage class, for example 'filesystem' or 'crypto'."""
-        return str(self.I.Block.t.IdUsage or '')
+        return tostr(self.I.Block.t.IdUsage)
 
     @property
     def is_crypto(self):
@@ -258,17 +273,17 @@ class Device(object):
         IdType      'ext4'          'crypto_LUKS'
 
         """
-        return str(self.I.Block.t.IdType or '')
+        return tostr(self.I.Block.t.IdType)
 
     @property
     def id_label(self):
         """Label of the device if available."""
-        return str(self.I.Block.t.IdLabel or '')
+        return tostr(self.I.Block.t.IdLabel)
 
     @property
     def id_uuid(self):
         """Device UUID."""
-        return str(self.I.Block.t.IdUUID or '')
+        return tostr(self.I.Block.t.IdUUID)
 
     @property
     def luks_cleartext_slave(self):
