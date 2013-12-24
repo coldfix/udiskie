@@ -53,9 +53,9 @@ def device_tree(devices):
             methods.append('detach')
         # find the root device:
         if device.is_partition:
-            root = device.partition_slave
+            root = device.partition_slave.object_path
         elif device.is_luks_cleartext:
-            root = device.luks_cleartext_slave
+            root = device.luks_cleartext_slave.object_path
         else:
             root = None
         # in this first step leave branches empty

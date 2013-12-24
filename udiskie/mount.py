@@ -117,9 +117,7 @@ class Mounter(object):
         log.info('attempting to unlock device %s' % (device,))
         try:
             device.unlock(password, [])
-            holder_dev = device.create(
-                device.bus,
-                device.luks_cleartext_holder)
+            holder_dev = device.luks_cleartext_holder
             holder_path = holder_dev.device_file
             log.info('unlocked device %s on %s' % (device, holder_path))
         except device.Exception:
@@ -181,9 +179,7 @@ class Mounter(object):
             if not device.is_unlocked:
                 return False
             if force:
-                self.remove_device(
-                    device.create(device.bus, device.luks_cleartext_holder),
-                    force=True)
+                self.remove_device(device.luks_cleartext_holder, force=True)
             return self.lock_device(device)
         elif force and device.is_partition_table:
             success = True
@@ -302,8 +298,7 @@ class Mounter(object):
         if not device.is_luks_cleartext:
             logger.debug('skipping non-luks-cleartext device %s' % (device,))
             return False
-        slave_path = device.luks_cleartext_slave
-        slave = self.udisks.create_device(slave_path)
+        slave = device.luks_cleartext_slave
         if slave.is_luks_cleartext_slave:
             return False
         return self.lock_device(slave)

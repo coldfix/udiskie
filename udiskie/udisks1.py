@@ -30,7 +30,7 @@ class Device(DBusProxy):
     Wrapper class for org.freedesktop.UDisks.Device proxy objects.
     """
     # construction
-    def __init__(self, bus, proxy):
+    def __init__(self, udisks, proxy):
         """
         Initialize an instance with the given dbus proxy object.
 
@@ -39,24 +39,19 @@ class Device(DBusProxy):
         """
         self.log = logging.getLogger('udiskie.udisks.Device')
         super(Device, self).__init__(proxy, UDISKS_DEVICE_INTERFACE)
-        self.bus = bus
-
-    @classmethod
-    def create(cls, bus, object_path):
-        """Find the object on the specified bus."""
-        return cls(bus, bus.get_object(UDISKS_OBJECT, object_path))
+        self.udisks = udisks
 
     # string representation
     def __str__(self):
+        """Display as object path."""
         return self.object_path
 
     def __eq__(self, other):
-        if isinstance(other, Device):
-            return self.object_path == other.object_path
-        else:
-            return self.object_path == str(other)
+        """Comparison by object path."""
+        return self.object_path == str(other)
 
     def __ne__(self, other):
+        """Comparison by object path."""
         return not (self == other)
 
     # check if the device is a valid udisks object
@@ -72,7 +67,7 @@ class Device(DBusProxy):
     @property
     def partition_slave(self):
         """Get the partition slave (container)."""
-        return self.property.PartitionSlave if self.is_partition else None
+        return self.udisks.create_device(self.property.PartitionSlave) if self.is_partition else None
 
     @property
     def is_partition(self):
@@ -98,9 +93,9 @@ class Device(DBusProxy):
 
         """
         if self.is_partition:
-            return self.create(self.bus, self.partition_slave).drive
+            return self.partition_slave.drive
         elif self.is_luks_cleartext:
-            return self.create(self.bus, self.luks_cleartext_slave).drive
+            return self.luks_cleartext_slave.drive
         else:
             return self
 
@@ -172,22 +167,22 @@ class Device(DBusProxy):
     @property
     def luks_cleartext_slave(self):
         """Get luks crypto device."""
-        return self.property.LuksCleartextSlave if self.is_luks_cleartext else None
+        return self.udisks.create_device(self.property.LuksCleartextSlave) if self.is_luks_cleartext else None
 
     @property
     def luks_cleartext_holder(self):
         """Get unlocked luks cleartext device."""
-        return self.property.LuksHolder if self.is_luks else None
+        return self.udisks.create_device(self.property.LuksHolder) if self.is_luks else None
 
     @property
     def is_luks_cleartext_slave(self):
         """Check whether the luks device is currently in use."""
         if not self.is_luks:
             return False
-        for device in Udisks.create(self.bus).get_all():
+        for device in self.udisks.get_all():
             if (not device.is_filesystem or device.is_mounted) and (
                     device.is_luks_cleartext and
-                    device.luks_cleartext_slave == self.object_path):
+                    device.luks_cleartext_slave == self):
                 return True
         return False
 
@@ -263,7 +258,7 @@ class Udisks(DBusProxy):
     # instantiation of device objects
     def create_device(self, object_path):
         """Create a Device instance from object path."""
-        return Device.create(self.bus, object_path)
+        return Device(self, self.bus.get_object(UDISKS_OBJECT, object_path))
 
     # Methods
     def get_all(self):
