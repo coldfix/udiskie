@@ -12,7 +12,7 @@ udisks1 module.
 """
 __all__ = ['Udisks']
 
-from udiskie.common import DBusProxy, Emitter
+from udiskie.common import DBusProxy, DBusProperties, Emitter, DBusException
 from copy import copy, deepcopy
 
 
@@ -25,16 +25,30 @@ UDISKS_OBJECT_PATH = '/org/freedesktop/UDisks2'
 # byte array to string conversion
 #----------------------------------------
 
-def tostr(ay):
+try:
+    unicode
+except AttributeError:
+    unicode = str
+
+def decode(ay):
     """Convert data from dbus queries to strings."""
     if ay is None:
         return ''
-    elif isinstance(ay, str):
+    elif isinstance(ay, unicode):
         return ay
     elif isinstance(ay, bytes):
         return ay.decode('utf-8')
     else: # dbus.Array([dbus.Byte]) or any similar sequence type:
         return b''.join(map(chr, ay)).rstrip(chr(0)).decode('utf-8')
+
+def encode(s):
+    """Convert data from dbus queries to strings."""
+    if s is None:
+        return b''
+    elif isinstance(s, unicode):
+        return s.encode('utf-8')
+    else:
+        return s
 
 #----------------------------------------
 # Internal helper classes
@@ -97,7 +111,7 @@ class OfflineInterfaceService(object):
             return OfflineProxy(DBusProxy(self.proxy, key),
                                 self.data[key])
         except:
-            return NullProxy(key)
+            return NullProxy(key, self.proxy.object_path)
 
 class NoneServer(object):
     """Yield None when asked for any attribute."""
@@ -106,17 +120,18 @@ class NoneServer(object):
 
 class NullProxy(object):
     """Interface not available."""
-    def __init__(self, name):
+    def __init__(self, name, object_path):
+        self.object_path = object_path
         self.name = name
         self.property = NoneServer()
 
-    def __bool__(self):
+    def __nonzero__(self):
         return False
 
     @property
     def method(self):
         """Access object methods dynamically via dbus."""
-        raise RuntimeError("Interface not available: %s" % self.name)
+        raise RuntimeError("Interface '%s' not available for %s" % (self.name, self.object_path))
 
 
 #----------------------------------------
@@ -134,6 +149,8 @@ class Device(object):
     This class is intended to be used only internally.
 
     """
+    Exception = DBusException
+
     def __init__(self, udisks, object_path, interface_service):
         """
         Initialize an instance with the given dbus proxy object.
@@ -153,10 +170,7 @@ class Device(object):
 
     def __eq__(self, other):
         """Comparison by object_path."""
-        if isinstance(other, Device):
-            return self.object_path == other.object_path
-        else:
-            return self.object_path == str(other)
+        return self.object_path == str(other)
 
     def __ne__(self, other):
         """Comparison by object_path."""
@@ -219,11 +233,13 @@ class Device(object):
         return bool(self.I.Drive.property.MediaAvailable)
 
     # Drive methods
-    def eject(self, options=[]):
+    # FIXME: signature different from udisks1 (options = dict vs list)
+    def eject(self, options={}):
         """Eject media from the device."""
         return self.I.Drive.method.Eject(options)
 
-    def detach(self, options=[]):
+    # FIXME: signature different from udisks1 (options = dict vs list)
+    def detach(self, options={}):
         """Detach the device by e.g. powering down the physical port."""
         return self.I.Drive.method.PowerOff(options)
 
@@ -235,12 +251,12 @@ class Device(object):
     @property
     def device_file(self):
         """The filesystem path of the device block file."""
-        return tostr(self.I.Block.property.Device)
+        return decode(self.I.Block.property.Device)
 
     @property
     def device_presentation(self):
         """The device file path to present to the user."""
-        return tostr(self.I.Block.property.PreferredDevice)
+        return decode(self.I.Block.property.PreferredDevice)
 
     @property
     def device_size(self):
@@ -250,7 +266,7 @@ class Device(object):
     @property
     def id_usage(self):
         """Device usage class, for example 'filesystem' or 'crypto'."""
-        return tostr(self.I.Block.property.IdUsage)
+        return decode(self.I.Block.property.IdUsage)
 
     @property
     def is_crypto(self):
@@ -267,22 +283,23 @@ class Device(object):
         IdType      'ext4'          'crypto_LUKS'
 
         """
-        return tostr(self.I.Block.property.IdType)
+        return decode(self.I.Block.property.IdType)
 
     @property
     def id_label(self):
         """Label of the device if available."""
-        return tostr(self.I.Block.property.IdLabel)
+        return decode(self.I.Block.property.IdLabel)
 
     @property
     def id_uuid(self):
         """Device UUID."""
-        return tostr(self.I.Block.property.IdUUID)
+        return decode(self.I.Block.property.IdUUID)
 
     @property
     def luks_cleartext_slave(self):
         """Get wrapper to the LUKS crypto device."""
-        return self.udisks.create_device(self.I.Block.property.CryptoBackingDevice)
+        return self.udisks.create_device(
+            self.I.Block.property.CryptoBackingDevice)
 
     @property
     def is_luks_cleartext(self):
@@ -290,14 +307,20 @@ class Device(object):
         return bool(self.luks_cleartext_slave)
 
     @property
-    def is_systeminternal(self):
-        """Check if the device is internal."""
-        return bool(self.I.Block.property.HintSystem)    # FIXME
-
-    @property
     def is_external(self):
         """Check if the device is external."""
-        return not self.is_systeminternal
+        # NOTE: udisks2 seems to guess incorrectly in some cases. This
+        # leads to HintSystem=True for unlocked devices. In order to show
+        # the device anyway, it needs to be recursively checked if any
+        # parent device is recognized as external:
+        return (not bool(self.I.Block.property.HintSystem) or
+                (self.is_luks_cleartext and self.luks_cleartext_slave.is_external) or
+                (self.is_partition and self.partition_slave.is_external))
+
+    @property
+    def is_systeminternal(self):
+        """Check if the device is internal."""
+        return not self.is_external
 
     @property
     def drive(self):
@@ -334,14 +357,17 @@ class Device(object):
     @property
     def mount_paths(self):
         """Return list of active mount paths."""
-        return list(map(tostr, self.I.Filesystem.property.MountPoints or ()))
+        return list(map(decode, self.I.Filesystem.property.MountPoints or ()))
 
     # Filesystem methods
     def mount(self, filesystem=None, options=[]):
         """Mount filesystem."""
-        return self.I.Filesystem.method.Mount(filesystem or self.id_type, options)
+        return self.I.Filesystem.method.Mount({
+            'fstype': encode(filesystem or self.id_type),
+            'options': encode(','.join(options)) })
 
-    def unmount(self, options=[]):
+    # FIXME: signature different from udisks1 (options = dict vs list)
+    def unmount(self, options={}):
         """Unmount filesystem."""
         return self.I.Filesystem.method.Unmount(options)
 
@@ -371,11 +397,20 @@ class Device(object):
         return bool(self.luks_cleartext_holder)     # FIXME
 
     # Encrypted methods
-    def unlock(self, password, options=[]):
+    # FIXME: signature different from udisks1 (options = dict vs list)
+    def unlock(self, password, options={}):
         """Unlock Luks device."""
-        return self.I.Encrypted.method.Unlock(password, options)
+        object_path = self.I.Encrypted.method.Unlock(password, options)
+        # udisks may not have processed the InterfacesAdded signal yet.
+        # Therefore it is necessary to query the interface data directly
+        # from the dbus service:
+        interface_service = OfflineInterfaceService(
+            self.udisks.bus.get_object(UDISKS_OBJECT, object_path),
+            self.udisks.method.GetManagedObjects()[object_path])
+        return Device(self.udisks, object_path, interface_service)
 
-    def lock(self, options=[]):
+    # FIXME: signature different from udisks1 (options = dict vs list)
+    def lock(self, options={}):
         """Lock Luks device."""
         return self.I.Encrypted.method.Lock(options)
 
@@ -442,12 +477,16 @@ class Udisks(DBusProxy):
 
         """
         import os
-        samefile = lambda f: f and os.path.samefile(f, path)
+        def samefile(a, b):
+            try:
+                return os.path.samefile(a, b)
+            except OSError:
+                return os.path.normpath(a) == os.path.normpath(b)
         for device in self.get_all():
-            if samefile(device.device_file):
+            if samefile(device.device_file, path):
                 return device
             for p in device.mount_paths:
-                if samefile(p):
+                if samefile(p, path):
                     return device
         return None
 
@@ -519,7 +558,7 @@ class Daemon(Emitter):
         if 'org.freedesktop.UDisks2.Drive' in interfaces:
             self._detect_toggle('has_media',
                                 old_device_state, new_device_state,
-                                'media_inserted', 'media_removed')
+                                'media_added', 'media_removed')
 
     def _interfaces_added(self, object_path, interfaces_and_properties):
         """Internal method."""
@@ -604,10 +643,10 @@ class Daemon(Emitter):
             'filesystem-unmount': 'device_unmount',
             'encrypted-unlock': 'device_unlock',
             'encrypted-lock': 'device_lock' }
-        job = DBusProperties(self.bus.get_object(UDISKS_OBJECT, job_name),
-                             'org.freedesktop.UDisks2.Job')
-        job_id = job.Operation
-        event_name = event_mapping[job_id]
-        for object_path in job.Objects:
+        job = self.udisks.devices[job_name]['org.freedesktop.UDisks2.Job']
+        event_name = event_mapping.get(job['Operation'])
+        if not event_name:
+            return
+        for object_path in job['Objects']:
             dev = self.udisks.create_device(object_path)
             self.trigger(event_name + 'ed', dev)

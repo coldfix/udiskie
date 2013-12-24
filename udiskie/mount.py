@@ -386,8 +386,9 @@ class Mounter(object):
 
         """
         # FIXME: what about drives
-        return device.is_block and device.is_external and (
-            not self.filter or not self.filter.is_ignored(device))
+        return (device.is_block and
+                device.is_external and
+                (not self.filter or not self.filter.is_ignored(device)))
 
     def get_all_handleable(self):
         """
