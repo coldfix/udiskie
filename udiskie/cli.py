@@ -56,16 +56,16 @@ def mount_program_options():
                       metavar='MODULE', help="replace password prompt")
     return parser
 
-def connect_udisks(bus):
+def udisks_service():
     """
-    Return a connection to the first udisks service found available.
+    Return the first udisks service found available.
 
     TODO: This should check if the udisks service is accessible and if not
     try to connect to udisks2 service.
 
     """
     import udiskie.udisks1
-    return udiskie.udisks1.Udisks.create(bus)
+    return udiskie.udisks1
 
 
 #----------------------------------------
@@ -77,7 +77,6 @@ def daemon(args=None, udisks=None):
     """
     import gobject
     import udiskie.automount
-    import udiskie.daemon
     import udiskie.mount
     import udiskie.prompt
 
@@ -97,10 +96,11 @@ def daemon(args=None, udisks=None):
         from dbus.mainloop.glib import DBusGMainLoop
         DBusGMainLoop(set_as_default=True)
         bus = dbus.SystemBus()
-        udisks = connect_udisks(bus)
+        udisks_module = udisks_service()
+        udisks = udisks_module.Udisks.create(bus)
 
     # create daemon
-    daemon = udiskie.daemon.Daemon(udisks=udisks)
+    daemon = udisks_module.Daemon(udisks=udisks)
     mainloop = gobject.MainLoop()
 
     # create a mounter
@@ -157,7 +157,7 @@ def mount(args=None, udisks=None):
     if udisks is None:
         import dbus
         bus = dbus.SystemBus()
-        udisks = connect_udisks(bus)
+        udisks = udisks_service().Udisks.create(bus)
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
@@ -213,7 +213,7 @@ def umount(args=None, udisks=None):
     if udisks is None:
         import dbus
         bus = dbus.SystemBus()
-        udisks = connect_udisks(bus)
+        udisks = udisks_service().Udisks.create(bus)
     mounter = udiskie.mount.Mounter(udisks=udisks)
 
     unmounted = []
