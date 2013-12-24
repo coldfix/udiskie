@@ -225,7 +225,7 @@ class Device(DBusProxy):
 
     def unlock(self, password, options=[]):
         """Unlock Luks device."""
-        return self.method.LuksUnlock(password, options)
+        return self.udisks.create_device(self.method.LuksUnlock(password, options))
 
     def eject(self, options=[]):
         """Eject media from the device."""
@@ -310,6 +310,10 @@ class CachedDevice(object):
     def luks_cleartext_holder(self):
         """Get unlocked luks cleartext device."""
         pass
+
+    def unlock(self, password, options=[]):
+        """Unlock Luks device."""
+        return CachedDevice(self._device.unlock(password, options))
 
 
 class Udisks(DBusProxy):

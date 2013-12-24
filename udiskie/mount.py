@@ -116,8 +116,7 @@ class Mounter(object):
         # unlock device
         log.info('attempting to unlock device %s' % (device,))
         try:
-            device.unlock(password, [])
-            holder_dev = device.luks_cleartext_holder
+            holder_dev = device.unlock(password, [])
             holder_path = holder_dev.device_file
             log.info('unlocked device %s on %s' % (device, holder_path))
         except device.Exception:
