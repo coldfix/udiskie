@@ -413,25 +413,38 @@ class Udisks(DBusProxy):
     def listen(self):
         """Listen to state changes to provide automatic synchronization."""
         self.bus.add_signal_receiver(
-            self._interface_added,
-            signal_name='InterfaceAdded',
+            self._interfaces_added,
+            signal_name='InterfacesAdded',
+            dbus_interface='org.freedesktop.DBus.ObjectManager',
             bus_name=UDISKS_OBJECT)
         self.bus.add_signal_receiver(
-            self._interface_removed,
-            signal_name='InterfaceRemoved',
+            self._interfaces_removed,
+            signal_name='InterfacesRemoved',
+            dbus_interface='org.freedesktop.DBus.ObjectManager',
             bus_name=UDISKS_OBJECT)
+        self.bus.add_signal_receiver(
+            self._job_completed,
+            signal_name='Completed',
+            dbus_interface='org.freedesktop.UDisks2.Job',
+            bus_name=UDISKS_OBJECT,
+            sender_keyword='job_name')
         self.sync()
 
-    def _interface_added(self, object_path, interfaces_and_properties):
+    def _interfaces_added(self, object_path, interfaces_and_properties):
         """Internal method."""
         self.devices[object_path] = interfaces_and_properties
 
-    def _interface_removed(self, object_path, interfaces):
+    def _interfaces_removed(self, object_path, interfaces):
         """Internal method."""
         for interface in interfaces:
             del self.devices[object_path][interface]
         if not self.devices[object_path]:
             del self.devices[object_path]
+
+    def _job_completed(self, success, message, job_name):
+        obj = DBusProperties(self.bus.get_object(UDISKS_OBJECT, job_name),
+                             'org.freedesktop.UDisks2.Job')
+
 
     def sync(self):
         """Synchronize state."""
