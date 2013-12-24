@@ -90,6 +90,10 @@ class Device(DBusProxy):
         return self.property.DeviceIsDrive
 
     @property
+    def is_block(self):
+        return True
+
+    @property
     def drive(self):
         """
         Get the drive containing this device.

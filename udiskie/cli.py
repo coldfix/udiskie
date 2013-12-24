@@ -41,6 +41,9 @@ def common_program_options():
     parser.add_option('-v', '--verbose', action='store_const',
                       dest='log_level', default=logging.INFO,
                       const=logging.DEBUG, help='verbose output')
+    parser.add_option('-2', '--use-udisks2', action='store_const',
+                      dest='udisks_version', default='1',
+                      const='2', help='use udisks2 as underlying daemon (experimental)')
     return parser
 
 def mount_program_options():
@@ -56,7 +59,7 @@ def mount_program_options():
                       metavar='MODULE', help="replace password prompt")
     return parser
 
-def udisks_service():
+def udisks_service(version):
     """
     Return the first udisks service found available.
 
@@ -64,8 +67,15 @@ def udisks_service():
     try to connect to udisks2 service.
 
     """
-    import udiskie.udisks1
-    return udiskie.udisks1
+    if version == '1':
+        import udiskie.udisks1
+        return udiskie.udisks1
+    elif version == '2':
+        import udiskie.udisks2
+        return udiskie.udisks2
+    else:
+        # FIXME: chose appropriate version
+        return None
 
 
 #----------------------------------------
@@ -96,7 +106,7 @@ def daemon(args=None, udisks=None):
         from dbus.mainloop.glib import DBusGMainLoop
         DBusGMainLoop(set_as_default=True)
         bus = dbus.SystemBus()
-        udisks_module = udisks_service()
+        udisks_module = udisks_service(options.udisks_version)
         udisks = udisks_module.Udisks.create(bus)
 
     # create daemon
@@ -157,7 +167,8 @@ def mount(args=None, udisks=None):
     if udisks is None:
         import dbus
         bus = dbus.SystemBus()
-        udisks = udisks_service().Udisks.create(bus)
+        udisks = udisks_service(options.udisks_version).Udisks.create(bus)
+        udisks.sync()
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
@@ -213,7 +224,8 @@ def umount(args=None, udisks=None):
     if udisks is None:
         import dbus
         bus = dbus.SystemBus()
-        udisks = udisks_service().Udisks.create(bus)
+        udisks = udisks_service(options.udisks_version).Udisks.create(bus)
+        udisks.sync()
     mounter = udiskie.mount.Mounter(udisks=udisks)
 
     unmounted = []
