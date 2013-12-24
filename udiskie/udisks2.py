@@ -13,6 +13,7 @@ udisks1 module.
 __all__ = ['Udisks']
 
 from udiskie.common import DBusProxy, Emitter
+from copy import copy, deepcopy
 
 
 UDISKS_INTERFACE = 'org.freedesktop.UDisks2'
@@ -333,7 +334,7 @@ class Device(object):
     @property
     def mount_paths(self):
         """Return list of active mount paths."""
-        return list(self.I.Filesystem.property.MountPoints or ())
+        return list(map(tostr, self.I.Filesystem.property.MountPoints or ()))
 
     # Filesystem methods
     def mount(self, filesystem=None, options=[]):
@@ -471,6 +472,9 @@ class Daemon(Emitter):
                            'device_chang', ))
         super(Daemon, self).__init__(event_names)
 
+        self.udisks = udisks
+        self.bus = udisks.bus
+
         self.bus.add_signal_receiver(
             self._interfaces_added,
             signal_name='InterfacesAdded',
@@ -486,23 +490,46 @@ class Daemon(Emitter):
             signal_name='PropertiesChanged',
             dbus_interface='org.freedesktop.DBus.Properties',
             bus_name=UDISKS_OBJECT,
-            sender_keyword='object_path')
+            path_keyword='object_path')
         self.bus.add_signal_receiver(
             self._job_completed,
             signal_name='Completed',
             dbus_interface='org.freedesktop.UDisks2.Job',
             bus_name=UDISKS_OBJECT,
-            sender_keyword='job_name')
+            path_keyword='job_name')
         udisks.sync()
 
     @property
     def devices(self):
         return self.udisks.devices
 
+    def _detect_toggle(self, property_name, old, new, add_name, del_name):
+        old_valid = old and bool(getattr(old, property_name))
+        new_valid = new and bool(getattr(new, property_name))
+        if new_valid and not old_valid:
+            self.trigger(add_name, new)
+        elif old_valid and not new_valid:
+            self.trigger(del_name, new)
+
+    def _detect_media_and_mount(self, old_device_state, new_device_state, *interfaces):
+        if 'org.freedesktop.UDisks2.Filesystem' in interfaces:
+            self._detect_toggle('mount_paths',
+                                old_device_state, new_device_state,
+                                'device_mounted', 'device_unmounted')
+        if 'org.freedesktop.UDisks2.Drive' in interfaces:
+            self._detect_toggle('has_media',
+                                old_device_state, new_device_state,
+                                'media_inserted', 'media_removed')
+
     def _interfaces_added(self, object_path, interfaces_and_properties):
         """Internal method."""
+        old_device_state = self.udisks.create_device(object_path)
         added = object_path not in self.devices
+        # TODO: are all interfaces passed or only the new ones?
         self.devices[object_path] = interfaces_and_properties
+        new_device_state = self.udisks.create_device(object_path)
+        self._detect_media_and_mount(old_device_state, new_device_state,
+                                     *interfaces_and_properties.keys())
         if added:
             udevice = self.udisks.create_device(object_path)
             self.trigger('device_added', udevice)
@@ -513,9 +540,14 @@ class Daemon(Emitter):
 
     def _interfaces_removed(self, object_path, interfaces):
         """Internal method."""
-        old_device_state = self.udisks.create_devices(object_path)
+        old_device_state = self.udisks.create_device(object_path)
+        # copy data in order not to invalidate old_device_state
+        self.devices[object_path] = copy(self.devices[object_path])
         for interface in interfaces:
             del self.devices[object_path][interface]
+        new_device_state = self.udisks.create_device(object_path)
+        self._detect_media_and_mount(old_device_state, new_device_state,
+                                     *interfaces)
         if not self.devices[object_path]:
             del self.devices[object_path]
             # FIXME: the event handler signature is inconsistent with the
@@ -524,7 +556,7 @@ class Daemon(Emitter):
             # implement a useful response.
             self.trigger('device_removed', old_device_state)
             ciphertext_device = old_device_state.luks_cleartext_slave
-            if ciphertext_device:
+            if ciphertext_device and not ciphertext_device.is_unlocked:
                 self.trigger('device_locked', ciphertext_device)
 
     def _properties_changed(self,
@@ -538,29 +570,25 @@ class Daemon(Emitter):
         Called when a DBusProperty of any managed object changes.
 
         """
-        # FIXME: how to wait for the task to finish before triggering the
-        # signal?
+        try:
+            # copy data in order to avoid conflicts with old_device_state
+            data = deepcopy(self.devices[object_path])
+        except KeyError:
+            # for objects that are not managed by the UDisks daemon
+            return
 
         old_device_state = self.udisks.create_device(object_path)
         # update device state:
         for property_name in invalidated_properties:
-            del self.devices[interface_name][property_name]
+            del data[interface_name][property_name]
         for key,value in changed_properties.items():
-            self.devices[interface_name][key] = value
+            data[interface_name][key] = value
+        self.devices[object_path] = data
         new_device_state = self.udisks.create_device(object_path)
-
-        def detect_toggle(property_name, add_name, del_name):
-            old_valid = getattr(old_device_state, property_name)
-            new_valid = getattr(new_device_state, property_name)
-            if old_valid and not old_valid:
-                self.trigger(add_name, new_device_state)
-            elif old_valid and not new_valid:
-                self.trigger(del_name, new_device_state)
-
-        if interface_name == 'org.freedesktop.UDisks2.Filesystem':
-            detect_toggle('mount_paths', 'device_mounted', 'device_unmounted')
-        elif interface_name == 'org.freedesktop.UDisks2.Drive':
-            detect_toggle('has_media', 'media_inserted', 'media_removed')
+        self._detect_media_and_mount(old_device_state, new_device_state,
+                                     interface_name)
+        # FIXME: how to wait for the task to finish before triggering the
+        # signal?
 
     def _job_completed(self, success, message, job_name):
         """
