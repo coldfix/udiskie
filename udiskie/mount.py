@@ -106,24 +106,27 @@ class Mounter(object):
             return False
 
         # prompt user for password
-        prompt = prompt or self.prompt
-        password = prompt and prompt(
-                'Enter password for %s:' % (device.device_presentation,),
-                'Unlock encrypted device')
-        if password is None:
-            return False
+        message = ''
+        for iteration in range(3):
+            prompt = prompt or self.prompt
+            password = prompt and prompt(
+                    '%sEnter password for %s:' % (
+                        message,
+                        device.device_presentation,),
+                    'Unlock encrypted device')
+            if password is None:
+                return False
 
-        # unlock device
-        log.info('attempting to unlock device %s' % (device,))
-        try:
-            holder_dev = device.unlock(password, [])
-            holder_path = holder_dev.device_file
-            log.info('unlocked device %s on %s' % (device, holder_path))
-        except device.Exception:
-            err = sys.exc_info()[1]
-            log.error('failed to unlock device %s:\n%s' % (device, err))
-            return None
-        return True
+            # unlock device
+            log.info('attempting to unlock device %s' % (device,))
+            try:
+                holder_dev = device.unlock(password, [])
+                log.info('unlocked device %s on %s' % (device, holder_dev.device_file))
+                return True
+            except device.Exception:
+                err = sys.exc_info()[1]
+                log.error('failed to unlock device %s:\n%s' % (device, err))
+                message = err.message
 
     def lock_device(self, device):
         """
