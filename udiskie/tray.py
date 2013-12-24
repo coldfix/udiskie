@@ -151,6 +151,7 @@ def create_menu(udisks=None,
             from dbus import SystemBus
             from udiskie.udisks import Udisks
             udisks = Udisks.create(SystemBus())
+            udisks.sync()
         from udiskie.mount import Mounter
         from udiskie.prompt import password
         mounter = Mounter(prompt=password(), udisks=udisks)
