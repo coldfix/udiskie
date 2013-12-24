@@ -12,7 +12,7 @@ udisks1 module.
 """
 __all__ = ['Udisks']
 
-from udiskie.common import DBusProxy
+from udiskie.common import DBusProxy, Emitter
 
 
 UDISKS_INTERFACE = 'org.freedesktop.UDisks2'
@@ -407,42 +407,6 @@ class Udisks(DBusProxy):
         self.bus = bus
         self.devices = {}
 
-    def listen(self):
-        """Listen to state changes to provide automatic synchronization."""
-        self.bus.add_signal_receiver(
-            self._interfaces_added,
-            signal_name='InterfacesAdded',
-            dbus_interface='org.freedesktop.DBus.ObjectManager',
-            bus_name=UDISKS_OBJECT)
-        self.bus.add_signal_receiver(
-            self._interfaces_removed,
-            signal_name='InterfacesRemoved',
-            dbus_interface='org.freedesktop.DBus.ObjectManager',
-            bus_name=UDISKS_OBJECT)
-        self.bus.add_signal_receiver(
-            self._job_completed,
-            signal_name='Completed',
-            dbus_interface='org.freedesktop.UDisks2.Job',
-            bus_name=UDISKS_OBJECT,
-            sender_keyword='job_name')
-        self.sync()
-
-    def _interfaces_added(self, object_path, interfaces_and_properties):
-        """Internal method."""
-        self.devices[object_path] = interfaces_and_properties
-
-    def _interfaces_removed(self, object_path, interfaces):
-        """Internal method."""
-        for interface in interfaces:
-            del self.devices[object_path][interface]
-        if not self.devices[object_path]:
-            del self.devices[object_path]
-
-    def _job_completed(self, success, message, job_name):
-        obj = DBusProperties(self.bus.get_object(UDISKS_OBJECT, job_name),
-                             'org.freedesktop.UDisks2.Job')
-
-
     def sync(self):
         """Synchronize state."""
         self.devices = self.method.GetManagedObjects()
@@ -450,16 +414,7 @@ class Udisks(DBusProxy):
     @classmethod
     def create(cls, bus):
         """Connect to the udisks service on the specified bus."""
-        udisks = cls(bus, bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH))
-        udisks.sync()
-        return udisks
-
-    @classmethod
-    def daemon(cls, bus):
-        """Connect to the udisks service on the specified bus."""
-        udisks = cls(bus, bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH))
-        udisks.listen()
-        return udisks
+        return cls(bus, bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH))
 
     # instantiation of device objects
     def create_device(self, object_path):
@@ -495,3 +450,136 @@ class Udisks(DBusProxy):
                     return device
         return None
 
+class Daemon(Emitter):
+    """
+    Listen to state changes to provide automatic synchronization.
+
+    """
+    def __init__(self, udisks):
+        """Initialize object and start listening to udisks events."""
+        event_names = (stem + suffix
+                       for suffix in ('ed',)
+                       for stem in (
+                           'device_add',
+                           'device_remov',
+                           'device_mount',
+                           'device_unmount',
+                           'media_add',
+                           'media_remov',
+                           'device_unlock',
+                           'device_lock',
+                           'device_chang', ))
+        super(Daemon, self).__init__(event_names)
+
+        self.bus.add_signal_receiver(
+            self._interfaces_added,
+            signal_name='InterfacesAdded',
+            dbus_interface='org.freedesktop.DBus.ObjectManager',
+            bus_name=UDISKS_OBJECT)
+        self.bus.add_signal_receiver(
+            self._interfaces_removed,
+            signal_name='InterfacesRemoved',
+            dbus_interface='org.freedesktop.DBus.ObjectManager',
+            bus_name=UDISKS_OBJECT)
+        self.bus.add_signal_receiver(
+            self._properties_changed,
+            signal_name='PropertiesChanged',
+            dbus_interface='org.freedesktop.DBus.Properties',
+            bus_name=UDISKS_OBJECT,
+            sender_keyword='object_path')
+        self.bus.add_signal_receiver(
+            self._job_completed,
+            signal_name='Completed',
+            dbus_interface='org.freedesktop.UDisks2.Job',
+            bus_name=UDISKS_OBJECT,
+            sender_keyword='job_name')
+        udisks.sync()
+
+    @property
+    def devices(self):
+        return self.udisks.devices
+
+    def _interfaces_added(self, object_path, interfaces_and_properties):
+        """Internal method."""
+        added = object_path not in self.devices
+        self.devices[object_path] = interfaces_and_properties
+        if added:
+            udevice = self.udisks.create_device(object_path)
+            self.trigger('device_added', udevice)
+            ciphertext_device = udevice.luks_cleartext_slave
+            if ciphertext_device:
+                # TODO: add cleartext_holder(==udevice) to event signature?
+                self.trigger('device_unlocked', ciphertext_device)
+
+    def _interfaces_removed(self, object_path, interfaces):
+        """Internal method."""
+        old_device_state = self.udisks.create_devices(object_path)
+        for interface in interfaces:
+            del self.devices[object_path][interface]
+        if not self.devices[object_path]:
+            del self.devices[object_path]
+            # FIXME: the event handler signature is inconsistent with the
+            # corresponding signal in the udisks1 module. Here we pass the
+            # old state of the device which makes it a lot easier to
+            # implement a useful response.
+            self.trigger('device_removed', old_device_state)
+            ciphertext_device = old_device_state.luks_cleartext_slave
+            if ciphertext_device:
+                self.trigger('device_locked', ciphertext_device)
+
+    def _properties_changed(self,
+                            interface_name,
+                            changed_properties,
+                            invalidated_properties,
+                            object_path):
+        """
+        Internal method.
+
+        Called when a DBusProperty of any managed object changes.
+
+        """
+        # FIXME: how to wait for the task to finish before triggering the
+        # signal?
+
+        old_device_state = self.udisks.create_device(object_path)
+        # update device state:
+        for property_name in invalidated_properties:
+            del self.devices[interface_name][property_name]
+        for key,value in changed_properties.items():
+            self.devices[interface_name][key] = value
+        new_device_state = self.udisks.create_device(object_path)
+
+        def detect_toggle(property_name, add_name, del_name):
+            old_valid = getattr(old_device_state, property_name)
+            new_valid = getattr(new_device_state, property_name)
+            if old_valid and not old_valid:
+                self.trigger(add_name, new_device_state)
+            elif old_valid and not new_valid:
+                self.trigger(del_name, new_device_state)
+
+        if interface_name == 'org.freedesktop.UDisks2.Filesystem':
+            detect_toggle('mount_paths', 'device_mounted', 'device_unmounted')
+        elif interface_name == 'org.freedesktop.UDisks2.Drive':
+            detect_toggle('has_media', 'media_inserted', 'media_removed')
+
+    def _job_completed(self, success, message, job_name):
+        """
+        Internal method.
+
+        Called when a job of a long running task completes.
+
+        """
+        # FIXME: the event is triggered twice (the first time in
+        # _properties_changed)
+        event_mapping = {
+            'filesystem-mount': 'device_mount',
+            'filesystem-unmount': 'device_unmount',
+            'encrypted-unlock': 'device_unlock',
+            'encrypted-lock': 'device_lock' }
+        job = DBusProperties(self.bus.get_object(UDISKS_OBJECT, job_name),
+                             'org.freedesktop.UDisks2.Job')
+        job_id = job.Operation
+        event_name = event_mapping[job_id]
+        for object_path in job.Objects:
+            dev = self.udisks.create_device(object_path)
+            self.trigger(event_name + 'ed', dev)
