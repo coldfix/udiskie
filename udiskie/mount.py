@@ -297,10 +297,9 @@ class Mounter(object):
         if not device.is_luks_cleartext:
             logger.debug('skipping non-luks-cleartext device %s' % (device,))
             return False
-        slave = device.luks_cleartext_slave
-        if slave.is_luks_cleartext_slave:
+        if device.in_use:
             return False
-        return self.lock_device(slave)
+        return self.lock_device(device.luks_cleartext_slave)
 
 
     # mount/unmount by path

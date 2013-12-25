@@ -190,18 +190,6 @@ class Device(DBusProxy):
         return self.udisks.create_device(self.property.LuksHolder) if self.is_luks else None
 
     @property
-    def is_luks_cleartext_slave(self):
-        """Check whether the luks device is currently in use."""
-        if not self.is_luks:
-            return False
-        for device in self.udisks.get_all():
-            if (not device.is_filesystem or device.is_mounted) and (
-                    device.is_luks_cleartext and
-                    device.luks_cleartext_slave == self):
-                return True
-        return False
-
-    @property
     def has_media(self):
         return self.property.DeviceIsMediaAvailable
 
@@ -217,6 +205,17 @@ class Device(DBusProxy):
     def id_uuid(self):
         """Device UUID."""
         return self.property.IdUuid
+
+    @property
+    def in_use(self):
+        """Check whether this device is in use, i.e. mounted or unlocked."""
+        if self.is_mounted or self.is_unlocked:
+            return True
+        if self.is_partition_table:
+            for device in self.udisks.get_all():
+                if device.partition_slave == self and device.in_use:
+                    return True
+        return False
 
     # methods
     def mount(self,

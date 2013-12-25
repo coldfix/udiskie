@@ -432,11 +432,6 @@ class Device(object):
         """Check if device is already unlocked."""
         return bool(self.luks_cleartext_holder)
 
-    @property
-    def is_luks_cleartext_slave(self):
-        """Check whether the luks device is currently in use."""
-        return bool(self.luks_cleartext_holder)     # FIXME
-
     # Encrypted methods
     def unlock(self, password, auth_no_user_interaction=None):
         """Unlock Luks device."""
@@ -456,6 +451,20 @@ class Device(object):
             'auth.no_user_interaction': auth_no_user_interaction
         }))
 
+    #----------------------------------------
+    # derived properties
+    #----------------------------------------
+
+    @property
+    def in_use(self):
+        """Check whether this device is in use, i.e. mounted or unlocked."""
+        if self.is_mounted or self.is_unlocked:
+            return True
+        if self.is_partition_table:
+            for device in self.udisks.get_all():
+                if device.partition_slave == self and device.in_use:
+                    return True
+        return False
 
 #----------------------------------------
 # udisks service wrapper
