@@ -89,6 +89,8 @@ class Device(DBusProxy):
         """Check if the device is a drive."""
         return self.property.DeviceIsDrive
 
+    is_toplevel = is_drive
+
     @property
     def is_block(self):
         return True

@@ -232,6 +232,10 @@ class Device(object):
 
     # Drive properties
     @property
+    def is_toplevel(self):
+        return not self.is_partition and not self.is_luks_cleartext
+
+    @property
     def _assocdrive(self):
         """
         Return associated drive if this is a top level block device.
@@ -240,10 +244,7 @@ class Device(object):
         devices in udisks1 and udisks2.
 
         """
-        if not self.is_partition and not self.is_luks_cleartext:
-            return self.drive
-        else:
-            return self
+        return self.drive if self.is_toplevel else self
 
     @property
     def is_detachable(self):

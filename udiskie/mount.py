@@ -183,10 +183,10 @@ class Mounter(object):
             if force:
                 self.remove_device(device.luks_cleartext_holder, force=True)
             return self.lock_device(device)
-        elif force and device.is_partition_table:
+        elif force and (device.is_partition_table or device.is_drive):
             success = True
             for dev in self.get_all_handleable():
-                if dev.is_partition and dev.partition_slave == device:
+                if (dev.is_partition and dev.partition_slave == device) or (dev.is_toplevel and dev.drive == device) and (dev != device):
                     ret = self.remove_device(dev, force=True)
                     if ret is None:
                         success = None
