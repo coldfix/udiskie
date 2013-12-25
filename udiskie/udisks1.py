@@ -25,6 +25,10 @@ UDISKS_DEVICE_INTERFACE = 'org.freedesktop.UDisks.Device'
 UDISKS_OBJECT = 'org.freedesktop.UDisks'
 UDISKS_OBJECT_PATH = '/org/freedesktop/UDisks'
 
+def filter_opt(opt):
+    return {k for k,v in opt.items() if v is not None}
+
+
 
 class Device(DBusProxy):
     """
@@ -215,31 +219,35 @@ class Device(DBusProxy):
         return self.property.IdUuid
 
     # methods
-    def mount(self, filesystem=None, options=[]):
+    def mount(self,
+              fstype=None,
+              options=None,
+              auth_no_user_interaction=None):
         """Mount filesystem."""
-        if filesystem is None:
-            filesystem = self.id_type
-        self.method.FilesystemMount(filesystem, options)
+        options = filter(None, (options or '').split(',')) + filter_opt({
+            'auth_no_user_interaction': auth_no_user_interaction
+        })
+        self.method.FilesystemMount(fstype or self.id_type, options)
 
-    def unmount(self, options=[]):
+    def unmount(self, force=None):
         """Unmount filesystem."""
-        self.method.FilesystemUnmount(options)
+        self.method.FilesystemUnmount(filter_opt({'force': force}))
 
-    def lock(self, options=[]):
+    def lock(self):
         """Lock Luks device."""
-        return self.method.LuksLock(options)
+        return self.method.LuksLock([])
 
-    def unlock(self, password, options=[]):
+    def unlock(self, password):
         """Unlock Luks device."""
-        return self.udisks.create_device(self.method.LuksUnlock(password, options))
+        return self.udisks.create_device(self.method.LuksUnlock(password, []))
 
-    def eject(self, options=[]):
+    def eject(self, unmount=None):
         """Eject media from the device."""
-        return self.method.DriveEject(options)
+        return self.method.DriveEject(filter_opt({'unmount': unmount}))
 
-    def detach(self, options=[]):
+    def detach(self):
         """Detach the device by e.g. powering down the physical port."""
-        return self.method.DriveDetach(options)
+        return self.method.DriveDetach([])
 
 def _CachedDeviceProperty(method):
     """Cache object path and return the current known CachedDevice state."""

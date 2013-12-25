@@ -35,6 +35,9 @@ def object_kind(object_path):
     except IndexError:
         return None
 
+def filter_opt(opt):
+    return {k: v for k,v in opt.items() if v is not None} 
+
 #----------------------------------------
 # byte array to string conversion
 #----------------------------------------
@@ -262,15 +265,17 @@ class Device(object):
         return bool(self._assocdrive.I.Drive.property.MediaAvailable)
 
     # Drive methods
-    # FIXME: signature different from udisks1 (options = dict vs list)
-    def eject(self, options={}):
+    def eject(self, auth_no_user_interaction=None):
         """Eject media from the device."""
-        return self._assocdrive.I.Drive.method.Eject(options)
+        return self._assocdrive.I.Drive.method.Eject(filter_opt({
+            'auth.no_user_interaction': auth_no_user_interaction
+        }))
 
-    # FIXME: signature different from udisks1 (options = dict vs list)
-    def detach(self, options={}):
+    def detach(self, auth_no_user_interaction=None):
         """Detach the device by e.g. powering down the physical port."""
-        return self._assocdrive.I.Drive.method.PowerOff(options)
+        return self._assocdrive.I.Drive.method.PowerOff(filter_opt({
+            'auth.no_user_interaction': auth_no_user_interaction
+        }))
 
     #----------------------------------------
     # Block
@@ -389,16 +394,23 @@ class Device(object):
         return list(map(decode, self.I.Filesystem.property.MountPoints or ()))
 
     # Filesystem methods
-    def mount(self, filesystem=None, options=[]):
+    def mount(self,
+              fstype=None,
+              options=None,
+              auth_no_user_interaction=None):
         """Mount filesystem."""
-        return self.I.Filesystem.method.Mount({
-            'fstype': encode(filesystem or self.id_type),
-            'options': encode(','.join(options)) })
+        return self.I.Filesystem.method.Mount(filter_opt({
+            'fstype': fstype,
+            'options': options,
+            'auth.no_user_interaction': auth_no_user_interaction
+        }))
 
-    # FIXME: signature different from udisks1 (options = dict vs list)
-    def unmount(self, options={}):
+    def unmount(self, force=None, auth_no_user_interaction=None):
         """Unmount filesystem."""
-        return self.I.Filesystem.method.Unmount(options)
+        return self.I.Filesystem.method.Unmount(filter_opt({
+            'force': force,
+            'auth.no_user_interaction': auth_no_user_interaction
+        }))
 
     #----------------------------------------
     # Encrypted
@@ -426,10 +438,11 @@ class Device(object):
         return bool(self.luks_cleartext_holder)     # FIXME
 
     # Encrypted methods
-    # FIXME: signature different from udisks1 (options = dict vs list)
-    def unlock(self, password, options={}):
+    def unlock(self, password, auth_no_user_interaction=None):
         """Unlock Luks device."""
-        object_path = self.I.Encrypted.method.Unlock(password, options)
+        object_path = self.I.Encrypted.method.Unlock(password, filter_opt({
+            'auth.no_user_interaction': auth_no_user_interaction
+        }))
         # udisks may not have processed the InterfacesAdded signal yet.
         # Therefore it is necessary to query the interface data directly
         # from the dbus service:
@@ -437,10 +450,11 @@ class Device(object):
             object_path,
             self.udisks.method.GetManagedObjects()[object_path])
 
-    # FIXME: signature different from udisks1 (options = dict vs list)
-    def lock(self, options={}):
+    def lock(self, auth_no_user_interaction=None):
         """Lock Luks device."""
-        return self.I.Encrypted.method.Lock(options)
+        return self.I.Encrypted.method.Lock(filter_opt({
+            'auth.no_user_interaction': auth_no_user_interaction
+        }))
 
 
 #----------------------------------------

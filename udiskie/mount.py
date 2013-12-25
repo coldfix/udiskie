@@ -50,11 +50,11 @@ class Mounter(object):
 
         fstype = str(device.id_type)
         filter = filter or self.filter
-        options = filter.get_mount_options(device) if filter else []
+        options = ','.join(filter.get_mount_options(device) if filter else [])
 
         log.debug('attempting to mount device %s (%s:%s)' % (device, fstype, options))
         try:
-            device.mount(fstype, options)
+            device.mount(fstype=fstype, options=options)
         except device.Exception:
             err = sys.exc_info()[1]
             log.error('failed to mount device %s: %s' % (device, err))
@@ -120,7 +120,7 @@ class Mounter(object):
             # unlock device
             log.info('attempting to unlock device %s' % (device,))
             try:
-                holder_dev = device.unlock(password, [])
+                holder_dev = device.unlock(password)
                 log.info('unlocked device %s on %s' % (device, holder_dev.device_file))
                 return True
             except device.Exception:
@@ -145,7 +145,7 @@ class Mounter(object):
             logger.debug('skipping locked device %s' % (device,))
             return False
         try:
-            device.lock([])
+            device.lock()
             logger.info('locked device %s' % (device,))
         except device.Exception:
             err = sys.exc_info()[1]
@@ -202,37 +202,34 @@ class Mounter(object):
         """Eject a device after unmounting all its mounted filesystems."""
         logger = logging.getLogger('udiskie.mount.eject_device')
         drive = device.drive
-        if drive.is_drive and drive.is_ejectable:
-            try:
-                if force:
-                    drive.eject(['unmount'])
-                else:
-                    drive.eject([])
-                logger.info('ejected device %s' % (device,))
-                return True
-            except drive.Exception:
-                logger.warning('failed to eject device %s' % (device,))
-                return False
-        else:
+        if not (drive.is_drive and drive.is_ejectable):
             logger.debug('drive not ejectable: %s' % drive)
+            return False
+        if force:
+            self.remove_device(drive, force=True)
+        try:
+            drive.eject()
+            logger.info('ejected device %s' % (device,))
+            return True
+        except drive.Exception:
+            logger.warning('failed to eject device %s' % (device,))
             return False
 
     def detach_device(self, device, force=False):
         """Detach a device after unmounting all its mounted filesystems."""
         logger = logging.getLogger('udiskie.mount.eject_device')
         drive = device.drive
-        if drive.is_drive and drive.is_detachable:
-            if force:
-                self.remove_device(drive, force=True)
-            try:
-                drive.detach([])
-                logger.info('detached device %s' % (device,))
-                return True
-            except drive.Exception:
-                logger.warning('failed to detach device %s' % (device,))
-                return False
-        else:
-            logger.debug('drive not detachable: %s' % drive)
+        if not (drive.is_drive and drive.is_detachable):
+            logger.warning('drive not detachable: %s' % drive)
+            return False
+        if force:
+            self.remove_device(drive, force=True)
+        try:
+            drive.detach()
+            logger.info('detached device %s' % (device,))
+            return True
+        except drive.Exception:
+            logger.warning('failed to detach device %s' % (device,))
             return False
 
     # mount_all/unmount_all
