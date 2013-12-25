@@ -41,6 +41,9 @@ def common_program_options():
     parser.add_option('-v', '--verbose', action='store_const',
                       dest='log_level', default=logging.INFO,
                       const=logging.DEBUG, help='verbose output')
+    parser.add_option('-1', '--use-udisks1', action='store_const',
+                      dest='udisks_version', default='1',
+                      const='1', help='use udisks1 as underlying daemon (default)')
     parser.add_option('-2', '--use-udisks2', action='store_const',
                       dest='udisks_version', default='1',
                       const='2', help='use udisks2 as underlying daemon (experimental)')
