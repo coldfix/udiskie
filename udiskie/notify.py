@@ -22,18 +22,18 @@ class Notify(object):
 
     # event handlers:
     def device_mounted(self, device):
-        device_file = device.device_presentation
+        label = device.id_label
         mount_path = device.mount_paths[0]
         self.notify.Notification(
             'Device mounted',
-            '%s mounted on %s' % (device_file, mount_path),
+            '%s mounted on %s' % (label, mount_path),
             'drive-removable-media').show()
 
     def device_unmounted(self, device):
-        device_file = device.device_presentation
+        label = device.id_label
         self.notify.Notification(
             'Device unmounted',
-            '%s unmounted' % (device_file,),
+            '%s unmounted' % (label,),
             'drive-removable-media').show()
 
     def device_locked(self, device):

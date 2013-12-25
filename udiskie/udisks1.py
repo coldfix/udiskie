@@ -204,6 +204,10 @@ class Device(DBusProxy):
         return self.property.IdUsage
 
     @property
+    def id_label(self):
+        return self.property.IdLabel
+
+    @property
     def id_uuid(self):
         """Device UUID."""
         return self.property.IdUuid
