@@ -47,7 +47,7 @@ def device_tree(devices):
                 methods.append('lock')
             else:
                 methods.append('unlock')
-        if device.is_ejectable:
+        if device.is_ejectable and device.has_media:
             methods.append('eject')
         if device.is_detachable:
             methods.append('detach')
