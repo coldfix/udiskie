@@ -52,7 +52,7 @@ class Mounter(object):
         filter = filter or self.filter
         options = filter.get_mount_options(device) if filter else []
 
-        log.info('attempting to mount device %s (%s:%s)' % (device, fstype, options))
+        log.debug('attempting to mount device %s (%s:%s)' % (device, fstype, options))
         try:
             device.mount(fstype, options)
         except device.Exception:

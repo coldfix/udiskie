@@ -12,6 +12,7 @@ udisks1 module.
 """
 __all__ = ['Udisks']
 
+import logging
 from udiskie.common import DBusProxy, DBusProperties, Emitter, DBusException
 from copy import copy, deepcopy
 
@@ -526,6 +527,7 @@ class Daemon(Emitter):
                            'device_chang', ))
         super(Daemon, self).__init__(event_names)
 
+        self.log = logging.getLogger('udiskie.udisks2.Daemon')
         self.udisks = udisks
         self.bus = udisks.bus
 
@@ -556,6 +558,10 @@ class Daemon(Emitter):
     @property
     def _objects(self):
         return self.udisks._objects
+
+    def trigger(self, event, device, *args):
+        self.log.debug("+++ %s: %s" % (event, device))
+        super(Daemon, self).trigger(event, device, *args)
 
     def _detect_toggle(self, property_name, old, new, add_name, del_name):
         old_valid = old and bool(getattr(old, property_name))
