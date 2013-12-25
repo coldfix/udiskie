@@ -433,10 +433,9 @@ class Device(object):
         # udisks may not have processed the InterfacesAdded signal yet.
         # Therefore it is necessary to query the interface data directly
         # from the dbus service:
-        interface_service = OfflineInterfaceService(
-            self.udisks.bus.get_object(UDISKS_OBJECT, object_path),
+        return self.udisks.create_device(
+            object_path,
             self.udisks.method.GetManagedObjects()[object_path])
-        return Device(self.udisks, object_path, interface_service)
 
     # FIXME: signature different from udisks1 (options = dict vs list)
     def lock(self, options={}):
@@ -482,15 +481,18 @@ class Udisks(DBusProxy):
         return cls(bus, bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH))
 
     # instantiation of device objects
-    def create_device(self, object_path):
+    def create_device(self, object_path, interfaces_and_properties=None):
         """Create a Device instance from object path."""
-        if object_path in self._objects:
-            interface_service = OfflineInterfaceService(
-                self.bus.get_object(UDISKS_OBJECT, object_path),
-                self._objects.get(object_path))
-            return Device(self, object_path, interface_service)
-        else:
-            return None
+        # check this before creating the dbus object for more
+        # controlled behaviour:
+        if not interfaces_and_properties:
+            interfaces_and_properties = self._objects.get(object_path)
+            if not interfaces_and_properties:
+                return None
+        interface_service = OfflineInterfaceService(
+            self.bus.get_object(UDISKS_OBJECT, object_path),
+            interfaces_and_properties)
+        return Device(self, object_path, interface_service)
 
     # Methods
     def get_all(self):
@@ -528,18 +530,20 @@ class Daemon(Emitter):
     """
     def __init__(self, udisks):
         """Initialize object and start listening to udisks events."""
-        event_names = (stem + suffix
-                       for suffix in ('ed','ing')
-                       for stem in (
-                           'device_add',
-                           'device_remov',
-                           'device_mount',
-                           'device_unmount',
-                           'media_add',
-                           'media_remov',
-                           'device_unlock',
-                           'device_lock',
-                           'device_chang', ))
+        event_names = (tuple(stem + suffix
+                             for suffix in ('ed','ing')
+                             for stem in (
+                                 'device_add',
+                                 'device_remov',
+                                 'device_mount',
+                                 'device_unmount',
+                                 'media_add',
+                                 'media_remov',
+                                 'device_unlock',
+                                 'device_lock',
+                                 'device_chang', ))
+                       + ('object_added',
+                          'object_removed'))
         super(Daemon, self).__init__(event_names)
 
         self.log = logging.getLogger('udiskie.udisks2.Daemon')
@@ -570,6 +574,8 @@ class Daemon(Emitter):
             path_keyword='job_name')
         udisks.sync()
 
+        self.connect(self._object_added, 'object_added')
+
     @property
     def _objects(self):
         return self.udisks._objects
@@ -581,53 +587,51 @@ class Daemon(Emitter):
     def _detect_toggle(self, property_name, old, new, add_name, del_name):
         old_valid = old and bool(getattr(old, property_name))
         new_valid = new and bool(getattr(new, property_name))
-        if new_valid and not old_valid:
+        if add_name and new_valid and not old_valid:
             self.trigger(add_name, new)
-        elif old_valid and not new_valid:
+        elif del_name and old_valid and not new_valid:
             self.trigger(del_name, new)
 
-    def _detect_media(self, old_device_state, new_device_state, *interfaces):
-        if 'org.freedesktop.UDisks2.Drive' in interfaces:
-            self._detect_toggle('has_media',
-                                old_device_state, new_device_state,
-                                'media_added', 'media_removed')
-
+    # add objects / interfaces
     def _interfaces_added(self, object_path, interfaces_and_properties):
         """Internal method."""
         added = object_path not in self._objects
         self._objects[object_path] = interfaces_and_properties
         if added:
-            kind = object_kind(object_path)
-            if kind in ('device', 'drive'):
-                self.trigger('device_added',
-                             self.udisks.create_device(object_path))
-            elif kind == 'job':
-                self._job_changed(object_path, False)
+            self.trigger('object_added', object_path)
 
+    def _object_added(self, object_path):
+        """Internal event handler."""
+        kind = object_kind(object_path)
+        if kind in ('device', 'drive'):
+            self.trigger('device_added',
+                         self.udisks.create_device(object_path))
+        elif kind == 'job':
+            self._job_changed(object_path, False)
+
+    # remove objects / interfaces
     def _interfaces_removed(self, object_path, interfaces):
         """Internal method."""
-        kind = object_kind(object_path)
-        def update():
-            for interface in interfaces:
-                del self._objects[object_path][interface]
-        def remove():
-            if self._objects[object_path]:
-                return False
-            del self._objects[object_path]
-            return True
-        if kind in ('device', 'drive'):
-            old_device_state = self.udisks.create_device(object_path)
-            # Copy data in order not to invalidate old_device_state.
-            self._objects[object_path] = copy(self._objects[object_path])
-            update()
-            new_device_state = self.udisks.create_device(object_path)
-            self._detect_media(old_device_state, new_device_state, *interfaces)
-            if remove():
-                self.trigger('device_removed', old_device_state)
-        else:
-            update()
-            remove()
+        old_state = copy(self._objects[object_path])
+        for interface in interfaces:
+            del self._objects[object_path][interface]
+        new_state = self._objects[object_path]
 
+        if 'org.freedesktop.UDisks2.Drive' in interfaces:
+            self._detect_toggle(
+                'has_media',
+                self.udisks.create_device(object_path, old_state),
+                self.udisks.create_device(object_path, new_state),
+                None, 'media_removed')
+
+        if not self._objects[object_path]:
+            del self._objects[object_path]
+            if object_kind(object_path) in ('device', 'drive'):
+                self.trigger(
+                    'device_removed',
+                    self.udisks.create_device(object_path, old_state))
+
+    # change interface properties
     def _properties_changed(self,
                             interface_name,
                             changed_properties,
@@ -639,26 +643,30 @@ class Daemon(Emitter):
         Called when a DBusProperty of any managed object changes.
 
         """
-        try:
-            # copy data in order to avoid conflicts with old_device_state
-            data = deepcopy(self._objects[object_path])
-        except KeyError:
-            # for objects that are not managed by the UDisks daemon
-            return
-
-        old_device_state = self.udisks.create_device(object_path)
         # update device state:
+        old_state = deepcopy(self._objects[object_path])
         for property_name in invalidated_properties:
-            del data[interface_name][property_name]
+            del self._objects[object_path][interface_name][property_name]
         for key,value in changed_properties.items():
-            data[interface_name][key] = value
-        self._objects[object_path] = data
-        new_device_state = self.udisks.create_device(object_path)
-        self._detect_media(old_device_state, new_device_state, interface_name)
+            self._objects[object_path][interface_name][key] = value
+        new_state = self._objects[object_path]
+
+        if interface_name == 'org.freedesktop.UDisks2.Drive':
+            self._detect_toggle(
+                'has_media',
+                self.udisks.create_device(object_path, old_state),
+                self.udisks.create_device(object_path, new_state),
+                'media_added', 'media_removed')
+        elif interface_name == 'org.freedesktop.UDisks2.Filesystem':
+            self._detect_toggle(
+                'is_mounted',
+                self.udisks.create_device(object_path, old_state),
+                self.udisks.create_device(object_path, new_state),
+                'device_mounted', None)
 
     def _job_changed(self, job_name, completed):
         event_mapping = {
-            'filesystem-mount': 'device_mount',
+            # 'filesystem-mount': 'device_mount',
             'filesystem-unmount': 'device_unmount',
             'encrypted-unlock': 'device_unlock',
             'encrypted-lock': 'device_lock' }
