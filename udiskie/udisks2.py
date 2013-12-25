@@ -232,30 +232,44 @@ class Device(object):
 
     # Drive properties
     @property
+    def _assocdrive(self):
+        """
+        Return associated drive if this is a top level block device.
+
+        This method is used internally to unify the behaviour of top level
+        devices in udisks1 and udisks2.
+
+        """
+        if not self.is_partition and not self.is_luks_cleartext:
+            return self.drive
+        else:
+            return self
+
+    @property
     def is_detachable(self):
         """Check if the drive that owns this device can be detached."""
-        return bool(self.I.Drive.property.CanPowerOff)
+        return bool(self._assocdrive.I.Drive.property.CanPowerOff)
 
     @property
     def is_ejectable(self):
         """Check if the drive that owns this device can be ejected."""
-        return bool(self.I.Drive.property.Ejectable)
+        return bool(self._assocdrive.I.Drive.property.Ejectable)
 
     @property
     def has_media(self):
         """Check if there is media available in the drive."""
-        return bool(self.I.Drive.property.MediaAvailable)
+        return bool(self._assocdrive.I.Drive.property.MediaAvailable)
 
     # Drive methods
     # FIXME: signature different from udisks1 (options = dict vs list)
     def eject(self, options={}):
         """Eject media from the device."""
-        return self.I.Drive.method.Eject(options)
+        return self._assocdrive.I.Drive.method.Eject(options)
 
     # FIXME: signature different from udisks1 (options = dict vs list)
     def detach(self, options={}):
         """Detach the device by e.g. powering down the physical port."""
-        return self.I.Drive.method.PowerOff(options)
+        return self._assocdrive.I.Drive.method.PowerOff(options)
 
     #----------------------------------------
     # Block
