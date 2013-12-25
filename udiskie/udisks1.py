@@ -26,7 +26,7 @@ UDISKS_OBJECT = 'org.freedesktop.UDisks'
 UDISKS_OBJECT_PATH = '/org/freedesktop/UDisks'
 
 def filter_opt(opt):
-    return {k for k,v in opt.items() if v is not None}
+    return [k for k,v in opt.items() if v is not None]
 
 
 
