@@ -202,6 +202,10 @@ class Device(DBusProxy):
         return self.property.IdUsage
 
     @property
+    def id_label(self):
+        return self.property.IdLabel
+
+    @property
     def id_uuid(self):
         """Device UUID."""
         return self.property.IdUuid
@@ -386,8 +390,15 @@ class Udisks(DBusProxy):
     # internal state keeping
     def sync(self):
         """Cache all device states."""
-        for object_path in self.method.EnumerateDevices():
-            self._upd_device_state(object_path)
+        self.device_states = {
+            object_path: self.create_device(object_path)
+            for object_path in self.method.EnumerateDevices() }
+        for object_path,device in self.device_states.items():
+            cached = CachedDevice(device)
+            if cached.is_valid:
+                self.device_states[object_path] = cached
+            else:
+                del self.device_states[object_path]
 
     def _get_device_state(self, object_path, fallback=False):
         dev = self.device_states.get(object_path)
