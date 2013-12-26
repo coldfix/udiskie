@@ -27,6 +27,11 @@ from inspect import getmembers
 
 from udiskie.common import DBusProxy, Emitter
 
+try:                    # python2
+    from itertools import ifilter as filter
+except ImportError:     # python3
+    pass
+
 def filter_opt(opt):
     return [k for k,v in opt.items() if v is not None]
 
@@ -37,26 +42,8 @@ def samefile(a, b):
     except OSError:
         return os.path.normpath(a) == os.path.normpath(b)
 
-class Device(DBusProxy):
-    """
-    Online wrapper for org.freedesktop.UDisks.Device DBus API proxy objects.
-
-    Resolves both property access and method calls dynamically to the DBus
-    object.
-
-    """
+class DeviceBase(object):
     Interface = 'org.freedesktop.UDisks.Device'
-
-    # construction
-    def __init__(self, udisks, proxy):
-        """
-        Initialize an instance with the given DBus proxy object.
-
-        proxy must be an object acquired by a call to bus.get_object().
-
-        """
-        super(Device, self).__init__(proxy, self.Interface)
-        self.udisks = udisks
 
     # string representation
     def __str__(self):
@@ -71,15 +58,6 @@ class Device(DBusProxy):
         """Comparison by object path."""
         return not (self == other)
 
-    # check if the device is a valid UDisks object
-    @property
-    def is_valid(self):
-        try:
-            self.property.DeviceFile
-            return True
-        except self.Exception:
-            return False
-
     def __nonzero__(self):      # python2
         return self.is_valid
     __bool__ = __nonzero__      # python3
@@ -88,6 +66,35 @@ class Device(DBusProxy):
         """Comparison by mount and device file path."""
         return samefile(path, self.device_file) or any(
             samefile(path, mp) for mp in self.mount_paths)
+
+
+class OnlineDevice(DBusProxy, DeviceBase):
+    """
+    Online wrapper for org.freedesktop.UDisks.Device DBus API proxy objects.
+
+    Resolves both property access and method calls dynamically to the DBus
+    object.
+
+    """
+    # construction
+    def __init__(self, udisks, proxy):
+        """
+        Initialize an instance with the given DBus proxy object.
+
+        proxy must be an object acquired by a call to bus.get_object().
+
+        """
+        super(OnlineDevice, self).__init__(proxy, self.Interface)
+        self.udisks = udisks
+
+    # check if the device is a valid UDisks object
+    @property
+    def is_valid(self):
+        try:
+            self.property.DeviceFile
+            return True
+        except self.Exception:
+            return False
 
     # properties
     @property
@@ -244,7 +251,7 @@ class Device(DBusProxy):
               options=None,
               auth_no_user_interaction=None):
         """Mount filesystem."""
-        options = filter(None, (options or '').split(',')) + filter_opt({
+        options = list(filter(None, (options or '').split(','))) + filter_opt({
             'auth_no_user_interaction': auth_no_user_interaction
         })
         return self.method.FilesystemMount(fstype or self.id_type, options)
@@ -278,7 +285,7 @@ def _CachedDeviceProperty(method):
         setattr(self, key, getattr(device, 'object_path', None))
     return property(get, set, doc=method.__doc__)
 
-class CachedDevice(object):
+class CachedDevice(DeviceBase):
     """
     Cached device state.
 
@@ -302,23 +309,6 @@ class CachedDevice(object):
     def __getattr__(self, key):
         """Resolve unknown properties and methods via the online device."""
         return getattr(self._device, key)
-
-    def __nonzero__(self):      # python2
-        return self.is_valid
-    __bool__ = __nonzero__      # python3
-
-    # string representation
-    def __str__(self):
-        """Display as object path."""
-        return self.object_path
-
-    def __eq__(self, other):
-        """Comparison by object path."""
-        return self.object_path == str(other)
-
-    def __ne__(self, other):
-        """Comparison by object path."""
-        return not (self == other)
 
     # Overload properties that return Device objects to return CachedDevice
     # instances instead. NOTE: the setters are implemented such that the
@@ -361,7 +351,7 @@ class UDisks(object):
 
     def __iter__(self):
         """Iterate over all devices."""
-        return (dev for dev in map(self.get, self.paths()) if dev)
+        return filter(None, map(self.get, self.paths()))
 
     def __getitem__(self, object_path):
         return self.get(object_path)
@@ -381,7 +371,7 @@ class UDisks(object):
         logger.warn('Device not found: %s' % path)
         return None
 
-class Sniffer(DBusProxy, UDisks):
+class Sniffer(UDisks):
     """
     UDisks DBus service wrapper.
 
@@ -404,15 +394,17 @@ class Sniffer(DBusProxy, UDisks):
             if bus is None:
                 from dbus import SystemBus
                 bus = SystemBus()
-            proxy = bus.get_object(self.BusName, self.ObjectPath)
-        super(Sniffer, self).__init__(proxy, self.Interface)
+            proxy = DBusProxy(bus.get_object(self.BusName, self.ObjectPath),
+                              self.Interface)
+        self._proxy = proxy
 
     def paths(self):
-        return self.method.EnumerateDevices()
+        return self._proxy.method.EnumerateDevices()
 
     def get(self, object_path):
         """Create a Device instance from object path."""
-        return Device(self, self._bus.get_object(self.BusName, object_path))
+        return OnlineDevice(self, self._proxy._bus.get_object(self.BusName,
+                                                              object_path))
 
     update = get
 
@@ -477,19 +469,20 @@ class Daemon(Emitter, UDisks):
         self._devices = {}
 
         self.connect(self._on_device_changed, 'device_changed')
-        self._sniffer._bus.add_signal_receiver(
+        bus = self._sniffer._proxy._bus
+        bus.add_signal_receiver(
             self._device_added,
             signal_name='DeviceAdded',
             bus_name=self.BusName)
-        self._sniffer._bus.add_signal_receiver(
+        bus.add_signal_receiver(
             self._device_removed,
             signal_name='DeviceRemoved',
             bus_name=self.BusName)
-        self._sniffer._bus.add_signal_receiver(
+        bus.add_signal_receiver(
             self._device_changed,
             signal_name='DeviceChanged',
             bus_name=self.BusName)
-        self._sniffer._bus.add_signal_receiver(
+        bus.add_signal_receiver(
             self._device_job_changed,
             signal_name='DeviceJobChanged',
             bus_name=self.BusName)
