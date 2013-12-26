@@ -14,14 +14,14 @@ class DBusProperties(object):
 
     """
     def __init__(self, dbus_object, interface):
-        """Initialize a proxy object with standard dbus property interface."""
+        """Initialize a proxy object with standard DBus property interface."""
         self.__proxy = Interface(
                 dbus_object,
                 dbus_interface='org.freedesktop.DBus.Properties')
         self.__interface = interface
 
     def __getattr__(self, property):
-        """Retrieve the property via the dbus proxy."""
+        """Retrieve the property via the DBus proxy."""
         return self.__proxy.Get(self.__interface, property)
 
 class DBusProxy(object):
@@ -33,10 +33,10 @@ class DBusProxy(object):
     """
     def __init__(self, proxy, interface):
         self.Exception = DBusException
-        self.proxy = proxy
         self.object_path = proxy.object_path
-        self.property = DBusProperties(self.proxy, interface)
-        self.method = Interface(self.proxy, interface)
+        self.property = DBusProperties(proxy, interface)
+        self.method = Interface(proxy, interface)
+        self._bus = proxy._bus
 
 class Emitter(object):
     """
@@ -45,13 +45,14 @@ class Emitter(object):
     Provides a simple event engine featuring a known finite set of events.
 
     """
-    def __init__(self, event_names=()):
+    def __init__(self, event_names=(), *args, **kwargs):
         """
         Initialize with empty lists of event handlers.
 
         :param iterable event_names: names of known events.
 
         """
+        super(Emitter, self).__init__(*args, **kwargs)
         self.event_handlers = {}
         for evt in event_names:
             self.event_handlers[evt] = []

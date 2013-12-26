@@ -64,10 +64,10 @@ def mount_program_options():
 
 def udisks_service(version):
     """
-    Return the first udisks service found available.
+    Return the first UDisks service found available.
 
-    TODO: This should check if the udisks service is accessible and if not
-    try to connect to udisks2 service.
+    TODO: This should check if the UDisks service is accessible and if not
+    try to connect to UDisks2 service.
 
     """
     if version == '1':
@@ -84,7 +84,7 @@ def udisks_service(version):
 #----------------------------------------
 # Entry points
 #----------------------------------------
-def daemon(args=None, udisks=None):
+def daemon(args=None, daemon=None):
     """
     Execute udiskie as a daemon.
     """
@@ -103,23 +103,16 @@ def daemon(args=None, udisks=None):
     options, posargs = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
 
-    # for now: just use the default udisks
-    if udisks is None:
-        import dbus
-        from dbus.mainloop.glib import DBusGMainLoop
-        DBusGMainLoop(set_as_default=True)
-        bus = dbus.SystemBus()
-        udisks_module = udisks_service(options.udisks_version)
-        udisks = udisks_module.Udisks.create(bus)
-
-    # create daemon
-    daemon = udisks_module.Daemon(udisks=udisks)
     mainloop = gobject.MainLoop()
+
+    # connect udisks
+    if daemon is None:
+        daemon = udisks_service(options.udisks_version).Daemon()
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
     filter = load_filter(options.filters)
-    mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=udisks)
+    mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=daemon)
 
     # notifications (optional):
     if not options.suppress_notify:
@@ -136,7 +129,7 @@ def daemon(args=None, udisks=None):
     if options.tray:
         import udiskie.tray
         create_menu = partial(udiskie.tray.create_menu,
-                              udisks=udisks,
+                              udisks=daemon,
                               mounter=mounter,
                               actions={'quit': mainloop.quit})
         statusicon = udiskie.tray.create_statusicon()
@@ -163,15 +156,15 @@ def mount(args=None, udisks=None):
     parser.add_option('-a', '--all', action='store_true',
                       dest='all', default=False,
                       help='mount all present devices')
+    parser.add_option('-r', '--recursive', action='store_true',
+                      dest='recursive', default=False,
+                      help='recursively mount LUKS partitions (if the automount daemon is running, this is not necessary)')
     options, posargs = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
 
-    # for now: just use the default udisks
+    # connect udisks
     if udisks is None:
-        import dbus
-        bus = dbus.SystemBus()
-        udisks = udisks_service(options.udisks_version).Udisks.create(bus)
-        udisks.sync()
+        udisks = udisks_service(options.udisks_version).Sniffer()
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
@@ -180,25 +173,20 @@ def mount(args=None, udisks=None):
 
     # mount all present devices
     if options.all:
-        mounter.mount_all()
-        return 0
+        success = mounter.mount_all(recursive=options.recursive)
 
     # only mount the desired devices
     elif len(posargs) > 0:
-        mounted = []
+        success = True
         for path in posargs:
-            device = mounter.mount(path)
-            if device:
-                mounted.append(device)
-        # automatically mount luks holders
-        for device in mounted:
-            mounter.mount_holder(device)
-        return 0
+            success = success and mounter.mount(path, recursive=options.recursive)
 
     # print command line options
     else:
         parser.print_usage()
-        return 1
+        success = False
+
+    return 0 if success else 1
 
 def umount(args=None, udisks=None):
     """
@@ -219,43 +207,23 @@ def umount(args=None, udisks=None):
     (options, posargs) = parser.parse_args(args)
     logging.basicConfig(level=options.log_level, format='%(message)s')
 
-    if len(posargs) == 0 and not options.all:
-        parser.print_usage()
-        return 1
-
-    # for now: use udisks v1 service
     if udisks is None:
-        import dbus
-        bus = dbus.SystemBus()
-        udisks = udisks_service(options.udisks_version).Udisks.create(bus)
-        udisks.sync()
+        udisks = udisks_service(options.udisks_version).Sniffer()
     mounter = udiskie.mount.Mounter(udisks=udisks)
 
-    unmounted = []
     if options.all:
-        if options.eject or options.detach:
-            if options.eject:
-                mounter.eject_all()
-            if options.detach:
-                mounter.detach_all()
-        else:
-            unmounted = mounter.unmount_all()
-    else:
-        unmounted = []
+        success = mounter.unmount_all(detach=options.detach,
+                                      eject=options.eject,
+                                      lock=True)
+    elif len(posargs) > 0:
+        success = True
         for path in posargs:
-            if options.eject or options.detach:
-                path = os.path.normpath(path)
-                if options.eject:
-                    mounter.eject(path, force=True)
-                if options.detach:
-                    mounter.detach(path, force=True)
-            else:
-                device = mounter.unmount(os.path.normpath(path))
-                if device:
-                    unmounted.append(device)
+            success = (success and
+                       mounter.unmount(path, detach=options.detach,
+                                       eject=options.eject, lock=True))
+    else:
+        parser.print_usage()
+        success = False
 
-    # automatically lock unused luks slaves of unmounted devices
-    for device in unmounted:
-        mounter.lock_slave(device)
-    return 0
+    return 0 if success else 1
 
