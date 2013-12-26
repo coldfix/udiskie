@@ -158,6 +158,7 @@ def mount(args=None, udisks=None):
         import dbus
         bus = dbus.SystemBus()
         udisks = udisks_service().Udisks.create(bus)
+        udisks.sync()
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
@@ -214,6 +215,7 @@ def umount(args=None, udisks=None):
         import dbus
         bus = dbus.SystemBus()
         udisks = udisks_service().Udisks.create(bus)
+        udisks.sync()
     mounter = udiskie.mount.Mounter(udisks=udisks)
 
     unmounted = []
