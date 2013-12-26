@@ -44,7 +44,7 @@ def filter_opt(opt):
 
 try:
     unicode
-except AttributeError:
+except NameError:
     unicode = str
 
 def decode(ay):
@@ -56,7 +56,7 @@ def decode(ay):
     elif isinstance(ay, bytes):
         return ay.decode('utf-8')
     else: # dbus.Array([dbus.Byte]) or any similar sequence type:
-        return b''.join(map(chr, ay)).rstrip(chr(0)).decode('utf-8')
+        return bytearray(ay).rstrip(bytearray((0,))).decode('utf-8')
 
 def encode(s):
     """Convert data from dbus queries to strings."""
@@ -142,8 +142,9 @@ class NullProxy(object):
         self.name = name
         self.property = NoneServer()
 
-    def __nonzero__(self):
+    def __nonzero__(self):      # python2
         return False
+    __bool__ = __nonzero__      # python3
 
     @property
     def method(self):
