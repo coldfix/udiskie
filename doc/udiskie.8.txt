@@ -37,7 +37,7 @@ Options
 *-s, \--suppress*::
 	Suppress pop-up notifications.
 
-*-s, \--tray*::
+*-t, \--tray*::
 	Show tray icon.
 
 *-a, \--all*::
