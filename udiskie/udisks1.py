@@ -42,7 +42,6 @@ class Device(DBusProxy):
         proxy must be an object acquired by a call to bus.get_object().
 
         """
-        self.log = logging.getLogger('udiskie.udisks.Device')
         super(Device, self).__init__(proxy, UDISKS_DEVICE_INTERFACE)
         self.udisks = udisks
 
@@ -396,11 +395,16 @@ class Udisks(DBusProxy):
         cached = CachedDevice(device)
         if cached.is_valid:
             self.device_states[object_path] = cached
+        elif object_path in self.device_states:
+            self.device_states[object_path].is_valid = False
         return cached
 
     def _del_device_state(self, object_path):
         if object_path in self.device_states:
-            self.deleted[object_path] = self.device_states.pop(object_path)
+            dev = self.device_states.pop(object_path)
+            dev.is_valid = False
+            self.deleted[object_path] = dev
+
 
 
 #----------------------------------------
@@ -522,9 +526,9 @@ class Daemon(Emitter):
             'LuksLock': 'device_lock', }
         check_success = {
             'FilesystemMount': lambda dev: dev.is_mounted,
-            'FilesystemUnmount': lambda dev: not dev.is_mounted,
+            'FilesystemUnmount': lambda dev: not dev.is_valid or not dev.is_mounted,
             'LuksUnlock': lambda dev: dev.is_unlocked,
-            'LuksLock': lambda dev: not dev.is_unlocked, }
+            'LuksLock': lambda dev: not dev.is_valid or not dev.is_unlocked, }
         if not job_in_progress and object_path in self.jobs:
             job_id = self.jobs[object_path].id
 
@@ -537,4 +541,6 @@ class Daemon(Emitter):
             elif check_success[job_id](dev):
                 self.trigger(event_name + 'ed', dev)
                 del self.jobs[object_path]
+            else:
+                self.log.info('%s operation failed for device: %s' % (job_id, object_path))
 
