@@ -2,35 +2,37 @@
 udiskie
 =======
 
-udiskie is a simple daemon that uses udisks_ to automatically mount
+*udiskie* is a simple daemon that uses UDisks_ to automatically mount
 removable storage devices. This daemon comes with optional mount
-notifications and gtk tray icon. It also provides a user level CLI for mount
-and unmount operations.
+notifications and gtk tray icon. It also provides a user level CLI for
+mount and unmount operations.
 
-.. _udisks: http://www.freedesktop.org/wiki/Software/udisks
+.. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
 
 
 Dependencies
 ------------
 
+- UDisks_ required for all operation modes
 - dbus-python_ required for all operation modes
-- pygobject_ to run the automount/notification daemon (provides the main loop)
+- PyGObject_ to run the automount/notification daemon (provides the main loop)
 - notify-python_ or notify2_ for mount notifications
-- zenity_ to unlock LUKS devices
-- pygtk_ to show the system tray icon
+- Zenity_ to unlock LUKS devices
+- PyGTK_ to show the system tray icon
 
-.. _dbus-python: http://dbus.freedesktop.org/releases/dbus-python/
-.. _pygobject: http://ftp.gnome.org/pub/gnome/sources/pygobject/
+.. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
+.. _dbus-python: http://dbus.freedesktop.org/doc/dbus-python/
+.. _PyGObject: http://ftp.gnome.org/pub/gnome/sources/pygobject/
 .. _notify-python: http://www.galago-project.org/files/releases/source/notify-python/
 .. _notify2: https://pypi.python.org/pypi/notify2
-.. _zenity: http://freecode.com/projects/zenity
-.. _pygtk: http://www.pygtk.org
+.. _Zenity: http://freecode.com/projects/zenity
+.. _PyGTK: http://www.pygtk.org
 
 
 Permissions
 -----------
 
-udiskie requires permission for the following PolicyKit_ actions:
+*udiskie* requires permission for the following PolicyKit_ actions:
 
 .. _PolicyKit: http://www.freedesktop.org/wiki/Software/PolicyKit
 
@@ -41,7 +43,9 @@ udiskie requires permission for the following PolicyKit_ actions:
 
 These are usually granted when using a desktop environment. If your login
 session is not properly activated you may need to customize your PolicyKit
-settings. Create the file ``/etc/polkit-1/localauthority/50-local.d/10-udiskie.pkla`` with the following contents:
+settings. Create the file
+``/etc/polkit-1/localauthority/50-local.d/10-udiskie.pkla`` with the
+following contents:
 
 ::
 
