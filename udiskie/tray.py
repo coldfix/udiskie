@@ -47,15 +47,15 @@ def device_tree(devices):
                 methods.append('lock')
             else:
                 methods.append('unlock')
-        if device.is_ejectable:
+        if device.is_ejectable and device.has_media:
             methods.append('eject')
         if device.is_detachable:
             methods.append('detach')
         # find the root device:
         if device.is_partition:
-            root = device.partition_slave
+            root = device.partition_slave.object_path
         elif device.is_luks_cleartext:
-            root = device.luks_cleartext_slave
+            root = device.luks_cleartext_slave.object_path
         else:
             root = None
         # in this first step leave branches empty
@@ -151,6 +151,7 @@ def create_menu(udisks=None,
             from dbus import SystemBus
             from udiskie.udisks import Udisks
             udisks = Udisks.create(SystemBus())
+            udisks.sync()
         from udiskie.mount import Mounter
         from udiskie.prompt import password
         mounter = Mounter(prompt=password(), udisks=udisks)

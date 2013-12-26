@@ -38,3 +38,44 @@ class DBusProxy(object):
         self.property = DBusProperties(self.proxy, interface)
         self.method = Interface(self.proxy, interface)
 
+class Emitter(object):
+    """
+    Event emitter class.
+
+    Provides a simple event engine featuring a known finite set of events.
+
+    """
+    def __init__(self, event_names=()):
+        """
+        Initialize with empty lists of event handlers.
+
+        :param iterable event_names: names of known events.
+
+        """
+        self.event_handlers = {}
+        for evt in event_names:
+            self.event_handlers[evt] = []
+
+    def trigger(self, event, *args):
+        """Trigger event handlers."""
+        for handler in self.event_handlers[event]:
+            handler(*args)
+
+    def connect(self, handler, event=None):
+        """Connect an event handler."""
+        if event:
+            self.event_handlers[event].append(handler)
+        else:
+            for event in self.event_handlers:
+                if hasattr(handler, event):
+                    self.connect(getattr(handler, event), event)
+
+    def disconnect(self, handler, event=None):
+        """Disconnect an event handler."""
+        if event:
+            self.event_handlers.remove(handler)
+        else:
+            for event in self.event_handlers:
+                if hasattr(handler, event):
+                    self.disconnect(getattr(handler, event), event)
+
