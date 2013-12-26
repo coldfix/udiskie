@@ -58,10 +58,10 @@ def mount_program_options():
 
 def udisks_service():
     """
-    Return the first udisks service found available.
+    Return the first UDisks service found available.
 
-    TODO: This should check if the udisks service is accessible and if not
-    try to connect to udisks2 service.
+    TODO: This should check if the UDisks service is accessible and if not
+    try to connect to UDisks2 service.
 
     """
     import udiskie.udisks1
@@ -71,7 +71,7 @@ def udisks_service():
 #----------------------------------------
 # Entry points
 #----------------------------------------
-def daemon(args=None, udisks=None):
+def daemon(args=None, daemon=None):
     """
     Execute udiskie as a daemon.
     """
@@ -91,22 +91,15 @@ def daemon(args=None, udisks=None):
     logging.basicConfig(level=options.log_level, format='%(message)s')
 
     # for now: just use the default udisks
-    if udisks is None:
-        import dbus
-        from dbus.mainloop.glib import DBusGMainLoop
-        DBusGMainLoop(set_as_default=True)
-        bus = dbus.SystemBus()
-        udisks_module = udisks_service()
-        udisks = udisks_module.Udisks.create(bus)
+    if daemon is None:
+        daemon = udisks_service().Daemon()
 
-    # create daemon
-    daemon = udisks_module.Daemon(udisks=udisks)
     mainloop = gobject.MainLoop()
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
     filter = load_filter(options.filters)
-    mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=udisks)
+    mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=daemon)
 
     # notifications (optional):
     if not options.suppress_notify:
@@ -123,7 +116,7 @@ def daemon(args=None, udisks=None):
     if options.tray:
         import udiskie.tray
         create_menu = partial(udiskie.tray.create_menu,
-                              udisks=udisks,
+                              udisks=daemon,
                               mounter=mounter,
                               actions={'quit': mainloop.quit})
         statusicon = udiskie.tray.create_statusicon()
@@ -155,10 +148,7 @@ def mount(args=None, udisks=None):
 
     # for now: just use the default udisks
     if udisks is None:
-        import dbus
-        bus = dbus.SystemBus()
-        udisks = udisks_service().Udisks.create(bus)
-        udisks.sync()
+        udisks = udisks_service().Sniffer()
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
@@ -212,10 +202,7 @@ def umount(args=None, udisks=None):
 
     # for now: use udisks v1 service
     if udisks is None:
-        import dbus
-        bus = dbus.SystemBus()
-        udisks = udisks_service().Udisks.create(bus)
-        udisks.sync()
+        udisks = udisks_service().Sniffer()
     mounter = udiskie.mount.Mounter(udisks=udisks)
 
     unmounted = []

@@ -252,7 +252,7 @@ class Mounter(object):
     def eject_all(self):
         """Eject all ejectable devices."""
         ejected = []
-        for device in self.udisks.get_all():
+        for device in self.udisks:
             if (device.is_drive and
                 device.is_external and
                 device.is_ejectable and
@@ -263,7 +263,7 @@ class Mounter(object):
     def detach_all(self):
         """Detach all detachable devices."""
         detached = []
-        for device in self.udisks.get_all():
+        for device in self.udisks:
             if (device.is_drive and
                 device.is_external and
                 device.is_detachable and
@@ -284,9 +284,8 @@ class Mounter(object):
         if not device.is_unlocked:
             logger.debug('skipping locked or non-luks device %s' % (device,))
             return False
-        holder_path = device.luks_cleartext_holder
-        holder = self.udisks.create_device(holder_path)
-        return self.add_device(holder, filter=filter, prompt=prompt)
+        return self.add_device(device.luks_cleartext_holder,
+                               filter=filter, prompt=prompt)
 
     def lock_slave(self, device):
         """
@@ -316,7 +315,7 @@ class Mounter(object):
 
         """
         logger = logging.getLogger('udiskie.mount.unmount')
-        device = self.udisks.get_device(path)
+        device = self.udisks.find(path)
         if device:
             logger.debug('found device owning "%s": "%s"' % (path, device))
             if self.add_device(device, filter=filter, prompt=prompt):
@@ -333,7 +332,7 @@ class Mounter(object):
 
         """
         logger = logging.getLogger('udiskie.mount.unmount')
-        device = self.udisks.get_device(path)
+        device = self.udisks.find(path)
         if device:
             logger.debug('found device owning "%s": "%s"' % (path, device))
             if self.remove_device(device, force=force):
@@ -350,7 +349,7 @@ class Mounter(object):
 
         """
         logger = logging.getLogger('udiskie.mount.eject')
-        device = self.udisks.get_device(path)
+        device = self.udisks.find(path)
         if device:
             logger.debug('found device owning "%s": "%s"' % (path, device))
             if self.eject_device(device, force=force):
@@ -368,7 +367,7 @@ class Mounter(object):
 
         """
         logger = logging.getLogger('udiskie.mount.detach')
-        device = self.udisks.get_device(path)
+        device = self.udisks.find(path)
         if device:
             logger.debug('found device owning "%s": "%s"' % (path, device))
             if self.detach_device(device, force=force):
@@ -398,5 +397,5 @@ class Mounter(object):
         race conditions inside udiskie.
 
         """
-        return filter(self.is_handleable, self.udisks.get_all())
+        return filter(self.is_handleable, self.udisks)
 
