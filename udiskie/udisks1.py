@@ -388,10 +388,8 @@ class Udisks(DBusProxy):
                 del self.device_states[object_path]
 
     def _get_device_state(self, object_path, fallback=False):
-        dev = self.device_states.get(object_path)
-        if not dev and fallback:
-            dev = self.deleted.get(object_path)
-        return dev
+        return (self.device_states.get(object_path) or
+                (fallback and self.deleted.get(object_path)) or None)
 
     def _upd_device_state(self, object_path):
         device = self.create_device(object_path)
@@ -522,6 +520,11 @@ class Daemon(Emitter):
             'FilesystemUnmount': 'device_unmount',
             'LuksUnlock': 'device_unlock',
             'LuksLock': 'device_lock', }
+        check_success = {
+            'FilesystemMount': lambda dev: dev.is_mounted,
+            'FilesystemUnmount': lambda dev: not dev.is_mounted,
+            'LuksUnlock': lambda dev: dev.is_unlocked,
+            'LuksLock': lambda dev: not dev.is_unlocked, }
         if not job_in_progress and object_path in self.jobs:
             job_id = self.jobs[object_path].id
 
@@ -531,7 +534,7 @@ class Daemon(Emitter):
             if job_in_progress:
                 self.trigger(event_name + 'ing', dev, job_percentage)
                 self.jobs[object_path] = Job(job_id, job_percentage)
-            else:
+            elif check_success[job_id](dev):
                 self.trigger(event_name + 'ed', dev)
                 del self.jobs[object_path]
 
