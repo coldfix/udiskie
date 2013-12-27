@@ -119,7 +119,7 @@ def create_menu(udisks=None,
     """
     Create menu for udiskie mount operations.
 
-    :param object udisks: Interface to udisks used to iterate external devices
+    :param object udisks: Interface to UDisks used to iterate external devices
     :param object mounter: Mount operation provider
     :param dict labels: Labels for menu items
     :param dict icons: Icons for menu items
@@ -148,10 +148,8 @@ def create_menu(udisks=None,
     """
     if mounter is None:
         if udisks is None:
-            from dbus import SystemBus
-            from udiskie.udisks import Udisks
-            udisks = Udisks.create(SystemBus())
-            udisks.sync()
+            from udiskie.udisks import Sniffer
+            udisks = Sniffer()
         from udiskie.mount import Mounter
         from udiskie.prompt import password
         mounter = Mounter(prompt=password(), udisks=udisks)
