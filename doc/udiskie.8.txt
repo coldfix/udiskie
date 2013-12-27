@@ -10,11 +10,11 @@ udiskie - automatic disk mounting service using udisks
 
 Synopsis
 --------
-'udiskie' [-hvfPst]
+'udiskie' [-hv12fPst]
 
-'udiskie-mount' [-hvfP] (-a | DEVICE...)
+'udiskie-mount' [-h12vfPr] (-a | DEVICE...)
 
-'udiskie-umount' [-hved] (-a | PATH...)
+'udiskie-umount' [-h12ved] (-a | PATH...)
 
 Description
 -----------
@@ -28,11 +28,20 @@ Options
 *-v, \--verbose*::
 	Verbose output.
 
+*-1, \--use-udisks1*::
+	Use UDisks1 as DBus backend (default)
+
+*-2, \--use-udisks2*::
+	Use UDisks2 as DBus backend (experimental)
+
 *-f FILE, \--filters=<file>*::
     Alternate filter configuration.
 
 *-P PROMPT, \--password-prompt=PROMPT*::
 	Password prompt to use for unlocking. Default is 'zenity'. This must be an executable that receives as its first two arguments the text and title to display and should print the password to its stdout in UTF-8 encoding.
+
+*-r, \--recursive*::
+	Recursively mount cleartext partitions after unlocking a LUKS device. This will happen by default running the udiskie daemon.
 
 *-s, \--suppress*::
 	Suppress pop-up notifications.

@@ -1,49 +1,49 @@
 """
-Udisks wrapper utilities.
+UDisks wrapper utilities.
 
-These act as a convenience abstraction layer on the udisks dbus service.
-Requires Udisks 1.0.5 as described here:
+These act as a convenience abstraction layer on the UDisks DBus service.
+Requires UDisks 1.0.5 as described here:
 
     http://udisks.freedesktop.org/docs/1.0.5/
 
-Note that (as this completely wraps the udisks dbus API) replacing this
-module will let you support Udisks2 or maybe even other services.
+Note that (as this completely wraps the UDisks DBus API) replacing this
+module will let you support UDisks2 or maybe even other services.
+
+Overview: This module exports the classes ``Sniffer`` and ``Daemon``.
+
+``Sniffer`` can be used as an online exporter of the current device states
+queried from the UDisks DBus service as requested.
+
+``Daemon`` caches all device states and listens to UDisks events to
+guarantee the validity of device objects during operations.
 
 """
-__all__ = ['Udisks', 'Daemon']
+__all__ = ['Sniffer', 'Daemon']
 
 import logging
-import os
-import sys
-from udiskie.common import DBusProxy, Emitter
+import os.path
+from copy import copy
 from inspect import getmembers
 
+from udiskie.common import DBusProxy, Emitter
 
-UDISKS_INTERFACE = 'org.freedesktop.UDisks'
-UDISKS_DEVICE_INTERFACE = 'org.freedesktop.UDisks.Device'
+try:                    # python2
+    from itertools import ifilter as filter
+except ImportError:     # python3
+    pass
 
-UDISKS_OBJECT = 'org.freedesktop.UDisks'
-UDISKS_OBJECT_PATH = '/org/freedesktop/UDisks'
+def filter_opt(opt):
+    return [k for k,v in opt.items() if v is not None]
 
+def samefile(a, b):
+    """Check if two pathes represent the same file."""
+    try:
+        return os.path.samefile(a, b)
+    except OSError:
+        return os.path.normpath(a) == os.path.normpath(b)
 
-class Device(DBusProxy):
-    """
-    Online wrapper for org.freedesktop.UDisks.Device dbus API proxy objects.
-
-    Resolves both property access and method calls dynamically to the dbus
-    object.
-
-    """
-    # construction
-    def __init__(self, udisks, proxy):
-        """
-        Initialize an instance with the given dbus proxy object.
-
-        proxy must be an object acquired by a call to bus.get_object().
-
-        """
-        super(Device, self).__init__(proxy, UDISKS_DEVICE_INTERFACE)
-        self.udisks = udisks
+class DeviceBase(object):
+    Interface = 'org.freedesktop.UDisks.Device'
 
     # string representation
     def __str__(self):
@@ -58,7 +58,36 @@ class Device(DBusProxy):
         """Comparison by object path."""
         return not (self == other)
 
-    # check if the device is a valid udisks object
+    def __nonzero__(self):      # python2
+        return self.is_valid
+    __bool__ = __nonzero__      # python3
+
+    def is_file(self, path):
+        """Comparison by mount and device file path."""
+        return samefile(path, self.device_file) or any(
+            samefile(path, mp) for mp in self.mount_paths)
+
+
+class OnlineDevice(DBusProxy, DeviceBase):
+    """
+    Online wrapper for org.freedesktop.UDisks.Device DBus API proxy objects.
+
+    Resolves both property access and method calls dynamically to the DBus
+    object.
+
+    """
+    # construction
+    def __init__(self, udisks, proxy):
+        """
+        Initialize an instance with the given DBus proxy object.
+
+        proxy must be an object acquired by a call to bus.get_object().
+
+        """
+        super(OnlineDevice, self).__init__(proxy, self.Interface)
+        self.udisks = udisks
+
+    # check if the device is a valid UDisks object
     @property
     def is_valid(self):
         try:
@@ -71,7 +100,7 @@ class Device(DBusProxy):
     @property
     def partition_slave(self):
         """Get the partition slave (container)."""
-        return self.udisks.create_device(self.property.PartitionSlave) if self.is_partition else None
+        return self.udisks[self.property.PartitionSlave] if self.is_partition else None
 
     @property
     def is_partition(self):
@@ -87,6 +116,12 @@ class Device(DBusProxy):
     def is_drive(self):
         """Check if the device is a drive."""
         return self.property.DeviceIsDrive
+
+    is_toplevel = is_drive
+
+    @property
+    def is_block(self):
+        return True
 
     @property
     def drive(self):
@@ -171,24 +206,12 @@ class Device(DBusProxy):
     @property
     def luks_cleartext_slave(self):
         """Get luks crypto device."""
-        return self.udisks.create_device(self.property.LuksCleartextSlave) if self.is_luks_cleartext else None
+        return self.udisks[self.property.LuksCleartextSlave] if self.is_luks_cleartext else None
 
     @property
     def luks_cleartext_holder(self):
         """Get unlocked luks cleartext device."""
-        return self.udisks.create_device(self.property.LuksHolder) if self.is_luks else None
-
-    @property
-    def is_luks_cleartext_slave(self):
-        """Check whether the luks device is currently in use."""
-        if not self.is_luks:
-            return False
-        for device in self.udisks.get_all():
-            if (not device.is_filesystem or device.is_mounted) and (
-                    device.is_luks_cleartext and
-                    device.luks_cleartext_slave == self):
-                return True
-        return False
+        return self.udisks[self.property.LuksHolder] if self.is_luks else None
 
     @property
     def has_media(self):
@@ -211,57 +234,69 @@ class Device(DBusProxy):
         """Device UUID."""
         return self.property.IdUuid
 
+    @property
+    def in_use(self):
+        """Check whether this device is in use, i.e. mounted or unlocked."""
+        if self.is_mounted or self.is_unlocked:
+            return True
+        if self.is_partition_table:
+            for device in self.udisks:
+                if device.partition_slave == self and device.in_use:
+                    return True
+        return False
+
     # methods
-    def mount(self, filesystem=None, options=[]):
+    def mount(self,
+              fstype=None,
+              options=None,
+              auth_no_user_interaction=None):
         """Mount filesystem."""
-        if filesystem is None:
-            filesystem = self.id_type
-        self.method.FilesystemMount(filesystem, options)
+        options = list(filter(None, (options or '').split(','))) + filter_opt({
+            'auth_no_user_interaction': auth_no_user_interaction
+        })
+        return self.method.FilesystemMount(fstype or self.id_type, options)
 
-    def unmount(self, options=[]):
+    def unmount(self, force=None):
         """Unmount filesystem."""
-        self.method.FilesystemUnmount(options)
+        return self.method.FilesystemUnmount(filter_opt({'force': force}))
 
-    def lock(self, options=[]):
+    def lock(self):
         """Lock Luks device."""
-        return self.method.LuksLock(options)
+        return self.method.LuksLock([])
 
-    def unlock(self, password, options=[]):
+    def unlock(self, password):
         """Unlock Luks device."""
-        return self.udisks.create_device(self.method.LuksUnlock(password, options))
+        return self.udisks.update(self.method.LuksUnlock(password, []))
 
-    def eject(self, options=[]):
+    def eject(self, unmount=None):
         """Eject media from the device."""
-        return self.method.DriveEject(options)
+        return self.method.DriveEject(filter_opt({'unmount': unmount}))
 
-    def detach(self, options=[]):
+    def detach(self):
         """Detach the device by e.g. powering down the physical port."""
-        return self.method.DriveDetach(options)
+        return self.method.DriveDetach([])
 
 def _CachedDeviceProperty(method):
     """Cache object path and return the current known CachedDevice state."""
     key = '_'+method.__name__
     def get(self):
-        object_path = getattr(self, key, None)
-        return self.udisks.device_states[object_path] if object_path else None
+        return self._daemon[getattr(self, key, None)]
     def set(self, device):
-        object_path = getattr(device, 'object_path', None)
-        setattr(self, key, object_path)
+        setattr(self, key, getattr(device, 'object_path', None))
     return property(get, set, doc=method.__doc__)
 
-
-class CachedDevice(object):
+class CachedDevice(DeviceBase):
     """
     Cached device state.
 
     Properties are cached at creation time. Methods will be invoked
-    dynamically via the associated dbus object.
+    dynamically via the associated DBus object.
 
     """
     def __init__(self, device):
         """Cache all properties of the online device."""
         self._device = device
-        self._udisks = device.udisks
+        self._daemon = device.udisks
         def isproperty(obj):
             return isinstance(obj, property)
         for key,val in getmembers(device.__class__, isproperty):
@@ -274,19 +309,6 @@ class CachedDevice(object):
     def __getattr__(self, key):
         """Resolve unknown properties and methods via the online device."""
         return getattr(self._device, key)
-
-    # string representation
-    def __str__(self):
-        """Display as object path."""
-        return self.object_path
-
-    def __eq__(self, other):
-        """Comparison by object path."""
-        return self.object_path == str(other)
-
-    def __ne__(self, other):
-        """Comparison by object path."""
-        return not (self == other)
 
     # Overload properties that return Device objects to return CachedDevice
     # instances instead. NOTE: the setters are implemented such that the
@@ -316,46 +338,25 @@ class CachedDevice(object):
 
     def unlock(self, password, options=[]):
         """Unlock Luks device."""
-        return CachedDevice(self._device.unlock(password, options))
+        return CachedDevice(self._device.unlock(password))
 
-
-class Udisks(DBusProxy):
+class UDisks(object):
     """
-    Udisks dbus service wrapper.
-
-    This is a dbus proxy object to the org.freedesktop.UDisks interface of
-    the udisks service object.
+    Base class for UDisks service wrappers.
 
     """
-    # Construction
-    def __init__(self, bus, proxy):
-        """
-        Initialize an instance with the given dbus proxy object.
+    BusName = 'org.freedesktop.UDisks'
+    Interface = 'org.freedesktop.UDisks'
+    ObjectPath = '/org/freedesktop/UDisks'
 
-        proxy must be an object acquired by a call to bus.get_object().
+    def __iter__(self):
+        """Iterate over all devices."""
+        return filter(None, map(self.get, self.paths()))
 
-        """
-        super(Udisks, self).__init__(proxy, UDISKS_INTERFACE)
-        self.bus = bus
-        self.device_states = {}
-        self.deleted = {}
+    def __getitem__(self, object_path):
+        return self.get(object_path)
 
-    @classmethod
-    def create(cls, bus):
-        """Connect to the udisks service on the specified bus."""
-        return cls(bus, bus.get_object(UDISKS_OBJECT, UDISKS_OBJECT_PATH))
-
-    # instantiation of device objects
-    def create_device(self, object_path):
-        """Create a Device instance from object path."""
-        return Device(self, self.bus.get_object(UDISKS_OBJECT, object_path))
-
-    # Methods
-    def get_all(self):
-        """Enumerate all device objects currently known to udisks."""
-        return self.device_states.values()
-
-    def get_device(self, path):
+    def find(self, path):
         """
         Get a device proxy by device name or any mount path of the device.
 
@@ -363,69 +364,61 @@ class Udisks(DBusProxy):
         path as well as mount pathes.
 
         """
-        logger = logging.getLogger('udiskie.udisks.get_device')
-        for device in self.get_all():
-            if os.path.samefile(path, device.device_file):
+        for device in self:
+            if device.is_file(path):
                 return device
-            for p in device.mount_paths:
-                if os.path.samefile(path, p):
-                    return device
+        logger = logging.getLogger('udiskie.udisks.find')
         logger.warn('Device not found: %s' % path)
         return None
 
-    # internal state keeping
-    def sync(self):
-        """Cache all device states."""
-        self.device_states = {
-            object_path: self.create_device(object_path)
-            for object_path in self.method.EnumerateDevices() }
-        for object_path,device in self.device_states.items():
-            cached = CachedDevice(device)
-            if cached.is_valid:
-                self.device_states[object_path] = cached
-            else:
-                del self.device_states[object_path]
+class Sniffer(UDisks):
+    """
+    UDisks DBus service wrapper.
 
-    def _get_device_state(self, object_path, fallback=False):
-        return (self.device_states.get(object_path) or
-                (fallback and self.deleted.get(object_path)) or None)
+    This is a wrapper for the DBus API of the UDisks service at
+    'org.freedesktop.UDisks'. Access to properties and device states is
+    completely online, meaning the properties are requested from dbus as
+    they are accessed in the python object.
 
-    def _upd_device_state(self, object_path):
-        device = self.create_device(object_path)
-        cached = CachedDevice(device)
-        if cached.is_valid:
-            self.device_states[object_path] = cached
-        elif object_path in self.device_states:
-            self.device_states[object_path].is_valid = False
-        return cached
+    """
+    # Construction
+    def __init__(self, bus=None, proxy=None):
+        """
+        Initialize an instance with the given DBus proxy object.
 
-    def _del_device_state(self, object_path):
-        if object_path in self.device_states:
-            dev = self.device_states.pop(object_path)
-            dev.is_valid = False
-            self.deleted[object_path] = dev
+        :param dbus.Bus bus: connection to system bus
+        :param dbus.proxies.ProxyObject proxy: proxy to udisks object
 
+        """
+        if proxy is None:
+            if bus is None:
+                from dbus import SystemBus
+                bus = SystemBus()
+            proxy = DBusProxy(bus.get_object(self.BusName, self.ObjectPath),
+                              self.Interface)
+        self._proxy = proxy
 
+    def paths(self):
+        return self._proxy.method.EnumerateDevices()
 
-#----------------------------------------
-# daemonic code:
-#----------------------------------------
+    def get(self, object_path):
+        """Create a Device instance from object path."""
+        return OnlineDevice(self, self._proxy._bus.get_object(self.BusName,
+                                                              object_path))
+
+    update = get
 
 class Job(object):
-    """
-    Job information struct for devices.
-    """
-    __slots__ = ['id', 'percentage']
-
-    def __init__(self, id, percentage):
-        self.id = id
+    """Job information struct for devices."""
+    def __init__(self, job_id, percentage):
+        self.job_id = job_id
         self.percentage = percentage
 
-class Daemon(Emitter):
+class Daemon(Emitter, UDisks):
     """
-    Udisks listener daemon.
+    UDisks listener daemon.
 
-    Listens to udisks events. When a change occurs this class detects what
+    Listens to UDisks events. When a change occurs this class detects what
     has changed and triggers an appropriate event. Valid events are:
 
         - device_added    / device_removed
@@ -439,9 +432,16 @@ class Daemon(Emitter):
     `disconnect` can be used to add or remove event handlers.
 
     """
-    def __init__(self, udisks):
+    def __init__(self, bus=None, proxy=None, sniffer=None):
         """
-        Initialize object and start listening to udisks events.
+        Create a Daemon object and start listening to DBus events.
+
+        :param dbus.Bus bus: connection to system bus
+        :param dbus.proxies.ProxyObject proxy: proxy
+
+        If the connection is not passed a new one will be created and dbus
+        will be configured for the gobject mainloop.
+
         """
         event_names = (stem + suffix
                        for suffix in ('ed', 'ing')
@@ -457,36 +457,60 @@ class Daemon(Emitter):
                            'device_chang', ))
         super(Daemon, self).__init__(event_names)
 
-        self.log = logging.getLogger('udiskie.daemon.Daemon')
-        self.jobs = {}
-        self.udisks = udisks
+        if sniffer is None:
+            if bus is None and proxy is None:
+                import dbus
+                from dbus.mainloop.glib import DBusGMainLoop
+                DBusGMainLoop(set_as_default=True)
+            sniffer = Sniffer(bus, proxy)
 
-        self.connect(self.on_device_changed, 'device_changed')
+        self._sniffer = sniffer
+        self._jobs = {}
+        self._devices = {}
 
-        udisks.bus.add_signal_receiver(
+        self.connect(self._on_device_changed, 'device_changed')
+        bus = self._sniffer._proxy._bus
+        bus.add_signal_receiver(
             self._device_added,
             signal_name='DeviceAdded',
-            bus_name='org.freedesktop.UDisks')
-        udisks.bus.add_signal_receiver(
+            bus_name=self.BusName)
+        bus.add_signal_receiver(
             self._device_removed,
             signal_name='DeviceRemoved',
-            bus_name='org.freedesktop.UDisks')
-        udisks.bus.add_signal_receiver(
+            bus_name=self.BusName)
+        bus.add_signal_receiver(
             self._device_changed,
             signal_name='DeviceChanged',
-            bus_name='org.freedesktop.UDisks')
-        udisks.bus.add_signal_receiver(
+            bus_name=self.BusName)
+        bus.add_signal_receiver(
             self._device_job_changed,
             signal_name='DeviceJobChanged',
-            bus_name='org.freedesktop.UDisks')
-        udisks.sync()
+            bus_name=self.BusName)
+        self._sync()
+
+    # Sniffer overrides
+    def paths(self):
+        """Iterate over all valid cached devices."""
+        return (object_path
+                for object_path,device in self._devices.items()
+                if device)
+
+    def get(self, object_path):
+        """Return the current cached state of the device."""
+        return self._devices.get(object_path)
+
+    def update(self, object_path):
+        device = self._sniffer.get(object_path)
+        cached = CachedDevice(device)
+        if cached or object_path not in self._devices:
+            self._devices[object_path] = cached
+        else:
+            self._invalidate(object_path)
+        return cached
 
     # events
-    def on_device_changed(self, old_state, new_state):
+    def _on_device_changed(self, old_state, new_state):
         """Detect type of event and trigger appropriate event handlers."""
-        if old_state is None:
-            self.trigger('device_added', new_state)
-            return
         d = {}
         d['media_added'] = new_state.has_media and not old_state.has_media
         d['media_removed'] = old_state.has_media and not new_state.has_media
@@ -494,22 +518,25 @@ class Daemon(Emitter):
             if d[event]:
                 self.trigger(event, new_state)
 
-    # udisks event listeners
+    # UDisks event listeners
     def _device_added(self, object_path):
-        new_state = self.udisks._upd_device_state(object_path)
+        """Internal method."""
+        new_state = self.update(object_path)
         self.trigger('device_added', new_state)
 
     def _device_removed(self, object_path):
-        old_state = self.udisks._get_device_state(object_path)
-        self.udisks._del_device_state(object_path)
+        """Internal method."""
+        old_state = self[object_path]
+        self._invalidate(object_path)
         self.trigger('device_removed', old_state)
 
     def _device_changed(self, object_path):
-        old_state = self.udisks._get_device_state(object_path, True)
-        new_state = self.udisks._upd_device_state(object_path)
+        """Internal method."""
+        old_state = self[object_path]
+        new_state = self.update(object_path)
         self.trigger('device_changed', old_state, new_state)
 
-    # NOTE: it seems the udisks1 documentation for DeviceJobChanged is
+    # NOTE: it seems the UDisks1 documentation for DeviceJobChanged is
     # fatally incorrect!
     def _device_job_changed(self,
                             object_path,
@@ -518,7 +545,12 @@ class Daemon(Emitter):
                             job_initiated_by_user,
                             job_is_cancellable,
                             job_percentage):
-        """Detect type of event and trigger appropriate event handlers."""
+        """
+        Detect type of event and trigger appropriate event handlers.
+
+        Internal method.
+
+        """
         event_mapping = {
             'FilesystemMount': 'device_mount',
             'FilesystemUnmount': 'device_unmount',
@@ -526,21 +558,37 @@ class Daemon(Emitter):
             'LuksLock': 'device_lock', }
         check_success = {
             'FilesystemMount': lambda dev: dev.is_mounted,
-            'FilesystemUnmount': lambda dev: not dev.is_valid or not dev.is_mounted,
+            'FilesystemUnmount': lambda dev: not dev or not dev.is_mounted,
             'LuksUnlock': lambda dev: dev.is_unlocked,
-            'LuksLock': lambda dev: not dev.is_valid or not dev.is_unlocked, }
-        if not job_in_progress and object_path in self.jobs:
-            job_id = self.jobs[object_path].id
+            'LuksLock': lambda dev: not dev or not dev.is_unlocked, }
+        if not job_in_progress and object_path in self._jobs:
+            job_id = self._jobs[object_path].job_id
 
         if job_id in event_mapping:
             event_name = event_mapping[job_id]
-            dev = self.udisks._get_device_state(object_path, True)
+            dev = self[object_path]
             if job_in_progress:
                 self.trigger(event_name + 'ing', dev, job_percentage)
-                self.jobs[object_path] = Job(job_id, job_percentage)
+                self._jobs[object_path] = Job(job_id, job_percentage)
             elif check_success[job_id](dev):
                 self.trigger(event_name + 'ed', dev)
-                del self.jobs[object_path]
+                del self._jobs[object_path]
             else:
-                self.log.info('%s operation failed for device: %s' % (job_id, object_path))
+                log = logging.getLogger('udiskie.daemon.Daemon')
+                log.info('%s operation failed for device: %s' % (job_id, object_path))
+
+    # internal state keeping
+    def _sync(self):
+        """Cache all device states."""
+        self._devices = { dev.object_path: dev for dev in self._sniffer }
+        self._devices = {
+            object_path: CachedDevice(device)
+            for object_path,device in self._devices.items() }
+
+    def _invalidate(self, object_path):
+        """Flag the device invalid. This removes it from the iteration."""
+        if object_path in self._devices:
+            update = copy(self._devices[object_path])
+            update.is_valid = False
+            self._devices[object_path] = update
 
