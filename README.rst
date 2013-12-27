@@ -13,7 +13,8 @@ mount and unmount operations.
 Dependencies
 ------------
 
-- UDisks_ required for all operation modes
+- UDisks_ required for all operation modes. UDisks2 support is experimental
+  and has to be requested explicitly via command line parameter.
 - dbus-python_ required for all operation modes
 - PyGObject_ to run the automount/notification daemon (provides the main loop)
 - notify-python_ or notify2_ for mount notifications
@@ -91,6 +92,7 @@ file ``/usr/share/polkit-1/actions/org.freedesktop.udisks.policy``:
         ...
     </action>
 
+Note that UDisks2 uses another set of permissions, see ``/usr/share/polkit-1/actions/org.freedesktop.udisks2.policy``.
 
 Usage
 -----

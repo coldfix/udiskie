@@ -2,9 +2,9 @@
 UDisks2 wrapper utilities.
 
 These act as a convenience abstraction layer on the UDisks2 DBus service.
-Requires UDisks2 2.XXX as described here:
+Requires UDisks2 2.1.1 as described here:
 
-    http://udisks.freedesktop.org/docs/XXX
+    http://udisks.freedesktop.org/docs/latest
 
 This wraps the DBus API of Udisks2 providing a common interface with the
 udisks1 module.
