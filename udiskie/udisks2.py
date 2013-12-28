@@ -177,6 +177,8 @@ class OnlineInterfaceService(object):
         except DBusException:
             return NullProxy(key, self._proxy.object_path)
 
+    # TODO: need reliable and fast __nonzero__ check
+
 class NoneServer(object):
     """Yield None when asked for any attribute."""
     def __getattr__(self, key):
@@ -402,8 +404,10 @@ class Device(object):
         # NOTE: udisks2 seems to guess incorrectly in some cases. This
         # leads to HintSystem=True for unlocked devices. In order to show
         # the device anyway, it needs to be recursively checked if any
-        # parent device is recognized as external:
-        return (not bool(self.I.Block.property.HintSystem) or
+        # parent device is recognized as external.
+        # NOTE: Checking for equality HintSystem==False returns False if the
+        # property is resolved to a None value (interface not available).
+        return (self.I.Block.property.HintSystem  == False or
                 (self.is_luks_cleartext and self.luks_cleartext_slave.is_external) or
                 (self.is_partition and self.partition_slave.is_external))
 
@@ -586,9 +590,14 @@ class Sniffer(UDisks2):
     def paths(self):
         return self._proxy.method.GetManagedObjects().keys()
 
+    def _is_valid_object_path(self, object_path):
+        return (object_path and
+                object_path.startswith(self.ObjectPath) and
+                object_kind(object_path))
+
     def get(self, object_path):
         """Create a Device instance from object path."""
-        if not object_path:
+        if not self._is_valid_object_path(object_path):
             return None
         return Device(self, object_path, OnlineInterfaceService(
             self._proxy._bus.get_object(self.BusName, object_path)))
