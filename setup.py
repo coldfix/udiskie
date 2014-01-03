@@ -26,12 +26,12 @@ check_any('pynotify', 'notify2')
 check_any('gtk')
 
 # read long_description from README.rst
+long_description = None
 try:
-    f = open('README.rst')
-    long_description = f.read()
-    f.close()
+    long_description = open('README.rst').read()
+    long_description += '\n' + open('CHANGES.rst').read()
 except IOError:
-    long_description = None
+    pass
 
 setup(
     name='udiskie',

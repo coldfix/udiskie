@@ -1,6 +1,6 @@
 include doc/*.txt
 include doc/asciidoc.conf
 include doc/Makefile
-include CHANGES
+include CHANGES.rst
 include COPYING
 include README.rst
