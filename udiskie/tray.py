@@ -7,6 +7,9 @@ __all__ = ['create_menu',
            'main']
 
 import gtk
+import gio
+import glib
+import logging
 from functools import partial
 from collections import namedtuple
 from itertools import chain
@@ -109,18 +112,23 @@ def flat_menu(node):
         groups=[list(leaves(node, [], ""))])
 
 
-def load_gtk_icon(name, size):
+def load_gtk_icon(name, size, default=None):
     """
     Load GTK icon as image by name
 
     :param string name: Name of the icon
     :param int size: Pixel size of the icon
+    :param object default: Default image when the icon is not in the GTK theme
 
     """
-    image = gtk.Image()
-    image.set_from_pixbuf(
-        gtk.icon_theme_get_default().load_icon(name, size, 0))
-    return image
+    try:
+        image = gtk.Image()
+        image.set_from_pixbuf(
+            gtk.icon_theme_get_default().load_icon(name, size, 0))
+        return image
+    except (gio.Error, glib.GError) as e:
+        logging.getLogger('udiskie.tray.icons').warning(str(e))
+        return default
 
 
 def create_menu(udisks=None,
@@ -170,8 +178,8 @@ def create_menu(udisks=None,
 
 
     setdefault(icons, {
-        'mount': load_gtk_icon('udiskie-mount', 16),
-        'unmount': load_gtk_icon('udiskie-unmount', 16),
+        'mount': load_gtk_icon('udiskie-mount', 16, gtk.STOCK_APPLY),
+        'unmount': load_gtk_icon('udiskie-unmount', 16, gtk.STOCK_CANCEL),
         'unlock': gtk.STOCK_APPLY,
         'lock': gtk.STOCK_CANCEL,
         'eject': gtk.STOCK_CANCEL,
