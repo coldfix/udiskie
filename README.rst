@@ -94,6 +94,16 @@ file ``/usr/share/polkit-1/actions/org.freedesktop.udisks.policy``:
 
 Note that UDisks2 uses another set of permissions, see ``/usr/share/polkit-1/actions/org.freedesktop.udisks2.policy``.
 
+
+GTK icons
+---------
+
+*udiskie* comes with a set of themeable custom Tango-style GTK icons for its
+tray icon menu. The icons can be installed by copying everything under
+``icons/`` into GTK's default hicolor theme. Typically, this is
+``/usr/share/icons/hicolor``.
+
+
 Usage
 -----
 
