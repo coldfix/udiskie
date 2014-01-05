@@ -109,6 +109,20 @@ def flat_menu(node):
         groups=[list(leaves(node, [], ""))])
 
 
+def load_gtk_icon(name, size):
+    """
+    Load GTK icon as image by name
+
+    :param string name: Name of the icon
+    :param int size: Pixel size of the icon
+
+    """
+    image = gtk.Image()
+    image.set_from_pixbuf(
+        gtk.icon_theme_get_default().load_icon(name, size, 0))
+    return image
+
+
 def create_menu(udisks=None,
                 mounter=None,
                 labels={},
@@ -154,9 +168,10 @@ def create_menu(udisks=None,
         from udiskie.prompt import password
         mounter = Mounter(prompt=password(), udisks=udisks)
 
+
     setdefault(icons, {
-        'mount': gtk.STOCK_APPLY,
-        'unmount': gtk.STOCK_CANCEL,
+        'mount': load_gtk_icon('udiskie-mount', 16),
+        'unmount': load_gtk_icon('udiskie-unmount', 16),
         'unlock': gtk.STOCK_APPLY,
         'lock': gtk.STOCK_CANCEL,
         'eject': gtk.STOCK_CANCEL,
@@ -189,7 +204,7 @@ def create_menu(udisks=None,
                 item = gtk.ImageMenuItem(stock_id=icon)
             except TypeError:
                 item = gtk.ImageMenuItem()
-                item.set_icon(icon)
+                item.set_image(icon)
         if label is not None:
             item.set_label(label)
         if isinstance(onclick, gtk.Menu):
