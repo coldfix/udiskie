@@ -103,6 +103,12 @@ tray icon menu. The icons can be installed by copying everything under
 ``icons/`` into GTK's default hicolor theme. Typically, this is
 ``/usr/share/icons/hicolor``.
 
+After copying the files it is most likely necessary to update the default
+theme's icon cache like so:
+
+::
+    gtk-update-icon-cache /usr/share/icons/hicolor
+
 
 Usage
 -----
