@@ -190,8 +190,8 @@ def create_menu(udisks=None,
     setdefault(icons, {
         'mount': load_menu_icon('mount', gtk.STOCK_APPLY),
         'unmount': load_menu_icon('unmount', gtk.STOCK_CANCEL),
-        'unlock': gtk.STOCK_APPLY,
-        'lock': gtk.STOCK_CANCEL,
+        'unlock': load_menu_icon('unlock', gtk.STOCK_APPLY),
+        'lock': load_menu_icon('lock', gtk.STOCK_CANCEL),
         'eject': gtk.STOCK_CANCEL,
         'detach': gtk.STOCK_CANCEL,
         'quit': gtk.STOCK_QUIT, })
