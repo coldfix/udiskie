@@ -193,7 +193,7 @@ def create_menu(udisks=None,
         'unlock': load_menu_icon('unlock', gtk.STOCK_APPLY),
         'lock': load_menu_icon('lock', gtk.STOCK_CANCEL),
         'eject': gtk.STOCK_CANCEL,
-        'detach': gtk.STOCK_CANCEL,
+        'detach': load_menu_icon('detach', gtk.STOCK_CANCEL),
         'quit': gtk.STOCK_QUIT, })
 
     setdefault(labels, {
