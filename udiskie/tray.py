@@ -192,7 +192,7 @@ def create_menu(udisks=None,
         'unmount': load_menu_icon('unmount', gtk.STOCK_CANCEL),
         'unlock': load_menu_icon('unlock', gtk.STOCK_APPLY),
         'lock': load_menu_icon('lock', gtk.STOCK_CANCEL),
-        'eject': gtk.STOCK_CANCEL,
+        'eject': load_menu_icon('eject', gtk.STOCK_CANCEL),
         'detach': load_menu_icon('detach', gtk.STOCK_CANCEL),
         'quit': gtk.STOCK_QUIT, })
 
