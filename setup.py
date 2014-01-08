@@ -4,6 +4,7 @@ from setuptools.command.install import install
 from subprocess import call
 import sys
 import logging
+from os import path
 
 log = logging.getLogger()
 
@@ -35,20 +36,12 @@ except IOError:
     pass
 
 
-theme_base = sys.prefix + '/share/icons/hicolor'
-icon_resolutions = ['scalable'] + ['{0}x{0}'.format(res) for res in [16]]
-icon_names = {'actions': ('mount', 'unmount',
-                          'lock', 'unlock',
-                          'eject', 'detach')}
-data_files = [
-    ("%s/%s/%s" % (theme_base, icon_resolution, icon_type), [
-        'icons/%s/%s/udiskie-%s.%s' %
-            (icon_resolution, icon_type, icon_name,
-            'svg' if icon_resolution == 'scalable' else 'png')
-        for icon_name in icon_names[icon_type]])
-    for icon_resolution in icon_resolutions
-    for icon_type in icon_names
-]
+theme_base = path.join(sys.prefix, 'share/icons/hicolor')
+icon_resolutions = ([('scalable', 'svg')] +
+                    [('{0}x{0}'.format(res), 'png') for res in [16]])
+icon_classes = {'actions': ('mount', 'unmount',
+                            'lock', 'unlock',
+                            'eject', 'detach')}
 
 class custom_install(install):
     def run(self):
@@ -61,7 +54,7 @@ class custom_install(install):
 
 setup(
     name='udiskie',
-    version='0.6.1',
+    version='0.6.2',
     description='Removable disk automounter for udisks',
     long_description=long_description,
     author='Byron Clark',
@@ -77,7 +70,14 @@ setup(
     namespace_packages=[
         'udiskie',
     ],
-    data_files=data_files,
+    data_files=[
+        (path.join(theme_base, icon_resolution, icon_class), [
+            path.join('icons', icon_resolution, icon_class,
+                      'udiskie-%s.%s' % (icon_name, icon_ext))
+            for icon_name in icon_names])
+        for icon_resolution,icon_ext in icon_resolutions
+        for icon_class,icon_names in icon_classes.items()
+    ],
     entry_points={
         'console_scripts': [
             'udiskie = udiskie.cli:daemon',

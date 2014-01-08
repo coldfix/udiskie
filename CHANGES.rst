@@ -1,6 +1,12 @@
 CHANGELOG
 ---------
 
+0.6.2 (aesthetic)
+~~~~~~~~~~~~~~~~~
+
+- add custom icons for the context menu of the system tray widget
+
+
 0.6.1 (bug fix)
 ~~~~~~~~~~~~~~~
 
