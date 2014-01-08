@@ -8,7 +8,7 @@ function rasterize {
     local output_dir=$3
     local size=$4
     echo "${output_dir}${file}.png"
-    convert $input_dir/$file.svg -resize $sizex$size $output_dir/$file.png
+    convert -background none $input_dir/$file.svg -resize $sizex$size $output_dir/$file.png
 }
 
 
@@ -29,7 +29,7 @@ function rasterize_all {
 # Loop over images and sizes
 base_dir=icons/
 input_dir=$base_dir/scalable/actions/
-for size in 16 22 24 32 48 256
+for size in 16
 do
     rasterize_all $input_dir ${base_dir}${size}x${size}/actions/ $size
 done

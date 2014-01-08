@@ -29,6 +29,3 @@ pip-log.txt
 .coverage
 .tox
 nosetests.xml
-
-# Rasterized icons
-icons/*x*/
