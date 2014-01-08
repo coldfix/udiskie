@@ -7,9 +7,6 @@ __all__ = ['create_menu',
            'main']
 
 import gtk
-import gio
-import glib
-import logging
 from functools import partial
 from collections import namedtuple
 from itertools import chain
@@ -112,43 +109,21 @@ def flat_menu(node):
         groups=[list(leaves(node, [], ""))])
 
 
-def load_gtk_icon(name, size, default=None):
-    """
-    Load GTK icon as image by name
-
-    :param string name: Name of the icon
-    :param int size: Pixel size of the icon
-    :param object default: Default image when the icon is not in the GTK theme
-
-    """
-    try:
-        return gtk.image_new_from_icon_name(name, size)
-    except (gio.Error, glib.GError) as e:
-        logging.getLogger('udiskie.tray.icons').warning(str(e))
-        return default
-
-
-def load_menu_icon(action_name, default_icon):
+def load_menu_icon(icon_name):
     """
     Load udiskie menu icon with correct size
 
     :param string action_name: Name of action the icon corresponds to
-    :param object default_icon: Default icon in case lookup fails
 
     """
-    return load_gtk_icon(
-        'udiskie-{}'.format(action_name),
-        gtk.ICON_SIZE_MENU,
-        default_icon)
-
+    return gtk.image_new_from_icon_name(icon_name, gtk.ICON_SIZE_MENU)
 
 def create_menu(udisks=None,
                 mounter=None,
                 labels={},
                 icons={},
                 actions={},
-                style=flat_menu,
-                flat=False):
+                style=flat_menu):
     """
     Create menu for udiskie mount operations.
 
@@ -157,7 +132,7 @@ def create_menu(udisks=None,
     :param dict labels: Labels for menu items
     :param dict icons: Icons for menu items
     :param dict actions: Actions for menu items
-    :param bool flat: Create a flattened menu
+    :param callabel style: Either of .flat_menu or .simple_menu
 
     If either ``udisks`` and or ``mounter`` is ``None`` default versions
     will be imported from the udiskie package.
@@ -188,12 +163,12 @@ def create_menu(udisks=None,
         mounter = Mounter(prompt=password(), udisks=udisks)
 
     setdefault(icons, {
-        'mount': load_menu_icon('mount', gtk.STOCK_APPLY),
-        'unmount': load_menu_icon('unmount', gtk.STOCK_CANCEL),
-        'unlock': load_menu_icon('unlock', gtk.STOCK_APPLY),
-        'lock': load_menu_icon('lock', gtk.STOCK_CANCEL),
-        'eject': load_menu_icon('eject', gtk.STOCK_CANCEL),
-        'detach': load_menu_icon('detach', gtk.STOCK_CANCEL),
+        'mount': load_menu_icon('udiskie-mount'),
+        'unmount': load_menu_icon('udiskie-unmount'),
+        'unlock': load_menu_icon('udiskie-unlock'),
+        'lock': load_menu_icon('udiskie-lock'),
+        'eject': load_menu_icon('udiskie-eject'),
+        'detach': load_menu_icon('udiskie-detach'),
         'quit': gtk.STOCK_QUIT, })
 
     setdefault(labels, {
