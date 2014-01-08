@@ -1,5 +1,8 @@
 # encoding: utf-8
 from setuptools import setup
+from setuptools.command.install import install
+from subprocess import call
+import sys
 
 # check availability of runtime dependencies
 def check_any(*packages):
@@ -33,6 +36,15 @@ try:
 except IOError:
     pass
 
+
+theme_base = sys.prefix + '/share/icons/hicolor'
+icon_path = 'scalable/actions'
+
+class custom_install(install):
+    def run(self):
+        install.run(self)
+        call(['gtk-update-icon-cache', theme_base])
+
 setup(
     name='udiskie',
     version='0.6.1',
@@ -44,11 +56,19 @@ setup(
     maintainer_email='t_glaessle@gmx.de',
     url='https://github.com/coldfix/udiskie',
     license='MIT',
+    cmdclass={'install': custom_install},
     packages=[
         'udiskie',
     ],
     namespace_packages=[
         'udiskie',
+    ],
+    data_files=[
+        ("%s/%s" % (theme_base,icon_path), [
+            'icons/%s/udiskie-%s.svg' % (icon_path, action)
+            for action in ('mount', 'unmount',
+                           'lock', 'unlock',
+                           'eject', 'detach')]),
     ],
     entry_points={
         'console_scripts': [
