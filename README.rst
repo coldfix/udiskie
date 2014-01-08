@@ -101,12 +101,12 @@ GTK icons
 *udiskie* comes with a set of themeable custom Tango-style GTK icons for its
 tray icon menu. The installer tries to install the icons into GTK's default
 hicolor theme. Typically this is located in ``/usr/share/icons/hicolor``. If
-you have any problems with this or you need a custom path you can do it
-manually like so:
+you have any problems with this or you need a custom path you can manually do
+it like so:
 
 .. code-block:: bash
 
-    cp ./icons/scalable /usr/share/icons/hicolor
+    cp ./icons/scalable /usr/share/icons/hicolor -r
     gtk-update-icon-cache /usr/share/icons/hicolor
 
 The icons roughly follow the `Tango style guidelines`. Some icons incorporate
