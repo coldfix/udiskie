@@ -4,6 +4,8 @@ Tray icon for udiskie.
 __all__ = ['create_menu',
            'create_statusicon',
            'connect_statusicon',
+           'default_icons',
+           'default_labels',
            'main']
 
 import gtk
@@ -109,19 +111,50 @@ def flat_menu(node):
         groups=[list(leaves(node, [], ""))])
 
 
-def load_menu_icon(icon_name):
-    """
-    Load udiskie menu icon with correct size
+class MenuIconLoader(object):
+    """Load menu icons dynamically."""
+    def __init__(self, icon_names):
+        self.icon_names = icon_names
+    def get(self, name):
+        return gtk.image_new_from_icon_name(self.icon_names[name],
+                                            gtk.ICON_SIZE_MENU)
 
-    :param string action_name: Name of action the icon corresponds to
+#----------------------------------------
+# menu actions
+#----------------------------------------
 
-    """
-    return gtk.image_new_from_icon_name(icon_name, gtk.ICON_SIZE_MENU)
+default_icons = MenuIconLoader({
+    'mount': 'udiskie-mount',
+    'unmount': 'udiskie-unmount',
+    'unlock': 'udiskie-unlock',
+    'lock': 'udiskie-lock',
+    'eject': 'udiskie-eject',
+    'detach': 'udiskie-detach',
+    'quit': gtk.STOCK_QUIT, })
+
+plain_icons = {
+    'mount': gtk.STOCK_APPLY,
+    'unmount': gtk.STOCK_CANCEL,
+    'unlock': gtk.STOCK_APPLY,
+    'lock': gtk.STOCK_CANCEL,
+    'eject': gtk.STOCK_CANCEL,
+    'detach': gtk.STOCK_CANCEL,
+    'quit': gtk.STOCK_QUIT, }
+
+default_labels = {
+    'mount': 'Mount %s',
+    'unmount': 'Unmount %s',
+    'unlock': 'Unlock %s',
+    'lock': 'Lock %s',
+    'eject': 'Eject %s',
+    'detach': 'Detach %s',
+    'quit': 'Quit', }
+
 
 def create_menu(udisks=None,
                 mounter=None,
-                labels={},
-                icons={},
+                labels=default_labels,
+                icons=default_icons,
                 actions={},
                 style=flat_menu):
     """
@@ -137,7 +170,8 @@ def create_menu(udisks=None,
     If either ``udisks`` and or ``mounter`` is ``None`` default versions
     will be imported from the udiskie package.
 
-    Valid keys for the ``labels``, ``icons`` and ``actions`` dictionaries are:
+    Required keys for the ``labels``, ``icons`` and ``actions`` dictionaries
+    are:
 
         - mount     Mount a device
         - unmount   Unmount a device
@@ -150,6 +184,7 @@ def create_menu(udisks=None,
     NOTE: If using a main loop other than ``gtk.main`` the 'quit' action
     must be customized.
 
+    I just realized, the following is not yet implemented:
     To prevent a certain action from being displayed its ``action`` must be
     set to ``None``.
 
@@ -162,24 +197,7 @@ def create_menu(udisks=None,
         from udiskie.prompt import password
         mounter = Mounter(prompt=password(), udisks=udisks)
 
-    setdefault(icons, {
-        'mount': load_menu_icon('udiskie-mount'),
-        'unmount': load_menu_icon('udiskie-unmount'),
-        'unlock': load_menu_icon('udiskie-unlock'),
-        'lock': load_menu_icon('udiskie-lock'),
-        'eject': load_menu_icon('udiskie-eject'),
-        'detach': load_menu_icon('udiskie-detach'),
-        'quit': gtk.STOCK_QUIT, })
-
-    setdefault(labels, {
-        'mount': 'Mount %s',
-        'unmount': 'Unmount %s',
-        'unlock': 'Unlock %s',
-        'lock': 'Lock %s',
-        'eject': 'Eject %s',
-        'detach': 'Detach %s',
-        'quit': 'Quit', })
-
+    actions = dict(actions)
     setdefault(actions, {
         'mount': mounter.mount_device,
         'unmount': mounter.unmount_device,
@@ -209,7 +227,7 @@ def create_menu(udisks=None,
     def item(action, feed=(), bind=()):
         return create_menuitem(
             labels[action] % tuple(feed),
-            icons[action],
+            icons.get(action),
             lambda _: actions[action](*bind))
 
     def mkmenu(menu_node):
@@ -237,7 +255,7 @@ def create_menu(udisks=None,
     menu = mkmenu(flat_menu(device_tree(mounter.get_all_handleable())))
 
     # append menu item for closing the application
-    if actions['quit']:
+    if actions.get('quit'):
         if len(menu) > 0:
             menu.append(gtk.SeparatorMenuItem())
         menu.append(item('quit'))
