@@ -1,7 +1,7 @@
 include doc/*.txt
 include doc/asciidoc.conf
 include doc/Makefile
-recursive-include icons *.svg
+recursive-include icons *.svg *.png
 include CHANGES.rst
 include COPYING
 include README.rst

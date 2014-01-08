@@ -3,6 +3,9 @@ from setuptools import setup
 from setuptools.command.install import install
 from subprocess import call
 import sys
+import logging
+
+log = logging.getLogger()
 
 # check availability of runtime dependencies
 def check_any(*packages):
@@ -13,14 +16,9 @@ def check_any(*packages):
             __import__(package)
             return True
         except ImportError:
-            import sys
             errors.append(sys.exc_info()[1])
-    if len(errors) == 1:
-        print("Missing runtime dependency: %s" % errors[0])
-    else:
-        print("Missing runtime dependencies:")
-        for err in errors:
-            print("\t%s" % err)
+    log.warning("\n\t".join(["Missing runtime dependencies:"]
+                            + [str(e) for e in errors]))
     return False
 
 check_any('dbus')
@@ -39,7 +37,9 @@ except IOError:
 
 theme_base = sys.prefix + '/share/icons/hicolor'
 icon_resolutions = ['scalable'] + ['{0}x{0}'.format(res) for res in [16]]
-icon_names = {'actions': ('mount', 'unmount', 'lock', 'unlock', 'eject', 'detach')}
+icon_names = {'actions': ('mount', 'unmount',
+                          'lock', 'unlock',
+                          'eject', 'detach')}
 data_files = [
     ("%s/%s/%s" % (theme_base, icon_resolution, icon_type), [
         'icons/%s/%s/udiskie-%s.%s' %
@@ -47,14 +47,17 @@ data_files = [
             'svg' if icon_resolution == 'scalable' else 'png')
         for icon_name in icon_names[icon_type]])
     for icon_resolution in icon_resolutions
-    for icon_type in icon_names.keys()
+    for icon_type in icon_names
 ]
-print data_files
 
 class custom_install(install):
     def run(self):
         install.run(self)
-        call(['gtk-update-icon-cache', theme_base])
+        try:
+            # ignore failures since the tray icon is an optional component:
+            call(['gtk-update-icon-cache', theme_base])
+        except OSError:
+            log.warning(sys.exc_info()[1])
 
 setup(
     name='udiskie',
