@@ -4,12 +4,11 @@ Tray icon for udiskie.
 __all__ = ['create_menu',
            'create_statusicon',
            'connect_statusicon',
+           'default_icons',
+           'default_labels',
            'main']
 
 import gtk
-import gio
-import glib
-import logging
 from functools import partial
 from collections import namedtuple
 from itertools import chain
@@ -112,43 +111,52 @@ def flat_menu(node):
         groups=[list(leaves(node, [], ""))])
 
 
-def load_gtk_icon(name, size, default=None):
-    """
-    Load GTK icon as image by name
+class MenuIconLoader(object):
+    """Load menu icons dynamically."""
+    def __init__(self, icon_names):
+        self.icon_names = icon_names
+    def get(self, name):
+        return gtk.image_new_from_icon_name(self.icon_names[name],
+                                            gtk.ICON_SIZE_MENU)
 
-    :param string name: Name of the icon
-    :param int size: Pixel size of the icon
-    :param object default: Default image when the icon is not in the GTK theme
+#----------------------------------------
+# menu actions
+#----------------------------------------
 
-    """
-    try:
-        return gtk.image_new_from_icon_name(name, size)
-    except (gio.Error, glib.GError) as e:
-        logging.getLogger('udiskie.tray.icons').warning(str(e))
-        return default
+default_icons = MenuIconLoader({
+    'mount': 'udiskie-mount',
+    'unmount': 'udiskie-unmount',
+    'unlock': 'udiskie-unlock',
+    'lock': 'udiskie-lock',
+    'eject': 'udiskie-eject',
+    'detach': 'udiskie-detach',
+    'quit': gtk.STOCK_QUIT, })
 
+plain_icons = {
+    'mount': gtk.STOCK_APPLY,
+    'unmount': gtk.STOCK_CANCEL,
+    'unlock': gtk.STOCK_APPLY,
+    'lock': gtk.STOCK_CANCEL,
+    'eject': gtk.STOCK_CANCEL,
+    'detach': gtk.STOCK_CANCEL,
+    'quit': gtk.STOCK_QUIT, }
 
-def load_menu_icon(action_name, default_icon):
-    """
-    Load udiskie menu icon with correct size
-
-    :param string action_name: Name of action the icon corresponds to
-    :param object default_icon: Default icon in case lookup fails
-
-    """
-    return load_gtk_icon(
-        'udiskie-{}'.format(action_name),
-        gtk.ICON_SIZE_MENU,
-        default_icon)
+default_labels = {
+    'mount': 'Mount %s',
+    'unmount': 'Unmount %s',
+    'unlock': 'Unlock %s',
+    'lock': 'Lock %s',
+    'eject': 'Eject %s',
+    'detach': 'Detach %s',
+    'quit': 'Quit', }
 
 
 def create_menu(udisks=None,
                 mounter=None,
-                labels={},
-                icons={},
+                labels=default_labels,
+                icons=default_icons,
                 actions={},
-                style=flat_menu,
-                flat=False):
+                style=flat_menu):
     """
     Create menu for udiskie mount operations.
 
@@ -157,12 +165,13 @@ def create_menu(udisks=None,
     :param dict labels: Labels for menu items
     :param dict icons: Icons for menu items
     :param dict actions: Actions for menu items
-    :param bool flat: Create a flattened menu
+    :param callabel style: Either of .flat_menu or .simple_menu
 
     If either ``udisks`` and or ``mounter`` is ``None`` default versions
     will be imported from the udiskie package.
 
-    Valid keys for the ``labels``, ``icons`` and ``actions`` dictionaries are:
+    Required keys for the ``labels``, ``icons`` and ``actions`` dictionaries
+    are:
 
         - mount     Mount a device
         - unmount   Unmount a device
@@ -175,6 +184,7 @@ def create_menu(udisks=None,
     NOTE: If using a main loop other than ``gtk.main`` the 'quit' action
     must be customized.
 
+    I just realized, the following is not yet implemented:
     To prevent a certain action from being displayed its ``action`` must be
     set to ``None``.
 
@@ -187,24 +197,7 @@ def create_menu(udisks=None,
         from udiskie.prompt import password
         mounter = Mounter(prompt=password(), udisks=udisks)
 
-    setdefault(icons, {
-        'mount': load_menu_icon('mount', gtk.STOCK_APPLY),
-        'unmount': load_menu_icon('unmount', gtk.STOCK_CANCEL),
-        'unlock': load_menu_icon('unlock', gtk.STOCK_APPLY),
-        'lock': load_menu_icon('lock', gtk.STOCK_CANCEL),
-        'eject': load_menu_icon('eject', gtk.STOCK_CANCEL),
-        'detach': load_menu_icon('detach', gtk.STOCK_CANCEL),
-        'quit': gtk.STOCK_QUIT, })
-
-    setdefault(labels, {
-        'mount': 'Mount %s',
-        'unmount': 'Unmount %s',
-        'unlock': 'Unlock %s',
-        'lock': 'Lock %s',
-        'eject': 'Eject %s',
-        'detach': 'Detach %s',
-        'quit': 'Quit', })
-
+    actions = dict(actions)
     setdefault(actions, {
         'mount': mounter.mount_device,
         'unmount': mounter.unmount_device,
@@ -234,7 +227,7 @@ def create_menu(udisks=None,
     def item(action, feed=(), bind=()):
         return create_menuitem(
             labels[action] % tuple(feed),
-            icons[action],
+            icons.get(action),
             lambda _: actions[action](*bind))
 
     def mkmenu(menu_node):
@@ -262,7 +255,7 @@ def create_menu(udisks=None,
     menu = mkmenu(flat_menu(device_tree(mounter.get_all_handleable())))
 
     # append menu item for closing the application
-    if actions['quit']:
+    if actions.get('quit'):
         if len(menu) > 0:
             menu.append(gtk.SeparatorMenuItem())
         menu.append(item('quit'))
