@@ -55,7 +55,11 @@ data_files = [
 class custom_install(install):
     def run(self):
         install.run(self)
-        call(['gtk-update-icon-cache', theme_base])
+        try:
+            # ignore failures since the tray icon is an optional component:
+            call(['gtk-update-icon-cache', theme_base])
+        except OSError:
+            print(sys.exc_info()[1])
 
 setup(
     name='udiskie',
