@@ -3,6 +3,9 @@ from setuptools import setup
 from setuptools.command.install import install
 from subprocess import call
 import sys
+import logging
+
+log = logging.getLogger()
 
 # check availability of runtime dependencies
 def check_any(*packages):
@@ -13,14 +16,9 @@ def check_any(*packages):
             __import__(package)
             return True
         except ImportError:
-            import sys
             errors.append(sys.exc_info()[1])
-    if len(errors) == 1:
-        print("Missing runtime dependency: %s" % errors[0])
-    else:
-        print("Missing runtime dependencies:")
-        for err in errors:
-            print("\t%s" % err)
+    log.warning("\n\t".join(["Missing runtime dependencies:"]
+                            + [str(e) for e in errors]))
     return False
 
 check_any('dbus')
@@ -59,7 +57,7 @@ class custom_install(install):
             # ignore failures since the tray icon is an optional component:
             call(['gtk-update-icon-cache', theme_base])
         except OSError:
-            print(sys.exc_info()[1])
+            log.warning(sys.exc_info()[1])
 
 setup(
     name='udiskie',
