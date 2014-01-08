@@ -636,9 +636,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="9.0677083"
-     inkscape:cx="14.117604"
-     inkscape:cy="21.566465"
+     inkscape:zoom="4.5338542"
+     inkscape:cx="32.432208"
+     inkscape:cy="-10.184987"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:grid-bbox="true"
@@ -745,7 +745,7 @@
        inkscape:connector-curvature="0"
        id="path3049"
        d="m 23.954186,1.3390511 c -11.056024,0 -19.9464346,8.8904119 -19.9464346,19.9464349 0,11.056025 8.8904106,19.946436 19.9464346,19.946436 11.056026,0 19.946437,-8.890411 19.946437,-19.946436 0,-11.056023 -8.890411,-19.9464349 -19.946437,-19.9464349 l 0,0 z m 0,24.7335799 c -2.621531,0 -4.787144,-2.165613 -4.787144,-4.787145 0,-2.621532 2.165613,-4.787145 4.787144,-4.787145 2.621532,0 4.787145,2.165613 4.787145,4.787145 0,2.621532 -2.165613,4.787145 -4.787145,4.787145 z"
-       style="fill:url(#linearGradient3913);fill-rule:nonzero;stroke:#808080;stroke-width:1.75742898;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+       style="fill:url(#linearGradient3913);fill-rule:nonzero;stroke:#000000;stroke-width:1.75742898000000003;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
     <path
        inkscape:connector-curvature="0"
        id="path3051"
@@ -810,13 +810,13 @@
     <g
        id="g4605"
        transform="matrix(-1,0,0,1,32.744398,8.3684048)"
-       style="fill:none;stroke:#000000;stroke-opacity:1;stroke-width:2.5;stroke-miterlimit:4;stroke-dasharray:none">
+       style="fill:none;stroke:#400000;stroke-opacity:1;stroke-width:2.50000000000000000;stroke-miterlimit:4;stroke-dasharray:none">
       <path
          sodipodi:nodetypes="cccccccc"
          inkscape:connector-curvature="0"
          id="path3379"
          d="m 2.5863641,27.133555 15.3204719,0 1e-6,7.660236 12.767057,-11.490354 -12.767058,-11.490353 0,7.660235 -15.3204719,0 z"
-         style="fill:none;stroke:#000000;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:none" />
+         style="fill:none;stroke:#400000;stroke-width:2.50000000000000000;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:none" />
     </g>
     <g
        transform="matrix(-1,0,0,1,32.686645,8.3450667)"
