@@ -245,6 +245,26 @@
        y1="32"
        x2="44.5"
        y2="32" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4427"
+       id="linearGradient5848"
+       gradientUnits="userSpaceOnUse"
+       x1="3.5"
+       y1="18"
+       x2="44.5"
+       y2="18"
+       gradientTransform="translate(0,-2)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4427-8"
+       id="linearGradient5852"
+       gradientUnits="userSpaceOnUse"
+       x1="3.5"
+       y1="32"
+       x2="44.5"
+       y2="32"
+       gradientTransform="translate(0,2)" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -254,8 +274,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="12.300712"
-     inkscape:cx="20.543442"
-     inkscape:cy="19.86605"
+     inkscape:cx="21.717551"
+     inkscape:cy="25.521179"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:grid-bbox="true"
@@ -286,35 +306,27 @@
      id="layer1"
      inkscape:label="Layer 1"
      inkscape:groupmode="layer">
-    <g
-       id="g3119"
-       transform="translate(0,2)">
-      <path
-         sodipodi:nodetypes="ccccc"
-         inkscape:connector-curvature="0"
-         id="path3917-4"
-         d="m 4,28 0,8 40,0 0,-8 z"
-         style="fill:url(#linearGradient3123);fill-opacity:1;stroke:#000000;stroke-linejoin:round;stroke-opacity:1" />
-      <path
-         sodipodi:nodetypes="cccccccccc"
-         inkscape:connector-curvature="0"
-         id="path3917"
-         d="m 4.5,28.5 0,7 39,0 0,-7 z m 1,1 37,0 0,5 -37,0 z"
-         style="fill:#ad7fa8;fill-opacity:1;stroke:none" />
-    </g>
-    <g
-       id="g3113"
-       transform="translate(0,-2)">
-      <path
-         inkscape:connector-curvature="0"
-         id="path3915"
-         d="M 4,28 24,8 44,28 z"
-         style="fill:url(#linearGradient3117);fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1" />
-      <path
-         id="path3915-2"
-         d="M 24,8.6875 5,27.5 43,27.5 24,8.6875 z m 0,1.21875 17,16.78125 -34,0 17,-16.78125 z"
-         style="fill:#ad7fa8;fill-opacity:1;stroke:none"
-         inkscape:connector-curvature="0" />
-    </g>
+    <path
+       style="fill:url(#linearGradient5852);fill-opacity:1;stroke:#000000;stroke-linejoin:round;stroke-opacity:1;stroke-width:2.5;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 4,30 0,8 40,0 0,-8 z"
+       id="path3917-4"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       style="fill:#ad7fa8;fill-opacity:1;stroke:none"
+       d="m 4.5,30.5 0,7 39,0 0,-7 z m 1,1 37,0 0,5 -37,0 z"
+       id="path3917"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccc" />
+    <path
+       style="fill:url(#linearGradient5848);fill-opacity:1;stroke:#000000;stroke-width:2.5;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="M 4,26 24,6 44,26 z"
+       id="path3915"
+       inkscape:connector-curvature="0" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:#ad7fa8;fill-opacity:1;stroke:none"
+       d="M 24,6.6875 5,25.5 43,25.5 24,6.6875 z m 0,1.21875 17,16.78125 -34,0 17,-16.78125 z"
+       id="path3915-2" />
   </g>
 </svg>
