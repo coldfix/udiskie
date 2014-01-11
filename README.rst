@@ -109,12 +109,12 @@ it like so:
     cp ./icons/scalable /usr/share/icons/hicolor -r
     gtk-update-icon-cache /usr/share/icons/hicolor
 
-The icons roughly follow the `Tango style guidelines`. Some icons incorporate
-the CDROM icon of the base icon theme of the `Tango desktop project` (released
-into the public domain).
+The icons roughly follow the `Tango style guidelines`_. Some icons incorporate
+the CDROM icon of the base icon theme of the `Tango desktop project`_
+(released into the public domain).
 
 .. _`Tango style guidelines`: http://tango.freedesktop.org/Tango_Icon_Theme_Guidelines
-.. _`Tango base icon theme`: http://tango.freedesktop.org/Tango_Desktop_Project
+.. _`Tango desktop project`: http://tango.freedesktop.org/Tango_Desktop_Project
 
 
 Usage
@@ -137,7 +137,7 @@ requests as you see fit.
 
 .. _github: https://github.com/coldfix/udiskie
 
-Try to be consistent with `PEP 8` guidelines as far as possible and test
+Try to be consistent with `PEP 8`_ guidelines as far as possible and test
 everything. Furthermore, your commit messages should start with a
 capitalized verb for consistency. Unless your modification is completely
 trivial, also add a message body to your commit.
