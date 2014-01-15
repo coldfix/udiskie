@@ -1,10 +1,15 @@
 """
 Common DBus utilities.
 """
-__all__ = ['DBusProperties', 'DBusProxy']
+__all__ = ['DBusProperties',
+           'DBusProxy',
+           'DBusService',
+           'DBusException',
+           'Emitter']
 
-from dbus import Interface
+from dbus import Interface, SystemBus
 from dbus.exceptions import DBusException
+from dbus.mainloop.glib import DBusGMainLoop
 
 class DBusProperties(object):
     """
@@ -37,6 +42,39 @@ class DBusProxy(object):
         self.property = DBusProperties(proxy, interface)
         self.method = Interface(proxy, interface)
         self._bus = proxy._bus
+
+class DBusService(object):
+    """
+    Abstract base class for UDisksX service wrapper classes.
+    """
+    mainloop = None
+
+    @classmethod
+    def connect_service(cls, bus=None, mainloop=None):
+        """
+        Connect to the service object on dbus.
+
+        :param dbus.Bus bus: connection to system bus
+        :param dbus.mainloop.NativeMainLoop mainloop: system bus event loop
+        :raises dbus.DBusException: if unable to connect to service.
+
+        The mainloop parameter is only relevant if no bus is given. In this
+        case if ``mainloop is True``, use the default (glib) mainloop
+        provided by dbus-python.
+
+        """
+        if bus is None:
+            mainloop = mainloop or cls.mainloop
+            if mainloop is True:
+                mainloop = DBusGMainLoop()
+            bus = SystemBus(mainloop=mainloop or cls.mainloop)
+        obj = bus.get_object(cls.BusName, cls.ObjectPath)
+        return DBusProxy(obj, cls.Interface)
+
+    @classmethod
+    def create(cls, bus=None, mainloop=None):
+        return cls(cls.connect_service(bus, mainloop or cls.mainloop))
+
 
 class Emitter(object):
     """

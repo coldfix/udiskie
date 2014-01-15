@@ -14,7 +14,7 @@ __all__ = ['Sniffer', 'Daemon']
 
 import logging
 import os.path
-from udiskie.common import DBusProxy, DBusProperties, Emitter, DBusException
+from udiskie.common import DBusProxy, DBusProperties, Emitter, DBusException, DBusService
 from copy import copy, deepcopy
 
 try:                    # python2
@@ -528,13 +528,14 @@ class Device(object):
 # UDisks2 service wrapper
 #----------------------------------------
 
-class UDisks2(object):
+class UDisks2(DBusService):
     """
     Base class for UDisks2 service wrappers.
 
     """
     BusName = 'org.freedesktop.UDisks2'
     ObjectPath = '/org/freedesktop/UDisks2'
+    Interface = Interface['ObjectManager']
 
     def __iter__(self):
         """Iterate over all devices."""
@@ -570,21 +571,15 @@ class Sniffer(UDisks2):
 
     """
     # Construction
-    def __init__(self, bus=None, proxy=None):
+    def __init__(self, proxy=None):
         """
         Initialize an instance with the given DBus proxy object.
 
         :param dbus.Bus bus: connection to system bus
-        :param dbus.proxies.ProxyObject proxy: proxy to udisks object
+        :param common.DBusProxy proxy: proxy to udisks object
 
         """
-        if proxy is None:
-            if bus is None:
-                from dbus import SystemBus
-                bus = SystemBus()
-            proxy = DBusProxy(bus.get_object(self.BusName, self.ObjectPath),
-                              Interface['ObjectManager'])
-        self._proxy = proxy
+        self._proxy = proxy or self.connect_service()
 
     # instantiation of device objects
     def paths(self):
@@ -619,7 +614,9 @@ class Daemon(Emitter, UDisks2):
         - device_changed
 
     """
-    def __init__(self, bus=None, proxy=None, sniffer=None):
+    mainloop = True
+
+    def __init__(self, proxy=None):
         """Initialize object and start listening to UDisks2 events."""
         event_names = (tuple(stem + suffix
                              for suffix in ('ed','ing')
@@ -637,15 +634,7 @@ class Daemon(Emitter, UDisks2):
                           'object_removed'))
         super(Daemon, self).__init__(event_names)
 
-        if proxy is None:
-            if bus is None:
-                import dbus
-                from dbus.mainloop.glib import DBusGMainLoop
-                DBusGMainLoop(set_as_default=True)
-                bus = dbus.SystemBus()
-            proxy = DBusProxy(bus.get_object(self.BusName, self.ObjectPath),
-                              Interface['ObjectManager'])
-        self._proxy = proxy
+        self._proxy = proxy or self.connect_service()
         self._log = logging.getLogger('udiskie.udisks2.Daemon')
         self._objects = {}
 
