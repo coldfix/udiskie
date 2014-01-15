@@ -12,7 +12,7 @@ import warnings
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
-import os
+import os, sys
 import logging
 from functools import partial
 
@@ -42,11 +42,11 @@ def common_program_options():
                       dest='log_level', default=logging.INFO,
                       const=logging.DEBUG, help='verbose output')
     parser.add_option('-1', '--use-udisks1', action='store_const',
-                      dest='udisks_version', default='1',
-                      const='1', help='use udisks1 as underlying daemon (default)')
+                      dest='udisks_version', default=0,
+                      const=1, help='use udisks1 as underlying daemon (default)')
     parser.add_option('-2', '--use-udisks2', action='store_const',
-                      dest='udisks_version', default='1',
-                      const='2', help='use udisks2 as underlying daemon (experimental)')
+                      dest='udisks_version', default=0,
+                      const=2, help='use udisks2 as underlying daemon (experimental)')
     return parser
 
 def mount_program_options():
@@ -62,23 +62,46 @@ def mount_program_options():
                       metavar='MODULE', help="replace password prompt")
     return parser
 
-def udisks_service(version):
-    """
-    Return the first UDisks service found available.
 
-    TODO: This should check if the UDisks service is accessible and if not
-    try to connect to UDisks2 service.
+def udisks_service_object(clsname, version=0):
+    """
+    Return UDisks service.
+
+    :param int version: requested udisks
+    :param dbus.mainloop.NativeMainLoop mainloop: event loop for system bus
+    :return: udisks service wrapper object
+    :raises dbus.DBusException: if unable to connect to UDisks dbus service.
+    :raises ValueError: if the version is invalid
+
+    If ``version is None``, try to connect to UDisks1 and fall back to
+    UDisks2 if not available.
+
+    If ``mainloop is True``, use the default (only) mainloop provided by
+    dbus-python.
 
     """
-    if version == '1':
+    def udisks1():
         import udiskie.udisks1
-        return udiskie.udisks1
-    elif version == '2':
+        return getattr(udiskie.udisks1, clsname).create()
+    def udisks2():
         import udiskie.udisks2
-        return udiskie.udisks2
+        return getattr(udiskie.udisks2, clsname).create()
+    if version == 0:
+        from udiskie.common import DBusException
+        try:
+            return udisks1()
+        except DBusException:
+            msg = sys.exc_info()[1].get_dbus_message()
+            logging.getLogger().warning(
+                ('Failed to connect UDisks1 dbus service: %s.\n' +
+                 'Falling back to UDisks2 [experimental].') % (msg,))
+            return udisks2()
+    elif version == 1:
+        return udisks1()
+    elif version == 2:
+        return udisks2()
     else:
-        # FIXME: chose appropriate version
-        return None
+        raise ValueError("UDisks version not supported: %s!" % (version,))
 
 
 #----------------------------------------
@@ -107,7 +130,7 @@ def daemon(args=None, daemon=None):
 
     # connect udisks
     if daemon is None:
-        daemon = udisks_service(options.udisks_version).Daemon()
+        daemon = udisks_service_object('Daemon', options.udisks_version)
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
@@ -164,7 +187,7 @@ def mount(args=None, udisks=None):
 
     # connect udisks
     if udisks is None:
-        udisks = udisks_service(options.udisks_version).Sniffer()
+        udisks = udisks_service_object('Sniffer', options.udisks_version)
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
@@ -208,7 +231,7 @@ def umount(args=None, udisks=None):
     logging.basicConfig(level=options.log_level, format='%(message)s')
 
     if udisks is None:
-        udisks = udisks_service(options.udisks_version).Sniffer()
+        udisks = udisks_service_object('Sniffer', options.udisks_version)
     mounter = udiskie.mount.Mounter(udisks=udisks)
 
     if options.all:
