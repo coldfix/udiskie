@@ -238,7 +238,7 @@ class Mounter(object):
         log = logging.getLogger('udiskie.mount.detach_device')
         drive = device.drive
         if not (drive.is_drive and drive.is_detachable):
-            logger.debug('drive not detachable: %s' % drive)
+            log.debug('drive not detachable: %s' % drive)
             return False
         if force:
             self.remove_device(drive, force=True)
@@ -248,7 +248,7 @@ class Mounter(object):
             log.info('detached device %s' % (device,))
             return True
         except drive.Exception:
-            logger.error('failed to detach device %s' % (device,))
+            log.error('failed to detach device %s' % (device,))
             return False
 
     # mount_all/unmount_all
