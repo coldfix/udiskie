@@ -16,8 +16,3 @@ class AutoMounter(object):
     def media_added(self, udevice):
         self.mounter.add_device(udevice)
 
-    # Automount LUKS cleartext holders after they have been unlocked.
-    # Why doesn't this work in device_added?
-    def device_unlocked(self, udevice):
-        self.mounter.add_device(udevice.luks_cleartext_holder)
-
