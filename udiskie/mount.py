@@ -236,8 +236,8 @@ class Mounter(object):
     def detach_device(self, device, force=False):
         """Detach a device after unmounting all its mounted filesystems."""
         log = logging.getLogger('udiskie.mount.detach_device')
-        drive = device.drive
-        if not (drive.is_drive and drive.is_detachable):
+        drive = device.root
+        if not drive.is_detachable:
             log.debug('drive not detachable: %s' % drive)
             return False
         if force:

@@ -428,6 +428,17 @@ class Device(object):
             return self.udisks[self.I.Block.property.Drive]
         return None
 
+    @property
+    def root(self):
+        """
+        Get the top level block device in the ancestry of this device.
+        """
+        drive = self.drive
+        for device in self.udisks:
+            if not device.is_drive and device.is_toplevel and device.drive == drive:
+                return device
+        return None
+
     #----------------------------------------
     # Partition
     #----------------------------------------
