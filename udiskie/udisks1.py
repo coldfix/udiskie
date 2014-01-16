@@ -138,6 +138,8 @@ class OnlineDevice(DBusProxy, DeviceBase):
         else:
             return self
 
+    root = drive
+
     @property
     def is_detachable(self):
         """Check if the drive that owns this device can be detached."""
