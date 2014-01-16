@@ -25,7 +25,7 @@ import os.path
 from copy import copy
 from inspect import getmembers
 
-from udiskie.common import DBusProxy, Emitter
+from udiskie.common import DBusProxy, Emitter, DBusService
 
 try:                    # python2
     from itertools import ifilter as filter
@@ -342,7 +342,7 @@ class CachedDevice(DeviceBase):
         """Unlock Luks device."""
         return CachedDevice(self._device.unlock(password))
 
-class UDisks(object):
+class UDisks(DBusService):
     """
     Base class for UDisks service wrappers.
 
@@ -384,21 +384,14 @@ class Sniffer(UDisks):
 
     """
     # Construction
-    def __init__(self, bus=None, proxy=None):
+    def __init__(self, proxy=None):
         """
         Initialize an instance with the given DBus proxy object.
 
-        :param dbus.Bus bus: connection to system bus
-        :param dbus.proxies.ProxyObject proxy: proxy to udisks object
+        :param common.DBusProxy proxy: proxy to udisks object
 
         """
-        if proxy is None:
-            if bus is None:
-                from dbus import SystemBus
-                bus = SystemBus()
-            proxy = DBusProxy(bus.get_object(self.BusName, self.ObjectPath),
-                              self.Interface)
-        self._proxy = proxy
+        self._proxy = proxy or self.connect_service()
 
     def paths(self):
         return self._proxy.method.EnumerateDevices()
@@ -407,7 +400,6 @@ class Sniffer(UDisks):
         """Create a Device instance from object path."""
         return OnlineDevice(self, self._proxy._bus.get_object(self.BusName,
                                                               object_path))
-
     update = get
 
 class Job(object):
@@ -434,15 +426,17 @@ class Daemon(Emitter, UDisks):
     `disconnect` can be used to add or remove event handlers.
 
     """
-    def __init__(self, bus=None, proxy=None, sniffer=None):
+    mainloop = True
+
+    def __init__(self, proxy=None, sniffer=None):
         """
         Create a Daemon object and start listening to DBus events.
 
-        :param dbus.Bus bus: connection to system bus
-        :param dbus.proxies.ProxyObject proxy: proxy
+        :param common.DBusProxy proxy: proxy to the dbus service object
+        :param udisks1.Sniffer sniffer: sniffer to use
 
-        If the connection is not passed a new one will be created and dbus
-        will be configured for the gobject mainloop.
+        If neither proxy nor sniffer are given they will be created and
+        dbus will be configured for the gobject mainloop.
 
         """
         event_names = (stem + suffix
@@ -459,12 +453,7 @@ class Daemon(Emitter, UDisks):
                            'device_chang', ))
         super(Daemon, self).__init__(event_names)
 
-        if sniffer is None:
-            if bus is None and proxy is None:
-                import dbus
-                from dbus.mainloop.glib import DBusGMainLoop
-                DBusGMainLoop(set_as_default=True)
-            sniffer = Sniffer(bus, proxy)
+        sniffer = sniffer or Sniffer(proxy or self.connect_service())
 
         self._sniffer = sniffer
         self._jobs = {}
