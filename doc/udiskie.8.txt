@@ -96,7 +96,7 @@ Mount '/dev/sdb1':
 
 Filters
 -------
-*udiskie* uses filters to apply additional mount options. On startup *udiskie* reads the filters in `$XDG_CONFIG_HOME/udiskie/filters.conf` (or the file specified with *-f*). Filters can match the filesystem type or the device UUID.
+*udiskie* uses filters to apply additional mount options. On startup *udiskie* reads the filters in `$XDG_CONFIG_HOME/udiskie/filters.conf` (or the file specified with *-f*). Filters can match the filesystem type or the device UUID. The option '__ignore__' instructs udiskie not to automount and display the matched device.
 
 Example Filters File
 --------------------
@@ -104,6 +104,7 @@ Example Filters File
 [mount_options]
 fstype.vfat: sync
 uuid.9d53-13ba: noexec,nodev
+uuid.abcd-ef01: __ignore__
 ----------------------------------------------------------------------
 
 See Also
