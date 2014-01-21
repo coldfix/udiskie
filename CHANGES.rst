@@ -1,6 +1,15 @@
 CHANGELOG
 ---------
 
+0.6.3 (bug fix)
+~~~~~~~~~~~~~~~
+
+- fix exception in Mounter.detach_device if unable to detach
+- fix force-detach for UDisks2 backend
+- automatically use UDisks2 if UDisks1 is not available
+- mount unlocked devices only once, removes error message on UDisks2
+- mention __ignore__ in man page
+
 0.6.2 (aesthetic)
 ~~~~~~~~~~~~~~~~~
 
