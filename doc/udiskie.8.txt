@@ -88,6 +88,10 @@ Unmount media and power down USB device:
 
 Mount all media:
 
+	udiskie-mount -a
+
+Mount '/dev/sdb1':
+
 	udiskie-mount /dev/sdb1
 
 Filters
