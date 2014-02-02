@@ -112,7 +112,7 @@ class Emitter(object):
     def disconnect(self, handler, event=None):
         """Disconnect an event handler."""
         if event:
-            self.event_handlers.remove(handler)
+            self.event_handlers[event].remove(handler)
         else:
             for event in self.event_handlers:
                 if hasattr(handler, event):
