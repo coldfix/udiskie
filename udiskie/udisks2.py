@@ -567,7 +567,7 @@ class UDisks2(DBusService):
         for device in self:
             if device.is_file(path):
                 return device
-        logger = logging.getLogger('udiskie.udisks.find')
+        logger = logging.getLogger(__name__)
         logger.warn('Device not found: %s' % path)
         return None
 
@@ -646,7 +646,7 @@ class Daemon(Emitter, UDisks2):
         super(Daemon, self).__init__(event_names)
 
         self._proxy = proxy or self.connect_service()
-        self._log = logging.getLogger('udiskie.udisks2.Daemon')
+        self._log = logging.getLogger(__name__)
         self._objects = {}
 
         bus = self._proxy._bus

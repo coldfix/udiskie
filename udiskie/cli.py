@@ -12,7 +12,8 @@ import warnings
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
-import os, sys
+import os
+import sys
 import logging
 from functools import partial
 
@@ -92,7 +93,8 @@ def udisks_service_object(clsname, version=0):
             return udisks1()
         except DBusException:
             msg = sys.exc_info()[1].get_dbus_message()
-            logging.getLogger().warning(
+            log = logging.getLogger(__name__)
+            log.warning(
                 ('Failed to connect UDisks1 dbus service: %s.\n' +
                  'Falling back to UDisks2 [experimental].') % (msg,))
             return udisks2()

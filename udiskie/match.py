@@ -42,7 +42,7 @@ class OptionFilter(object):
         :param list options: mount options for matching devices
 
         """
-        self._log = logging.getLogger('udiskie.match.OptionFilter')
+        self._log = logging.getLogger(__name__)
         self._key = key
         self._value = value
         self._options = list(options)

@@ -37,6 +37,7 @@ class Mounter(object):
         self._filter = filter
         self._prompt = prompt
         self._udisks = udisks
+        self._logger = logging.getLogger(__name__)
 
     # mount/unmount
     def mount_device(self, device, filter=None):
@@ -46,24 +47,23 @@ class Mounter(object):
         Return value indicates whether the device is mounted.
 
         """
-        log = logging.getLogger('udiskie.mount.mount_device')
         if not self.is_handleable(device) or not device.is_filesystem:
-            log.debug('not mounting unhandled device %s' % (device,))
+            self._logger.debug('not mounting unhandled device %s' % (device,))
             return False
         if device.is_mounted:
-            log.debug('not mounting mounted device %s' % (device,))
+            self._logger.debug('not mounting mounted device %s' % (device,))
             return True
         fstype = str(device.id_type)
         filter = filter or self._filter
         options = ','.join(filter.get_mount_options(device) if filter else [])
         try:
-            log.debug('mounting device %s (%s:%s)' % (device, fstype, options))
+            self._logger.debug('mounting device %s (%s:%s)' % (device, fstype, options))
             mount_path = device.mount(fstype=fstype, options=options)
-            log.info('mounted device %s on %s' % (device, mount_path))
+            self._logger.info('mounted device %s on %s' % (device, mount_path))
             return True
         except device.Exception:
             err = sys.exc_info()[1]
-            log.error('failed to mount device %s: %s' % (device, err))
+            self._logger.error('failed to mount device %s: %s' % (device, err))
             return False
 
     def unmount_device(self, device):
@@ -74,21 +74,20 @@ class Mounter(object):
         Return value indicates whether the device is unmounted.
 
         """
-        log = logging.getLogger('udiskie.mount.unmount_device')
         if not self.is_handleable(device) or not device.is_filesystem:
-            log.debug('not unmounting unhandled device %s' % (device,))
+            self._logger.debug('not unmounting unhandled device %s' % (device,))
             return False
         if not device.is_mounted:
-            log.debug('not unmounting unmounted device %s' % (device,))
+            self._logger.debug('not unmounting unmounted device %s' % (device,))
             return True
         try:
-            log.debug('unmounting device %s' % (device,))
+            self._logger.debug('unmounting device %s' % (device,))
             device.unmount()
-            log.info('unmounted device %s' % (device,))
+            self._logger.info('unmounted device %s' % (device,))
             return True
         except device.Exception:
             err = sys.exc_info()[1]
-            log.error('failed to unmount device %s: %s' % (device, err))
+            self._logger.error('failed to unmount device %s: %s' % (device, err))
             return False
 
     # unlock/lock (LUKS)
@@ -99,12 +98,11 @@ class Mounter(object):
         Return value indicates whether the device is unlocked.
 
         """
-        log = logging.getLogger('udiskie.mount.unlock_device')
         if not self.is_handleable(device) or not device.is_crypto:
-            log.debug('not unlocking unhandled device %s' % (device,))
+            self._logger.debug('not unlocking unhandled device %s' % (device,))
             return False
         if device.is_unlocked:
-            log.debug('not unlocking unlocked device %s' % (device,))
+            self._logger.debug('not unlocking unlocked device %s' % (device,))
             return True
         # prompt user for password
         message = ''
@@ -119,13 +117,13 @@ class Mounter(object):
                 return False
             # unlock device
             try:
-                log.debug('unlocking device %s' % (device,))
+                self._logger.debug('unlocking device %s' % (device,))
                 mount_path = device.unlock(password).device_file
-                log.info('unlocked device %s on %s' % (device, mount_path))
+                self._logger.info('unlocked device %s on %s' % (device, mount_path))
                 return True
             except device.Exception:
                 err = sys.exc_info()[1]
-                log.error('failed to unlock device %s:\n%s' % (device, err))
+                self._logger.error('failed to unlock device %s:\n%s' % (device, err))
                 message = err.message
         return False
 
@@ -137,29 +135,27 @@ class Mounter(object):
         Return value indicates whether the device is locked.
 
         """
-        log = logging.getLogger('udiskie.mount.lock_device')
         if not self.is_handleable(device) or not device.is_crypto:
-            log.debug('not locking unhandled device %s' % (device,))
+            self._logger.debug('not locking unhandled device %s' % (device,))
             return False
         if not device.is_unlocked:
-            log.debug('not locking locked device %s' % (device,))
+            self._logger.debug('not locking locked device %s' % (device,))
             return True
         try:
-            log.debug('locking device %s' % (device,))
+            self._logger.debug('locking device %s' % (device,))
             device.lock()
-            log.info('locked device %s' % (device,))
+            self._logger.info('locked device %s' % (device,))
             return True
         except device.Exception:
             err = sys.exc_info()[1]
-            log.error('failed to lock device %s: %s' % (device, err))
+            self._logger.error('failed to lock device %s: %s' % (device, err))
             return False
 
     # add/remove (unlock/lock or mount/unmount)
     def add_device(self, device, filter=None, prompt=None, recursive=False):
         """Mount or unlock the device depending on its type."""
-        log = logging.getLogger('udiskie.mount.add_device')
         if not self.is_handleable(device):
-            log.debug('not adding unhandled device %s' % (device,))
+            self._logger.debug('not adding unhandled device %s' % (device,))
             return False
         if device.is_filesystem:
             success = self.mount_device(device, filter)
@@ -175,7 +171,7 @@ class Mounter(object):
                 if dev.is_partition and dev.partition_slave == device:
                     success = self.add_device(dev, filter=filter, prompt=prompt, recursive=True) and success
         else:
-            log.debug('not adding unhandled device %s' % (device,))
+            self._logger.debug('not adding unhandled device %s' % (device,))
             success = True
         return success
 
@@ -187,9 +183,8 @@ class Mounter(object):
         contained by this device.
 
         """
-        log = logging.getLogger('udiskie.mount.remove_device')
         if not self.is_handleable(device):
-            log.debug('not removing unhandled device %s' % (device,))
+            self._logger.debug('not removing unhandled device %s' % (device,))
             return False
         if device.is_filesystem:
             success = self.unmount_device(device)
@@ -204,7 +199,7 @@ class Mounter(object):
                     (dev.is_toplevel and dev.drive == device and dev != device)):
                     success = self.remove_device(dev, force=True, detach=detach, eject=eject, lock=lock) and success
         else:
-            log.debug('not removing unhandled device %s' % (device,))
+            self._logger.debug('not removing unhandled device %s' % (device,))
             success = True
         if lock and device.is_luks_cleartext:
             success = self.lock_device(device.luks_cleartext_slave)
@@ -217,38 +212,36 @@ class Mounter(object):
     # eject/detach device
     def eject_device(self, device, force=False):
         """Eject a device after unmounting all its mounted filesystems."""
-        log = logging.getLogger('udiskie.mount.eject_device')
         drive = device.drive
         if not (drive.is_drive and drive.is_ejectable):
-            log.debug('drive not ejectable: %s' % drive)
+            self._logger.debug('drive not ejectable: %s' % drive)
             return False
         if force:
             self.remove_device(drive, force=True)
         try:
-            log.debug('ejecting device %s' % (device,))
+            self._logger.debug('ejecting device %s' % (device,))
             drive.eject()
-            log.info('ejected device %s' % (device,))
+            self._logger.info('ejected device %s' % (device,))
             return True
         except drive.Exception:
-            log.error('failed to eject device %s' % (device,))
+            self._logger.error('failed to eject device %s' % (device,))
             return False
 
     def detach_device(self, device, force=False):
         """Detach a device after unmounting all its mounted filesystems."""
-        log = logging.getLogger('udiskie.mount.detach_device')
         drive = device.root
         if not drive.is_detachable:
-            log.debug('drive not detachable: %s' % drive)
+            self._logger.debug('drive not detachable: %s' % drive)
             return False
         if force:
             self.remove_device(drive, force=True)
         try:
-            log.debug('detaching device %s' % (device,))
+            self._logger.debug('detaching device %s' % (device,))
             drive.detach()
-            log.info('detached device %s' % (device,))
+            self._logger.info('detached device %s' % (device,))
             return True
         except drive.Exception:
-            log.error('failed to detach device %s' % (device,))
+            self._logger.error('failed to detach device %s' % (device,))
             return False
 
     # mount_all/unmount_all
@@ -360,12 +353,11 @@ class Mounter(object):
     # internals
     def __path_adapter(self, fn, path, **kwargs):
         """Internal method."""
-        log = logging.getLogger('udiskie.mount.%s' % fn.__name__)
         device = self._udisks.find(path)
         if device:
-            log.debug('found device owning "%s": "%s"' % (path, device))
+            self._logger.debug('found device owning "%s": "%s"' % (path, device))
             return fn(device, **kwargs)
         else:
-            log.error('no device found owning "%s"' % (path))
+            self._logger.error('no device found owning "%s"' % (path))
             return False
 
