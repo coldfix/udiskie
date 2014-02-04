@@ -91,30 +91,30 @@ class Emitter(object):
 
         """
         super(Emitter, self).__init__(*args, **kwargs)
-        self.event_handlers = {}
+        self._event_handlers = {}
         for evt in event_names:
-            self.event_handlers[evt] = []
+            self._event_handlers[evt] = []
 
     def trigger(self, event, *args):
         """Trigger event handlers."""
-        for handler in self.event_handlers[event]:
+        for handler in self._event_handlers[event]:
             handler(*args)
 
     def connect(self, handler, event=None):
         """Connect an event handler."""
         if event:
-            self.event_handlers[event].append(handler)
+            self._event_handlers[event].append(handler)
         else:
-            for event in self.event_handlers:
+            for event in self._event_handlers:
                 if hasattr(handler, event):
                     self.connect(getattr(handler, event), event)
 
     def disconnect(self, handler, event=None):
         """Disconnect an event handler."""
         if event:
-            self.event_handlers[event].remove(handler)
+            self._event_handlers[event].remove(handler)
         else:
-            for event in self.event_handlers:
+            for event in self._event_handlers:
                 if hasattr(handler, event):
                     self.disconnect(getattr(handler, event), event)
 

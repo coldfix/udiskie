@@ -6,31 +6,41 @@ __all__ = [
     'daemon',
     'mount',
     'umount',
-    ]
+]
 
 import warnings
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
-import os, sys
+import os
+import sys
 import logging
 from functools import partial
-
-CONFIG_PATH = 'udiskie/filters.conf'
 
 #----------------------------------------
 # Utility functions
 #----------------------------------------
+def config_path(*path):
+    try:
+        from xdg.BaseDirectory import xdg_config_home as config_home
+    except ImportError:
+        config_home = os.path.expanduser('~/.config')
+    return os.path.join(config_home, 'udiskie', *path)
+
 def load_filter(filter_file=None):
     """Load mount option filters."""
     import udiskie.match
-    if not filter_file:
-        try:
-            from xdg.BaseDirectory import xdg_config_home
-        except ImportError:
-            xdg_config_home = os.path.expanduser('~/.config')
-        filter_file = os.path.join(xdg_config_home, CONFIG_PATH)
-    return udiskie.match.FilterMatcher.from_config_file(filter_file)
+    return udiskie.match.FilterMatcher.from_config_file(
+        filter_file or config_path('filters.conf'))
+
+def init_logging(program_options):
+    """Initialize logging configuration."""
+    log_level = program_options.log_level
+    if log_level <= logging.DEBUG:
+        fmt = '%(levelname)s [%(asctime)s] %(name)s.%(funcName)s(): %(message)s'
+    else:
+        fmt = '%(message)s'
+    logging.basicConfig(level=log_level, format=fmt)
 
 def common_program_options():
     """
@@ -92,7 +102,8 @@ def udisks_service_object(clsname, version=0):
             return udisks1()
         except DBusException:
             msg = sys.exc_info()[1].get_dbus_message()
-            logging.getLogger().warning(
+            log = logging.getLogger(__name__)
+            log.warning(
                 ('Failed to connect UDisks1 dbus service: %s.\n' +
                  'Falling back to UDisks2 [experimental].') % (msg,))
             return udisks2()
@@ -124,7 +135,7 @@ def daemon(args=None, daemon=None):
                       dest='tray', default=False,
                       help='show tray icon')
     options, posargs = parser.parse_args(args)
-    logging.basicConfig(level=options.log_level, format='%(message)s')
+    init_logging(options)
 
     mainloop = gobject.MainLoop()
 
@@ -183,7 +194,7 @@ def mount(args=None, udisks=None):
                       dest='recursive', default=False,
                       help='recursively mount LUKS partitions (if the automount daemon is running, this is not necessary)')
     options, posargs = parser.parse_args(args)
-    logging.basicConfig(level=options.log_level, format='%(message)s')
+    init_logging(options)
 
     # connect udisks
     if udisks is None:
@@ -228,7 +239,7 @@ def umount(args=None, udisks=None):
                       dest='detach', default=False,
                       help='Detach drive')
     (options, posargs) = parser.parse_args(args)
-    logging.basicConfig(level=options.log_level, format='%(message)s')
+    init_logging(options)
 
     if udisks is None:
         udisks = udisks_service_object('Sniffer', options.udisks_version)

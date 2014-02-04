@@ -18,7 +18,8 @@ queried from the UDisks DBus service as requested.
 guarantee the validity of device objects during operations.
 
 """
-__all__ = ['Sniffer', 'Daemon']
+__all__ = ['Sniffer',
+           'Daemon']
 
 import logging
 import os.path
@@ -369,7 +370,7 @@ class UDisks(DBusService):
         for device in self:
             if device.is_file(path):
                 return device
-        logger = logging.getLogger('udiskie.udisks.find')
+        logger = logging.getLogger(__name__)
         logger.warn('Device not found: %s' % path)
         return None
 
@@ -565,7 +566,7 @@ class Daemon(Emitter, UDisks):
                 self.trigger(event_name + 'ed', dev)
                 del self._jobs[object_path]
             else:
-                log = logging.getLogger('udiskie.daemon.Daemon')
+                log = logging.getLogger(__name__)
                 log.info('%s operation failed for device: %s' % (job_id, object_path))
 
     # internal state keeping

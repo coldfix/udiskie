@@ -6,8 +6,6 @@ import sys
 import logging
 from os import path
 
-log = logging.getLogger()
-
 # check availability of runtime dependencies
 def check_any(*packages):
     """Issue a warning if none of the packages is available."""
@@ -18,8 +16,8 @@ def check_any(*packages):
             return True
         except ImportError:
             errors.append(sys.exc_info()[1])
-    log.warning("\n\t".join(["Missing runtime dependencies:"]
-                            + [str(e) for e in errors]))
+    logging.warn("\n\t".join(["Missing runtime dependencies:"]
+                             + [str(e) for e in errors]))
     return False
 
 check_any('dbus')
@@ -50,7 +48,7 @@ class custom_install(install):
             # ignore failures since the tray icon is an optional component:
             call(['gtk-update-icon-cache', theme_base])
         except OSError:
-            log.warning(sys.exc_info()[1])
+            logging.warn(sys.exc_info()[1])
 
 setup(
     name='udiskie',
