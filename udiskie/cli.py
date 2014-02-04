@@ -6,7 +6,7 @@ __all__ = [
     'daemon',
     'mount',
     'umount',
-    ]
+]
 
 import warnings
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)

@@ -5,7 +5,9 @@ Used to communicate user configuration to udiskie. At the moment user
 configuration can be used to ignore certain devices or add mount options.
 
 """
-__all__ = ['InvalidFilter', 'OptionFilter', 'FilterMatcher']
+__all__ = ['InvalidFilter',
+           'OptionFilter',
+           'FilterMatcher']
 
 try:
     from ConfigParser import SafeConfigParser, NoSectionError
@@ -40,13 +42,13 @@ class OptionFilter(object):
         :param list options: mount options for matching devices
 
         """
-        self.log = logging.getLogger('udiskie.match.OptionFilter')
-        self.key = key
-        self.value = value
-        self.options = list(options)
-        if self.key not in self.VALID_PARAMETERS:
+        self._log = logging.getLogger('udiskie.match.OptionFilter')
+        self._key = key
+        self._value = value
+        self._options = list(options)
+        if self._key not in self.VALID_PARAMETERS:
             raise InvalidFilter("Invalid key: %s" % self)
-        self.log.debug('%s created' % self)
+        self._log.debug('%s created' % self)
 
     @classmethod
     def from_config_item(cls, config_item):
@@ -65,9 +67,9 @@ class OptionFilter(object):
                    (S.strip() for S in options.split(',')))
 
     def __str__(self):
-        return '<OptionFilter %s=%s: %s>' % (self.key,
-                                             self.value,
-                                             self.options)
+        return '<OptionFilter %s=%s: %s>' % (self._key,
+                                             self._value,
+                                             self._options)
 
     def __call__(self, device):
         """
@@ -78,10 +80,10 @@ class OptionFilter(object):
         returned.
 
         """
-        if getattr(device, self.VALID_PARAMETERS[self.key]) == self.value:
-            self.log.debug('%s matched against %s' % (self,
-                                                      device.object_path))
-            return self.options
+        if getattr(device, self.VALID_PARAMETERS[self._key]) == self._value:
+            self._log.debug('%s matched against %s' % (self,
+                                                       device.object_path))
+            return self._options
         else:
             return []
 
@@ -99,7 +101,7 @@ class FilterMatcher(object):
         :param list filters: list of callable(Device) -> list
 
         """
-        self.filters = list(filters)
+        self._filters = list(filters)
 
     @classmethod
     def from_config_file(cls, config_file):
@@ -134,7 +136,7 @@ class FilterMatcher(object):
     def get_mount_options(self, device):
         """Retrieve list of mount options for device."""
         return list(set(chain.from_iterable(
-            filt(device) for filt in self.filters)))
+            filt(device) for filt in self._filters)))
 
     def is_ignored(self, device):
         """Check if the device should be ignored by udiskie."""

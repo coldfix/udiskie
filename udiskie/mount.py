@@ -34,9 +34,9 @@ class Mounter(object):
         If prompt is None device unlocking will not work.
 
         """
-        self.filter = filter
-        self.prompt = prompt
-        self.udisks = udisks
+        self._filter = filter
+        self._prompt = prompt
+        self._udisks = udisks
 
     # mount/unmount
     def mount_device(self, device, filter=None):
@@ -54,7 +54,7 @@ class Mounter(object):
             log.debug('not mounting mounted device %s' % (device,))
             return True
         fstype = str(device.id_type)
-        filter = filter or self.filter
+        filter = filter or self._filter
         options = ','.join(filter.get_mount_options(device) if filter else [])
         try:
             log.debug('mounting device %s (%s:%s)' % (device, fstype, options))
@@ -109,7 +109,7 @@ class Mounter(object):
         # prompt user for password
         message = ''
         for iteration in range(3):
-            prompt = prompt or self.prompt
+            prompt = prompt or self._prompt
             password = prompt and prompt(
                 '%sEnter password for %s:' % (
                     message,
@@ -345,7 +345,7 @@ class Mounter(object):
         """
         return (device.is_block and
                 device.is_external and
-                (not self.filter or not self.filter.is_ignored(device)))
+                (not self._filter or not self._filter.is_ignored(device)))
 
     def get_all_handleable(self):
         """
@@ -355,13 +355,13 @@ class Mounter(object):
         race conditions inside udiskie.
 
         """
-        return filter(self.is_handleable, self.udisks)
+        return filter(self.is_handleable, self._udisks)
 
     # internals
     def __path_adapter(self, fn, path, **kwargs):
         """Internal method."""
         log = logging.getLogger('udiskie.mount.%s' % fn.__name__)
-        device = self.udisks.find(path)
+        device = self._udisks.find(path)
         if device:
             log.debug('found device owning "%s": "%s"' % (path, device))
             return fn(device, **kwargs)

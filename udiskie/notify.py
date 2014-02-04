@@ -18,34 +18,34 @@ class Notify(object):
         A notify service such as pynotify or notify2 should be passed in.
 
         """
-        self.notify = notify
+        self._notify = notify
 
     # event handlers:
     def device_mounted(self, device):
         label = device.id_label
         mount_path = device.mount_paths[0]
-        self.notify.Notification(
+        self._notify.Notification(
             'Device mounted',
             '%s mounted on %s' % (label, mount_path),
             'drive-removable-media').show()
 
     def device_unmounted(self, device):
         label = device.id_label
-        self.notify.Notification(
+        self._notify.Notification(
             'Device unmounted',
             '%s unmounted' % (label,),
             'drive-removable-media').show()
 
     def device_locked(self, device):
         device_file = device.device_presentation
-        self.notify.Notification(
+        self._notify.Notification(
             'Device locked',
             '%s locked' % (device_file,),
             'drive-removable-media').show()
 
     def device_unlocked(self, device):
         device_file = device.device_presentation
-        self.notify.Notification(
+        self._notify.Notification(
             'Device unlocked',
             '%s unlocked' % (device_file,),
             'drive-removable-media').show()

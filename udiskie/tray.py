@@ -114,9 +114,9 @@ def flat_menu(node):
 class MenuIconLoader(object):
     """Load menu icons dynamically."""
     def __init__(self, icon_names):
-        self.icon_names = icon_names
+        self._icon_names = icon_names
     def get(self, name):
-        return gtk.image_new_from_icon_name(self.icon_names[name],
+        return gtk.image_new_from_icon_name(self._icon_names[name],
                                             gtk.ICON_SIZE_MENU)
 
 #----------------------------------------

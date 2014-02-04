@@ -18,7 +18,8 @@ queried from the UDisks DBus service as requested.
 guarantee the validity of device objects during operations.
 
 """
-__all__ = ['Sniffer', 'Daemon']
+__all__ = ['Sniffer',
+           'Daemon']
 
 import logging
 import os.path
