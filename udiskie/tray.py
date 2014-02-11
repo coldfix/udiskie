@@ -165,7 +165,7 @@ def create_menu(udisks=None,
     :param dict labels: Labels for menu items
     :param dict icons: Icons for menu items
     :param dict actions: Actions for menu items
-    :param callabel style: Either of .flat_menu or .simple_menu
+    :param callable style: Either of .flat_menu or .simple_menu
 
     If either ``udisks`` and or ``mounter`` is ``None`` default versions
     will be imported from the udiskie package.

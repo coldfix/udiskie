@@ -112,6 +112,8 @@ class FilterMatcher(object):
 
         Config files should look as follows:
 
+        .. code-block:: cfg
+
             [mount_options]
             fstype.vfat = ro,nouser
             uuid.d730f9ea-1751-4f83-8244-c9b3e6b78c3a = __ignore__
