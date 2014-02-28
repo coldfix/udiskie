@@ -8,6 +8,31 @@ notifications and gtk tray icon. It also provides a user level CLI for
 mount and unmount operations.
 
 
+Usage
+-----
+
+Start the automount and notification daemon:
+
+.. code-block:: bash
+
+    # the optional tray icon requires PyGTK
+    udiskie --tray  
+
+Mount or unlock a specific device manually:
+
+.. code-block:: bash
+
+    udiskie-mount /dev/sdb1
+
+Unmount or remove a specific device manually:
+
+.. code-block:: bash
+
+    udiskie-umount /media/<device-name>
+
+See the man page for further instructions
+
+
 Dependencies
 ------------
 
@@ -113,18 +138,6 @@ the CDROM icon of the base icon theme of the `Tango desktop project`_
 
 .. _`Tango style guidelines`: http://tango.freedesktop.org/Tango_Icon_Theme_Guidelines
 .. _`Tango desktop project`: http://tango.freedesktop.org/Tango_Desktop_Project
-
-
-Usage
------
-
-The following entry points are defined:
-
-- ``udiskie`` to run the automount/notification daemon
-- ``udiskie-mount`` user level mount/unlock operations
-- ``udiskie-umount`` user level unmount/lock/eject/detach operations
-
-See the man pages for further instructions
 
 
 Contributing
