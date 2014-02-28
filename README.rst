@@ -4,7 +4,7 @@ udiskie
 
 *udiskie* is a simple daemon that uses UDisks_ to automatically mount
 removable storage devices. This daemon comes with optional mount
-notifications and gtk tray icon. It also provides a user level CLI for
+notifications and GTK tray icon. It also provides a user level CLI for
 mount and unmount operations.
 
 
@@ -36,12 +36,15 @@ See the man page for further instructions
 Dependencies
 ------------
 
+Unfortunately, *udiskie* has dependencies that can not be automatically
+downloaded and installed from PyPI:
+
 - UDisks_ required for all operation modes. UDisks2 support is experimental
-  and has to be requested explicitly via command line parameter.
+  and has to be requested explicitly via the command line parameter ``-2``.
 - dbus-python_ required for all operation modes
 - PyGObject_ to run the automount/notification daemon (provides the main loop)
-- notify-python_ or notify2_ for mount notifications
-- Zenity_ to unlock LUKS devices
+- notify2_ or notify-python_ for mount notifications
+- Zenity_ to show a password prompt to unlock LUKS devices
 - PyGTK_ to show the system tray icon
 
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
@@ -71,14 +74,14 @@ settings. Create the file
 ``/etc/polkit-1/localauthority/50-local.d/10-udiskie.pkla`` with the
 following contents:
 
-::
+.. code-block:: cfg
 
     [udiskie]
     Identity=unix-group:storage
     Action=org.freedesktop.udisks.filesystem-mount;org.freedesktop.udisks.luks-unlock;org.freedesktop.udisks.drive-eject;org.freedesktop.udisks.drive-detach
     ResultAny=yes
 
-This configuration allows all members of the storage group to run udiskie.
+This configuration allows all members of the *storage* group to run udiskie.
 
 Alternatively, change the setting for ``allow_inactive`` to *yes* in the
 file ``/usr/share/polkit-1/actions/org.freedesktop.udisks.policy``:
@@ -93,29 +96,10 @@ file ``/usr/share/polkit-1/actions/org.freedesktop.udisks.policy``:
 
     ...
 
-    <action id="org.freedesktop.udisks.luks-unlock">
-        ...
-        <allow_inactive>yes</allow_inactive>
-        ...
-    </action>
+Do this for all relevant actions.
 
-    ...
-
-    <action id="org.freedesktop.udisks.drive-eject">
-        ...
-        <allow_inactive>yes</allow_inactive>
-        ...
-    </action>
-
-    ...
-
-    <action id="org.freedesktop.udisks.drive-detach">
-        ...
-        <allow_inactive>yes</allow_inactive>
-        ...
-    </action>
-
-Note that UDisks2 uses another set of permissions, see ``/usr/share/polkit-1/actions/org.freedesktop.udisks2.policy``.
+Note that UDisks2 uses another set of permissions, see
+``/usr/share/polkit-1/actions/org.freedesktop.udisks2.policy``.
 
 
 GTK icons
