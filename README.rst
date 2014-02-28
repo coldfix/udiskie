@@ -147,3 +147,13 @@ trivial, also add a message body to your commit.
 Where possible dependency injection should be used to keep the module
 easily testable.
 
+Contact
+-------
+
+You can use the `github issues`_ to report any issues you encounter, ask
+general questions or suggest new features. There is also a public `mailing
+list`_ on sourceforge if you prefer email.
+
+.. _`github issues`: https://github.com/coldfix/udiskie/issues
+.. _`mailing list`: https://lists.sourceforge.net/lists/listinfo/udiskie-users
+
