@@ -6,6 +6,10 @@ CHANGELOG
 
 - fix logging in setup.py
 - more verbose log messages (with time) when having -v on
+- fix mounting devices that are added as 'external' and later changed to
+  'internal' [udisks1] (applies to LUKS devices that are opened by an udev
+  rule for example)
+
 
 0.6.3 (bug fix)
 ~~~~~~~~~~~~~~~

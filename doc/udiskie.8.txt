@@ -127,3 +127,12 @@ Authors
 -------
 Byron Clark <byron@theclarkfamily.name>
 
+
+Contact
+-------
+You can use the github issues to report any issues you encounter, ask general questions or suggest new features. There is also a public mailing list on sourceforge if you prefer email:
+
+https://github.com/coldfix/udiskie/issues
+
+https://lists.sourceforge.net/lists/listinfo/udiskie-users
+
