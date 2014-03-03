@@ -1,8 +1,8 @@
 CHANGELOG
 ---------
 
-0.6.4 (in preparation)
-~~~~~~~~~~~~~~~~~~~~~~
+0.6.4
+~~~~~
 
 - fix logging in setup.py
 - more verbose log messages (with time) when having -v on
