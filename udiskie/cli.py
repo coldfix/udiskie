@@ -12,7 +12,6 @@ import warnings
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
-import os
 import sys
 import logging
 from functools import partial
@@ -20,19 +19,6 @@ from functools import partial
 #----------------------------------------
 # Utility functions
 #----------------------------------------
-def config_path(*path):
-    try:
-        from xdg.BaseDirectory import xdg_config_home as config_home
-    except ImportError:
-        config_home = os.path.expanduser('~/.config')
-    return os.path.join(config_home, 'udiskie', *path)
-
-def load_filter(filter_file=None):
-    """Load mount option filters."""
-    import udiskie.config
-    return udiskie.config.FilterMatcher.from_config_file(
-        filter_file or config_path('filters.conf'))
-
 def init_logging(program_options):
     """Initialize logging configuration."""
     log_level = program_options.log_level
@@ -126,6 +112,7 @@ def daemon(args=None, daemon=None):
     import udiskie.automount
     import udiskie.mount
     import udiskie.prompt
+    import udiskie.config
 
     parser = mount_program_options()
     parser.add_option('-s', '--suppress', action='store_true',
@@ -145,7 +132,7 @@ def daemon(args=None, daemon=None):
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
-    filter = load_filter(options.filters)
+    filter = udiskie.config.Config.from_config_file(options.filters).filter_options
     mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=daemon)
 
     # notifications (optional):
@@ -185,6 +172,7 @@ def mount(args=None, udisks=None):
     """
     import udiskie.mount
     import udiskie.prompt
+    import udiskie.config
 
     parser = mount_program_options()
     parser.add_option('-a', '--all', action='store_true',
@@ -202,7 +190,7 @@ def mount(args=None, udisks=None):
 
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
-    filter = load_filter(options.filters)
+    filter = udiskie.config.Config.from_config_file(options.filters).filter_options
     mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=udisks)
 
     # mount all present devices

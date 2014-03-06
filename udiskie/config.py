@@ -7,28 +7,24 @@ configuration can be used to ignore certain devices or add mount options.
 """
 __all__ = ['InvalidFilter',
            'OptionFilter',
-           'FilterMatcher']
+           'FilterMatcher',
+           'Config']
 
-try:
+try:                    # python2
     from ConfigParser import SafeConfigParser, NoSectionError
-except ImportError:
-    # module was renamed to 'configparser' in python3:
+except ImportError:     # python3
     from configparser import SafeConfigParser, NoSectionError
 
+import os
 import re
 import logging
 from itertools import chain
 
 class InvalidFilter(ValueError):
-    """Inapropriate filter configuration entry."""
-    pass
-
+    """Inappropriate filter configuration entry."""
 
 class OptionFilter(object):
-    """
-    A filter to add a list of mount options for matching devices.
-
-    """
+    """Add a list of mount options for matching devices."""
     VALID_PARAMETERS = {
         'fstype': 'id_type',
         'uuid': 'id_uuid' }
@@ -87,13 +83,8 @@ class OptionFilter(object):
         else:
             return []
 
-
 class FilterMatcher(object):
-    """
-    Matches multiple OptionFilter filters against devices.
-    """
-    MOUNT_OPTIONS_SECTION = 'mount_options'
-
+    """Matches devices against multiple `OptionFilter`s."""
     def __init__(self, filters):
         """
         Construct a FilterMatcher instance from list of OptionFilters.
@@ -104,7 +95,55 @@ class FilterMatcher(object):
         self._filters = list(filters)
 
     @classmethod
-    def from_config_file(cls, config_file):
+    def from_config_section(cls, config_section):
+        """
+        Construct a FilterMatcher instance from config file section.
+
+        :param string config_section: list of config items
+
+        The left hand side consists of either the property key to match and
+        the value to search for separated by a dot: 'key.value'. Currently,
+        the only possible keys are 'fstype' and 'uuid'. The right hand side
+        is a comma separated list of all options. The special value
+        '__ignore__' is used to specify that a device will not be handled
+        by udiskie.
+
+        Example:
+
+        >>> filter = FilterMatcher.from_config_section([
+        ...     ('fstype.vfat', 'ro,nouser'),
+        ...     ('uuid.d730f9ea-1751-4f83-8244-c9b3e6b78c3a', '__ignore__')])
+
+        """
+        return cls(map(OptionFilter.from_config_item, config_section))
+
+    def get_mount_options(self, device):
+        """Retrieve list of mount options for device."""
+        return list(set(chain.from_iterable(
+            filt(device) for filt in self._filters)))
+
+    def is_ignored(self, device):
+        """Check if the device should be ignored by udiskie."""
+        return '__ignore__' in self.get_mount_options(device)
+
+class Config(object):
+    """Read udiskie config."""
+    MOUNT_OPTIONS_SECTION = 'mount_options'
+    PROGRAM_OPTIONS_SECTION = 'program_options'
+
+    def __init__(self, data):
+        self._data = data
+
+    @classmethod
+    def config_path(cls):
+        try:
+            from xdg.BaseDirectory import xdg_config_home as config_home
+        except ImportError:
+            config_home = os.path.expanduser('~/.config')
+        return os.path.join(config_home, 'udiskie', 'filters.conf')
+
+    @classmethod
+    def from_config_file(cls, config_file=None):
         """
         Construct a FilterMatcher instance from config file.
 
@@ -113,6 +152,12 @@ class FilterMatcher(object):
         Config files should look as follows:
 
         .. code-block:: cfg
+
+            [program_options]
+            udisks_version=2
+            password_prompt=zenity
+            suppress_notify=
+            tray=
 
             [mount_options]
             fstype.vfat = ro,nouser
@@ -127,20 +172,31 @@ class FilterMatcher(object):
 
         """
         parser = SafeConfigParser()
-        parser.read(config_file)
+        parser.read(config_file or cls.config_path())
+        return cls(parser)
+
+    @property
+    def filter_options(self):
         try:
-            filters = map(OptionFilter.from_config_item,
-                          parser.items(cls.MOUNT_OPTIONS_SECTION))
+            mount_options = self._data.items(self.MOUNT_OPTIONS_SECTION)
         except NoSectionError:
-            filters = []
-        return cls(filters)
+            return []
+        else:
+            return FilterMatcher.from_config_section(mount_options)
 
-    def get_mount_options(self, device):
-        """Retrieve list of mount options for device."""
-        return list(set(chain.from_iterable(
-            filt(device) for filt in self._filters)))
-
-    def is_ignored(self, device):
-        """Check if the device should be ignored by udiskie."""
-        return '__ignore__' in self.get_mount_options(device)
+    @property
+    def program_options(self):
+        options = {
+            'udisks_version': '0',
+            'password_prompt': 'zenity',
+            'suppress_notify': False,
+            'tray': True
+        }
+        try:
+            config_items = self._data.items(self.PROGRAM_OPTIONS_SECTION)
+        except NoSectionError:
+            pass
+        else:
+            options.update(**dict(config_items))
+        return options
 
