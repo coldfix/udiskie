@@ -5,6 +5,7 @@ __all__ = ['password']
 
 import subprocess
 from distutils.spawn import find_executable
+import logging
 
 def password(prompt_name='zenity'):
     """
@@ -41,3 +42,22 @@ def password(prompt_name='zenity'):
             return None
 
     return password_prompt
+
+def browser(browser_name='xdg-open'):
+    """
+    Create a browse-directory function.
+    """
+    if not browser_name:
+        return None
+    executable = find_executable(browser_name)
+    if executable is None:
+        # Why not raise an exception? -I think it is more convenient (for
+        # end users) to have a reasonable default, without enforcing it.
+        logging.getLogger(__name__).warn(
+            "Can't find file browser: '%s'. "
+            "You may want to change the value for the '-b' option."
+            % (browser_name,))
+        return None
+    def browse(path):
+        return subprocess.call([executable, path])
+    return browse

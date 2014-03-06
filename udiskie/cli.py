@@ -134,6 +134,9 @@ def daemon(args=None, daemon=None):
     parser.add_option('-t', '--tray', action='store_true',
                       dest='tray', default=False,
                       help='show tray icon')
+    parser.add_option('-b', '--browser', action='store',
+                      dest='browser', default='xdg-open',
+                      metavar='BROWSER', help="to open mount pathes")
     options, posargs = parser.parse_args(args)
     init_logging(options)
 
@@ -146,6 +149,7 @@ def daemon(args=None, daemon=None):
     # create a mounter
     prompt = udiskie.prompt.password(options.password_prompt)
     filter = load_filter(options.filters)
+    browser = udiskie.prompt.browser(options.browser)
     mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=daemon)
 
     # notifications (optional):
@@ -153,10 +157,13 @@ def daemon(args=None, daemon=None):
         import udiskie.notify
         try:
             import notify2 as notify_service
+            # notify2 needs to be initialized with the mainloop in order to
+            # receive signals (actions/closed)
+            notify_service.init('udiskie.mount', mainloop='glib')
         except ImportError:
             import pynotify as notify_service
-        notify_service.init('udiskie.mount')
-        notify = udiskie.notify.Notify(notify_service)
+            notify_service.init('udiskie.mount')
+        notify = udiskie.notify.Notify(notify_service, browser=browser)
         daemon.connect(notify)
 
     # tray icon (optional):
