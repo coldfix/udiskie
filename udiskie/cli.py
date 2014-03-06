@@ -29,8 +29,8 @@ def config_path(*path):
 
 def load_filter(filter_file=None):
     """Load mount option filters."""
-    import udiskie.match
-    return udiskie.match.FilterMatcher.from_config_file(
+    import udiskie.config
+    return udiskie.config.FilterMatcher.from_config_file(
         filter_file or config_path('filters.conf'))
 
 def init_logging(program_options):
