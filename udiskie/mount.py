@@ -21,7 +21,7 @@ class Mounter(object):
     mount operations.
 
     """
-    def __init__(self, filter=None, prompt=None, udisks=None):
+    def __init__(self, filter=None, prompt=None, udisks=None, browser=None):
         """
         Initialize mounter with the given defaults.
 
@@ -37,7 +37,18 @@ class Mounter(object):
         self._filter = filter
         self._prompt = prompt
         self._udisks = udisks
+        self._browser = browser
         self._logger = logging.getLogger(__name__)
+
+    def browse_device(self, device):
+        if not device.is_mounted:
+            self._logger.error("not browsing unmounted device: %s" % (device,))
+            return False
+        if not self._browser:
+            self._logger.error("not browsing device: %s, no browser specified" % (device,))
+            return False
+        self._browser(device.mount_paths[0])
+        return True
 
     # mount/unmount
     def mount_device(self, device, filter=None):

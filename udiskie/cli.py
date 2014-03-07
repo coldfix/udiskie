@@ -150,7 +150,8 @@ def daemon(args=None, daemon=None):
     prompt = udiskie.prompt.password(options.password_prompt)
     filter = load_filter(options.filters)
     browser = udiskie.prompt.browser(options.browser)
-    mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=daemon)
+    mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=daemon,
+                                    browser=browser)
 
     # notifications (optional):
     if not options.suppress_notify:
