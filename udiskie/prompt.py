@@ -59,5 +59,5 @@ def browser(browser_name='xdg-open'):
             % (browser_name,))
         return None
     def browse(path):
-        return subprocess.call([executable, path])
+        return subprocess.Popen([executable, path])
     return browse
