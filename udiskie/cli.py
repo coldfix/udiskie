@@ -51,7 +51,6 @@ def udisks_service_object(clsname, version=None):
 class _EntryPoint(object):
     """
     Base class for other entry points.
-
     """
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -84,7 +83,7 @@ class _EntryPoint(object):
         """
         import udiskie.config
 
-        # parse program options:
+        # parse program options (retrieve log level and config file name):
         parser = cls.program_options_parser()
         options, posargs = parser.parse_args(argv)
 
@@ -96,8 +95,10 @@ class _EntryPoint(object):
             fmt = '%(message)s'
         logging.basicConfig(level=log_level, format=fmt)
 
-        # parse config options:
+        # parse config options (reparse to get the real values now):
         config = udiskie.config.Config.from_config_file(options.config_file)
+        parser.set_defaults(**config.program_options)
+        options, posargs = parser.parse_args(argv)
 
         return cls.create(config, options, posargs).run(options, posargs)
 
