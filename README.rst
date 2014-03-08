@@ -2,6 +2,8 @@
 udiskie
 =======
 
+|Version| |Downloads| |License|
+
 *udiskie* is a simple daemon that uses UDisks_ to automatically mount
 removable storage devices. This daemon comes with optional mount
 notifications and GTK tray icon. It also provides a user level CLI for
@@ -155,3 +157,15 @@ list`_ on sourceforge if you prefer email.
 .. _`github issues`: https://github.com/coldfix/udiskie/issues
 .. _`mailing list`: https://lists.sourceforge.net/lists/listinfo/udiskie-users
 
+
+.. |Version| image:: https://pypip.in/v/udiskie/badge.png
+   :target: https://pypi.python.org/pypi/udiskie/
+   :alt: Latest Version
+
+.. |Downloads| image:: https://pypip.in/d/udiskie/badge.png
+   :target: https://pypi.python.org/pypi/udiskie/
+   :alt: Downloads
+
+.. |License| image:: https://pypip.in/license/udiskie/badge.png
+   :target: https://pypi.python.org/pypi/udiskie/
+   :alt: License
