@@ -158,6 +158,7 @@ class Config(object):
             password_prompt=zenity
             suppress_notify=
             tray=
+            browser=xdg-open
 
             [mount_options]
             fstype.vfat = ro,nouser
@@ -190,7 +191,8 @@ class Config(object):
             'udisks_version': '0',
             'password_prompt': 'zenity',
             'suppress_notify': False,
-            'tray': True
+            'tray': True,
+            'browser': 'xdg-open'
         }
         try:
             config_items = self._data.items(self.PROGRAM_OPTIONS_SECTION)
