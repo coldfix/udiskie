@@ -215,7 +215,7 @@ class Mount(_EntryPoint):
                 success = success and mounter.mount(path, recursive=recursive)
         # print command line options
         else:
-            self.program_options_parser().print_usage()
+            self.program_options_parser().print_help()
             success = False
 
         return 0 if success else 1
@@ -254,7 +254,7 @@ class Umount(_EntryPoint):
                            mounter.unmount(path, detach=options.detach,
                                            eject=options.eject, lock=True))
         else:
-            parser.print_usage()
+            self.program_options_parser().print_help()
             success = False
         return 0 if success else 1
 
