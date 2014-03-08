@@ -13,7 +13,7 @@ import shutil
 import os.path
 import gc
 
-from udiskie.match import OptionFilter, FilterMatcher
+from udiskie.config import OptionFilter, Config
 
 class TestDev(object):
     def __init__(self, object_path, id_type, id_uuid):
@@ -38,7 +38,7 @@ uuid.ignored-device = __ignore__
 uuid.device-with-options = noatime,nouser
 fstype.vfat = ro,nouser''')
 
-        self.filter_matcher = FilterMatcher.from_config_file(self.config_file)
+        self.filter_matcher = Config.from_config_file(self.config_file).filter_options
     
     def tearDown(self):
         """Remove the config file."""
