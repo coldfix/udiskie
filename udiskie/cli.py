@@ -7,6 +7,7 @@ import warnings
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
+import optparse
 import sys
 import logging
 from functools import partial
@@ -60,16 +61,15 @@ class _EntryPoint(object):
         """
         Return a command line option parser for options common to all modes.
         """
-        import optparse
         parser = optparse.OptionParser()
         parser.add_option('-v', '--verbose', dest='log_level',
                           action='store_const', default=logging.INFO,
                           const=logging.DEBUG, help='verbose output')
         parser.add_option('-1', '--use-udisks1', dest='udisks_version',
-                          action='store_const', default=None, const=1,
+                          action='store_const', default=0, const=1,
                           help='use udisks1 as underlying daemon (default)')
         parser.add_option('-2', '--use-udisks2', dest='udisks_version',
-                          action='store_const', default=None, const=2,
+                          action='store_const', default=0, const=2,
                           help='use udisks2 as underlying daemon (experimental)')
         parser.add_option('-f', '--filters', dest='config_file',
                           action='store', default=None,
@@ -129,7 +129,7 @@ class Daemon(_EntryPoint):
         import udiskie.prompt
 
         mainloop = gobject.MainLoop()
-        daemon = udisks_service_object('Daemon', options.udisks_version)
+        daemon = udisks_service_object('Daemon', int(options.udisks_version))
         mounter = udiskie.mount.Mounter(
             filter=config.filter_options,
             prompt=udiskie.prompt.password(options.password_prompt),
@@ -198,7 +198,7 @@ class Mount(_EntryPoint):
         mounter = udiskie.mount.Mounter(
             filter=config.filter_options,
             prompt=udiskie.prompt.password(options.password_prompt),
-            udisks=udisks_service_object('Sniffer', options.udisks_version))
+            udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
         return cls(mounter=mounter)
 
     def run(self, options, posargs):
@@ -239,7 +239,7 @@ class Umount(_EntryPoint):
     def create(cls, config, options, posargs):
         import udiskie.mount
         mounter = udiskie.mount.Mounter(
-            udisks=udisks_service_object('Sniffer', options.udisks_version))
+            udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
         return cls(mounter=mounter)
 
     def run(self, options, posargs):
