@@ -78,9 +78,9 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'udiskie = udiskie.cli:daemon',
-            'udiskie-mount = udiskie.cli:mount',
-            'udiskie-umount = udiskie.cli:umount',
+            'udiskie = udiskie.cli:Daemon.main',
+            'udiskie-mount = udiskie.cli:Mount.main',
+            'udiskie-umount = udiskie.cli:Umount.main',
         ],
     },
     extras_require={
