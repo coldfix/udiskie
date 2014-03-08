@@ -40,6 +40,7 @@ def device_tree(devices):
         label = device.device_presentation
         if device.is_filesystem:
             if device.is_mounted:
+                methods.append('browse')
                 methods.append('unmount')
                 label = device.mount_paths[0]
             else:
@@ -124,6 +125,7 @@ class MenuIconLoader(object):
 #----------------------------------------
 
 default_icons = MenuIconLoader({
+    'browse': gtk.STOCK_OPEN,
     'mount': 'udiskie-mount',
     'unmount': 'udiskie-unmount',
     'unlock': 'udiskie-unlock',
@@ -133,6 +135,7 @@ default_icons = MenuIconLoader({
     'quit': gtk.STOCK_QUIT, })
 
 plain_icons = {
+    'browse': gtk.STOCK_OPEN,
     'mount': gtk.STOCK_APPLY,
     'unmount': gtk.STOCK_CANCEL,
     'unlock': gtk.STOCK_APPLY,
@@ -142,6 +145,7 @@ plain_icons = {
     'quit': gtk.STOCK_QUIT, }
 
 default_labels = {
+    'browse': 'Browse %s',
     'mount': 'Mount %s',
     'unmount': 'Unmount %s',
     'unlock': 'Unlock %s',
@@ -199,6 +203,7 @@ def create_menu(udisks=None,
 
     actions = dict(actions)
     setdefault(actions, {
+        'browse': mounter.browse_device,
         'mount': mounter.mount_device,
         'unmount': mounter.unmount_device,
         'unlock': mounter.unlock_device,

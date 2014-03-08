@@ -11,7 +11,7 @@ class Notify(object):
     notifications when system status has changed.
 
     """
-    def __init__(self, notify):
+    def __init__(self, notify, browser=None):
         """
         Initialize notifier.
 
@@ -19,15 +19,33 @@ class Notify(object):
 
         """
         self._notify = notify
+        self._browser = browser
+        # pynotify does not store hard references to the notification
+        # objects. When a signal is received and the notification does not
+        # exist anymore, no handller will be called. Therefore, we need to
+        # prevent these notifications from being destroyed by storing
+        # references (note, notify2 doesn't need this):
+        self._notifications = []
 
     # event handlers:
     def device_mounted(self, device):
         label = device.id_label
         mount_path = device.mount_paths[0]
-        self._notify.Notification(
+        notification = self._notify.Notification(
             'Device mounted',
             '%s mounted on %s' % (label, mount_path),
-            'drive-removable-media').show()
+            'drive-removable-media')
+        if self._browser:
+            # Show a 'Browse directory' button in mount notifications.
+            # Note, this only works with some libnotify services.
+            def on_browse(notification, action):
+                self._browser(mount_path)
+            notification.add_action('browse', "Browse directory", on_browse)
+            # Need to store a reference (see above) only if there is a
+            # signal connected:
+            notification.connect('closed', self._notifications.remove)
+            self._notifications.append(notification)
+        notification.show()
 
     def device_unmounted(self, device):
         label = device.id_label

@@ -119,6 +119,9 @@ class Daemon(_EntryPoint):
         parser.add_option('-t', '--tray', dest='tray',
                           action='store_true', default=False,
                           help='show tray icon')
+        parser.add_option('-b', '--browser', action='store',
+                          dest='browser', default='xdg-open',
+                          metavar='BROWSER', help="to open mount pathes")
         return parser
 
     @classmethod
@@ -130,9 +133,11 @@ class Daemon(_EntryPoint):
 
         mainloop = gobject.MainLoop()
         daemon = udisks_service_object('Daemon', int(options.udisks_version))
+        browser = udiskie.prompt.browser(options.browser)
         mounter = udiskie.mount.Mounter(
             filter=config.filter_options,
             prompt=udiskie.prompt.password(options.password_prompt),
+            browser=browser,
             udisks=daemon)
 
         # notifications (optional):
@@ -143,7 +148,7 @@ class Daemon(_EntryPoint):
             except ImportError:
                 import pynotify as notify_service
             notify_service.init('udiskie.mount')
-            notify = udiskie.notify.Notify(notify_service)
+            notify = udiskie.notify.Notify(notify_service, browser=browser)
             daemon.connect(notify)
 
         # tray icon (optional):
