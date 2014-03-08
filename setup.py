@@ -65,9 +65,6 @@ setup(
     packages=[
         'udiskie',
     ],
-    namespace_packages=[
-        'udiskie',
-    ],
     data_files=[
         (path.join(theme_base, icon_resolution, icon_class), [
             path.join('icons', icon_resolution, icon_class,
