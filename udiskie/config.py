@@ -187,13 +187,7 @@ class Config(object):
 
     @property
     def program_options(self):
-        options = {
-            'udisks_version': '0',
-            'password_prompt': 'zenity',
-            'suppress_notify': False,
-            'tray': True,
-            'browser': 'xdg-open'
-        }
+        options = {}
         try:
             config_items = self._data.items(self.PROGRAM_OPTIONS_SECTION)
         except NoSectionError:
