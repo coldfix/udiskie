@@ -159,12 +159,9 @@ class Daemon(_EntryPoint):
         # tray icon (optional):
         if options.tray:
             import udiskie.tray
-            create_menu = partial(udiskie.tray.create_menu,
-                                  udisks=daemon,
-                                  mounter=mounter,
-                                  actions={'quit': mainloop.quit})
-            statusicon = udiskie.tray.create_statusicon()
-            connection = udiskie.tray.connect_statusicon(statusicon, create_menu)
+            menu_maker = udiskie.tray.SmartUdiskieMenu.create(mounter)
+            menu_maker._actions['quit'] = mainloop.quit
+            statusicon = udiskie.tray.TrayIcon(menu_maker)
         else:
             status_icon = None
 

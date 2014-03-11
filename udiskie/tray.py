@@ -1,11 +1,8 @@
 """
 Tray icon for udiskie.
 """
-__all__ = ['create_menu',
-           'create_statusicon',
-           'connect_statusicon',
-           'default_icons',
-           'default_labels',
+__all__ = ['UdiskieMenu', 'SmartUdiskieMenu',
+           'TrayIcon',
            'main']
 
 import gtk
@@ -13,206 +10,167 @@ from functools import partial
 from collections import namedtuple
 from itertools import chain
 
-
 def setdefault(self, other):
     """Merge two dictionaries like .update() but don't overwrite values."""
     for k,v in other.items():
         self.setdefault(k, v)
 
-
-TreeNode = namedtuple('TreeNode',
-                      ['root', 'branches',
-                       'device', 'label', 'methods'])
+# data structs containing the menu hierarchy:
+Node = namedtuple('Node', ['root', 'branches', 'device', 'label', 'methods'])
 Action = namedtuple('Action', ['label', 'device', 'method'])
 Branch = namedtuple('Branch', ['label', 'groups'])
 
-
-def device_tree(devices):
+class UdiskieMenu(object):
     """
-    Return the device hierarchy as list of TreeNodes.
+    Builder for udiskie menus.
 
-    :param iterable devices: list of devices to be shown
-
-    """
-    def mknode(device):
-        # determine available methods
-        methods = []
-        label = device.device_presentation
-        if device.is_filesystem:
-            if device.is_mounted:
-                methods.append('browse')
-                methods.append('unmount')
-                label = device.mount_paths[0]
-            else:
-                methods.append('mount')
-        elif device.is_crypto:
-            if device.is_unlocked:
-                methods.append('lock')
-            else:
-                methods.append('unlock')
-        if device.is_ejectable and device.has_media:
-            methods.append('eject')
-        if device.is_detachable:
-            methods.append('detach')
-        # find the root device:
-        if device.is_partition:
-            root = device.partition_slave.object_path
-        elif device.is_luks_cleartext:
-            root = device.luks_cleartext_slave.object_path
-        else:
-            root = None
-        # in this first step leave branches empty
-        return device.object_path,TreeNode(root, [], device, label, methods)
-
-    device_nodes = dict(map(mknode, devices))
-
-    # create the hierarchy
-    rootnode = TreeNode(None, [], None, "", [])
-    for object_path,node in device_nodes.items():
-        device_nodes.get(node.root, rootnode).branches.append(node)
-    return rootnode
-
-
-def simple_menu(node):
-    return Branch(
-        label=node.label,
-        groups=[
-            [flatten_menu(branch)
-             for branch in node.branches],
-            [Action(node.label, node.device, method)
-             for method in node.methods],
-        ])
-
-def flat_menu(node):
-    def actions(node, presentation):
-        return [Action(presentation, node.device, method)
-                for method in node.methods]
-
-    def leaves(node, outer_methods, presentation):
-        if not presentation or (node.device.is_mounted or
-                                not node.device.is_luks_cleartext):
-            presentation = node.label
-        if node.branches:
-            return chain.from_iterable(
-                leaves(branch,
-                       actions(node, presentation) + outer_methods,
-                       presentation)
-                for branch in node.branches)
-        elif len(node.methods) + len(outer_methods) > 0:
-            return Branch(
-                label=presentation,
-                groups=[list(chain(actions(node,
-                                           presentation),
-                                   outer_methods))]),
-        else:
-            return ()
-
-    return Branch(
-        label=node.label,
-        groups=[list(leaves(node, [], ""))])
-
-
-class MenuIconLoader(object):
-    """Load menu icons dynamically."""
-    def __init__(self, icon_names):
-        self._icon_names = icon_names
-    def get(self, name):
-        return gtk.image_new_from_icon_name(self._icon_names[name],
-                                            gtk.ICON_SIZE_MENU)
-
-#----------------------------------------
-# menu actions
-#----------------------------------------
-
-default_icons = MenuIconLoader({
-    'browse': gtk.STOCK_OPEN,
-    'mount': 'udiskie-mount',
-    'unmount': 'udiskie-unmount',
-    'unlock': 'udiskie-unlock',
-    'lock': 'udiskie-lock',
-    'eject': 'udiskie-eject',
-    'detach': 'udiskie-detach',
-    'quit': gtk.STOCK_QUIT, })
-
-plain_icons = {
-    'browse': gtk.STOCK_OPEN,
-    'mount': gtk.STOCK_APPLY,
-    'unmount': gtk.STOCK_CANCEL,
-    'unlock': gtk.STOCK_APPLY,
-    'lock': gtk.STOCK_CANCEL,
-    'eject': gtk.STOCK_CANCEL,
-    'detach': gtk.STOCK_CANCEL,
-    'quit': gtk.STOCK_QUIT, }
-
-default_labels = {
-    'browse': 'Browse %s',
-    'mount': 'Mount %s',
-    'unmount': 'Unmount %s',
-    'unlock': 'Unlock %s',
-    'lock': 'Lock %s',
-    'eject': 'Eject %s',
-    'detach': 'Detach %s',
-    'quit': 'Quit', }
-
-
-def create_menu(udisks=None,
-                mounter=None,
-                labels=default_labels,
-                icons=default_icons,
-                actions={},
-                style=flat_menu):
-    """
-    Create menu for udiskie mount operations.
-
-    :param object udisks: Interface to UDisks used to iterate external devices
-    :param object mounter: Mount operation provider
-    :param dict labels: Labels for menu items
-    :param dict icons: Icons for menu items
-    :param dict actions: Actions for menu items
-    :param callable style: Either of .flat_menu or .simple_menu
-
-    If either ``udisks`` and or ``mounter`` is ``None`` default versions
-    will be imported from the udiskie package.
-
-    Required keys for the ``labels``, ``icons`` and ``actions`` dictionaries
-    are:
-
-        - mount     Mount a device
-        - unmount   Unmount a device
-        - unlock    Unlock a LUKS device
-        - lock      Lock a LUKS device
-        - eject     Eject a drive
-        - detach    Detach (power down) a drive
-        - quit      Exit the application
-
-    NOTE: If using a main loop other than ``gtk.main`` the 'quit' action
-    must be customized.
-
-    I just realized, the following is not yet implemented:
-    To prevent a certain action from being displayed its ``action`` must be
-    set to ``None``.
+    Objects of this class generate action menus when being called.
 
     """
-    if mounter is None:
-        if udisks is None:
-            from udiskie.udisks import Sniffer
-            udisks = Sniffer()
-        from udiskie.mount import Mounter
-        from udiskie.prompt import password
-        mounter = Mounter(prompt=password(), udisks=udisks)
+    _menu_icons = {
+        'browse': gtk.STOCK_OPEN,
+        'mount': 'udiskie-mount',
+        'unmount': 'udiskie-unmount',
+        'unlock': 'udiskie-unlock',
+        'lock': 'udiskie-lock',
+        'eject': 'udiskie-eject',
+        'detach': 'udiskie-detach',
+        'quit': gtk.STOCK_QUIT, }
 
-    actions = dict(actions)
-    setdefault(actions, {
-        'browse': mounter.browse_device,
-        'mount': mounter.mount_device,
-        'unmount': mounter.unmount_device,
-        'unlock': mounter.unlock_device,
-        'lock': partial(mounter.remove_device, force=True),
-        'eject': partial(mounter.eject_device, force=True),
-        'detach': partial(mounter.detach_device, force=True),
-        'quit': gtk.main_quit, })
+    _menu_labels = {
+        'browse': 'Browse %s',
+        'mount': 'Mount %s',
+        'unmount': 'Unmount %s',
+        'unlock': 'Unlock %s',
+        'lock': 'Lock %s',
+        'eject': 'Eject %s',
+        'detach': 'Detach %s',
+        'quit': 'Quit', }
 
-    def create_menuitem(label, icon, onclick):
+    def __init__(self, mounter, actions):
+        self._mounter = mounter
+        self._actions = actions
+
+    @classmethod
+    def create(cls, mounter=None, udisks=None, actions={}):
+        """
+        Create a new menu maker.
+
+        :param object mounter: mount operation provider
+        :param object udisks: udisks wrapper (only if ``mounter is None``)
+        :param dict actions: actions for menu items
+        :returns: a new menu maker
+        :rtype: cls
+
+        Required keys for the ``_menu_labels``, ``_menu_icons`` and
+        ``actions`` dictionaries are:
+
+            - browse    Open mount location
+            - mount     Mount a device
+            - unmount   Unmount a device
+            - unlock    Unlock a LUKS device
+            - lock      Lock a LUKS device
+            - eject     Eject a drive
+            - detach    Detach (power down) a drive
+            - quit      Exit the application
+
+        NOTE: If using a main loop other than ``gtk.main`` the 'quit' action
+        must be customized.
+
+        """
+        if mounter is None:
+            if udisks is None:
+                from udiskie.udisks import Sniffer
+                udisks = Sniffer()
+            from udiskie.mount import Mounter
+            from udiskie.prompt import password
+            mounter = Mounter(prompt=password(), udisks=udisks)
+        setdefault(actions, {
+            'browse': mounter.browse_device,
+            'mount': mounter.mount_device,
+            'unmount': mounter.unmount_device,
+            'unlock': mounter.unlock_device,
+            'lock': partial(mounter.remove_device, force=True),
+            'eject': partial(mounter.eject_device, force=True),
+            'detach': partial(mounter.detach_device, force=True),
+            'quit': gtk.main_quit, })
+        return cls(mounter, actions)
+
+    def __call__(self):
+        """
+        Create menu for udiskie mount operations.
+
+        :returns: a new menu
+        :rtype: gtk.Menu
+
+        """
+        # create actions items
+        menu = self._branchmenu(self._prepare_menu(self.detect()).groups)
+        # append menu item for closing the application
+        if self._actions.get('quit'):
+            if len(menu) > 0:
+                menu.append(gtk.SeparatorMenuItem())
+            menu.append(self._actionitem('quit'))
+        return menu
+
+    def detect(self):
+        """
+        Detect all currently known devices.
+
+        :returns: root of device hierarchy
+        :rtype: Node
+
+        """
+        root = Node(None, [], None, "", [])
+        device_nodes = dict(map(self._device_node,
+                                self._mounter.get_all_handleable()))
+        # insert child devices as branches into their roots:
+        for object_path, node in device_nodes.items():
+            device_nodes.get(node.root, root).branches.append(node)
+        return root
+
+    def _branchmenu(self, groups):
+        """
+        Create a menu from the given node.
+
+        :param Branch groups: contains information about the menu
+        :returns: a new menu object holding all groups of the node
+        :rtype: gtk.Menu
+
+        """
+        menu = gtk.Menu()
+        separate = False
+        for group in groups:
+            if len(group) > 0:
+                if separate:
+                    menu.append(gtk.SeparatorMenuItem())
+                separate = True
+            for node in group:
+                if isinstance(node, Action):
+                    menu.append(self._actionitem(
+                        node.method,
+                        feed=[node.label],
+                        bind=[node.device]))
+                elif isinstance(node, Branch):
+                    menu.append(self._menuitem(
+                        node.label,
+                        icon=None,
+                        onclick=self._branchmenu(node.groups)))
+                else:
+                    raise ValueError("Invalid node!")
+        return menu
+
+    def _menuitem(self, label, icon, onclick):
+        """
+        Create a generic menu item.
+
+        :param str label: text
+        :param gtk.Image icon: icon (may be ``None``)
+        :param onclick: onclick handler, either a callable or gtk.Menu
+        :returns: the menu item object
+        :rtype: gtk.MenuItem
+
+        """
         if icon is None:
             item = gtk.MenuItem()
         else:
@@ -229,57 +187,195 @@ def create_menu(udisks=None,
             item.connect('activate', onclick)
         return item
 
-    def item(action, feed=(), bind=()):
-        return create_menuitem(
-            labels[action] % tuple(feed),
-            icons.get(action),
-            lambda _: actions[action](*bind))
+    def _actionitem(self, action, feed=(), bind=()):
+        """
+        Create a menu item for the specified action.
 
-    def mkmenu(menu_node):
-        menu = gtk.Menu()
-        separate = False
-        for group in menu_node.groups:
-            if len(group) > 0:
-                if separate:
-                    menu.append(gtk.SeparatorMenuItem())
-                separate = True
-            for node in group:
-                if isinstance(node, Action):
-                    menu.append(item(
-                        node.method,
-                        feed=[node.label],
-                        bind=[node.device]))
-                else:
-                    menu.append(create_menuitem(
-                        node.label,
-                        icon=None,
-                        onclick=mkmenu(node)))
-        return menu
+        :param str action: name of the action
+        :param tuple feed: parameters for the label text
+        :param tuple bind: parameters for the onclick handler
+        :returns: the menu item object
+        :rtype: gtk.MenuItem
 
-    # create actions items
-    menu = mkmenu(flat_menu(device_tree(mounter.get_all_handleable())))
+        """
+        return self._menuitem(
+            self._menu_labels[action] % tuple(feed),
+            self._get_icon(action),
+            lambda _: self._actions[action](*bind))
 
-    # append menu item for closing the application
-    if actions.get('quit'):
-        if len(menu) > 0:
-            menu.append(gtk.SeparatorMenuItem())
-        menu.append(item('quit'))
+    def _device_node(self, device):
+        """Create an empty menu node for the specified device."""
+        label = device.device_presentation
+        # determine available methods
+        methods = []
+        def append(method):
+            if self._actions[method]:
+                methods.append(method)
+        if device.is_filesystem:
+            if device.is_mounted:
+                append('browse')
+                append('unmount')
+            else:
+                append('mount')
+        elif device.is_crypto:
+            if device.is_unlocked:
+                append('lock')
+            else:
+                append('unlock')
+        if device.is_ejectable and device.has_media:
+            append('eject')
+        if device.is_detachable:
+            append('detach')
+        # find the root device:
+        if device.is_partition:
+            root = device.partition_slave.object_path
+        elif device.is_luks_cleartext:
+            root = device.luks_cleartext_slave.object_path
+        else:
+            root = None
+        # in this first step leave branches empty
+        return device.object_path, Node(root, [], device, label, methods)
 
-    return menu
+    def _prepare_menu(self, node):
+        """
+        Prepare the menu hierarchy from the given device tree.
 
+        :param Node node: root node of device hierarchy
+        :returns: menu hierarchy
+        :rtype: Branch
 
-def create_statusicon():
-    """Create a simple gtk.StatusIcon"""
-    statusicon = gtk.StatusIcon()
-    statusicon.set_from_stock(gtk.STOCK_CDROM)
-    statusicon.set_tooltip("udiskie")
-    return statusicon
+        """
+        return Branch(
+            label=node.label,
+            groups=[
+                [self._prepare_menu(branch)
+                 for branch in node.branches],
+                [Action(node.label, node.device, method)
+                 for method in node.methods],
+            ])
 
+    def _get_icon(self, name):
+        """
+        Load menu icons dynamically.
 
-def connect_statusicon(statusicon, menu=create_menu):
-    """Connect a popup menu event handler, return the connection identifier."""
-    def right_click_event(icon, button, time):
-        m = menu()
+        :param str name: name of the menu item
+        :returns: the loaded icon
+        :rtype: gtk.Image
+
+        """
+        return gtk.image_new_from_icon_name(self._menu_icons[name],
+                                            gtk.ICON_SIZE_MENU)
+
+class SmartUdiskieMenu(UdiskieMenu):
+
+    def _actions_group(self, node, presentation):
+        """
+        Create the actions group for the specified device node.
+
+        :param Node node: device
+        :param str presentation: node label
+
+        """
+        return [Action(presentation, node.device, method)
+                for method in node.methods]
+
+    def _leaves_group(self, node, outer_methods, presentation):
+        """
+        Create groups for the specified node.
+
+        :param Node node: device
+        :param list outer_methods: mix-in methods of root device
+        :param str presentation: node label
+
+        """
+        if not presentation or (node.device.is_mounted or
+                                not node.device.is_luks_cleartext):
+            presentation = node.label
+        if node.branches:
+            return chain.from_iterable(
+                self._leaves_group(
+                    branch,
+                    self._actions_group(node, presentation) + outer_methods,
+                    presentation)
+                for branch in node.branches)
+        elif len(node.methods) + len(outer_methods) > 0:
+            return Branch(
+                label=presentation,
+                groups=[list(chain(self._actions_group(node, presentation),
+                                   outer_methods))]),
+        else:
+            return ()
+
+    def _prepare_menu(self, node):
+        return Branch(
+            label=node.label,
+            groups=[list(self._leaves_group(node, [], ""))])
+
+#----------------------------------------
+# menu actions
+#----------------------------------------
+class TrayIcon(object):
+    def __init__(self, menumaker=None, statusicon=None):
+        """Create a simple gtk.StatusIcon"""
+        self._icon = statusicon or self._create_statusicon()
+        self._menu = menumaker or SmartUdiskieMenu.create()
+        self._conn = None
+        self.show()
+
+    @classmethod
+    def _create_statusicon(self):
+        statusicon = gtk.StatusIcon()
+        statusicon.set_from_stock(gtk.STOCK_CDROM)
+        statusicon.set_tooltip("udiskie")
+        return statusicon
+
+    @classmethod
+    def main(cls):
+        """Run udiskie tray icon in a main loop."""
+        icon = cls()
+        try:
+            gtk.main()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            icon.hide()
+
+    @property
+    def visible(self):
+        """Return shown state of icon."""
+        return bool(self._conn)
+
+    def show(self, show=True):
+        """Show or hide the tray icon."""
+        if show:
+            if not self.visible:
+                self._show()
+        else:
+            self.hide()
+
+    def hide(self):
+        """Hide the tray icon."""
+        if self.visible:
+            self._hide()
+
+    def _show(self):
+        """Show the tray icon."""
+        self._icon.set_visible(True)
+        self._conn = self._icon.connect("popup-menu", self._right_click_event)
+
+    def _hide(self):
+        """Hide the tray icon."""
+        self._icon.set_visible(False)
+        self._icon.disconnect(self._conn)
+        self._conn = None
+
+    def create_context_menu(self):
+        """Create the context menu."""
+        return self._menu()
+
+    def _right_click_event(self, icon, button, time):
+        """Handle a right click event (show the menu)."""
+        m = self.create_context_menu()
         m.show_all()
         m.popup(parent_menu_shell=None,
                 parent_menu_item=None,
@@ -287,18 +383,7 @@ def connect_statusicon(statusicon, menu=create_menu):
                 button=button,
                 activate_time=time,
                 data=icon)
-    return statusicon.connect("popup-menu", right_click_event)
-
-
-def main():
-    """Run udiskie tray icon in a main loop."""
-    statusicon = create_statusicon()
-    connection = connect_statusicon(statusicon)
-    gtk.main()
-    statusicon.disconnect(connection)
-    statusicon.set_visible(False)
-
 
 if __name__ == '__main__':
-    main()
+    TrayIcon.main()
 
