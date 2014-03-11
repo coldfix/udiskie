@@ -1,93 +1,29 @@
 """
-Udiskie CLI logic.
+Udiskie CLI entry points.
 """
-__all__ = [
-    # entry points:
-    'daemon',
-    'mount',
-    'umount',
-]
+__all__ = ['Daemon', 'Mount', 'Umount']
 
 import warnings
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
-import os
+import optparse
 import sys
 import logging
 from functools import partial
 
-#----------------------------------------
-# Utility functions
-#----------------------------------------
-def config_path(*path):
-    try:
-        from xdg.BaseDirectory import xdg_config_home as config_home
-    except ImportError:
-        config_home = os.path.expanduser('~/.config')
-    return os.path.join(config_home, 'udiskie', *path)
-
-def load_filter(filter_file=None):
-    """Load mount option filters."""
-    import udiskie.match
-    return udiskie.match.FilterMatcher.from_config_file(
-        filter_file or config_path('filters.conf'))
-
-def init_logging(program_options):
-    """Initialize logging configuration."""
-    log_level = program_options.log_level
-    if log_level <= logging.DEBUG:
-        fmt = '%(levelname)s [%(asctime)s] %(name)s.%(funcName)s(): %(message)s'
-    else:
-        fmt = '%(message)s'
-    logging.basicConfig(level=log_level, format=fmt)
-
-def common_program_options():
-    """
-    Return a command line option parser for options common to all modes.
-    """
-    import optparse
-    parser = optparse.OptionParser()
-    parser.add_option('-v', '--verbose', action='store_const',
-                      dest='log_level', default=logging.INFO,
-                      const=logging.DEBUG, help='verbose output')
-    parser.add_option('-1', '--use-udisks1', action='store_const',
-                      dest='udisks_version', default=0,
-                      const=1, help='use udisks1 as underlying daemon (default)')
-    parser.add_option('-2', '--use-udisks2', action='store_const',
-                      dest='udisks_version', default=0,
-                      const=2, help='use udisks2 as underlying daemon (experimental)')
-    return parser
-
-def mount_program_options():
-    """
-    Return the mount option parser for the mount command.
-    """
-    parser = common_program_options()
-    parser.add_option('-f', '--filters', action='store',
-                      dest='filters', default=None,
-                      metavar='FILE', help='filter FILE')
-    parser.add_option('-P', '--password-prompt', action='store',
-                      dest='password_prompt', default='zenity',
-                      metavar='MODULE', help="replace password prompt")
-    return parser
-
-
-def udisks_service_object(clsname, version=0):
+def udisks_service_object(clsname, version=None):
     """
     Return UDisks service.
 
-    :param int version: requested udisks
-    :param dbus.mainloop.NativeMainLoop mainloop: event loop for system bus
+    :param str clsname: requested service object
+    :param int version: requested udisks backend version
     :return: udisks service wrapper object
     :raises dbus.DBusException: if unable to connect to UDisks dbus service.
     :raises ValueError: if the version is invalid
 
-    If ``version is None``, try to connect to UDisks1 and fall back to
-    UDisks2 if not available.
-
-    If ``mainloop is True``, use the default (only) mainloop provided by
-    dbus-python.
+    If ``version`` has a false truth value, try to connect to UDisks1 and
+    fall back to UDisks2 if not available.
 
     """
     def udisks1():
@@ -96,16 +32,15 @@ def udisks_service_object(clsname, version=0):
     def udisks2():
         import udiskie.udisks2
         return getattr(udiskie.udisks2, clsname).create()
-    if version == 0:
+    if not version:
         from udiskie.common import DBusException
         try:
             return udisks1()
         except DBusException:
             msg = sys.exc_info()[1].get_dbus_message()
             log = logging.getLogger(__name__)
-            log.warning(
-                ('Failed to connect UDisks1 dbus service: %s.\n' +
-                 'Falling back to UDisks2 [experimental].') % (msg,))
+            log.warning('Failed to connect UDisks1 dbus service: %s.\n'
+                        'Falling back to UDisks2 [experimental].' % (msg,))
             return udisks2()
     elif version == 1:
         return udisks1()
@@ -114,158 +49,222 @@ def udisks_service_object(clsname, version=0):
     else:
         raise ValueError("UDisks version not supported: %s!" % (version,))
 
+class _EntryPoint(object):
+    """
+    Base class for other entry points.
+    """
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
 
-#----------------------------------------
-# Entry points
-#----------------------------------------
-def daemon(args=None, daemon=None):
+    @classmethod
+    def program_options_parser(cls):
+        """
+        Return a command line option parser for options common to all modes.
+        """
+        parser = optparse.OptionParser()
+        parser.add_option('-v', '--verbose', dest='log_level',
+                          action='store_const', default=logging.INFO,
+                          const=logging.DEBUG, help='verbose output')
+        parser.add_option('-1', '--use-udisks1', dest='udisks_version',
+                          action='store_const', default=0, const=1,
+                          help='use udisks1 as underlying daemon (default)')
+        parser.add_option('-2', '--use-udisks2', dest='udisks_version',
+                          action='store_const', default=0, const=2,
+                          help='use udisks2 as underlying daemon (experimental)')
+        parser.add_option('-f', '--filters', dest='config_file',
+                          action='store', default=None,
+                          metavar='FILE', help='synonym of --config [deprecated]')
+        parser.add_option('-C', '--config', dest='config_file',
+                          action='store', default=None,
+                          metavar='FILE', help='config file')
+        return parser
+
+    @classmethod
+    def main(cls, argv=None):
+        """
+        Run the entry point.
+        """
+        import udiskie.config
+
+        # parse program options (retrieve log level and config file name):
+        parser = cls.program_options_parser()
+        options, posargs = parser.parse_args(argv)
+
+        # initialize logging configuration:
+        log_level = options.log_level
+        if log_level <= logging.DEBUG:
+            fmt = '%(levelname)s [%(asctime)s] %(name)s.%(funcName)s(): %(message)s'
+        else:
+            fmt = '%(message)s'
+        logging.basicConfig(level=log_level, format=fmt)
+
+        # parse config options (reparse to get the real values now):
+        config = udiskie.config.Config.from_config_file(options.config_file)
+        parser.set_defaults(**config.program_options)
+        options, posargs = parser.parse_args(argv)
+
+        return cls.create(config, options, posargs).run(options, posargs)
+
+
+class Daemon(_EntryPoint):
     """
     Execute udiskie as a daemon.
     """
-    import gobject
-    import udiskie.automount
-    import udiskie.mount
-    import udiskie.prompt
+    @classmethod
+    def program_options_parser(cls):
+        parser = _EntryPoint.program_options_parser()
+        parser.add_option('-P', '--password-prompt', dest='password_prompt',
+                          action='store', default='zenity', metavar='PROGRAM',
+                          help="replace password prompt")
+        parser.add_option('-s', '--suppress', dest='suppress_notify',
+                          action='store_true', default=False,
+                          help='suppress popup notifications')
+        parser.add_option('-t', '--tray', dest='tray',
+                          action='store_true', default=False,
+                          help='show tray icon')
+        parser.add_option('-F', '--file-manager', action='store',
+                          dest='file_manager', default='xdg-open',
+                          metavar='PROGRAM', help="to open mount pathes")
+        return parser
 
-    parser = mount_program_options()
-    parser.add_option('-s', '--suppress', action='store_true',
-                      dest='suppress_notify', default=False,
-                      help='suppress popup notifications')
-    parser.add_option('-t', '--tray', action='store_true',
-                      dest='tray', default=False,
-                      help='show tray icon')
-    parser.add_option('-b', '--browser', action='store',
-                      dest='browser', default='xdg-open',
-                      metavar='BROWSER', help="to open mount pathes")
-    options, posargs = parser.parse_args(args)
-    init_logging(options)
+    @classmethod
+    def create(cls, config, options, posargs):
+        import gobject
+        import udiskie.automount
+        import udiskie.mount
+        import udiskie.prompt
 
-    mainloop = gobject.MainLoop()
+        mainloop = gobject.MainLoop()
+        daemon = udisks_service_object('Daemon', int(options.udisks_version))
+        browser = udiskie.prompt.browser(options.file_manager)
+        mounter = udiskie.mount.Mounter(
+            filter=config.filter_options,
+            prompt=udiskie.prompt.password(options.password_prompt),
+            browser=browser,
+            udisks=daemon)
 
-    # connect udisks
-    if daemon is None:
-        daemon = udisks_service_object('Daemon', options.udisks_version)
-
-    # create a mounter
-    prompt = udiskie.prompt.password(options.password_prompt)
-    filter = load_filter(options.filters)
-    browser = udiskie.prompt.browser(options.browser)
-    mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=daemon,
-                                    browser=browser)
-
-    # notifications (optional):
-    if not options.suppress_notify:
-        import udiskie.notify
-        try:
-            import notify2 as notify_service
-            # notify2 needs to be initialized with the mainloop in order to
-            # receive signals (actions/closed)
-            notify_service.init('udiskie.mount', mainloop='glib')
-        except ImportError:
-            import pynotify as notify_service
+        # notifications (optional):
+        if not options.suppress_notify:
+            import udiskie.notify
+            try:
+                import notify2 as notify_service
+            except ImportError:
+                import pynotify as notify_service
             notify_service.init('udiskie.mount')
-        notify = udiskie.notify.Notify(notify_service, browser=browser)
-        daemon.connect(notify)
+            notify = udiskie.notify.Notify(notify_service,
+                                           browser=browser,
+                                           config=config.notifications)
+            notify.subscribe(daemon)
 
-    # tray icon (optional):
-    if options.tray:
-        import udiskie.tray
-        create_menu = partial(udiskie.tray.create_menu,
-                              udisks=daemon,
-                              mounter=mounter,
-                              actions={'quit': mainloop.quit})
-        statusicon = udiskie.tray.create_statusicon()
-        connection = udiskie.tray.connect_statusicon(statusicon, create_menu)
+        # tray icon (optional):
+        if options.tray:
+            import udiskie.tray
+            create_menu = partial(udiskie.tray.create_menu,
+                                  udisks=daemon,
+                                  mounter=mounter,
+                                  actions={'quit': mainloop.quit})
+            statusicon = udiskie.tray.create_statusicon()
+            connection = udiskie.tray.connect_statusicon(statusicon, create_menu)
+        else:
+            status_icon = None
 
-    # automounter
-    automount = udiskie.automount.AutoMounter(mounter)
-    daemon.connect(automount)
+        # automounter
+        automount = udiskie.automount.AutoMounter(mounter)
+        daemon.connect(automount)
+        # Note: mounter and statusicon are saved so these are kept alive:
+        return cls(mainloop=mainloop,
+                   mounter=mounter,
+                   statusicon=statusicon)
 
-    mounter.mount_all()
-    try:
-        return mainloop.run()
-    except KeyboardInterrupt:
-        return 0
+    def run(self, options, posargs):
+        self.mounter.mount_all()
+        try:
+            return self.mainloop.run()
+        except KeyboardInterrupt:
+            return 0
 
-def mount(args=None, udisks=None):
+class Mount(_EntryPoint):
     """
     Execute the mount command.
     """
-    import udiskie.mount
-    import udiskie.prompt
+    @classmethod
+    def program_options_parser(cls):
+        parser = _EntryPoint.program_options_parser()
+        parser.add_option('-P', '--password-prompt', dest='password_prompt',
+                          action='store', default='zenity', metavar='PROGRAM',
+                          help="replace password prompt")
+        parser.add_option('-a', '--all', dest='all',
+                          action='store_true', default=False,
+                          help='mount all present devices')
+        parser.add_option('-r', '--recursive', dest='recursive',
+                          action='store_true', default=False,
+                          help='recursively mount LUKS partitions (if the automount daemon is running, this is not necessary)')
+        return parser
 
-    parser = mount_program_options()
-    parser.add_option('-a', '--all', action='store_true',
-                      dest='all', default=False,
-                      help='mount all present devices')
-    parser.add_option('-r', '--recursive', action='store_true',
-                      dest='recursive', default=False,
-                      help='recursively mount LUKS partitions (if the automount daemon is running, this is not necessary)')
-    options, posargs = parser.parse_args(args)
-    init_logging(options)
+    @classmethod
+    def create(cls, config, options, posargs):
+        import udiskie.mount
+        import udiskie.prompt
+        mounter = udiskie.mount.Mounter(
+            filter=config.filter_options,
+            prompt=udiskie.prompt.password(options.password_prompt),
+            udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
+        return cls(mounter=mounter)
 
-    # connect udisks
-    if udisks is None:
-        udisks = udisks_service_object('Sniffer', options.udisks_version)
+    def run(self, options, posargs):
+        mounter = self.mounter
+        recursive = options.recursive
 
-    # create a mounter
-    prompt = udiskie.prompt.password(options.password_prompt)
-    filter = load_filter(options.filters)
-    mounter = udiskie.mount.Mounter(filter=filter, prompt=prompt, udisks=udisks)
+        # mount all present devices
+        if options.all:
+            success = mounter.mount_all(recursive=recursive)
+        # only mount the desired devices
+        elif len(posargs) > 0:
+            success = True
+            for path in posargs:
+                success = success and mounter.mount(path, recursive=recursive)
+        # print command line options
+        else:
+            self.program_options_parser().print_help()
+            success = False
 
-    # mount all present devices
-    if options.all:
-        success = mounter.mount_all(recursive=options.recursive)
+        return 0 if success else 1
 
-    # only mount the desired devices
-    elif len(posargs) > 0:
-        success = True
-        for path in posargs:
-            success = success and mounter.mount(path, recursive=options.recursive)
-
-    # print command line options
-    else:
-        parser.print_usage()
-        success = False
-
-    return 0 if success else 1
-
-def umount(args=None, udisks=None):
+class Umount(_EntryPoint):
     """
     Execute the umount command.
     """
-    import udiskie.mount
+    @classmethod
+    def program_options_parser(cls):
+        parser = _EntryPoint.program_options_parser()
+        parser.add_option('-a', '--all', dest='all', default=False,
+                          action='store_true', help='all devices')
+        parser.add_option('-e', '--eject', dest='eject', default=False,
+                          action='store_true', help='Eject drive')
+        parser.add_option('-d', '--detach', dest='detach', default=False,
+                          action='store_true', help='Detach drive')
+        return parser
 
-    parser = common_program_options()
-    parser.add_option('-a', '--all', action='store_true',
-                      dest='all', default=False,
-                      help='all devices')
-    parser.add_option('-e', '--eject', action='store_true',
-                      dest='eject', default=False,
-                      help='Eject drive')
-    parser.add_option('-d', '--detach', action='store_true',
-                      dest='detach', default=False,
-                      help='Detach drive')
-    (options, posargs) = parser.parse_args(args)
-    init_logging(options)
+    @classmethod
+    def create(cls, config, options, posargs):
+        import udiskie.mount
+        mounter = udiskie.mount.Mounter(
+            udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
+        return cls(mounter=mounter)
 
-    if udisks is None:
-        udisks = udisks_service_object('Sniffer', options.udisks_version)
-    mounter = udiskie.mount.Mounter(udisks=udisks)
-
-    if options.all:
-        success = mounter.unmount_all(detach=options.detach,
-                                      eject=options.eject,
-                                      lock=True)
-    elif len(posargs) > 0:
-        success = True
-        for path in posargs:
-            success = (success and
-                       mounter.unmount(path, detach=options.detach,
-                                       eject=options.eject, lock=True))
-    else:
-        parser.print_usage()
-        success = False
-
-    return 0 if success else 1
+    def run(self, options, posargs):
+        mounter = self.mounter
+        if options.all:
+            success = mounter.unmount_all(detach=options.detach,
+                                          eject=options.eject, lock=True)
+        elif len(posargs) > 0:
+            success = True
+            for path in posargs:
+                success = (success and
+                           mounter.unmount(path, detach=options.detach,
+                                           eject=options.eject, lock=True))
+        else:
+            self.program_options_parser().print_help()
+            success = False
+        return 0 if success else 1
 

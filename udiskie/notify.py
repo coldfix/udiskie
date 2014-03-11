@@ -11,7 +11,7 @@ class Notify(object):
     notifications when system status has changed.
 
     """
-    def __init__(self, notify, browser=None):
+    def __init__(self, notify, browser=None, config=None):
         """
         Initialize notifier.
 
@@ -20,6 +20,7 @@ class Notify(object):
         """
         self._notify = notify
         self._browser = browser
+        self._config = config
         # pynotify does not store hard references to the notification
         # objects. When a signal is received and the notification does not
         # exist anymore, no handller will be called. Therefore, we need to
@@ -27,11 +28,19 @@ class Notify(object):
         # references (note, notify2 doesn't need this):
         self._notifications = []
 
+    def subscribe(self, daemon):
+        """Subscribe all enabled events to the daemon."""
+        for event in ['device_mounted', 'device_unmounted',
+                      'device_locked', 'device_unlocked']:
+            if self._enabled(event):
+                daemon.connect(getattr(self, event), event)
+
     # event handlers:
     def device_mounted(self, device):
         label = device.id_label
         mount_path = device.mount_paths[0]
-        notification = self._notify.Notification(
+        notification = self._notification(
+            'device_mounted',
             'Device mounted',
             '%s mounted on %s' % (label, mount_path),
             'drive-removable-media')
@@ -49,22 +58,48 @@ class Notify(object):
 
     def device_unmounted(self, device):
         label = device.id_label
-        self._notify.Notification(
+        self._notification(
+            'device_unmounted',
             'Device unmounted',
             '%s unmounted' % (label,),
             'drive-removable-media').show()
 
     def device_locked(self, device):
         device_file = device.device_presentation
-        self._notify.Notification(
+        self._notification(
+            'device_locked'
             'Device locked',
             '%s locked' % (device_file,),
             'drive-removable-media').show()
 
     def device_unlocked(self, device):
         device_file = device.device_presentation
-        self._notify.Notification(
+        self._notification(
+            'device_unlocked',
             'Device unlocked',
             '%s unlocked' % (device_file,),
             'drive-removable-media').show()
 
+    def _notification(self, event, summary, message, icon):
+        notification = self._notify.Notification(summary, message, icon)
+        timeout = self._get_timeout(event)
+        if timeout != -1:
+            notification.set_timeout(int(timeout * 1000))
+        return notification
+
+    def _enabled(self, event):
+        return self._get_timeout(event) is not None
+
+    def _get_timeout(self, event):
+        if not self._config:
+            return -1
+        try:
+            timeout = self._config[event]
+        except KeyError:
+            timeout = self._config.get('timeout', -1)
+        if timeout in ('', None):
+            return None
+        try:
+            return int(timeout)
+        except ValueError:
+            return float(timeout)
