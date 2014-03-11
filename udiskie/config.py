@@ -158,7 +158,7 @@ class Config(object):
             password_prompt=zenity
             suppress_notify=
             tray=
-            browser=xdg-open
+            file_manager=xdg-open
 
             [mount_options]
             fstype.vfat = ro,nouser

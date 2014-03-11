@@ -119,9 +119,9 @@ class Daemon(_EntryPoint):
         parser.add_option('-t', '--tray', dest='tray',
                           action='store_true', default=False,
                           help='show tray icon')
-        parser.add_option('-b', '--browser', action='store',
-                          dest='browser', default='xdg-open',
-                          metavar='BROWSER', help="to open mount pathes")
+        parser.add_option('-F', '--file-manager', action='store',
+                          dest='file_manager', default='xdg-open',
+                          metavar='PROGRAM', help="to open mount pathes")
         return parser
 
     @classmethod
@@ -133,7 +133,7 @@ class Daemon(_EntryPoint):
 
         mainloop = gobject.MainLoop()
         daemon = udisks_service_object('Daemon', int(options.udisks_version))
-        browser = udiskie.prompt.browser(options.browser)
+        browser = udiskie.prompt.browser(options.file_manager)
         mounter = udiskie.mount.Mounter(
             filter=config.filter_options,
             prompt=udiskie.prompt.password(options.password_prompt),

@@ -10,7 +10,7 @@ udiskie - automatic disk mounting service using udisks
 
 Synopsis
 --------
-'udiskie' [-hv12fPstb]
+'udiskie' [-hv12fPstF]
 
 'udiskie-mount' [-h12vfPr] (-a | DEVICE...)
 
@@ -49,7 +49,7 @@ Options
 *-t, \--tray*::
 	Show tray icon.
 
-*-b, \--browser*::
+*-F PROGRAM, \--file-manager PROGRAM*::
 	Set program to open mounted directories. Default is 'xdg-open'. Pass an empty string to disable this feature.
 
 *-a, \--all*::
