@@ -10,11 +10,11 @@ udiskie - automatic disk mounting service using udisks
 
 Synopsis
 --------
-'udiskie' [-hv12fPstF]
+'udiskie' [-hv12CPstF]
 
-'udiskie-mount' [-h12vfPr] (-a | DEVICE...)
+'udiskie-mount' [-h12vCPr] (-a | DEVICE...)
 
-'udiskie-umount' [-h12ved] (-a | PATH...)
+'udiskie-umount' [-h12vCed] (-a | PATH...)
 
 Description
 -----------
@@ -34,7 +34,7 @@ Options
 *-2, \--use-udisks2*::
 	Use UDisks2 as DBus backend (experimental)
 
-*-f FILE, \--filters=<file>*::
+*-C FILE, \--config=FILE*::
     Alternate filter configuration.
 
 *-P PROMPT, \--password-prompt=PROMPT*::
@@ -49,7 +49,7 @@ Options
 *-t, \--tray*::
 	Show tray icon.
 
-*-F PROGRAM, \--file-manager PROGRAM*::
+*-F PROGRAM, \--file-manager=PROGRAM*::
 	Set program to open mounted directories. Default is 'xdg-open'. Pass an empty string to disable this feature.
 
 *-a, \--all*::
@@ -99,7 +99,7 @@ Mount '/dev/sdb1':
 
 Filters
 -------
-*udiskie* uses filters to apply additional mount options. On startup *udiskie* reads the filters in `$XDG_CONFIG_HOME/udiskie/filters.conf` (or the file specified with *-f*). Filters can match the filesystem type or the device UUID. The option '__ignore__' instructs udiskie not to automount and display the matched device.
+*udiskie* uses filters to apply additional mount options. On startup *udiskie* reads the filters in `$XDG_CONFIG_HOME/udiskie/filters.conf` (or the file specified with *-C*). Filters can match the filesystem type or the device UUID. The option '__ignore__' instructs udiskie not to automount and display the matched device.
 
 Example Filters File
 --------------------
