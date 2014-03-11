@@ -1,6 +1,20 @@
 CHANGELOG
 ---------
 
+0.7.0 (in preparation)
+~~~~~~~~~~~~~~~~~~~~~~
+
+There are some backward incompatible changes, hence the version break:
+
+- default configuration path is now '$XDG_CONFIG_HOME/udiskie.conf'
+- command line parameter '-f'/'--filters' renamed to '-C'/'--config'
+- add sections in config file to disable individual mount notifications and
+  set defaults for some program options (udisks version, prompt, etc)
+- refactor ``udiskie.cli`` and ``udiskie.config``
+- revert 'make udiskie a namespace package'
+- add 'Browse folder' action to tray menu
+- add 'Browse folder' action button to mount notifications
+
 0.6.4
 ~~~~~
 
