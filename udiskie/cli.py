@@ -120,8 +120,11 @@ class Daemon(_EntryPoint):
                           action='store_true', default=False,
                           help='suppress popup notifications')
         parser.add_option('-t', '--tray', dest='tray',
-                          action='store_true', default=False,
-                          help='show tray icon')
+                          action='store_const', default=None,
+                          const='TrayIcon', help='show tray icon')
+        parser.add_option('-T', '--auto-tray', dest='tray',
+                          action='store_const', default=None,
+                          const='AutoTray', help='show tray icon')
         parser.add_option('-F', '--file-manager', action='store',
                           dest='file_manager', default='xdg-open',
                           metavar='PROGRAM', help="to open mount pathes")
@@ -161,7 +164,8 @@ class Daemon(_EntryPoint):
             import udiskie.tray
             menu_maker = udiskie.tray.SmartUdiskieMenu.create(mounter)
             menu_maker._actions['quit'] = mainloop.quit
-            statusicon = udiskie.tray.TrayIcon(menu_maker)
+            TrayIcon = getattr(udiskie.tray, options.tray)
+            statusicon = TrayIcon(menu_maker)
         else:
             status_icon = None
 

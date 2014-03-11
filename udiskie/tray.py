@@ -384,6 +384,36 @@ class TrayIcon(object):
                 activate_time=time,
                 data=icon)
 
+class AutoTray(TrayIcon):
+    def __init__(self, menumaker=None):
+        self._icon = None
+        self._menu = menumaker or SmartUdiskieMenu.create()
+        self._conn = None
+        # Okay, the following is BAD:
+        menumaker._actions['quit'] = None
+        menumaker._mounter._udisks.connect(self)
+        self.show(self.has_menu())
+
+    def _show(self):
+        self._icon = self._create_statusicon()
+        super(AutoTray, self)._show()
+
+    def _hide(self):
+        super(AutoTray, self)._hide()
+        self._icon = None
+
+    def has_menu(self):
+        return any(self._menu._prepare_menu(self._menu.detect()).groups)
+
+    def device_changed(self, old_state, new_state):
+        self.show(self.has_menu())
+
+    def device_added(self, device):
+        self.show(self.has_menu())
+
+    def device_removed(self, device):
+        self.show(self.has_menu())
+
 if __name__ == '__main__':
     TrayIcon.main()
 
