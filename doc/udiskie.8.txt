@@ -105,16 +105,32 @@ Example Configuration File
 --------------------------
 ----------------------------------------------------------------------
 [mount_options]
-fstype.vfat: sync
-uuid.9d53-13ba: noexec,nodev
-uuid.abcd-ef01: __ignore__
+fstype.vfat=sync
+uuid.9d53-13ba=noexec,nodev
+uuid.abcd-ef01=__ignore__
 
 [program_options]
+# Allowed values are '1' and '2'
 udisks_version=2
+# 'zenity', 'systemd-ask-password' or user program:
 password_prompt=zenity
-suppress_notify=
+# Leave empty to set to ``False``:
 tray=
+# Use '1' for ``True``:
+suppress_notify=
+# Default program:
 file_manager=xdg-open
+
+[notifications]
+# Default timeout in seconds:
+timeout=1.5
+# Overwrite timeout for 'device_mounted' notification:
+device_mounted=5
+# Leave empty to disable:
+device_unmounted=
+# Use the libnotify default timeout:
+device_unlocked=-1
+device_locked=-1
 ----------------------------------------------------------------------
 
 See Also

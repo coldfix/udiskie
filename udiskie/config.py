@@ -130,6 +130,7 @@ class Config(object):
     """Read udiskie config."""
     MOUNT_OPTIONS_SECTION = 'mount_options'
     PROGRAM_OPTIONS_SECTION = 'program_options'
+    NOTIFICATIONS_SECTION = 'notifications'
 
     def __init__(self, data):
         self._data = data
@@ -145,24 +146,41 @@ class Config(object):
     @classmethod
     def from_config_file(cls, config_file=None):
         """
-        Construct a FilterMatcher instance from config file.
+        Read config file.
 
-        :param string config_file: config file name
+        :param str config_file: config file name
 
         Config files should look as follows:
 
         .. code-block:: cfg
 
+            [mount_options]
+            fstype.vfat=sync
+            uuid.9d53-13ba=noexec,nodev
+            uuid.abcd-ef01=__ignore__
+
             [program_options]
+            # Allowed values are '1' and '2'
             udisks_version=2
+            # 'zenity', 'systemd-ask-password' or user program:
             password_prompt=zenity
-            suppress_notify=
+            # Leave empty to set to ``False``:
             tray=
+            # Use '1' for ``True``:
+            suppress_notify=
+            # Default program:
             file_manager=xdg-open
 
-            [mount_options]
-            fstype.vfat = ro,nouser
-            uuid.d730f9ea-1751-4f83-8244-c9b3e6b78c3a = __ignore__
+            [notifications]
+            # Default timeout in seconds:
+            timeout=1.5
+            # Overwrite timeout for 'device_mounted' notification:
+            device_mounted=0.5
+            # Leave empty to disable:
+            device_unmounted=
+            # Use the libnotify default timeout:
+            device_unlocked=-1
+            device_locked=-1
 
         The left hand side consists of either the property key to match and
         the value to search for separated by a dot: 'key.value'. Currently,
@@ -185,14 +203,18 @@ class Config(object):
         else:
             return FilterMatcher.from_config_section(mount_options)
 
+    def _get_section(self, name):
+        try:
+            items = self._data.items(name)
+        except NoSectionError:
+            return {}
+        else:
+            return dict((k, v.strip()) for k,v in items)
+
     @property
     def program_options(self):
-        options = {}
-        try:
-            config_items = self._data.items(self.PROGRAM_OPTIONS_SECTION)
-        except NoSectionError:
-            pass
-        else:
-            options.update(**dict(config_items))
-        return options
+        return self._get_section(self.PROGRAM_OPTIONS_SECTION)
 
+    @property
+    def notifications(self):
+        return self._get_section(self.NOTIFICATIONS_SECTION)

@@ -114,7 +114,7 @@ class Daemon(_EntryPoint):
     def program_options_parser(cls):
         parser = _EntryPoint.program_options_parser()
         parser.add_option('-P', '--password-prompt', dest='password_prompt',
-                          action='store', default='zenity', metavar='MODULE',
+                          action='store', default='zenity', metavar='PROGRAM',
                           help="replace password prompt")
         parser.add_option('-s', '--suppress', dest='suppress_notify',
                           action='store_true', default=False,
@@ -151,8 +151,10 @@ class Daemon(_EntryPoint):
             except ImportError:
                 import pynotify as notify_service
             notify_service.init('udiskie.mount')
-            notify = udiskie.notify.Notify(notify_service, browser=browser)
-            daemon.connect(notify)
+            notify = udiskie.notify.Notify(notify_service,
+                                           browser=browser,
+                                           config=config.notifications)
+            notify.subscribe(daemon)
 
         # tray icon (optional):
         if options.tray:
@@ -189,7 +191,7 @@ class Mount(_EntryPoint):
     def program_options_parser(cls):
         parser = _EntryPoint.program_options_parser()
         parser.add_option('-P', '--password-prompt', dest='password_prompt',
-                          action='store', default='zenity', metavar='MODULE',
+                          action='store', default='zenity', metavar='PROGRAM',
                           help="replace password prompt")
         parser.add_option('-a', '--all', dest='all',
                           action='store_true', default=False,
