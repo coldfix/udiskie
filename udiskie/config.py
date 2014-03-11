@@ -166,8 +166,9 @@ class Config(object):
             password_prompt=zenity
             # Leave empty to set to ``False``:
             tray=
+            automount=
             # Use '1' for ``True``:
-            suppress_notify=
+            suppress_notify=1
             # Default program:
             file_manager=xdg-open
 

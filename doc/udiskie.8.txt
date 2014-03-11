@@ -10,7 +10,7 @@ udiskie - automatic disk mounting service using udisks
 
 Synopsis
 --------
-'udiskie' [-hv12CPstTF]
+'udiskie' [-hv12CPstTFN]
 
 'udiskie-mount' [-h12vCPr] (-a | DEVICE...)
 
@@ -51,6 +51,9 @@ Options
 
 *-T, \--auto-tray*::
 	Show tray icon without 'Quit' menuitem that automatically hides when there is no action available. Can't be used together with the '-t' option.
+
+*-N, \--no-automount*::
+	Disable automounting new devices.
 
 *-F PROGRAM, \--file-manager=PROGRAM*::
 	Set program to open mounted directories. Default is 'xdg-open'. Pass an empty string to disable this feature.
@@ -119,8 +122,9 @@ udisks_version=2
 password_prompt=zenity
 # Leave empty to set to ``False``:
 tray=
+automount=
 # Use '1' for ``True``:
-suppress_notify=
+suppress_notify=1
 # Default program:
 file_manager=xdg-open
 
