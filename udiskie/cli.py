@@ -166,7 +166,7 @@ class Daemon(_EntryPoint):
             statusicon = udiskie.tray.create_statusicon()
             connection = udiskie.tray.connect_statusicon(statusicon, create_menu)
         else:
-            status_icon = None
+            statusicon = None
 
         # automounter
         automount = udiskie.automount.AutoMounter(mounter)
