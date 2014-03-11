@@ -97,17 +97,24 @@ Mount '/dev/sdb1':
 
 	udiskie-mount /dev/sdb1
 
-Filters
--------
-*udiskie* uses filters to apply additional mount options. On startup *udiskie* reads the filters in `$XDG_CONFIG_HOME/udiskie.conf` (or the file specified with *-C*). Filters can match the filesystem type or the device UUID. The option '__ignore__' instructs udiskie not to automount and display the matched device.
+Configuration
+-------------
+*udiskie* uses filters to apply additional mount options. On startup *udiskie* reads the filters in `$XDG_CONFIG_HOME/udiskie.conf` (or the file specified with *-C*). Filters can match the filesystem type or the device UUID. The option '__ignore__' instructs udiskie not to automount and display the matched device. The configuration file can also be used to specify defaults for some of the command line parameters.
 
-Example Filters File
---------------------
+Example Configuration File
+--------------------------
 ----------------------------------------------------------------------
 [mount_options]
 fstype.vfat: sync
 uuid.9d53-13ba: noexec,nodev
 uuid.abcd-ef01: __ignore__
+
+[program_options]
+udisks_version=2
+password_prompt=zenity
+suppress_notify=
+tray=
+file_manager=xdg-open
 ----------------------------------------------------------------------
 
 See Also
