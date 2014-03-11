@@ -125,12 +125,14 @@ class Daemon(_EntryPoint):
         parser.add_option('-F', '--file-manager', action='store',
                           dest='file_manager', default='xdg-open',
                           metavar='PROGRAM', help="to open mount pathes")
+        parser.add_option('-N', '--no-automount', action='store_false',
+                          dest='automount', default=True,
+                          help="do not automount new devices")
         return parser
 
     @classmethod
     def create(cls, config, options, posargs):
         import gobject
-        import udiskie.automount
         import udiskie.mount
         import udiskie.prompt
 
@@ -169,15 +171,19 @@ class Daemon(_EntryPoint):
             statusicon = None
 
         # automounter
-        automount = udiskie.automount.AutoMounter(mounter)
-        daemon.connect(automount)
+        if options.automount:
+            import udiskie.automount
+            automount = udiskie.automount.AutoMounter(mounter)
+            daemon.connect(automount)
+
         # Note: mounter and statusicon are saved so these are kept alive:
         return cls(mainloop=mainloop,
                    mounter=mounter,
                    statusicon=statusicon)
 
     def run(self, options, posargs):
-        self.mounter.mount_all()
+        if options.automount:
+            self.mounter.mount_all()
         try:
             return self.mainloop.run()
         except KeyboardInterrupt:
