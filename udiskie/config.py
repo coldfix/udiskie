@@ -176,9 +176,11 @@ class Config(object):
             # Default timeout in seconds:
             timeout=1.5
             # Overwrite timeout for 'device_mounted' notification:
-            device_mounted=0.5
+            device_mounted=5
             # Leave empty to disable:
             device_unmounted=
+            device_added=
+            device_removed=
             # Use the libnotify default timeout:
             device_unlocked=-1
             device_locked=-1

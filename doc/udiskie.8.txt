@@ -132,6 +132,8 @@ timeout=1.5
 device_mounted=5
 # Leave empty to disable:
 device_unmounted=
+device_added=
+device_removed=
 # Use the libnotify default timeout:
 device_unlocked=-1
 device_locked=-1
