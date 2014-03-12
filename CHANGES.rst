@@ -10,10 +10,15 @@ There are some backward incompatible changes, hence the version break:
 - command line parameter '-f'/'--filters' renamed to '-C'/'--config'
 - add sections in config file to disable individual mount notifications and
   set defaults for some program options (udisks version, prompt, etc)
-- refactor ``udiskie.cli`` and ``udiskie.config``
+- refactor ``udiskie.cli``, ``udiskie.config`` and ``udiskie.tray``
 - revert 'make udiskie a namespace package'
 - add 'Browse folder' action to tray menu
 - add 'Browse folder' action button to mount notifications
+- add '--no-automounter' command line option to disable automounting
+- add '--auto-tray' command line option to use a tray icon that
+  automatically disappears when no actions are available
+- show notifications when devices dis-/appear (can be disabled via config
+  file)
 
 0.6.4
 ~~~~~
