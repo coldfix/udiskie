@@ -164,9 +164,13 @@ class Daemon(_EntryPoint):
         # tray icon (optional):
         if options.tray:
             import udiskie.tray
+            tray_classes = {'TrayIcon': udiskie.tray.TrayIcon,
+                            'AutoTray': udiskie.tray.AutoTray}
+            if options.tray not in tray_classes:
+                raise ValueError("Invalid tray: %s" % (options.tray,))
             menu_maker = udiskie.tray.SmartUdiskieMenu.create(mounter)
             menu_maker._actions['quit'] = mainloop.quit
-            TrayIcon = getattr(udiskie.tray, options.tray)
+            TrayIcon = tray_classes[options.tray]
             statusicon = TrayIcon(menu_maker)
         else:
             statusicon = None
