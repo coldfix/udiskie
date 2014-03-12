@@ -164,8 +164,9 @@ class Config(object):
             udisks_version=2
             # 'zenity', 'systemd-ask-password' or user program:
             password_prompt=zenity
+            # valid values are: 'AutoTray', 'TrayIcon'
+            tray=AutoTray
             # Leave empty to set to ``False``:
-            tray=
             automount=
             # Use '1' for ``True``:
             suppress_notify=1

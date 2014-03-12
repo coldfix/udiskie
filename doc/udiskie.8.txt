@@ -10,7 +10,7 @@ udiskie - automatic disk mounting service using udisks
 
 Synopsis
 --------
-'udiskie' [-hv12CPstFN]
+'udiskie' [-hv12CPstTFN]
 
 'udiskie-mount' [-h12vCPr] (-a | DEVICE...)
 
@@ -47,7 +47,10 @@ Options
 	Suppress pop-up notifications.
 
 *-t, \--tray*::
-	Show tray icon.
+	Show tray icon. Can't be used together with the '-T' option.
+
+*-T, \--auto-tray*::
+	Show tray icon without 'Quit' menuitem that automatically hides when there is no action available. Can't be used together with the '-t' option.
 
 *-N, \--no-automount*::
 	Disable automounting new devices.
@@ -117,8 +120,9 @@ uuid.abcd-ef01=__ignore__
 udisks_version=2
 # 'zenity', 'systemd-ask-password' or user program:
 password_prompt=zenity
+# valid values are: 'AutoTray', 'TrayIcon'
+tray=AutoTray
 # Leave empty to set to ``False``:
-tray=
 automount=
 # Use '1' for ``True``:
 suppress_notify=1
