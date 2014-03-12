@@ -215,6 +215,7 @@ class UdiskieMenu(object):
             if device.is_mounted:
                 append('browse')
                 append('unmount')
+                label = device.mount_paths[0]
             else:
                 append('mount')
         elif device.is_crypto:
