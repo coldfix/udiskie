@@ -67,7 +67,7 @@ class Notify(object):
     def device_locked(self, device):
         device_file = device.device_presentation
         self._notification(
-            'device_locked'
+            'device_locked',
             'Device locked',
             '%s locked' % (device_file,),
             'drive-removable-media').show()
