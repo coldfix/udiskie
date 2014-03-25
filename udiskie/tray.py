@@ -205,7 +205,7 @@ class UdiskieMenu(object):
 
     def _device_node(self, device):
         """Create an empty menu node for the specified device."""
-        label = device.device_presentation
+        label = device.id_label or device.device_presentation
         # determine available methods
         methods = []
         def append(method):
@@ -215,7 +215,6 @@ class UdiskieMenu(object):
             if device.is_mounted:
                 append('browse')
                 append('unmount')
-                label = device.mount_paths[0]
             else:
                 append('mount')
         elif device.is_crypto:
