@@ -251,9 +251,9 @@ class Umount(_EntryPoint):
         parser.add_option('-a', '--all', dest='all', default=False,
                           action='store_true', help='all devices')
         parser.add_option('-e', '--eject', dest='eject', default=False,
-                          action='store_true', help='Eject drive')
+                          action='store_true', help='Eject media from drive (CDROM etc)')
         parser.add_option('-d', '--detach', dest='detach', default=False,
-                          action='store_true', help='Detach drive')
+                          action='store_true', help='Detach drive (power off)')
         return parser
 
     @classmethod
