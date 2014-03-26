@@ -82,24 +82,22 @@ class Notify(object):
             'drive-removable-media').show()
 
     def device_added(self, device):
-        if not device.is_drive:
-            return
         device_file = device.device_presentation
-        self._notification(
-            'device_added',
-            'Device added',
-            'device appeared on %s' % (device_file,),
-            'drive-removable-media').show()
+        if (device.is_drive or device.is_toplevel) and device_file:
+            self._notification(
+                'device_added',
+                'Device added',
+                'device appeared on %s' % (device_file,),
+                'drive-removable-media').show()
 
     def device_removed(self, device):
-        if not device.is_drive:
-            return
         device_file = device.device_presentation
-        self._notification(
-            'device_removed',
-            'Device removed',
-            'device disappeared on %s' % (device_file,),
-            'drive-removable-media').show()
+        if (device.is_drive or device.is_toplevel) and device_file:
+            self._notification(
+                'device_removed',
+                'Device removed',
+                'device disappeared on %s' % (device_file,),
+                'drive-removable-media').show()
 
     def _notification(self, event, summary, message, icon):
         notification = self._notify.Notification(summary, message, icon)
