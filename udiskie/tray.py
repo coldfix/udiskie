@@ -319,7 +319,8 @@ class TrayIcon(object):
         """Create a simple gtk.StatusIcon"""
         self._icon = statusicon or self._create_statusicon()
         self._menu = menumaker or SmartUdiskieMenu.create()
-        self._conn = None
+        self._conn_left = None
+        self._conn_right = None
         self.show()
 
     @classmethod
@@ -343,7 +344,7 @@ class TrayIcon(object):
     @property
     def visible(self):
         """Return shown state of icon."""
-        return bool(self._conn)
+        return bool(self._conn_left)
 
     def show(self, show=True):
         """Show or hide the tray icon."""
@@ -361,17 +362,31 @@ class TrayIcon(object):
     def _show(self):
         """Show the tray icon."""
         self._icon.set_visible(True)
-        self._conn = self._icon.connect("popup-menu", self._right_click_event)
+        self._conn_left = self._icon.connect("activate", self._left_click_event)
+        self._conn_right = self._icon.connect("popup-menu", self._right_click_event)
 
     def _hide(self):
         """Hide the tray icon."""
         self._icon.set_visible(False)
-        self._icon.disconnect(self._conn)
-        self._conn = None
+        self._icon.disconnect(self._conn_left)
+        self._icon.disconnect(self._conn_right)
+        self._conn_left = None
+        self._conn_right = None
 
     def create_context_menu(self):
         """Create the context menu."""
         return self._menu()
+
+    def _left_click_event(self, icon):
+        """Handle a left click event (show the menu)."""
+        m = self.create_context_menu()
+        m.show_all()
+        m.popup(parent_menu_shell=None,
+                parent_menu_item=None,
+                func=gtk.status_icon_position_menu,
+                button=0,
+                activate_time=gtk.get_current_event_time(),
+                data=icon)
 
     def _right_click_event(self, icon, button, time):
         """Handle a right click event (show the menu)."""
@@ -388,7 +403,8 @@ class AutoTray(TrayIcon):
     def __init__(self, menumaker=None):
         self._icon = None
         self._menu = menumaker or SmartUdiskieMenu.create()
-        self._conn = None
+        self._conn_left = None
+        self._conn_right = None
         # Okay, the following is BAD:
         menumaker._actions['quit'] = None
         menumaker._mounter._udisks.connect(self)
