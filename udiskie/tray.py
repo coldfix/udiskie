@@ -44,7 +44,7 @@ class UdiskieMenu(object):
         'unlock': 'Unlock %s',
         'lock': 'Lock %s',
         'eject': 'Eject %s',
-        'detach': 'Detach %s',
+        'detach': 'Unpower %s',
         'quit': 'Quit', }
 
     def __init__(self, mounter, actions):
