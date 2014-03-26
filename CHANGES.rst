@@ -19,6 +19,8 @@ There are some backward incompatible changes, hence the version break:
   automatically disappears when no actions are available
 - show notifications when devices dis-/appear (can be disabled via config
   file)
+- show 'id_label' in tray menu, if available (instead of mount path or
+  device path)
 
 0.6.4
 ~~~~~
