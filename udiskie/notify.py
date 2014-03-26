@@ -32,7 +32,8 @@ class Notify(object):
         """Subscribe all enabled events to the daemon."""
         for event in ['device_mounted', 'device_unmounted',
                       'device_locked', 'device_unlocked',
-                      'device_added', 'device_removed']:
+                      'device_added', 'device_removed',
+                      'job_failed']:
             if self._enabled(event):
                 daemon.connect(getattr(self, event), event)
 
@@ -97,6 +98,21 @@ class Notify(object):
                 'device_removed',
                 'Device removed',
                 'device disappeared on %s' % (device_file,),
+                'drive-removable-media').show()
+
+    def job_failed(self, device, action, message):
+        device_file = device.device_presentation or device.object_path
+        if message:
+            self._notification(
+                'job_failed',
+                'Job failed',
+                'failed to %s %s:\n%s' % (action, device_file, message),
+                'drive-removable-media').show()
+        else:
+            self._notification(
+                'job_failed',
+                'Job failed',
+                'failed to %s %s.' % (action, device_file,),
                 'drive-removable-media').show()
 
     def _notification(self, event, summary, message, icon):

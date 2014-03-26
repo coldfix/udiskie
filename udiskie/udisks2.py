@@ -622,7 +622,7 @@ class Daemon(Emitter, UDisks2):
         - device_unlocked / device_locked
         - device_mounted  / device_unmounted
         - media_added     / media_removed
-        - device_changed
+        - device_changed  / job_failed
 
     """
     mainloop = True
@@ -642,7 +642,8 @@ class Daemon(Emitter, UDisks2):
                                  'device_lock',
                                  'device_chang', ))
                        + ('object_added',
-                          'object_removed'))
+                          'object_removed',
+                          'job_failed'))
         super(Daemon, self).__init__(event_names)
 
         self._proxy = proxy or self.connect_service()
@@ -785,20 +786,37 @@ class Daemon(Emitter, UDisks2):
                 'device_mounted', None)
 
     # jobs
+    _action_mapping = {
+        'filesystem-mount': 'mount',
+        'filesystem-unmount': 'unmount',
+        'encrypted-unlock': 'unlock',
+        'encrypted-lock': 'lock',
+        'power-off-drive': 'detach',
+        'eject-media': 'eject', }
+
+    _event_mapping = {
+        'filesystem-unmount': 'device_unmount',
+        'encrypted-unlock': 'device_unlock',
+        'encrypted-lock': 'device_lock', }
+
     def _job_changed(self, job_name, completed):
-        event_mapping = {
-            # 'filesystem-mount': 'device_mount',
-            'filesystem-unmount': 'device_unmount',
-            'encrypted-unlock': 'device_unlock',
-            'encrypted-lock': 'device_lock' }
-        job = self._objects[job_name]['org.freedesktop.UDisks2.Job']
-        event_name = event_mapping.get(job['Operation'])
+        job = self._objects[job_name][Interface['Job']]
+        event_name = self._event_mapping.get(job['Operation'])
         if not event_name:
             return
         suffix = 'ed' if completed else 'ing'
         for object_path in job['Objects']:
             device = self[object_path]
             self.trigger(event_name + suffix, device)
+
+    def _job_failed(self, job_name, message):
+        job = self._objects[job_name][Interface['Job']]
+        action = self._event_mapping.get(job['Operation'])
+        if not action:
+            return
+        for object_path in job['Objects']:
+            device = self[object_path]
+            self.trigger('job_failed', device, action, message)
 
     def _job_completed(self, success, message, job_name):
         """
@@ -809,4 +827,6 @@ class Daemon(Emitter, UDisks2):
         """
         if success:
             self._job_changed(job_name, True)
+        else:
+            self._job_failed(job_name, message)
 

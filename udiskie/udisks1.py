@@ -420,7 +420,7 @@ class Daemon(Emitter, UDisks):
         - device_unlocked / device_locked
         - device_mounted  / device_unmounted
         - media_added     / media_removed
-        - device_changed
+        - device_changed  / job_failed
 
     A very primitive mechanism that gets along without external
     dependencies is used for event dispatching. The methods `connect` and
@@ -440,7 +440,7 @@ class Daemon(Emitter, UDisks):
         dbus will be configured for the gobject mainloop.
 
         """
-        event_names = (stem + suffix
+        event_names = [stem + suffix
                        for suffix in ('ed', 'ing')
                        for stem in (
                            'device_add',
@@ -451,7 +451,7 @@ class Daemon(Emitter, UDisks):
                            'media_remov',
                            'device_unlock',
                            'device_lock',
-                           'device_chang', ))
+                           'device_chang', )] + ['job_failed']
         super(Daemon, self).__init__(event_names)
 
         sniffer = sniffer or Sniffer(proxy or self.connect_service())
@@ -459,6 +459,9 @@ class Daemon(Emitter, UDisks):
         self._sniffer = sniffer
         self._jobs = {}
         self._devices = {}
+        self._errors = {'mount': {}, 'unmount': {},
+                        'unlock': {}, 'lock': {},
+                        'eject': {}, 'detach': {}}
 
         self.connect(self._on_device_changed, 'device_changed')
         bus = self._sniffer._proxy._bus
@@ -499,6 +502,10 @@ class Daemon(Emitter, UDisks):
         else:
             self._invalidate(object_path)
         return cached
+
+    # special methods
+    def set_error(self, device, action, message):
+        self._errors[action][device.object_path] = message
 
     # events
     def _on_device_changed(self, old_state, new_state):
@@ -543,31 +550,55 @@ class Daemon(Emitter, UDisks):
         Internal method.
 
         """
-        event_mapping = {
-            'FilesystemMount': 'device_mount',
-            'FilesystemUnmount': 'device_unmount',
-            'LuksUnlock': 'device_unlock',
-            'LuksLock': 'device_lock', }
-        check_success = {
-            'FilesystemMount': lambda dev: dev.is_mounted,
-            'FilesystemUnmount': lambda dev: not dev or not dev.is_mounted,
-            'LuksUnlock': lambda dev: dev.is_unlocked,
-            'LuksLock': lambda dev: not dev or not dev.is_unlocked, }
         if not job_in_progress and object_path in self._jobs:
             job_id = self._jobs[object_path].job_id
+        try:
+            action = self._action_mapping[job_id]
+        except KeyError:
+            return
+        event_name = self._event_mapping[action]
+        dev = self[object_path]
+        if job_in_progress:
+            self.trigger(event_name + 'ing', dev, job_percentage)
+            self._jobs[object_path] = Job(job_id, job_percentage)
+        # NOTE: The here used heuristic is inaccurate! This shows for
+        # example when failing to unlock a LUKS partition from the same
+        # process. The event will be processed after all three login
+        # attempts are done and either show success/fail for all of them.
+        elif self._check_success[job_id](dev):
+            self.trigger(event_name + 'ed', dev)
+            del self._jobs[object_path]
+        else:
+            # get and delete message, if available:
+            message = self._errors[action].pop(object_path, "")
+            self.trigger('job_failed', dev, 'device_' + action, message)
+            log = logging.getLogger(__name__)
+            log.info('%s operation failed for device: %s' % (job_id, object_path))
 
-        if job_id in event_mapping:
-            event_name = event_mapping[job_id]
-            dev = self[object_path]
-            if job_in_progress:
-                self.trigger(event_name + 'ing', dev, job_percentage)
-                self._jobs[object_path] = Job(job_id, job_percentage)
-            elif check_success[job_id](dev):
-                self.trigger(event_name + 'ed', dev)
-                del self._jobs[object_path]
-            else:
-                log = logging.getLogger(__name__)
-                log.info('%s operation failed for device: %s' % (job_id, object_path))
+    # used internally by _device_job_changed:
+    _action_mapping = {
+        'FilesystemMount': 'mount',
+        'FilesystemUnmount': 'unmount',
+        'LuksUnlock': 'unlock',
+        'LuksLock': 'lock',
+        'DriveDetach': 'device_remove',
+        'DriveEject': 'media_remove' }
+
+    _event_mapping = {'mount': 'device_mount',
+                      'unmount': 'device_unmount',
+                      'unlock': 'device_unlock',
+                      'lock': 'device_lock',
+                      'eject': 'media_remov',
+                      'detach': 'device_remov'}
+
+    _check_success = {
+        'FilesystemMount': lambda dev: dev.is_mounted,
+        'FilesystemUnmount': lambda dev: not dev or not dev.is_mounted,
+        'LuksUnlock': lambda dev: dev.is_unlocked,
+        'LuksLock': lambda dev: not dev or not dev.is_unlocked,
+        'DriveDetach': lambda dev: not dev,
+        'DriveEject': lambda dev: not dev or not dev.has_media
+    }
 
     # internal state keeping
     def _sync(self):
