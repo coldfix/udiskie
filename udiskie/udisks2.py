@@ -276,7 +276,10 @@ class Device(object):
     @property
     def is_partition(self):
         """Check if the device has a partition slave."""
-        return bool(self._I.Partition)
+        # Sometimes udisks2 empties the Partition interface before removing
+        # the device. In this case, we want to report .is_partition=False, so
+        # properties like .partition_slave will not be used.
+        return bool(self._I.Partition and self.partition_slave)
 
     @property
     def is_filesystem(self):
