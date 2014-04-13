@@ -107,18 +107,9 @@ class Notify(object):
         return notification
 
     def _enabled(self, event):
-        return self._get_timeout(event) is not None
+        return self._get_timeout(event) not in (None, False)
 
     def _get_timeout(self, event):
         if not self._config:
             return -1
-        try:
-            timeout = self._config[event]
-        except KeyError:
-            timeout = self._config.get('timeout', -1)
-        if timeout in ('', None):
-            return None
-        try:
-            return int(timeout)
-        except ValueError:
-            return float(timeout)
+        return self._config.get(event, -1)

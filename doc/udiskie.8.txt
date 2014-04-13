@@ -105,43 +105,8 @@ Mount '/dev/sdb1':
 
 Configuration
 -------------
-*udiskie* uses filters to apply additional mount options. On startup *udiskie* reads the filters in `$XDG_CONFIG_HOME/udiskie.conf` (or the file specified with *-C*). Filters can match the filesystem type or the device UUID. The option '__ignore__' instructs udiskie not to automount and display the matched device. The configuration file can also be used to specify defaults for some of the command line parameters.
+The config file at '$XDG_CONFIG_HOME/udiskie.py' (e.g. '~/.config/udiskie.py') is executed once on startup, after processing the command line. For an example config, see the file 'udiskie/config_example.py'.
 
-Example Configuration File
---------------------------
-----------------------------------------------------------------------
-[mount_options]
-fstype.vfat=sync
-uuid.9d53-13ba=noexec,nodev
-uuid.abcd-ef01=__ignore__
-
-[program_options]
-# Allowed values are '1' and '2'
-udisks_version=2
-# 'zenity', 'systemd-ask-password' or user program:
-password_prompt=zenity
-# valid values are: 'AutoTray', 'TrayIcon'
-tray=AutoTray
-# Leave empty to set to ``False``:
-automount=
-# Use '1' for ``True``:
-suppress_notify=1
-# Default program:
-file_manager=xdg-open
-
-[notifications]
-# Default timeout in seconds:
-timeout=1.5
-# Overwrite timeout for 'device_mounted' notification:
-device_mounted=5
-# Leave empty to disable:
-device_unmounted=
-device_added=
-device_removed=
-# Use the libnotify default timeout:
-device_unlocked=-1
-device_locked=-1
-----------------------------------------------------------------------
 
 See Also
 --------

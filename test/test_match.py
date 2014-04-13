@@ -8,10 +8,7 @@ config file used by udiskie for custom device options.
 """
 import unittest
 
-import tempfile
-import shutil
 import os.path
-import gc
 
 from udiskie.config import OptionFilter, Config
 
@@ -26,36 +23,22 @@ class TestFilterMatcher(unittest.TestCase):
     Tests for the udiskie.match.FilterMatcher class.
 
     """
+    config_file = os.path.join(os.path.dirname(__file__), '..',
+                               'udiskie', 'config_example.py')
+
     def setUp(self):
         """Create a temporary config file."""
-        self.base = tempfile.mkdtemp()
-        self.config_file = os.path.join(self.base, 'filters.conf')
-
-        with open(self.config_file, 'wt') as f:
-            f.write('''
-[mount_options]
-uuid.ignored-device = __ignore__
-uuid.device-with-options = noatime,nouser
-fstype.vfat = ro,nouser''')
-
-        self.filter_matcher = Config.from_config_file(self.config_file).filter_options
-    
-    def tearDown(self):
-        """Remove the config file."""
-        gc.collect()
-        shutil.rmtree(self.base)
+        self.config = Config.from_config_file(self.config_file)
+        self.filter_matcher = self.config.mount_option_filter
 
     def test_ignored(self):
         """Test the FilterMatcher.is_ignored() method."""
+        self.assertFalse(
+            self.filter_matcher.is_ignored(
+                TestDev('/vfat-0', 'vfat', 'abcd-ef00')))
         self.assertTrue(
             self.filter_matcher.is_ignored(
-                TestDev('/ignore', 'vfat', 'ignored-device')))
-        self.assertFalse(
-            self.filter_matcher.is_ignored(
-                TestDev('/options', 'vfat', 'device-with-options')))
-        self.assertFalse(
-            self.filter_matcher.is_ignored(
-                TestDev('/nomatch', 'vfat', 'no-matching-id')))
+                TestDev('/vfat-1', 'vfat', 'abcd-ef01')))
 
     try:
         unittest.TestCase.assertItemsEqual
@@ -64,20 +47,21 @@ fstype.vfat = ro,nouser''')
 
     def test_options(self):
         """Test the FilterMatcher.get_mount_options() method."""
+        # only the first uuid OptionFilter should be used:
         self.assertItemsEqual(
-            ['noatime', 'ro', 'nouser'],
+            ['ro', 'noexec'],
             self.filter_matcher.get_mount_options(
-                TestDev('/options', 'vfat', 'device-with-options')))
+                TestDev('/vfat-0', 'vfat', 'abcd-ef00')))
         self.assertItemsEqual(
-            ['noatime', 'nouser'],
+            ['ro', 'noexec'],
             self.filter_matcher.get_mount_options(
-                TestDev('/optonly', 'ext', 'device-with-options')))
+                TestDev('/ext-0', 'ext', 'abcd-ef00')))
+        # only the id_type OptionFilter should be used:
         self.assertItemsEqual(
-            ['ro', 'nouser'],
+            ['nosync'],
             self.filter_matcher.get_mount_options(
-                TestDev('/fsonly', 'vfat', 'no-matching-id')))
+                TestDev('/vfat-unknown', 'vfat', 'no-matching-id')))
         self.assertItemsEqual(
             [],
             self.filter_matcher.get_mount_options(
-                TestDev('/nomatch', 'ext', 'no-matching-id')))
-
+                TestDev('/ext-unknown', 'ext', 'no-matching-id')))
