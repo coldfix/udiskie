@@ -6,9 +6,9 @@ CHANGELOG
 
 There are some backward incompatible changes, hence the version break:
 
-- default configuration path is now '$XDG_CONFIG_HOME/udiskie.conf'
-- command line parameter '-f'/'--filters' renamed to '-C'/'--config'
-- add sections in config file to disable individual mount notifications and
+- the config file is now a python script at '$XDG_CONFIG_HOME/udiskie.py'
+- command line parameter '-f'/'--filters' replaced by '-C'/'--config'
+- add config variables to disable individual mount notifications and
   set defaults for some program options (udisks version, prompt, etc)
 - refactor ``udiskie.cli``, ``udiskie.config`` and ``udiskie.tray``
 - revert 'make udiskie a namespace package'

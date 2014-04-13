@@ -71,9 +71,6 @@ class _EntryPoint(object):
         parser.add_option('-2', '--use-udisks2', dest='udisks_version',
                           action='store_const', default=0, const=2,
                           help='use udisks2 as underlying daemon (experimental)')
-        parser.add_option('-f', '--filters', dest='config_file',
-                          action='store', default=None,
-                          metavar='FILE', help='synonym of --config [deprecated]')
         parser.add_option('-C', '--config', dest='config_file',
                           action='store', default=None,
                           metavar='FILE', help='config file')
@@ -143,7 +140,7 @@ class Daemon(_EntryPoint):
         daemon = udisks_service_object('Daemon', int(options.udisks_version))
         browser = udiskie.prompt.browser(options.file_manager)
         mounter = udiskie.mount.Mounter(
-            filter=config.filter_options,
+            filter=config.mount_option_filter,
             prompt=udiskie.prompt.password(options.password_prompt),
             browser=browser,
             udisks=daemon)
@@ -158,7 +155,7 @@ class Daemon(_EntryPoint):
             notify_service.init('udiskie.mount')
             notify = udiskie.notify.Notify(notify_service,
                                            browser=browser,
-                                           config=config.notifications)
+                                           config=config.notification_timeouts)
             notify.subscribe(daemon)
 
         # tray icon (optional):
@@ -217,7 +214,7 @@ class Mount(_EntryPoint):
         import udiskie.mount
         import udiskie.prompt
         mounter = udiskie.mount.Mounter(
-            filter=config.filter_options,
+            filter=config.mount_option_filter,
             prompt=udiskie.prompt.password(options.password_prompt),
             udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
         return cls(mounter=mounter)
