@@ -1,22 +1,24 @@
 """
 Udiskie notification daemon.
 """
+
 __all__ = ['Notify']
 
+
 class Notify(object):
+
     """
     Notification tool.
 
     Can be connected to udisks daemon in order to automatically issue
     notifications when system status has changed.
-
     """
+
     def __init__(self, notify, mounter=None, config=None):
         """
         Initialize notifier.
 
         A notify service such as pynotify or notify2 should be passed in.
-
         """
         self._notify = notify
         self._mounter = mounter

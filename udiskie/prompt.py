@@ -1,16 +1,21 @@
 """
 Udiskie user prompt utility.
 """
-__all__ = ['password']
 
-import subprocess
 from distutils.spawn import find_executable
 import logging
+import subprocess
+
+
+__all__ = ['password']
+
 
 def password(prompt_name='zenity'):
+
     """
     Create a password prompt function.
     """
+
     if not prompt_name:
         return None
 
@@ -50,6 +55,7 @@ def password(prompt_name='zenity'):
             return None
 
     return password_prompt
+
 
 def browser(browser_name='xdg-open'):
     """

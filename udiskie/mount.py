@@ -1,10 +1,9 @@
 """
 Udiskie mount utilities.
 """
-__all__ = ['Mounter']
 
-import sys
 import logging
+import sys
 
 try:                    # python2
     from itertools import ifilter as filter
@@ -12,15 +11,18 @@ except ImportError:     # python3
     pass
 
 
+__all__ = ['Mounter']
+
 
 class Mounter(object):
+
     """
     Mount utility.
 
     Remembers udisks, prompt and filter instances to use across multiple
     mount operations.
-
     """
+
     def __init__(self, filter=None, prompt=None, udisks=None, browser=None):
         """
         Initialize mounter with the given defaults.
@@ -32,7 +34,6 @@ class Mounter(object):
         exception is the force=True branch of remove_device.
 
         If prompt is None device unlocking will not work.
-
         """
         self._filter = filter
         self._prompt = prompt
@@ -60,7 +61,6 @@ class Mounter(object):
         Mount the device if not already mounted.
 
         Return value indicates whether the device is mounted.
-
         """
         if not self.is_handleable(device) or not device.is_filesystem:
             self._logger.debug('not mounting unhandled device %s' % (device,))
@@ -79,7 +79,6 @@ class Mounter(object):
 
         Checks to make sure the device is unmountable and then unmounts.
         Return value indicates whether the device is unmounted.
-
         """
         if not self.is_handleable(device) or not device.is_filesystem:
             self._logger.debug('not unmounting unhandled device %s' % (device,))
@@ -95,7 +94,6 @@ class Mounter(object):
         Unlock the device if not already unlocked.
 
         Return value indicates whether the device is unlocked.
-
         """
         if not self.is_handleable(device) or not device.is_crypto:
             self._logger.debug('not unlocking unhandled device %s' % (device,))
@@ -119,7 +117,6 @@ class Mounter(object):
 
         Checks to make sure the device is lockable, then locks.
         Return value indicates whether the device is locked.
-
         """
         if not self.is_handleable(device) or not device.is_crypto:
             self._logger.debug('not locking unhandled device %s' % (device,))
@@ -158,7 +155,6 @@ class Mounter(object):
 
         If `force` is True recursively unmount/unlock all devices that are
         contained by this device.
-
         """
         if not self.is_handleable(device):
             self._logger.debug('not removing unhandled device %s' % (device,))
@@ -247,7 +243,6 @@ class Mounter(object):
 
         The device must match the criteria for a filesystem mountable or
         unlockable by udiskie.
-
         """
         return self.__path_adapter(self.add_device, path, recursive=recursive)
 
@@ -258,7 +253,6 @@ class Mounter(object):
         The filesystem must match the criteria for a filesystem mountable
         by udiskie.  path is either the physical device node (e.g.
         /dev/sdb1) or the mount point (e.g. /media/Foo).
-
         """
         return self.__path_adapter(self.remove_device, path,
                                    force=force,
@@ -272,7 +266,6 @@ class Mounter(object):
 
         If the device has any mounted filesystems, these will be unmounted
         before ejection.
-
         """
         return self.__path_adapter(self.eject_device, path, force=force)
 
@@ -282,7 +275,6 @@ class Mounter(object):
 
         If the device has any mounted filesystems, these will be unmounted
         before ejection.
-
         """
         return self.__path_adapter(self.detach_device, path, force=force)
 
@@ -293,7 +285,6 @@ class Mounter(object):
 
         Currently this just means that the device is removable and holds a
         filesystem or the device is a LUKS encrypted volume.
-
         """
         return (device.is_block and
                 device.is_external and
@@ -305,7 +296,6 @@ class Mounter(object):
 
         NOTE: returns only devices that are still valid. This protects from
         race conditions inside udiskie.
-
         """
         return filter(self.is_handleable, self._udisks)
 

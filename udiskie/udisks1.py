@@ -16,25 +16,28 @@ queried from the UDisks DBus service as requested.
 
 ``Daemon`` caches all device states and listens to UDisks events to
 guarantee the validity of device objects during operations.
-
 """
-__all__ = ['Sniffer',
-           'Daemon']
 
-import logging
-import os.path
 from copy import copy
 from inspect import getmembers
-
-from udiskie.common import DBusProxy, Emitter, DBusService
+import logging
+import os.path
 
 try:                    # python2
     from itertools import ifilter as filter
 except ImportError:     # python3
     pass
 
+from udiskie.common import DBusProxy, Emitter, DBusService
+
+
+__all__ = ['Sniffer',
+           'Daemon']
+
+
 def filter_opt(opt):
     return [k for k,v in opt.items() if v is not None]
+
 
 def samefile(a, b):
     """Check if two pathes represent the same file."""
@@ -43,7 +46,9 @@ def samefile(a, b):
     except OSError:
         return os.path.normpath(a) == os.path.normpath(b)
 
+
 class DeviceBase(object):
+
     Interface = 'org.freedesktop.UDisks.Device'
 
     # string representation
@@ -70,20 +75,20 @@ class DeviceBase(object):
 
 
 class OnlineDevice(DBusProxy, DeviceBase):
+
     """
     Online wrapper for org.freedesktop.UDisks.Device DBus API proxy objects.
 
     Resolves both property access and method calls dynamically to the DBus
     object.
-
     """
+
     # construction
     def __init__(self, udisks, proxy):
         """
         Initialize an instance with the given DBus proxy object.
 
         proxy must be an object acquired by a call to bus.get_object().
-
         """
         super(OnlineDevice, self).__init__(proxy, self.Interface)
         self.udisks = udisks
@@ -130,7 +135,6 @@ class OnlineDevice(DBusProxy, DeviceBase):
         Get the drive containing this device.
 
         The returned Device object is not guaranteed to be a drive.
-
         """
         if self.is_partition:
             return self.partition_slave.drive
@@ -279,6 +283,7 @@ class OnlineDevice(DBusProxy, DeviceBase):
         """Detach the device by e.g. powering down the physical port."""
         return self.method.DriveDetach([])
 
+
 def _CachedDeviceProperty(method):
     """Cache object path and return the current known CachedDevice state."""
     key = '_'+method.__name__
@@ -288,14 +293,16 @@ def _CachedDeviceProperty(method):
         setattr(self, key, getattr(device, 'object_path', None))
     return property(get, set, doc=method.__doc__)
 
+
 class CachedDevice(DeviceBase):
+
     """
     Cached device state.
 
     Properties are cached at creation time. Methods will be invoked
     dynamically via the associated DBus object.
-
     """
+
     def __init__(self, device):
         """Cache all properties of the online device."""
         self._device = device
@@ -343,11 +350,13 @@ class CachedDevice(DeviceBase):
         """Unlock Luks device."""
         return CachedDevice(self._device.unlock(password))
 
+
 class UDisks(DBusService):
-    """
-    Base class for UDisks service wrappers.
 
     """
+    Base class for UDisks service wrappers.
+    """
+
     BusName = 'org.freedesktop.UDisks'
     Interface = 'org.freedesktop.UDisks'
     ObjectPath = '/org/freedesktop/UDisks'
@@ -365,7 +374,6 @@ class UDisks(DBusService):
 
         This searches through all accessible devices and compares device
         path as well as mount pathes.
-
         """
         for device in self:
             if device.is_file(path):
@@ -374,7 +382,9 @@ class UDisks(DBusService):
         logger.warn('Device not found: %s' % path)
         return None
 
+
 class Sniffer(UDisks):
+
     """
     UDisks DBus service wrapper.
 
@@ -382,15 +392,14 @@ class Sniffer(UDisks):
     'org.freedesktop.UDisks'. Access to properties and device states is
     completely online, meaning the properties are requested from dbus as
     they are accessed in the python object.
-
     """
+
     # Construction
     def __init__(self, proxy=None):
         """
         Initialize an instance with the given DBus proxy object.
 
         :param common.DBusProxy proxy: proxy to udisks object
-
         """
         self._proxy = proxy or self.connect_service()
 
@@ -403,13 +412,18 @@ class Sniffer(UDisks):
                                                               object_path))
     update = get
 
+
 class Job(object):
+
     """Job information struct for devices."""
+
     def __init__(self, job_id, percentage):
         self.job_id = job_id
         self.percentage = percentage
 
+
 class Daemon(Emitter, UDisks):
+
     """
     UDisks listener daemon.
 
@@ -425,8 +439,8 @@ class Daemon(Emitter, UDisks):
     A very primitive mechanism that gets along without external
     dependencies is used for event dispatching. The methods `connect` and
     `disconnect` can be used to add or remove event handlers.
-
     """
+
     mainloop = True
 
     def __init__(self, proxy=None, sniffer=None):
@@ -438,7 +452,6 @@ class Daemon(Emitter, UDisks):
 
         If neither proxy nor sniffer are given they will be created and
         dbus will be configured for the gobject mainloop.
-
         """
         event_names = [stem + suffix
                        for suffix in ('ed', 'ing')
@@ -548,7 +561,6 @@ class Daemon(Emitter, UDisks):
         Detect type of event and trigger appropriate event handlers.
 
         Internal method.
-
         """
         if not job_in_progress and object_path in self._jobs:
             job_id = self._jobs[object_path].job_id
@@ -611,4 +623,3 @@ class Daemon(Emitter, UDisks):
             update = copy(self._devices[object_path])
             update.is_valid = False
             self._devices[object_path] = update
-

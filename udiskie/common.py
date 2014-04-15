@@ -1,23 +1,27 @@
 """
 Common DBus utilities.
 """
+
+from dbus import Interface, SystemBus
+from dbus.exceptions import DBusException
+from dbus.mainloop.glib import DBusGMainLoop
+
+
 __all__ = ['DBusProperties',
            'DBusProxy',
            'DBusService',
            'DBusException',
            'Emitter']
 
-from dbus import Interface, SystemBus
-from dbus.exceptions import DBusException
-from dbus.mainloop.glib import DBusGMainLoop
 
 class DBusProperties(object):
+
     """
     Dbus property map abstraction.
 
     Properties of the object can be accessed as attributes.
-
     """
+
     def __init__(self, dbus_object, interface):
         """Initialize a proxy object with standard DBus property interface."""
         self.__proxy = Interface(
@@ -29,13 +33,15 @@ class DBusProperties(object):
         """Retrieve the property via the DBus proxy."""
         return self.__proxy.Get(self.__interface, property)
 
+
 class DBusProxy(object):
+
     """
     DBus proxy object.
 
     Provides property and method bindings.
-
     """
+
     def __init__(self, proxy, interface):
         self.Exception = DBusException
         self.object_path = proxy.object_path
@@ -43,10 +49,13 @@ class DBusProxy(object):
         self.method = Interface(proxy, interface)
         self._bus = proxy._bus
 
+
 class DBusService(object):
+
     """
     Abstract base class for UDisksX service wrapper classes.
     """
+
     mainloop = None
 
     @classmethod
@@ -61,7 +70,6 @@ class DBusService(object):
         The mainloop parameter is only relevant if no bus is given. In this
         case if ``mainloop is True``, use the default (glib) mainloop
         provided by dbus-python.
-
         """
         if bus is None:
             mainloop = mainloop or cls.mainloop
@@ -77,18 +85,18 @@ class DBusService(object):
 
 
 class Emitter(object):
+
     """
     Event emitter class.
 
     Provides a simple event engine featuring a known finite set of events.
-
     """
+
     def __init__(self, event_names=(), *args, **kwargs):
         """
         Initialize with empty lists of event handlers.
 
         :param iterable event_names: names of known events.
-
         """
         super(Emitter, self).__init__(*args, **kwargs)
         self._event_handlers = {}
@@ -117,4 +125,3 @@ class Emitter(object):
             for event in self._event_handlers:
                 if hasattr(handler, event):
                     self.disconnect(getattr(handler, event), event)
-

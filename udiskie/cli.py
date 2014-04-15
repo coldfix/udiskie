@@ -1,16 +1,19 @@
 """
 Udiskie CLI entry points.
 """
+
+import logging
+import optparse
+import sys
+import warnings
+
+
 __all__ = ['Daemon', 'Mount', 'Umount']
 
-import warnings
+
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
-import optparse
-import sys
-import logging
-from functools import partial
 
 def udisks_service_object(clsname, version=None):
     """
@@ -24,7 +27,6 @@ def udisks_service_object(clsname, version=None):
 
     If ``version`` has a false truth value, try to connect to UDisks1 and
     fall back to UDisks2 if not available.
-
     """
     def udisks1():
         import udiskie.udisks1
@@ -49,10 +51,13 @@ def udisks_service_object(clsname, version=None):
     else:
         raise ValueError("UDisks version not supported: %s!" % (version,))
 
+
 class _EntryPoint(object):
+
     """
     Base class for other entry points.
     """
+
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
@@ -107,9 +112,11 @@ class _EntryPoint(object):
 
 
 class Daemon(_EntryPoint):
+
     """
     Execute udiskie as a daemon.
     """
+
     @classmethod
     def program_options_parser(cls):
         parser = _EntryPoint.program_options_parser()
@@ -195,10 +202,13 @@ class Daemon(_EntryPoint):
         except KeyboardInterrupt:
             return 0
 
+
 class Mount(_EntryPoint):
+
     """
     Execute the mount command.
     """
+
     @classmethod
     def program_options_parser(cls):
         parser = _EntryPoint.program_options_parser()
@@ -242,10 +252,13 @@ class Mount(_EntryPoint):
 
         return 0 if success else 1
 
+
 class Umount(_EntryPoint):
+
     """
     Execute the umount command.
     """
+
     @classmethod
     def program_options_parser(cls):
         parser = _EntryPoint.program_options_parser()
@@ -279,4 +292,3 @@ class Umount(_EntryPoint):
             self.program_options_parser().print_help()
             success = False
         return 0 if success else 1
-

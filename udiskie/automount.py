@@ -1,12 +1,16 @@
 """
 Udiskie automounter daemon.
 """
+
 __all__ = ['AutoMounter']
 
+
 class AutoMounter(object):
+
     """
     Automatically mount newly added media.
     """
+
     def __init__(self, mounter):
         self._mounter = mounter
 
@@ -20,9 +24,8 @@ class AutoMounter(object):
         """
         Check whether is_external changed, then mount
         """
-        # fixes usecase: mount luks-cleartext when opened by
-        # non-udiskie-software problem: in this case the device is not seen as
-        # external from the beginning and thus not mounted
+        # udisks2 sometimes adds empty devices and later updates them so
+        # the is_external becomes true:
         if not old_state.is_external and new_state.is_external:
             self._mounter.add_device(new_state)
 

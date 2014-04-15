@@ -3,28 +3,33 @@ Filters for udiskie mount tools.
 
 Used to communicate user configuration to udiskie. At the moment user
 configuration can be used to ignore certain devices or add mount options.
-
 """
-__all__ = ['InvalidFilter',
-           'OptionFilter',
-           'FilterMatcher',
-           'Config']
+
+from itertools import chain
+import logging
+import os
+import re
 
 try:                    # python2
     from ConfigParser import SafeConfigParser, NoSectionError
 except ImportError:     # python3
     from configparser import SafeConfigParser, NoSectionError
 
-import os
-import re
-import logging
-from itertools import chain
+
+__all__ = ['InvalidFilter',
+           'OptionFilter',
+           'FilterMatcher',
+           'Config']
+
 
 class InvalidFilter(ValueError):
     """Inappropriate filter configuration entry."""
 
+
 class OptionFilter(object):
+
     """Add a list of mount options for matching devices."""
+
     VALID_PARAMETERS = {
         'fstype': 'id_type',
         'uuid': 'id_uuid' }
@@ -36,7 +41,6 @@ class OptionFilter(object):
         :param string key: match key; one of 'fstype','uuid'
         :param string value: match value
         :param list options: mount options for matching devices
-
         """
         self._log = logging.getLogger(__name__)
         self._key = key
@@ -52,7 +56,6 @@ class OptionFilter(object):
         Construct an instance from an entry in a config file.
 
         :param tuple config_item: (LHS,RHS) of the config line
-
         """
         expr, options = config_item
         try:
@@ -74,7 +77,6 @@ class OptionFilter(object):
         If the device can be matched against the filter a list of
         additional mount options is returned. Otherwise, an empty list is
         returned.
-
         """
         if getattr(device, self.VALID_PARAMETERS[self._key]) == self._value:
             self._log.debug('%s matched against %s' % (self,
@@ -83,14 +85,16 @@ class OptionFilter(object):
         else:
             return []
 
+
 class FilterMatcher(object):
+
     """Matches devices against multiple `OptionFilter`s."""
+
     def __init__(self, filters):
         """
         Construct a FilterMatcher instance from list of OptionFilters.
 
         :param list filters: list of callable(Device) -> list
-
         """
         self._filters = list(filters)
 
@@ -113,7 +117,6 @@ class FilterMatcher(object):
         >>> filter = FilterMatcher.from_config_section([
         ...     ('fstype.vfat', 'ro,nouser'),
         ...     ('uuid.d730f9ea-1751-4f83-8244-c9b3e6b78c3a', '__ignore__')])
-
         """
         return cls(map(OptionFilter.from_config_item, config_section))
 
@@ -126,8 +129,11 @@ class FilterMatcher(object):
         """Check if the device should be ignored by udiskie."""
         return '__ignore__' in self.get_mount_options(device)
 
+
 class Config(object):
+
     """Read udiskie config."""
+
     MOUNT_OPTIONS_SECTION = 'mount_options'
     PROGRAM_OPTIONS_SECTION = 'program_options'
     NOTIFICATIONS_SECTION = 'notifications'
@@ -193,7 +199,6 @@ class Config(object):
         is a comma separated list of all options. The special value
         '__ignore__' is used to specify that a device will not be handled
         by udiskie.
-
         """
         parser = SafeConfigParser()
         parser.read(config_file or cls.config_path())

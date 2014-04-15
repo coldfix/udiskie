@@ -1,32 +1,37 @@
 """
 Tray icon for udiskie.
 """
-__all__ = ['UdiskieMenu', 'SmartUdiskieMenu',
-           'TrayIcon',
-           'main']
+
+from collections import namedtuple
+from functools import partial
+from itertools import chain
 
 import gtk
-from functools import partial
-from collections import namedtuple
-from itertools import chain
+
+
+__all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
+
 
 def setdefault(self, other):
     """Merge two dictionaries like .update() but don't overwrite values."""
     for k,v in other.items():
         self.setdefault(k, v)
 
+
 # data structs containing the menu hierarchy:
 Node = namedtuple('Node', ['root', 'branches', 'device', 'label', 'methods'])
 Action = namedtuple('Action', ['label', 'device', 'method'])
 Branch = namedtuple('Branch', ['label', 'groups'])
 
+
 class UdiskieMenu(object):
+
     """
     Builder for udiskie menus.
 
     Objects of this class generate action menus when being called.
-
     """
+
     _menu_icons = {
         'browse': gtk.STOCK_OPEN,
         'mount': 'udiskie-mount',
@@ -76,7 +81,6 @@ class UdiskieMenu(object):
 
         NOTE: If using a main loop other than ``gtk.main`` the 'quit' action
         must be customized.
-
         """
         if mounter is None:
             if udisks is None:
@@ -102,7 +106,6 @@ class UdiskieMenu(object):
 
         :returns: a new menu
         :rtype: gtk.Menu
-
         """
         # create actions items
         menu = self._branchmenu(self._prepare_menu(self.detect()).groups)
@@ -119,7 +122,6 @@ class UdiskieMenu(object):
 
         :returns: root of device hierarchy
         :rtype: Node
-
         """
         root = Node(None, [], None, "", [])
         device_nodes = dict(map(self._device_node,
@@ -136,7 +138,6 @@ class UdiskieMenu(object):
         :param Branch groups: contains information about the menu
         :returns: a new menu object holding all groups of the node
         :rtype: gtk.Menu
-
         """
         menu = gtk.Menu()
         separate = False
@@ -169,7 +170,6 @@ class UdiskieMenu(object):
         :param onclick: onclick handler, either a callable or gtk.Menu
         :returns: the menu item object
         :rtype: gtk.MenuItem
-
         """
         if icon is None:
             item = gtk.MenuItem()
@@ -196,7 +196,6 @@ class UdiskieMenu(object):
         :param tuple bind: parameters for the onclick handler
         :returns: the menu item object
         :rtype: gtk.MenuItem
-
         """
         return self._menuitem(
             self._menu_labels[action] % tuple(feed),
@@ -243,7 +242,6 @@ class UdiskieMenu(object):
         :param Node node: root node of device hierarchy
         :returns: menu hierarchy
         :rtype: Branch
-
         """
         return Branch(
             label=node.label,
@@ -261,10 +259,10 @@ class UdiskieMenu(object):
         :param str name: name of the menu item
         :returns: the loaded icon
         :rtype: gtk.Image
-
         """
         return gtk.image_new_from_icon_name(self._menu_icons[name],
                                             gtk.ICON_SIZE_MENU)
+
 
 class SmartUdiskieMenu(UdiskieMenu):
 
@@ -274,7 +272,6 @@ class SmartUdiskieMenu(UdiskieMenu):
 
         :param Node node: device
         :param str presentation: node label
-
         """
         return [Action(presentation, node.device, method)
                 for method in node.methods]
@@ -286,7 +283,6 @@ class SmartUdiskieMenu(UdiskieMenu):
         :param Node node: device
         :param list outer_methods: mix-in methods of root device
         :param str presentation: node label
-
         """
         if not presentation or (node.device.is_mounted or
                                 not node.device.is_luks_cleartext):
@@ -311,10 +307,9 @@ class SmartUdiskieMenu(UdiskieMenu):
             label=node.label,
             groups=[list(self._leaves_group(node, [], ""))])
 
-#----------------------------------------
-# menu actions
-#----------------------------------------
+
 class TrayIcon(object):
+
     def __init__(self, menumaker=None, statusicon=None):
         """Create a simple gtk.StatusIcon"""
         self._icon = statusicon or self._create_statusicon()
@@ -399,7 +394,9 @@ class TrayIcon(object):
                 activate_time=time,
                 data=icon)
 
+
 class AutoTray(TrayIcon):
+
     def __init__(self, menumaker=None):
         self._icon = None
         self._menu = menumaker or SmartUdiskieMenu.create()
@@ -432,4 +429,3 @@ class AutoTray(TrayIcon):
 
 if __name__ == '__main__':
     TrayIcon.main()
-
