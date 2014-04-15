@@ -73,8 +73,7 @@ class Mounter(object):
             self._logger.info('mounted device %s on %s' % (device, mount_path))
             return True
         except device.Exception:
-            err = sys.exc_info()[1]
-            self._logger.error('failed to mount device %s: %s' % (device, err))
+            self.__job_failed('mount', device)
             return False
 
     def unmount_device(self, device):
@@ -97,8 +96,7 @@ class Mounter(object):
             self._logger.info('unmounted device %s' % (device,))
             return True
         except device.Exception:
-            err = sys.exc_info()[1]
-            self._logger.error('failed to unmount device %s: %s' % (device, err))
+            self.__job_failed('unmount', device)
             return False
 
     # unlock/lock (LUKS)
@@ -116,12 +114,10 @@ class Mounter(object):
             self._logger.debug('not unlocking unlocked device %s' % (device,))
             return True
         # prompt user for password
-        message = ''
         for iteration in range(3):
             prompt = prompt or self._prompt
             password = prompt and prompt(
-                '%sEnter password for %s:' % (
-                    message,
+                'Enter password for %s:' % (
                     device.device_presentation,),
                 'Unlock encrypted device')
             if password is None:
@@ -133,9 +129,7 @@ class Mounter(object):
                 self._logger.info('unlocked device %s on %s' % (device, mount_path))
                 return True
             except device.Exception:
-                err = sys.exc_info()[1]
-                self._logger.error('failed to unlock device %s:\n%s' % (device, err))
-                message = err.message
+                self.__job_failed('unlock', device)
         return False
 
     def lock_device(self, device):
@@ -158,8 +152,7 @@ class Mounter(object):
             self._logger.info('locked device %s' % (device,))
             return True
         except device.Exception:
-            err = sys.exc_info()[1]
-            self._logger.error('failed to lock device %s: %s' % (device, err))
+            self.__job_failed('lock', device)
             return False
 
     # add/remove (unlock/lock or mount/unmount)
@@ -235,7 +228,7 @@ class Mounter(object):
             self._logger.info('ejected device %s' % (device,))
             return True
         except drive.Exception:
-            self._logger.error('failed to eject device %s' % (device,))
+            self.__job_failed('eject', device)
             return False
 
     def detach_device(self, device, force=False):
@@ -252,7 +245,7 @@ class Mounter(object):
             self._logger.info('detached device %s' % (device,))
             return True
         except drive.Exception:
-            self._logger.error('failed to detach device %s' % (device,))
+            self.__job_failed('detach', device)
             return False
 
     # mount_all/unmount_all
@@ -372,3 +365,7 @@ class Mounter(object):
             self._logger.error('no device found owning "%s"' % (path))
             return False
 
+    def __job_failed(self, action, device):
+        err = sys.exc_info()[1]
+        self._logger.error('failed to {0} device {1}: {2}'
+                           .format(action, device, err.message))
