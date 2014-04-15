@@ -100,7 +100,7 @@ class _EntryPoint(object):
         logging.basicConfig(level=log_level, format=fmt)
 
         # parse config options (reparse to get the real values now):
-        config = udiskie.config.Config.from_config_file(options.config_file)
+        config = udiskie.config.Config.from_file(options.config_file)
         parser.set_defaults(**config.program_options)
         options, posargs = parser.parse_args(argv)
         # initialize instance variables
@@ -168,7 +168,7 @@ class Daemon(_EntryPoint):
             notify_service.init('udiskie.mount')
             notify = udiskie.notify.Notify(notify_service,
                                            mounter=mounter,
-                                           config=config.notifications)
+                                           timeout=config.notifications)
 
         # tray icon (optional):
         if options.tray:

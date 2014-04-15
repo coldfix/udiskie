@@ -46,8 +46,6 @@ class OptionFilter(object):
         self._key = key
         self._value = value
         self._options = list(options)
-        if self._key not in self.VALID_PARAMETERS:
-            raise InvalidFilter("Invalid key: %s" % self)
         self._log.debug('%s created' % self)
 
     @classmethod
@@ -62,7 +60,9 @@ class OptionFilter(object):
             key,value = re.match(r'(\w+)\.(\S+)', expr).groups()
         except AttributeError:
             raise InvalidFilter('Invalid format: %s' % expr)
-        return cls(key, value,
+        if key not in cls.VALID_PARAMETERS:
+            raise InvalidFilter("Invalid key: %s" % self)
+        return cls(cls.VALID_PARAMETERS[key], value,
                    (S.strip() for S in options.split(',')))
 
     def __str__(self):
@@ -70,20 +70,25 @@ class OptionFilter(object):
                                              self._value,
                                              self._options)
 
-    def __call__(self, device):
+    def match(self, device):
         """
-        Get list of mount options that this filter wants to add.
+        Check if the device matches this filter.
 
-        If the device can be matched against the filter a list of
-        additional mount options is returned. Otherwise, an empty list is
-        returned.
+        :param Device device: device to be checked
         """
-        if getattr(device, self.VALID_PARAMETERS[self._key]) == self._value:
-            self._log.debug('%s matched against %s' % (self,
-                                                       device.object_path))
-            return self._options
-        else:
-            return []
+        return getattr(device, self._key) == self._value
+
+    def get_options(self, device):
+        """
+        Get list of mount options for the device.
+
+        :param Device device: matched device
+
+        If :meth:`match` is False for the device, the return value of this
+        method is undefined.
+        """
+        self._log.debug('%s used for %s' % (self, device.object_path))
+        return self._options
 
 
 class FilterMatcher(object):
@@ -121,13 +126,29 @@ class FilterMatcher(object):
         return cls(map(OptionFilter.from_config_item, config_section))
 
     def get_mount_options(self, device):
-        """Retrieve list of mount options for device."""
-        return list(set(chain.from_iterable(
-            filt(device) for filt in self._filters)))
+        """
+        Retrieve list of mount options for device.
+
+        :param Device device: device to be mounted
+        :returns: mount options
+        :rtype: list
+        """
+        matching_mount_options = (filt.get_options(device)
+                                  for filt in self._filters
+                                  if filt.match(device))
+        return next(iter(matching_mount_options), [])
 
     def is_ignored(self, device):
-        """Check if the device should be ignored by udiskie."""
-        return '__ignore__' in self.get_mount_options(device)
+        """
+        Check if the device should be ignored by udiskie.
+
+        :param Device device: device to be checked
+        :returns: if the device should be ignored
+        :rtype: bool
+        """
+        return any('__ignore__' in filt.get_options(device)
+                   for filt in self._filters
+                   if filt.match(device))
 
 
 class Config(object):
@@ -142,7 +163,12 @@ class Config(object):
         self._data = data
 
     @classmethod
-    def config_path(cls):
+    def default_path(cls):
+        """
+        Return the default config file path.
+
+        :rtype: str
+        """
         try:
             from xdg.BaseDirectory import xdg_config_home as config_home
         except ImportError:
@@ -150,11 +176,13 @@ class Config(object):
         return os.path.join(config_home, 'udiskie.conf')
 
     @classmethod
-    def from_config_file(cls, config_file=None):
+    def from_file(cls, path=None):
         """
         Read config file.
 
-        :param str config_file: config file name
+        :param str path: config file name
+        :returns: configuration object
+        :rtype: Config
 
         Config files should look as follows:
 
@@ -201,7 +229,7 @@ class Config(object):
         by udiskie.
         """
         parser = SafeConfigParser()
-        parser.read(config_file or cls.config_path())
+        parser.read(path or cls.default_path())
         return cls(parser)
 
     @property
@@ -209,7 +237,7 @@ class Config(object):
         try:
             mount_options = self._data.items(self.MOUNT_OPTIONS_SECTION)
         except NoSectionError:
-            return []
+            return FilterMatcher([])
         else:
             return FilterMatcher.from_config_section(mount_options)
 

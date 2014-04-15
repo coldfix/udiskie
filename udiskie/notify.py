@@ -14,7 +14,7 @@ class Notify(object):
     notifications when system status has changed.
     """
 
-    def __init__(self, notify, mounter=None, config=None):
+    def __init__(self, notify, mounter, timeout=None):
         """
         Initialize notifier.
 
@@ -22,7 +22,7 @@ class Notify(object):
         """
         self._notify = notify
         self._mounter = mounter
-        self._config = config
+        self._timeout = timeout
         # pynotify does not store hard references to the notification
         # objects. When a signal is received and the notification does not
         # exist anymore, no handller will be called. Therefore, we need to
@@ -137,12 +137,12 @@ class Notify(object):
         return self._get_timeout(event) is not None
 
     def _get_timeout(self, event):
-        if not self._config:
+        if not self._timeout:
             return -1
         try:
-            timeout = self._config[event]
+            timeout = self._timeout[event]
         except KeyError:
-            timeout = self._config.get('timeout', -1)
+            timeout = self._timeout.get('timeout', -1)
         if timeout in ('', None):
             return None
         try:
