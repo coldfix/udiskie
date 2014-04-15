@@ -141,6 +141,7 @@ device_removed=
 # Use the libnotify default timeout:
 device_unlocked=-1
 device_locked=-1
+job_failed=-1
 ----------------------------------------------------------------------
 
 See Also

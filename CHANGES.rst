@@ -21,6 +21,9 @@ There are some backward incompatible changes, hence the version break:
   file)
 - show 'id_label' in tray menu, if available (instead of mount path or
   device path)
+- add 'Job failed' notifications
+- add 'Retry' button to failed notifications
+- remove automatic retries to unlock LUKS partitions
 
 0.6.4
 ~~~~~
