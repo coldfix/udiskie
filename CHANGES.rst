@@ -24,6 +24,7 @@ There are some backward incompatible changes, hence the version break:
 - add 'Job failed' notifications
 - add 'Retry' button to failed notifications
 - remove automatic retries to unlock LUKS partitions
+- pass only device name to external password prompt
 
 0.6.4
 ~~~~~

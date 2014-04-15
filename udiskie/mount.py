@@ -103,12 +103,12 @@ class Mounter(object):
         if device.is_unlocked:
             self._logger.debug('not unlocking unlocked device %s' % (device,))
             return True
-        prompt = self._prompt
-        password = prompt and prompt(
-            'Enter password for %s:' % (
-                device.device_presentation,),
-            'Unlock encrypted device')
+        if not self._prompt:
+            self._logger.warn('not unlocking device %s: no prompt available' % (device,))
+            return False
+        password = self._prompt(device)
         if password is None:
+            self._logger.debug('not unlocking device %s: cancelled by user' % (device,))
             return False
         # pass password as non-keyword argument to avoid it being logged
         return self.__action(device, 'unlock', password)

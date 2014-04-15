@@ -38,7 +38,7 @@ Options
     Alternate filter configuration.
 
 *-P PROMPT, \--password-prompt=PROMPT*::
-	Password prompt to use for unlocking. Default is 'zenity'. This must be an executable that receives as its first two arguments the text and title to display and should print the password to its stdout in UTF-8 encoding.
+	Password prompt to use for unlocking. Default is 'zenity'. This must be an executable that receives as its first argument the device path and should print the password to its stdout in UTF-8 encoding.
 
 *-r, \--recursive*::
 	Recursively mount cleartext partitions after unlocking a LUKS device. This will happen by default running the udiskie daemon.
