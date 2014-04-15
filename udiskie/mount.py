@@ -51,7 +51,7 @@ class Mounter(object):
         return True
 
     # mount/unmount
-    def mount_device(self, device, filter=None):
+    def mount_device(self, device):
         """
         Mount the device if not already mounted.
 
@@ -65,7 +65,7 @@ class Mounter(object):
             self._logger.debug('not mounting mounted device %s' % (device,))
             return True
         fstype = str(device.id_type)
-        filter = filter or self._filter
+        filter = self._filter
         options = ','.join(filter.get_mount_options(device) if filter else [])
         try:
             self._logger.debug('mounting device %s (%s:%s)' % (device, fstype, options))
@@ -100,7 +100,7 @@ class Mounter(object):
             return False
 
     # unlock/lock (LUKS)
-    def unlock_device(self, device, prompt=None):
+    def unlock_device(self, device):
         """
         Unlock the device if not already unlocked.
 
@@ -114,7 +114,7 @@ class Mounter(object):
             self._logger.debug('not unlocking unlocked device %s' % (device,))
             return True
         # prompt user for password
-        prompt = prompt or self._prompt
+        prompt = self._prompt
         password = prompt and prompt(
             'Enter password for %s:' % (
                 device.device_presentation,),
@@ -155,24 +155,23 @@ class Mounter(object):
             return False
 
     # add/remove (unlock/lock or mount/unmount)
-    def add_device(self, device, filter=None, prompt=None, recursive=False):
+    def add_device(self, device, recursive=False):
         """Mount or unlock the device depending on its type."""
         if not self.is_handleable(device):
             self._logger.debug('not adding unhandled device %s' % (device,))
             return False
         if device.is_filesystem:
-            success = self.mount_device(device, filter)
+            success = self.mount_device(device)
         elif device.is_crypto:
-            success = self.unlock_device(device, prompt)
+            success = self.unlock_device(device)
             if success and recursive:
                 success = self.add_device(device.luks_cleartext_holder,
-                                          filter=filter, prompt=prompt,
                                           recursive=True)
         elif recursive and device.is_partition_table:
             success = True
             for dev in self.get_all_handleable():
                 if dev.is_partition and dev.partition_slave == device:
-                    success = self.add_device(dev, filter=filter, prompt=prompt, recursive=True) and success
+                    success = self.add_device(dev, recursive=True) and success
         else:
             self._logger.debug('not adding unhandled device %s' % (device,))
             success = True
@@ -248,12 +247,11 @@ class Mounter(object):
             return False
 
     # mount_all/unmount_all
-    def mount_all(self, filter=None, prompt=None, recursive=False):
+    def mount_all(self, recursive=False):
         """Mount handleable devices that are already present."""
         success = True
         for device in self.get_all_handleable():
-            success = self.add_device(device, filter, prompt,
-                                      recursive=recursive) and success
+            success = self.add_device(device, recursive=recursive) and success
         return success
 
     def unmount_all(self, detach=False, eject=False, lock=False):
@@ -282,7 +280,7 @@ class Mounter(object):
         return success
 
     # mount/unmount by path
-    def mount(self, path, filter=None, prompt=None, recursive=False):
+    def mount(self, path, recursive=False):
         """
         Mount or unlock a device.
 
@@ -290,10 +288,7 @@ class Mounter(object):
         unlockable by udiskie.
 
         """
-        return self.__path_adapter(self.add_device, path,
-                                   filter=filter,
-                                   prompt=prompt,
-                                   recursive=recursive)
+        return self.__path_adapter(self.add_device, path, recursive=recursive)
 
     def unmount(self, path, force=False, detach=False, eject=False, lock=False):
         """
