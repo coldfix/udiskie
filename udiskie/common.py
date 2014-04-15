@@ -108,20 +108,40 @@ class Emitter(object):
         for handler in self._event_handlers[event]:
             handler(*args)
 
-    def connect(self, handler, event=None):
-        """Connect an event handler."""
-        if event:
-            self._event_handlers[event].append(handler)
-        else:
-            for event in self._event_handlers:
-                if hasattr(handler, event):
-                    self.connect(getattr(handler, event), event)
+    def connect_all(self, obj):
+        """
+        Connect all handlers of a multi-slot object.
 
-    def disconnect(self, handler, event=None):
-        """Disconnect an event handler."""
-        if event:
-            self._event_handlers[event].remove(handler)
-        else:
-            for event in self._event_handlers:
-                if hasattr(handler, event):
-                    self.disconnect(getattr(handler, event), event)
+        :param obj: multi-slot
+        """
+        for event in self._event_handlers:
+            if hasattr(obj, event):
+                self.connect(event, getattr(obj, event))
+
+    def disconnect_all(self, obj):
+        """
+        Disconnect all handlers of a multi-slot object.
+
+        :param obj: multi-slot
+        """
+        for event in self._event_handlers:
+            if hasattr(obj, event):
+                self.disconnect(event, getattr(obj, event))
+
+    def connect(self, event, handler):
+        """
+        Connect an event handler.
+
+        :param str event: event name
+        :param callable handler: event handler
+        """
+        self._event_handlers[event].append(handler)
+
+    def disconnect(self, event, handler):
+        """
+        Disconnect an event handler.
+
+        :param str event: event name
+        :param callable handler: event handler
+        """
+        self._event_handlers[event].remove(handler)

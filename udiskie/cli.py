@@ -167,7 +167,6 @@ class Daemon(_EntryPoint):
             notify = udiskie.notify.Notify(notify_service,
                                            mounter=mounter,
                                            config=config.notifications)
-            notify.subscribe(daemon)
 
         # tray icon (optional):
         if options.tray:
@@ -186,8 +185,7 @@ class Daemon(_EntryPoint):
         # automounter
         if options.automount:
             import udiskie.automount
-            automount = udiskie.automount.AutoMounter(mounter)
-            daemon.connect(automount)
+            udiskie.automount.AutoMounter(mounter)
 
         # Note: mounter and statusicon are saved so these are kept alive:
         return cls(mainloop=mainloop,

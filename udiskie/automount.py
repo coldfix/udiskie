@@ -13,6 +13,7 @@ class AutoMounter(object):
 
     def __init__(self, mounter):
         self._mounter = mounter
+        mounter.udisks.connect_all(self)
 
     def device_added(self, udevice):
         self._mounter.add_device(udevice)

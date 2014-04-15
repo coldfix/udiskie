@@ -696,7 +696,7 @@ class Daemon(Emitter, UDisks2):
             path_keyword='job_name')
         self._sync()
 
-        self.connect(self._object_added, 'object_added')
+        self.connect('object_added', self._object_added)
 
     def _sync(self):
         """Synchronize state."""

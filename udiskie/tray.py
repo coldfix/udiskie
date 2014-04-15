@@ -404,7 +404,7 @@ class AutoTray(TrayIcon):
         self._conn_right = None
         # Okay, the following is BAD:
         menumaker._actions['quit'] = None
-        menumaker._mounter._udisks.connect(self)
+        menumaker._mounter.udisks.connect_all(self)
         self.show(self.has_menu())
 
     def _show(self):

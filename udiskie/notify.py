@@ -29,15 +29,14 @@ class Notify(object):
         # prevent these notifications from being destroyed by storing
         # references (note, notify2 doesn't need this):
         self._notifications = []
-
-    def subscribe(self, daemon):
-        """Subscribe all enabled events to the daemon."""
+        # Subscribe all enabled events to the daemon:
+        udisks = mounter.udisks
         for event in ['device_mounted', 'device_unmounted',
                       'device_locked', 'device_unlocked',
                       'device_added', 'device_removed',
                       'job_failed']:
             if self._enabled(event):
-                daemon.connect(getattr(self, event), event)
+                udisks.connect(event, getattr(self, event))
 
     # event handlers:
     def device_mounted(self, device):

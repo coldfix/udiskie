@@ -476,7 +476,7 @@ class Daemon(Emitter, UDisks):
                         'unlock': {}, 'lock': {},
                         'eject': {}, 'detach': {}}
 
-        self.connect(self._on_device_changed, 'device_changed')
+        self.connect('device_changed', self._on_device_changed)
         bus = self._sniffer._proxy._bus
         bus.add_signal_receiver(
             self._device_added,
