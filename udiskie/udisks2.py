@@ -738,7 +738,7 @@ class Daemon(Emitter, UDisks2):
             del self._objects[object_path][interface]
         new_state = self._objects[object_path]
 
-        if 'org.freedesktop.UDisks2.Drive' in interfaces:
+        if Interface['Drive'] in interfaces:
             self._detect_toggle(
                 'has_media',
                 self.get(object_path, old_state),
@@ -772,13 +772,13 @@ class Daemon(Emitter, UDisks2):
             self._objects[object_path][interface_name][key] = value
         new_state = self._objects[object_path]
 
-        if interface_name == 'org.freedesktop.UDisks2.Drive':
+        if interface_name == Interface['Drive']:
             self._detect_toggle(
                 'has_media',
                 self.get(object_path, old_state),
                 self.get(object_path, new_state),
                 'media_added', 'media_removed')
-        elif interface_name == 'org.freedesktop.UDisks2.Filesystem':
+        elif interface_name == Interface['Filesystem']:
             self._detect_toggle(
                 'is_mounted',
                 self.get(object_path, old_state),
