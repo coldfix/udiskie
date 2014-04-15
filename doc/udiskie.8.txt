@@ -38,7 +38,7 @@ Options
     Alternate filter configuration.
 
 *-P PROMPT, \--password-prompt=PROMPT*::
-	Password prompt to use for unlocking. Default is 'zenity'. This must be an executable that receives as its first argument the device path and should print the password to its stdout in UTF-8 encoding.
+	Password prompt to use for unlocking. Default is 'zenity'. This must be an executable that receives as its first argument the device path and should print the password to its stdout in UTF-8 encoding. This option is deprecated and will probably be replaced by a python commands file.
 
 *-r, \--recursive*::
 	Recursively mount cleartext partitions after unlocking a LUKS device. This will happen by default running the udiskie daemon.
@@ -56,7 +56,7 @@ Options
 	Disable automounting new devices.
 
 *-F PROGRAM, \--file-manager=PROGRAM*::
-	Set program to open mounted directories. Default is 'xdg-open'. Pass an empty string to disable this feature.
+	Set program to open mounted directories. Default is 'xdg-open'. Pass an empty string to disable this feature. This option is deprecated and will probably be replaced by a python commands file.
 
 *-a, \--all*::
 	Mount or unmount all external devices.

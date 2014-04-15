@@ -115,7 +115,7 @@ class Daemon(_EntryPoint):
         parser = _EntryPoint.program_options_parser()
         parser.add_option('-P', '--password-prompt', dest='password_prompt',
                           action='store', default='zenity', metavar='PROGRAM',
-                          help="replace password prompt")
+                          help="replace password prompt [deprecated]")
         parser.add_option('-s', '--suppress', dest='suppress_notify',
                           action='store_true', default=False,
                           help='suppress popup notifications')
@@ -127,7 +127,8 @@ class Daemon(_EntryPoint):
                           const='AutoTray', help='show tray icon')
         parser.add_option('-F', '--file-manager', action='store',
                           dest='file_manager', default='xdg-open',
-                          metavar='PROGRAM', help="to open mount pathes")
+                          metavar='PROGRAM',
+                          help="to open mount pathes [deprecated]")
         parser.add_option('-N', '--no-automount', action='store_false',
                           dest='automount', default=True,
                           help="do not automount new devices")
