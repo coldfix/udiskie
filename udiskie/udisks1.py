@@ -6,16 +6,16 @@ Requires UDisks 1.0.5 as described here:
 
     http://udisks.freedesktop.org/docs/1.0.5/
 
-Note that (as this completely wraps the UDisks DBus API) replacing this
-module will let you support UDisks2 or maybe even other services.
+This wraps the DBus API of Udisks2 providing a common interface with the
+udisks2 module.
 
 Overview: This module exports the classes ``Sniffer`` and ``Daemon``.
 
-``Sniffer`` can be used as an online exporter of the current device states
-queried from the UDisks DBus service as requested.
+:class:`Sniffer` can be used as an online exporter of the current device
+states queried from the UDisks DBus service as requested.
 
-``Daemon`` caches all device states and listens to UDisks events to
-guarantee the validity of device objects during operations.
+:class:`Daemon` caches all device states and listens to UDisks events to
+guarantee the accessibilityy of device properties in between operations.
 """
 
 from copy import copy
@@ -31,11 +31,11 @@ except ImportError:     # python3
 from udiskie.common import DBusProxy, Emitter, DBusService
 
 
-__all__ = ['Sniffer',
-           'Daemon']
+__all__ = ['Sniffer', 'Daemon']
 
 
 def filter_opt(opt):
+    """Remove ``None`` values from a dictionary."""
     return [k for k,v in opt.items() if v is not None]
 
 
@@ -48,6 +48,8 @@ def samefile(a, b):
 
 
 class DeviceBase(object):
+
+    """Helper base class for devices."""
 
     Interface = 'org.freedesktop.UDisks.Device'
 
@@ -65,6 +67,7 @@ class DeviceBase(object):
         return not (self == other)
 
     def __nonzero__(self):      # python2
+        """Check device validity."""
         return self.is_valid
     __bool__ = __nonzero__      # python3
 
@@ -81,6 +84,9 @@ class OnlineDevice(DBusProxy, DeviceBase):
 
     Resolves both property access and method calls dynamically to the DBus
     object.
+
+    This is the main class used to retrieve (and then possibly cache) device
+    properties from the DBus backend.
     """
 
     # construction
@@ -93,25 +99,25 @@ class OnlineDevice(DBusProxy, DeviceBase):
         super(OnlineDevice, self).__init__(proxy, self.Interface)
         self.udisks = udisks
 
-    # check if the device is a valid UDisks object
+    # availability of interfaces
     @property
     def is_valid(self):
+        """Check if there is a valid DBus object for this object path."""
         try:
             self.property.DeviceFile
             return True
         except self.Exception:
             return False
 
-    # properties
     @property
-    def partition_slave(self):
-        """Get the partition slave (container)."""
-        return self.udisks[self.property.PartitionSlave] if self.is_partition else None
+    def is_drive(self):
+        """Check if the device is a drive."""
+        return self.property.DeviceIsDrive
 
     @property
-    def is_partition(self):
-        """Check if the device has a partition slave."""
-        return self.property.DeviceIsPartition
+    def is_block(self):
+        """Check if the device is a block device."""
+        return True
 
     @property
     def is_partition_table(self):
@@ -119,15 +125,119 @@ class OnlineDevice(DBusProxy, DeviceBase):
         return self.property.DeviceIsPartitionTable
 
     @property
-    def is_drive(self):
-        """Check if the device is a drive."""
-        return self.property.DeviceIsDrive
+    def is_partition(self):
+        """Check if the device has a partition slave."""
+        return self.property.DeviceIsPartition
 
+    @property
+    def is_filesystem(self):
+        """Check if the device is a filesystem."""
+        return self.id_usage == 'filesystem'
+
+    @property
+    def is_luks(self):
+        """Check if the device is a LUKS container."""
+        return self.property.DeviceIsLuks
+
+    #----------------------------------------
+    # Drive
+    #----------------------------------------
+
+    # Drive properties
     is_toplevel = is_drive
 
     @property
-    def is_block(self):
-        return True
+    def is_detachable(self):
+        """Check if the drive that owns this device can be detached."""
+        return self.property.DriveCanDetach if self.is_drive else None
+
+    @property
+    def is_ejectable(self):
+        """Check if the drive that owns this device can be ejected."""
+        return self.property.DriveIsMediaEjectable if self.is_drive else None
+
+    @property
+    def has_media(self):
+        """Check if there is media available in the drive."""
+        return self.property.DeviceIsMediaAvailable
+
+    # Drive methods
+    def eject(self, unmount=None):
+        """Eject media from the device."""
+        return self.method.DriveEject(filter_opt({'unmount': unmount}))
+
+    def detach(self):
+        """Detach the device by e.g. powering down the physical port."""
+        return self.method.DriveDetach([])
+
+    #----------------------------------------
+    # Block
+    #----------------------------------------
+
+    # Block properties
+    @property
+    def device_file(self):
+        """The filesystem path of the device block file."""
+        return os.path.normpath(self.property.DeviceFile)
+
+    @property
+    def device_presentation(self):
+        """The device file path to present to the user."""
+        return self.property.DeviceFilePresentation
+
+    # TODO: device_size missing
+
+    @property
+    def id_usage(self):
+        """Device usage class, for example 'filesystem' or 'crypto'."""
+        return self.property.IdUsage
+
+    @property
+    def is_crypto(self):
+        """Check if the device is a crypto device."""
+        return self.id_usage == 'crypto'
+
+    @property
+    def id_type(self):
+        """"
+        Return IdType property.
+
+        This field provides further detail on IdUsage, for example:
+
+        IdUsage     'filesystem'    'crypto'
+        IdType      'ext4'          'crypto_LUKS'
+        """
+        return self.property.IdType
+
+    @property
+    def id_label(self):
+        """Label of the device if available."""
+        return self.property.IdLabel
+
+    @property
+    def id_uuid(self):
+        """Device UUID."""
+        return self.property.IdUuid
+
+    @property
+    def luks_cleartext_slave(self):
+        """Get luks crypto device."""
+        return self.udisks[self.property.LuksCleartextSlave] if self.is_luks_cleartext else None
+
+    @property
+    def is_luks_cleartext(self):
+        """Check whether this is a luks cleartext device."""
+        return self.property.DeviceIsLuksCleartext
+
+    @property
+    def is_external(self):
+        """Check if the device is external."""
+        return not self.is_systeminternal
+
+    @property
+    def is_systeminternal(self):
+        """Check if the device is internal."""
+        return self.property.DeviceIsSystemInternal
 
     @property
     def drive(self):
@@ -145,35 +255,25 @@ class OnlineDevice(DBusProxy, DeviceBase):
 
     root = drive
 
-    @property
-    def is_detachable(self):
-        """Check if the drive that owns this device can be detached."""
-        return self.property.DriveCanDetach if self.is_drive else None
+    #----------------------------------------
+    # Partition
+    #----------------------------------------
 
+    # Partition properties
     @property
-    def is_ejectable(self):
-        """Check if the drive that owns this device can be ejected."""
-        return self.property.DriveIsMediaEjectable if self.is_drive else None
+    def partition_slave(self):
+        """Get the partition slave (container)."""
+        return self.udisks[self.property.PartitionSlave] if self.is_partition else None
 
-    @property
-    def is_systeminternal(self):
-        """Check if the device is internal."""
-        return self.property.DeviceIsSystemInternal
+    #----------------------------------------
+    # Filesystem
+    #----------------------------------------
 
-    @property
-    def is_external(self):
-        """Check if the device is external."""
-        return not self.is_systeminternal
-
+    # Filesystem properties
     @property
     def is_mounted(self):
         """Check if the device is mounted."""
         return self.property.DeviceIsMounted
-
-    @property
-    def is_unlocked(self):
-        """Check if device is already unlocked."""
-        return self.luks_cleartext_holder if self.is_luks else None
 
     @property
     def mount_paths(self):
@@ -183,76 +283,7 @@ class OnlineDevice(DBusProxy, DeviceBase):
         raw_paths = self.property.DeviceMountPaths
         return [os.path.normpath(path) for path in raw_paths]
 
-    @property
-    def device_file(self):
-        """The filesystem path of the device block file."""
-        return os.path.normpath(self.property.DeviceFile)
-
-    @property
-    def device_presentation(self):
-        """The device file path to present to the user."""
-        return self.property.DeviceFilePresentation
-
-    @property
-    def is_filesystem(self):
-        return self.id_usage == 'filesystem'
-
-    @property
-    def is_crypto(self):
-        return self.id_usage == 'crypto'
-
-    @property
-    def is_luks(self):
-        return self.property.DeviceIsLuks
-
-    @property
-    def is_luks_cleartext(self):
-        """Check whether this is a luks cleartext device."""
-        return self.property.DeviceIsLuksCleartext
-
-    @property
-    def luks_cleartext_slave(self):
-        """Get luks crypto device."""
-        return self.udisks[self.property.LuksCleartextSlave] if self.is_luks_cleartext else None
-
-    @property
-    def luks_cleartext_holder(self):
-        """Get unlocked luks cleartext device."""
-        return self.udisks[self.property.LuksHolder] if self.is_luks else None
-
-    @property
-    def has_media(self):
-        return self.property.DeviceIsMediaAvailable
-
-    @property
-    def id_type(self):
-        return self.property.IdType
-
-    @property
-    def id_usage(self):
-        return self.property.IdUsage
-
-    @property
-    def id_label(self):
-        return self.property.IdLabel
-
-    @property
-    def id_uuid(self):
-        """Device UUID."""
-        return self.property.IdUuid
-
-    @property
-    def in_use(self):
-        """Check whether this device is in use, i.e. mounted or unlocked."""
-        if self.is_mounted or self.is_unlocked:
-            return True
-        if self.is_partition_table:
-            for device in self.udisks:
-                if device.partition_slave == self and device.in_use:
-                    return True
-        return False
-
-    # methods
+    # Filesystem methods
     def mount(self,
               fstype=None,
               options=None,
@@ -267,21 +298,44 @@ class OnlineDevice(DBusProxy, DeviceBase):
         """Unmount filesystem."""
         return self.method.FilesystemUnmount(filter_opt({'force': force}))
 
-    def lock(self):
-        """Lock Luks device."""
-        return self.method.LuksLock([])
+    #----------------------------------------
+    # Encrypted
+    #----------------------------------------
 
+    # Encrypted properties
+    @property
+    def luks_cleartext_holder(self):
+        """Get unlocked luks cleartext device."""
+        return self.udisks[self.property.LuksHolder] if self.is_luks else None
+
+    @property
+    def is_unlocked(self):
+        """Check if device is already unlocked."""
+        return self.luks_cleartext_holder if self.is_luks else None
+
+    # Encrypted methods
     def unlock(self, password):
         """Unlock Luks device."""
         return self.udisks.update(self.method.LuksUnlock(password, []))
 
-    def eject(self, unmount=None):
-        """Eject media from the device."""
-        return self.method.DriveEject(filter_opt({'unmount': unmount}))
+    def lock(self):
+        """Lock Luks device."""
+        return self.method.LuksLock([])
 
-    def detach(self):
-        """Detach the device by e.g. powering down the physical port."""
-        return self.method.DriveDetach([])
+    #----------------------------------------
+    # derived properties
+    #----------------------------------------
+
+    @property
+    def in_use(self):
+        """Check whether this device is in use, i.e. mounted or unlocked."""
+        if self.is_mounted or self.is_unlocked:
+            return True
+        if self.is_partition_table:
+            for device in self.udisks:
+                if device.partition_slave == self and device.in_use:
+                    return True
+        return False
 
 
 def _CachedDeviceProperty(method):
@@ -327,18 +381,18 @@ class CachedDevice(DeviceBase):
     # FIXME: should it be different?
 
     @_CachedDeviceProperty
+    def luks_cleartext_slave(self):
+        """Get luks crypto device."""
+        pass
+
+    @_CachedDeviceProperty
     def drive(self):
-        """Get the partition slave (container)."""
+        """Get the drive."""
         pass
 
     @_CachedDeviceProperty
     def partition_slave(self):
         """Get the partition slave (container)."""
-        pass
-
-    @_CachedDeviceProperty
-    def luks_cleartext_slave(self):
-        """Get luks crypto device."""
         pass
 
     @_CachedDeviceProperty
