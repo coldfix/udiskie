@@ -51,7 +51,7 @@ class Notify(object):
             # Show a 'Browse directory' button in mount notifications.
             # Note, this only works with some libnotify services.
             def on_browse(notification, action):
-                self._mounter.browse_device(device)
+                self._mounter.browse(device)
             notification.add_action('browse', "Browse directory", on_browse)
             # Need to store a reference (see above) only if there is a
             # signal connected:
@@ -111,7 +111,7 @@ class Notify(object):
                                           'Job failed', text,
                                           'drive-removable-media')
         try:
-            retry = getattr(self._mounter, action + '_device')
+            retry = getattr(self._mounter, action)
         except AttributeError:
             pass
         else:

@@ -90,13 +90,13 @@ class UdiskieMenu(object):
             from udiskie.prompt import password
             mounter = Mounter(prompt=password(), udisks=udisks)
         setdefault(actions, {
-            'browse': mounter.browse_device,
-            'mount': mounter.mount_device,
-            'unmount': mounter.unmount_device,
-            'unlock': mounter.unlock_device,
-            'lock': partial(mounter.remove_device, force=True),
-            'eject': partial(mounter.eject_device, force=True),
-            'detach': partial(mounter.detach_device, force=True),
+            'browse': mounter.browse,
+            'mount': mounter.mount,
+            'unmount': mounter.unmount,
+            'unlock': mounter.unlock,
+            'lock': partial(mounter.remove, force=True),
+            'eject': partial(mounter.eject, force=True),
+            'detach': partial(mounter.detach, force=True),
             'quit': gtk.main_quit, })
         return cls(mounter, actions)
 

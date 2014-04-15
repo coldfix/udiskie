@@ -242,7 +242,7 @@ class Mount(_EntryPoint):
         elif len(posargs) > 0:
             success = True
             for path in posargs:
-                success = success and mounter.mount(path, recursive=recursive)
+                success = success and mounter.add(path, recursive=recursive)
         # print command line options
         else:
             self.program_options_parser().print_help()
@@ -284,8 +284,8 @@ class Umount(_EntryPoint):
             success = True
             for path in posargs:
                 success = (success and
-                           mounter.unmount(path, detach=options.detach,
-                                           eject=options.eject, lock=True))
+                           mounter.remove(path, detach=options.detach,
+                                          eject=options.eject, lock=True))
         else:
             self.program_options_parser().print_help()
             success = False
