@@ -57,12 +57,11 @@ class UdiskieMenu(object):
         self._actions = actions
 
     @classmethod
-    def create(cls, mounter=None, udisks=None, actions={}):
+    def create(cls, mounter, actions={}):
         """
         Create a new menu maker.
 
         :param object mounter: mount operation provider
-        :param object udisks: udisks wrapper (only if ``mounter is None``)
         :param dict actions: actions for menu items
         :returns: a new menu maker
         :rtype: cls
@@ -82,13 +81,6 @@ class UdiskieMenu(object):
         NOTE: If using a main loop other than ``gtk.main`` the 'quit' action
         must be customized.
         """
-        if mounter is None:
-            if udisks is None:
-                from udiskie.udisks import Sniffer
-                udisks = Sniffer()
-            from udiskie.mount import Mounter
-            from udiskie.prompt import password
-            mounter = Mounter(prompt=password(), udisks=udisks)
         setdefault(actions, {
             'browse': mounter.browse,
             'mount': mounter.mount,
@@ -310,10 +302,10 @@ class SmartUdiskieMenu(UdiskieMenu):
 
 class TrayIcon(object):
 
-    def __init__(self, menumaker=None, statusicon=None):
+    def __init__(self, menumaker, statusicon=None):
         """Create a simple gtk.StatusIcon"""
         self._icon = statusicon or self._create_statusicon()
-        self._menu = menumaker or SmartUdiskieMenu.create()
+        self._menu = menumaker
         self._conn_left = None
         self._conn_right = None
         self.show()
@@ -324,17 +316,6 @@ class TrayIcon(object):
         statusicon.set_from_stock(gtk.STOCK_CDROM)
         statusicon.set_tooltip("udiskie")
         return statusicon
-
-    @classmethod
-    def main(cls):
-        """Run udiskie tray icon in a main loop."""
-        icon = cls()
-        try:
-            gtk.main()
-        except KeyboardInterrupt:
-            pass
-        finally:
-            icon.hide()
 
     @property
     def visible(self):
@@ -397,9 +378,9 @@ class TrayIcon(object):
 
 class AutoTray(TrayIcon):
 
-    def __init__(self, menumaker=None):
+    def __init__(self, menumaker):
         self._icon = None
-        self._menu = menumaker or SmartUdiskieMenu.create()
+        self._menu = menumaker
         self._conn_left = None
         self._conn_right = None
         # Okay, the following is BAD:
@@ -426,6 +407,3 @@ class AutoTray(TrayIcon):
 
     def device_removed(self, device):
         self.show(self.has_menu())
-
-if __name__ == '__main__':
-    TrayIcon.main()
