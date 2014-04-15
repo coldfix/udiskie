@@ -11,7 +11,7 @@ class Notify(object):
     notifications when system status has changed.
 
     """
-    def __init__(self, notify, browser=None, config=None):
+    def __init__(self, notify, mounter=None, config=None):
         """
         Initialize notifier.
 
@@ -19,7 +19,7 @@ class Notify(object):
 
         """
         self._notify = notify
-        self._browser = browser
+        self._mounter = mounter
         self._config = config
         # pynotify does not store hard references to the notification
         # objects. When a signal is received and the notification does not
@@ -46,11 +46,11 @@ class Notify(object):
             'Device mounted',
             '%s mounted on %s' % (label, mount_path),
             'drive-removable-media')
-        if self._browser:
+        if self._mounter._browser:
             # Show a 'Browse directory' button in mount notifications.
             # Note, this only works with some libnotify services.
             def on_browse(notification, action):
-                self._browser(mount_path)
+                self._mounter.browse_device(device)
             notification.add_action('browse', "Browse directory", on_browse)
             # Need to store a reference (see above) only if there is a
             # signal connected:
@@ -103,17 +103,27 @@ class Notify(object):
     def job_failed(self, device, action, message):
         device_file = device.device_presentation or device.object_path
         if message:
-            self._notification(
-                'job_failed',
-                'Job failed',
-                'failed to %s %s:\n%s' % (action, device_file, message),
-                'drive-removable-media').show()
+            text = 'failed to %s %s:\n%s' % (action, device_file, message)
         else:
-            self._notification(
-                'job_failed',
-                'Job failed',
-                'failed to %s %s.' % (action, device_file,),
-                'drive-removable-media').show()
+            text = 'failed to %s device %s.' % (action, device_file,)
+        notification = self._notification('job_failed',
+                                          'Job failed', text,
+                                          'drive-removable-media')
+        try:
+            retry = getattr(self._mounter, action + '_device')
+        except AttributeError:
+            pass
+        else:
+            # Show a 'Retry' button in mount notifications.
+            # Note, this only works with some libnotify services.
+            def on_retry(notification, action):
+                retry(device)
+            notification.add_action('retry', "Retry", on_retry)
+            # Need to store a reference (see above) only if there is a
+            # signal connected:
+            notification.connect('closed', self._notifications.remove)
+            self._notifications.append(notification)
+        notification.show()
 
     def _notification(self, event, summary, message, icon):
         notification = self._notify.Notification(summary, message, icon)
