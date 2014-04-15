@@ -558,13 +558,10 @@ class Daemon(Emitter, UDisks):
             return
         event_name = self._event_mapping[action]
         dev = self[object_path]
+        # NOTE: The here used heuristic is prone to raise conditions.
         if job_in_progress:
             self.trigger(event_name + 'ing', dev, job_percentage)
             self._jobs[object_path] = Job(job_id, job_percentage)
-        # NOTE: The here used heuristic is inaccurate! This shows for
-        # example when failing to unlock a LUKS partition from the same
-        # process. The event will be processed after all three login
-        # attempts are done and either show success/fail for all of them.
         elif self._check_success[job_id](dev):
             self.trigger(event_name + 'ed', dev)
             del self._jobs[object_path]

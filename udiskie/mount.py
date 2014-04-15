@@ -114,23 +114,22 @@ class Mounter(object):
             self._logger.debug('not unlocking unlocked device %s' % (device,))
             return True
         # prompt user for password
-        for iteration in range(3):
-            prompt = prompt or self._prompt
-            password = prompt and prompt(
-                'Enter password for %s:' % (
-                    device.device_presentation,),
-                'Unlock encrypted device')
-            if password is None:
-                return False
-            # unlock device
-            try:
-                self._logger.debug('unlocking device %s' % (device,))
-                mount_path = device.unlock(password).device_file
-                self._logger.info('unlocked device %s on %s' % (device, mount_path))
-                return True
-            except device.Exception:
-                self.__job_failed(device, 'unlock')
-        return False
+        prompt = prompt or self._prompt
+        password = prompt and prompt(
+            'Enter password for %s:' % (
+                device.device_presentation,),
+            'Unlock encrypted device')
+        if password is None:
+            return False
+        # unlock device
+        try:
+            self._logger.debug('unlocking device %s' % (device,))
+            mount_path = device.unlock(password).device_file
+            self._logger.info('unlocked device %s on %s' % (device, mount_path))
+            return True
+        except device.Exception:
+            self.__job_failed(device, 'unlock')
+            return False
 
     def lock_device(self, device):
         """
