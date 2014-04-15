@@ -185,6 +185,7 @@ class Config(object):
             # Use the libnotify default timeout:
             device_unlocked=-1
             device_locked=-1
+            job_failed=-1
 
         The left hand side consists of either the property key to match and
         the value to search for separated by a dot: 'key.value'. Currently,

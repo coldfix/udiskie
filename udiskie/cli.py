@@ -157,7 +157,7 @@ class Daemon(_EntryPoint):
                 import pynotify as notify_service
             notify_service.init('udiskie.mount')
             notify = udiskie.notify.Notify(notify_service,
-                                           browser=browser,
+                                           mounter=mounter,
                                            config=config.notifications)
             notify.subscribe(daemon)
 
