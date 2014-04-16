@@ -19,18 +19,28 @@ class DBusProperties(object):
     """
     Dbus property map abstraction.
 
-    Properties of the object can be accessed as attributes.
+    Wraps properties of a DBus interface on a DBus object as attributes.
     """
 
     def __init__(self, dbus_object, interface):
-        """Initialize a proxy object with standard DBus property interface."""
+        """
+        Initialize a proxy object with standard DBus property interface.
+
+        :param dbus.proxies.ProxyObject dbus_object: accessed object
+        :param str interface: accessed interface name
+        """
         self.__proxy = Interface(
-                dbus_object,
-                dbus_interface='org.freedesktop.DBus.Properties')
+            dbus_object,
+            dbus_interface='org.freedesktop.DBus.Properties')
         self.__interface = interface
 
     def __getattr__(self, property):
-        """Retrieve the property via the DBus proxy."""
+        """
+        Retrieve the property via the DBus proxy.
+
+        :param str property: name of the dbus property
+        :returns: the property
+        """
         return self.__proxy.Get(self.__interface, property)
 
 
@@ -39,11 +49,23 @@ class DBusProxy(object):
     """
     DBus proxy object.
 
-    Provides property and method bindings.
+    Provides attribute accessors to properties and methods of a DBus
+    interface on a DBus object.
+
+    :ivar object_path: object path of the DBus object
+    :ivar property: attribute access to DBus properties
+    :ivar method: attribute access to DBus methods
     """
 
+    Exception = DBusException
+
     def __init__(self, proxy, interface):
-        self.Exception = DBusException
+        """
+        Initialize property and method attribute accessors for the interface.
+
+        :param dbus.proxies.ProxyObject proxy: accessed object
+        :param str interface: accessed interface
+        """
         self.object_path = proxy.object_path
         self.property = DBusProperties(proxy, interface)
         self.method = Interface(proxy, interface)
@@ -61,21 +83,25 @@ class DBusService(object):
     @classmethod
     def connect_service(cls, bus=None, mainloop=None):
         """
-        Connect to the service object on dbus.
+        Connect to the service object on DBus.
 
         :param dbus.Bus bus: connection to system bus
         :param dbus.mainloop.NativeMainLoop mainloop: system bus event loop
-        :raises dbus.DBusException: if unable to connect to service.
+        :returns: new proxy object for the service
+        :rtype: DBusProxy
+        :raises BusException: if unable to connect to service.
 
         The mainloop parameter is only relevant if no bus is given. In this
-        case if ``mainloop is True``, use the default (glib) mainloop
-        provided by dbus-python.
+        case if ``mainloop is True``, use the default (glib) mainloop provided
+        by dbus-python.
         """
         if bus is None:
-            mainloop = mainloop or cls.mainloop
+            mainloop = mainloop if mainloop is not None else cls.mainloop
             if mainloop is True:
                 mainloop = DBusGMainLoop()
-            bus = SystemBus(mainloop=mainloop or cls.mainloop)
+            elif mainloop is False:
+                mainloop = None
+            bus = SystemBus(mainloop=mainloop)
         obj = bus.get_object(cls.BusName, cls.ObjectPath)
         return DBusProxy(obj, cls.Interface)
 
@@ -100,7 +126,12 @@ class Emitter(object):
             self._event_handlers[evt] = []
 
     def trigger(self, event, *args):
-        """Trigger event handlers."""
+        """
+        Trigger event handlers.
+
+        :param str event: event name
+        :param *args: event parameters
+        """
         for handler in self._event_handlers[event]:
             handler(*args)
 

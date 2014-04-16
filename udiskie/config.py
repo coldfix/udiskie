@@ -1,11 +1,7 @@
 """
-Filters for udiskie mount tools.
-
-Used to communicate user configuration to udiskie. At the moment user
-configuration can be used to ignore certain devices or add mount options.
+Config utilities.
 """
 
-from itertools import chain
 import logging
 import os
 import re
@@ -23,12 +19,12 @@ __all__ = ['InvalidFilter',
 
 
 class InvalidFilter(ValueError):
-    """Inappropriate filter configuration entry."""
+    """Raised when a filter configuration entry is invalid."""
 
 
 class OptionFilter(object):
 
-    """Add a list of mount options for matching devices."""
+    """Specify mount options for matching devices."""
 
     VALID_PARAMETERS = {
         'fstype': 'id_type',
@@ -38,8 +34,8 @@ class OptionFilter(object):
         """
         Construct an instance.
 
-        :param string key: match key; one of 'fstype','uuid'
-        :param string value: match value
+        :param string key: device attribute name
+        :param string value: device attribute value to be matched
         :param list options: mount options for matching devices
         """
         self._log = logging.getLogger(__name__)
@@ -153,13 +149,19 @@ class FilterMatcher(object):
 
 class Config(object):
 
-    """Read udiskie config."""
+    """Udiskie config in memory representation."""
 
+    # config file sections
     MOUNT_OPTIONS_SECTION = 'mount_options'
     PROGRAM_OPTIONS_SECTION = 'program_options'
     NOTIFICATIONS_SECTION = 'notifications'
 
     def __init__(self, data):
+        """
+        Initialize with preparsed data object.
+
+        :param ConfigParser data: config file accessor
+        """
         self._data = data
 
     @classmethod
@@ -234,6 +236,7 @@ class Config(object):
 
     @property
     def filter_options(self):
+        """Get a :class:`FilterMatcher` instance from the config data."""
         try:
             mount_options = self._data.items(self.MOUNT_OPTIONS_SECTION)
         except NoSectionError:
@@ -241,18 +244,27 @@ class Config(object):
         else:
             return FilterMatcher.from_config_section(mount_options)
 
+    @property
+    def program_options(self):
+        """Get the program options dictionary from the config file."""
+        return self._get_section(self.PROGRAM_OPTIONS_SECTION)
+
+    @property
+    def notifications(self):
+        """Get the notification timeouts dictionary from the config file."""
+        return self._get_section(self.NOTIFICATIONS_SECTION)
+
     def _get_section(self, name):
+        """
+        Get a section as dictionary from the config file. Internal method.
+
+        :param str name: config section
+        :returns: the deserialized section
+        :rtype: dict
+        """
         try:
             items = self._data.items(name)
         except NoSectionError:
             return {}
         else:
             return dict((k, v.strip()) for k,v in items)
-
-    @property
-    def program_options(self):
-        return self._get_section(self.PROGRAM_OPTIONS_SECTION)
-
-    @property
-    def notifications(self):
-        return self._get_section(self.NOTIFICATIONS_SECTION)

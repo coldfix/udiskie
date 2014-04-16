@@ -13,7 +13,12 @@ __all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
 
 
 def setdefault(self, other):
-    """Merge two dictionaries like .update() but don't overwrite values."""
+    """
+    Merge two dictionaries like .update() but don't overwrite values.
+
+    :param dict self: updated dict
+    :param dict other: default values to be inserted
+    """
     for k,v in other.items():
         self.setdefault(k, v)
 
@@ -291,6 +296,7 @@ class SmartUdiskieMenu(UdiskieMenu):
             return ()
 
     def _prepare_menu(self, node):
+        """Overrides UdiskieMenu._prepare_menu."""
         return Branch(
             label=node.label,
             groups=[list(self._leaves_group(node, [], ""))])
@@ -298,8 +304,15 @@ class SmartUdiskieMenu(UdiskieMenu):
 
 class TrayIcon(object):
 
+    """Default TrayIcon class."""
+
     def __init__(self, menumaker, statusicon=None):
-        """Create a simple gtk.StatusIcon"""
+        """
+        Create and show a simple gtk.StatusIcon.
+
+        :param UdiskieMenu menumaker: menu factory
+        :param gtk.StatusIcon statusicon: status icon
+        """
         self._icon = statusicon or self._create_statusicon()
         self._menu = menumaker
         self._conn_left = None
@@ -308,6 +321,7 @@ class TrayIcon(object):
 
     @classmethod
     def _create_statusicon(self):
+        """Return a new gtk.StatusIcon."""
         statusicon = gtk.StatusIcon()
         statusicon.set_from_stock(gtk.STOCK_CDROM)
         statusicon.set_tooltip("udiskie")
@@ -315,7 +329,7 @@ class TrayIcon(object):
 
     @property
     def visible(self):
-        """Return shown state of icon."""
+        """Return visibility state of icon."""
         return bool(self._conn_left)
 
     def show(self, show=True):
@@ -374,7 +388,23 @@ class TrayIcon(object):
 
 class AutoTray(TrayIcon):
 
+    """
+    TrayIcon that automatically hides.
+
+    The menu has no 'Quit' item, and the tray icon will automatically hide
+    if there is no action available.
+    """
+
     def __init__(self, menumaker):
+        """
+        Create and automatically set visibility of a new status icon.
+
+        Overrides TrayIcon.__init__.
+        """
+        # The reason to overwrite TrayIcon.__init__ is that the AutoTray
+        # icon may need to be hidden at initialization time. When creating a
+        # gtk.StatusIcon, it will initially be visible, creating a minor
+        # nuisance.
         self._icon = None
         self._menu = menumaker
         self._conn_left = None
@@ -385,21 +415,27 @@ class AutoTray(TrayIcon):
         self.show(self.has_menu())
 
     def _show(self):
+        """Extends TrayIcon._show: create a new status icon."""
         self._icon = self._create_statusicon()
         super(AutoTray, self)._show()
 
     def _hide(self):
+        """Extends TrayIcon._hide: forget the status icon."""
         super(AutoTray, self)._hide()
         self._icon = None
 
     def has_menu(self):
+        """Check if a menu action is available."""
         return any(self._menu._prepare_menu(self._menu.detect()).groups)
 
     def device_changed(self, old_state, new_state):
+        """Update visibility."""
         self.show(self.has_menu())
 
     def device_added(self, device):
+        """Update visibility."""
         self.show(self.has_menu())
 
     def device_removed(self, device):
+        """Update visibility."""
         self.show(self.has_menu())

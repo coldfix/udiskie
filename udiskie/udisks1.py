@@ -497,7 +497,7 @@ class Daemon(Emitter, UDisks):
 
     mainloop = True
 
-    def __init__(self, proxy=None, sniffer=None):
+    def __init__(self, proxy=None):
         """
         Create a Daemon object and start listening to DBus events.
 
@@ -521,7 +521,7 @@ class Daemon(Emitter, UDisks):
                            'device_chang', )] + ['job_failed']
         super(Daemon, self).__init__(event_names)
 
-        sniffer = sniffer or Sniffer(proxy or self.connect_service())
+        sniffer = Sniffer(proxy or self.connect_service())
 
         self._sniffer = sniffer
         self._jobs = {}

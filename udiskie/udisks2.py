@@ -37,6 +37,7 @@ def object_kind(object_path):
 
 
 def filter_opt(opt):
+    """Remove ``None`` values from a dictionary."""
     return {k: v for k,v in opt.items() if v is not None}
 
 
@@ -314,6 +315,7 @@ class Device(object):
     # Drive properties
     @property
     def is_toplevel(self):
+        """Check if the device is not a child device."""
         return not self.is_partition and not self.is_luks_cleartext
 
     @property
@@ -381,6 +383,7 @@ class Device(object):
 
     @property
     def is_crypto(self):
+        """Check if the device is a crypto device."""
         return self.id_usage == 'crypto'
 
     @property

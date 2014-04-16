@@ -1,5 +1,8 @@
 """
-Udiskie CLI entry points.
+Command line interface logic.
+
+The application classes in this module are installed as executables via
+setuptools entry points.
 """
 
 import logging
@@ -21,7 +24,7 @@ def udisks_service_object(clsname, version=None):
 
     :param str clsname: requested service object
     :param int version: requested udisks backend version
-    :return: udisks service wrapper object
+    :returns: udisks service wrapper object
     :raises dbus.DBusException: if unable to connect to UDisks dbus service.
     :raises ValueError: if the version is invalid
 
@@ -55,14 +58,15 @@ def udisks_service_object(clsname, version=None):
 class _EntryPoint(object):
 
     """
-    Base class for other entry points.
+    Abstract base class for program entry points.
+
+    Concrete implementations need to implement :meth:`run` and
+    :meth:`_init` to be usable with :meth:`main`.
     """
 
     @classmethod
     def program_options_parser(cls):
-        """
-        Return a command line option parser for options common to all modes.
-        """
+        """Return a parser for common program options."""
         parser = optparse.OptionParser()
         parser.add_option('-v', '--verbose', dest='log_level',
                           action='store_const', default=logging.INFO,
@@ -83,14 +87,14 @@ class _EntryPoint(object):
 
     def __init__(self, argv=None):
         """
-        Run the entry point.
+        Parse command line options, read config and initialize members.
+
+        :param list argv: command line parameters
         """
         import udiskie.config
-
         # parse program options (retrieve log level and config file name):
         parser = self.program_options_parser()
         options, posargs = parser.parse_args(argv)
-
         # initialize logging configuration:
         log_level = options.log_level
         if log_level <= logging.DEBUG:
@@ -98,7 +102,6 @@ class _EntryPoint(object):
         else:
             fmt = '%(message)s'
         logging.basicConfig(level=log_level, format=fmt)
-
         # parse config options (reparse to get the real values now):
         config = udiskie.config.Config.from_file(options.config_file)
         parser.set_defaults(**config.program_options)
@@ -111,17 +114,53 @@ class _EntryPoint(object):
 
     @classmethod
     def main(cls, argv=None):
+        """
+        Run program.
+
+        :param list argv: command line parameters
+        :returns: program exit code
+        :rtype: int
+        """
         return cls(argv).run()
+
+    def _init(self, config, options, posargs):
+        """
+        Fully initialize Daemon object.
+
+        :param Config config: configuration object
+        :param options: program options as returned by optparse
+        :param list posargs: positional arguments as returned by optparse
+        """
+        raise NotImplementedError("{0}._init".format(self.__class__.__name__))
+
+    def run(self):
+        """
+        Run main program logic.
+
+        :param options: program options as returned by optparse
+        :param list posargs: positional arguments as returned by optparse
+        :returns: exit code
+        :rtype: int
+        """
+        raise NotImplementedError("{0}.run".format(self.__class__.__name__))
 
 
 class Daemon(_EntryPoint):
 
     """
     Execute udiskie as a daemon.
+
+    The daemon listens to UDisks events and has the following optional
+    components:
+
+    - :class:`automount.AutoMounter`
+    - :class:`notify.Notify`
+    - :class:`tray.TrayIcon`
     """
 
     @classmethod
     def program_options_parser(cls):
+        """Extends _EntryPoint.program_option_parser."""
         parser = _EntryPoint.program_options_parser()
         parser.add_option('-P', '--password-prompt', dest='password_prompt',
                           action='store', default='zenity', metavar='PROGRAM',
@@ -145,6 +184,9 @@ class Daemon(_EntryPoint):
         return parser
 
     def _init(self, config, options, posargs):
+
+        """Implements _EntryPoint._init."""
+
         import gobject
         import udiskie.mount
         import udiskie.prompt
@@ -196,6 +238,7 @@ class Daemon(_EntryPoint):
         self.statusicon = statusicon
 
     def run(self):
+        """Implements _EntryPoint.run."""
         if self.options.automount:
             self.mounter.mount_all()
         try:
@@ -207,11 +250,12 @@ class Daemon(_EntryPoint):
 class Mount(_EntryPoint):
 
     """
-    Execute the mount command.
+    Execute the mount command line utility.
     """
 
     @classmethod
     def program_options_parser(cls):
+        """Extends _EntryPoint._program_options_parser."""
         parser = _EntryPoint.program_options_parser()
         parser.add_option('-P', '--password-prompt', dest='password_prompt',
                           action='store', default='zenity', metavar='PROGRAM',
@@ -225,6 +269,7 @@ class Mount(_EntryPoint):
         return parser
 
     def _init(self, config, options, posargs):
+        """Implements _EntryPoint._init."""
         import udiskie.mount
         import udiskie.prompt
         self.mounter = udiskie.mount.Mounter(
@@ -233,11 +278,11 @@ class Mount(_EntryPoint):
             udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
 
     def run(self):
+        """Implements _EntryPoint.run."""
         options = self.options
         posargs = self.posargs
         mounter = self.mounter
         recursive = options.recursive
-
         # mount all present devices
         if options.all:
             success = mounter.mount_all(recursive=recursive)
@@ -250,18 +295,18 @@ class Mount(_EntryPoint):
         else:
             self.program_options_parser().print_help()
             success = False
-
         return 0 if success else 1
 
 
 class Umount(_EntryPoint):
 
     """
-    Execute the umount command.
+    Execute the unmount command line utility.
     """
 
     @classmethod
     def program_options_parser(cls):
+        """Extends _EntryPoint._program_options_parser."""
         parser = _EntryPoint.program_options_parser()
         parser.add_option('-a', '--all', dest='all', default=False,
                           action='store_true', help='all devices')
@@ -272,11 +317,13 @@ class Umount(_EntryPoint):
         return parser
 
     def _init(self, config, options, posargs):
+        """Implements _EntryPoint._init."""
         import udiskie.mount
         self.mounter = udiskie.mount.Mounter(
             udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
 
     def run(self):
+        """Implements _EntryPoint.run."""
         options = self.options
         posargs = self.posargs
         mounter = self.mounter

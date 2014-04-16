@@ -1,5 +1,5 @@
 """
-Udiskie notification daemon.
+Notification utility.
 """
 
 __all__ = ['Notify']
@@ -12,13 +12,18 @@ class Notify(object):
 
     Can be connected to udisks daemon in order to automatically issue
     notifications when system status has changed.
+
+    NOTE: the action buttons in the notifications don't work with all
+    notification services.
     """
 
     def __init__(self, notify, mounter, timeout=None):
         """
-        Initialize notifier.
+        Initialize notifier and connect to service.
 
-        A notify service such as pynotify or notify2 should be passed in.
+        :param notify: notification service module (pynotify or notify2)
+        :param mounter: Mounter object
+        :param dict timeout: timeouts
         """
         self._notify = notify
         self._mounter = mounter
@@ -40,6 +45,11 @@ class Notify(object):
 
     # event handlers:
     def device_mounted(self, device):
+        """
+        Show 'Device mounted' notification with 'Browse directory' button.
+
+        :param device: device object
+        """
         label = device.id_label
         mount_path = device.mount_paths[0]
         notification = self._notification(
@@ -60,6 +70,11 @@ class Notify(object):
         notification.show()
 
     def device_unmounted(self, device):
+        """
+        Show 'Device unmounted' notification.
+
+        :param device: device object
+        """
         label = device.id_label
         self._notification(
             'device_unmounted',
@@ -68,6 +83,11 @@ class Notify(object):
             'drive-removable-media').show()
 
     def device_locked(self, device):
+        """
+        Show 'Device locked' notification.
+
+        :param device: device object
+        """
         device_file = device.device_presentation
         self._notification(
             'device_locked',
@@ -76,6 +96,11 @@ class Notify(object):
             'drive-removable-media').show()
 
     def device_unlocked(self, device):
+        """
+        Show 'Device unlocked' notification.
+
+        :param device: device object
+        """
         device_file = device.device_presentation
         self._notification(
             'device_unlocked',
@@ -84,6 +109,11 @@ class Notify(object):
             'drive-removable-media').show()
 
     def device_added(self, device):
+        """
+        Show 'Device added' notification.
+
+        :param device: device object
+        """
         device_file = device.device_presentation
         if (device.is_drive or device.is_toplevel) and device_file:
             self._notification(
@@ -93,6 +123,11 @@ class Notify(object):
                 'drive-removable-media').show()
 
     def device_removed(self, device):
+        """
+        Show 'Device removed' notification.
+
+        :param device: device object
+        """
         device_file = device.device_presentation
         if (device.is_drive or device.is_toplevel) and device_file:
             self._notification(
@@ -102,6 +137,11 @@ class Notify(object):
                 'drive-removable-media').show()
 
     def job_failed(self, device, action, message):
+        """
+        Show 'Job failed' notification with 'Retry' button.
+
+        :param device: device object
+        """
         device_file = device.device_presentation or device.object_path
         if message:
             text = 'failed to %s %s:\n%s' % (action, device_file, message)
@@ -127,6 +167,18 @@ class Notify(object):
         notification.show()
 
     def _notification(self, event, summary, message, icon):
+        """
+        Create a notification object.
+
+        :param str event: event name
+        :param str summary: notification title
+        :param str message: notification body
+        :param str icon: icon name
+        :returns: notification object
+
+        This is just a small convenience method to get the timeouts
+        correct everywhere.
+        """
         notification = self._notify.Notification(summary, message, icon)
         timeout = self._get_timeout(event)
         if timeout != -1:
@@ -134,9 +186,23 @@ class Notify(object):
         return notification
 
     def _enabled(self, event):
+        """
+        Check if the notification for an event is enabled.
+
+        :param str event: event name
+        :returns: if the event notification is enabled
+        :rtype: bool
+        """
         return self._get_timeout(event) is not None
 
     def _get_timeout(self, event):
+        """
+        Get the timeout for an event from the config.
+
+        :param str event: event name
+        :returns: timeout in seconds
+        :rtype: int, float or NoneType
+        """
         if not self._timeout:
             return -1
         try:
