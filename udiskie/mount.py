@@ -267,9 +267,9 @@ class Mounter(object):
         return self._action(device, 'detach')
 
     # mount_all/unmount_all
-    def mount_all(self, recursive=False):
+    def add_all(self, recursive=False):
         """
-        Mount handleable devices that are already present.
+        Add all handleable devices that available at start.
 
         :param bool recursive: recursively mount and unlock child devices
         :returns: whether all attempted operations succeeded
@@ -277,12 +277,15 @@ class Mounter(object):
         """
         success = True
         for device in self.get_all_handleable():
-            success = self.add(device, recursive=recursive) and success
+            if (device.is_filesystem or
+                device.is_crypto or
+                recursive and device.is_partition_table):
+                success = self.add(device, recursive=recursive) and success
         return success
 
-    def unmount_all(self, detach=False, eject=False, lock=False):
+    def remove_all(self, detach=False, eject=False, lock=False):
         """
-        Unmount all filesystems handleable by udiskie.
+        Remove all filesystems handleable by udiskie.
 
         :param bool detach: detach the root drive
         :param bool eject: remove media from the root drive
@@ -292,9 +295,36 @@ class Mounter(object):
         """
         success = True
         for device in self.get_all_handleable():
-            success = self.remove(device, force=True,
-                                  detach=detach, eject=eject,
-                                  lock=True) and success
+            if (device.is_filesystem or 
+                device.is_crypto or
+                device.is_partition_table or
+                device.is_drive):
+                success = self.remove(device, force=True, detach=detach,
+                                      eject=eject, lock=lock) and success
+        return success
+
+    def mount_all(self):
+        """
+        Mount handleable devices that are already present.
+
+        :returns: whether all attempted operations succeeded
+        :rtype: bool
+        """
+        success = True
+        for device in self.get_all_handleable():
+            success = self.mount(device) and success
+        return success
+
+    def unmount_all(self):
+        """
+        Unmount all filesystems handleable by udiskie.
+
+        :returns: whether all attempted operations succeeded
+        :rtype: bool
+        """
+        success = True
+        for device in self.get_all_handleable():
+            success = self.unmount(device) and success
         return success
 
     def eject_all(self, force=True):

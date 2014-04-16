@@ -240,7 +240,7 @@ class Daemon(_EntryPoint):
     def run(self):
         """Implements _EntryPoint.run."""
         if self.options.automount:
-            self.mounter.mount_all()
+            self.mounter.add_all()
         try:
             return self.mainloop.run()
         except KeyboardInterrupt:
@@ -285,7 +285,7 @@ class Mount(_EntryPoint):
         recursive = options.recursive
         # mount all present devices
         if options.all:
-            success = mounter.mount_all(recursive=recursive)
+            success = mounter.add_all(recursive=recursive)
         # only mount the desired devices
         elif len(posargs) > 0:
             success = True
@@ -328,8 +328,8 @@ class Umount(_EntryPoint):
         posargs = self.posargs
         mounter = self.mounter
         if options.all:
-            success = mounter.unmount_all(detach=options.detach,
-                                          eject=options.eject, lock=True)
+            success = mounter.remove_all(detach=options.detach,
+                                         eject=options.eject, lock=True)
         elif len(posargs) > 0:
             success = True
             for path in posargs:
