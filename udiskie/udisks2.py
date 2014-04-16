@@ -14,13 +14,9 @@ from copy import copy, deepcopy
 import logging
 import os.path
 
-try:                    # python2
-    from itertools import ifilter as filter
-except ImportError:     # python3
-    pass
-
-from udiskie.common import DBusProxy, DBusProperties, Emitter, DBusException, DBusService
-
+from udiskie.common import Emitter, samefile
+from udiskie.compat import filter
+from udiskie.dbus import DBusProxy, DBusProperties, DBusException, DBusService
 
 __all__ = ['Sniffer', 'Daemon']
 
@@ -39,14 +35,6 @@ def object_kind(object_path):
 def filter_opt(opt):
     """Remove ``None`` values from a dictionary."""
     return {k: v for k,v in opt.items() if v is not None}
-
-
-def samefile(a, b):
-    """Check if two pathes represent the same file."""
-    try:
-        return os.path.samefile(a, b)
-    except OSError:
-        return os.path.normpath(a) == os.path.normpath(b)
 
 
 Interface = dict(

@@ -8,19 +8,10 @@ from itertools import chain
 
 import gtk
 
+from udiskie.common import setdefault
+
 
 __all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
-
-
-def setdefault(self, other):
-    """
-    Merge two dictionaries like .update() but don't overwrite values.
-
-    :param dict self: updated dict
-    :param dict other: default values to be inserted
-    """
-    for k,v in other.items():
-        self.setdefault(k, v)
 
 
 # data structs containing the menu hierarchy:

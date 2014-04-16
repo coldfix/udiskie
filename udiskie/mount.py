@@ -6,15 +6,7 @@ from functools import wraps
 import logging
 import sys
 
-try:                    # python2
-    from itertools import ifilter as filter
-except ImportError:     # python3
-    pass
-
-try:                    # python2
-    basestring
-except NameError:       # python3
-    basestring = str
+from udiskie.compat import filter, basestring
 
 
 __all__ = ['Mounter']

@@ -23,12 +23,9 @@ from inspect import getmembers
 import logging
 import os.path
 
-try:                    # python2
-    from itertools import ifilter as filter
-except ImportError:     # python3
-    pass
-
-from udiskie.common import DBusProxy, Emitter, DBusService
+from udiskie.common import Emitter, samefile
+from udiskie.compat import filter
+from udiskie.dbus import DBusProxy, DBusService
 
 
 __all__ = ['Sniffer', 'Daemon']
@@ -37,14 +34,6 @@ __all__ = ['Sniffer', 'Daemon']
 def filter_opt(opt):
     """Remove ``None`` values from a dictionary."""
     return [k for k,v in opt.items() if v is not None]
-
-
-def samefile(a, b):
-    """Check if two pathes represent the same file."""
-    try:
-        return os.path.samefile(a, b)
-    except OSError:
-        return os.path.normpath(a) == os.path.normpath(b)
 
 
 class DeviceBase(object):
