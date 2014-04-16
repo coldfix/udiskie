@@ -30,10 +30,10 @@ def udisks_service_object(clsname, version=None):
     """
     def udisks1():
         import udiskie.udisks1
-        return getattr(udiskie.udisks1, clsname).create()
+        return getattr(udiskie.udisks1, clsname)()
     def udisks2():
         import udiskie.udisks2
-        return getattr(udiskie.udisks2, clsname).create()
+        return getattr(udiskie.udisks2, clsname)()
     if not version:
         from udiskie.common import DBusException
         try:
@@ -58,9 +58,6 @@ class _EntryPoint(object):
     Base class for other entry points.
     """
 
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-
     @classmethod
     def program_options_parser(cls):
         """
@@ -84,15 +81,14 @@ class _EntryPoint(object):
                           metavar='FILE', help='config file')
         return parser
 
-    @classmethod
-    def main(cls, argv=None):
+    def __init__(self, argv=None):
         """
         Run the entry point.
         """
         import udiskie.config
 
         # parse program options (retrieve log level and config file name):
-        parser = cls.program_options_parser()
+        parser = self.program_options_parser()
         options, posargs = parser.parse_args(argv)
 
         # initialize logging configuration:
@@ -107,8 +103,15 @@ class _EntryPoint(object):
         config = udiskie.config.Config.from_config_file(options.config_file)
         parser.set_defaults(**config.program_options)
         options, posargs = parser.parse_args(argv)
+        # initialize instance variables
+        self.config = config
+        self.options = options
+        self.posargs = posargs
+        self._init(config, options, posargs)
 
-        return cls.create(config, options, posargs).run(options, posargs)
+    @classmethod
+    def main(cls, argv=None):
+        return cls(argv).run()
 
 
 class Daemon(_EntryPoint):
@@ -141,8 +144,7 @@ class Daemon(_EntryPoint):
                           help="do not automount new devices")
         return parser
 
-    @classmethod
-    def create(cls, config, options, posargs):
+    def _init(self, config, options, posargs):
         import gobject
         import udiskie.mount
         import udiskie.prompt
@@ -175,8 +177,9 @@ class Daemon(_EntryPoint):
                             'AutoTray': udiskie.tray.AutoTray}
             if options.tray not in tray_classes:
                 raise ValueError("Invalid tray: %s" % (options.tray,))
-            menu_maker = udiskie.tray.SmartUdiskieMenu.create(mounter)
-            menu_maker._actions['quit'] = mainloop.quit
+            menu_maker = udiskie.tray.SmartUdiskieMenu(
+                mounter,
+                {'quit': mainloop.quit})
             TrayIcon = tray_classes[options.tray]
             statusicon = TrayIcon(menu_maker)
         else:
@@ -188,12 +191,12 @@ class Daemon(_EntryPoint):
             udiskie.automount.AutoMounter(mounter)
 
         # Note: mounter and statusicon are saved so these are kept alive:
-        return cls(mainloop=mainloop,
-                   mounter=mounter,
-                   statusicon=statusicon)
+        self.mainloop = mainloop
+        self.mounter = mounter
+        self.statusicon = statusicon
 
-    def run(self, options, posargs):
-        if options.automount:
+    def run(self):
+        if self.options.automount:
             self.mounter.mount_all()
         try:
             return self.mainloop.run()
@@ -221,17 +224,17 @@ class Mount(_EntryPoint):
                           help='recursively mount LUKS partitions (if the automount daemon is running, this is not necessary)')
         return parser
 
-    @classmethod
-    def create(cls, config, options, posargs):
+    def _init(self, config, options, posargs):
         import udiskie.mount
         import udiskie.prompt
-        mounter = udiskie.mount.Mounter(
+        self.mounter = udiskie.mount.Mounter(
             filter=config.filter_options,
             prompt=udiskie.prompt.password(options.password_prompt),
             udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
-        return cls(mounter=mounter)
 
-    def run(self, options, posargs):
+    def run(self):
+        options = self.options
+        posargs = self.posargs
         mounter = self.mounter
         recursive = options.recursive
 
@@ -268,14 +271,14 @@ class Umount(_EntryPoint):
                           action='store_true', help='Detach drive (power off)')
         return parser
 
-    @classmethod
-    def create(cls, config, options, posargs):
+    def _init(self, config, options, posargs):
         import udiskie.mount
-        mounter = udiskie.mount.Mounter(
+        self.mounter = udiskie.mount.Mounter(
             udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
-        return cls(mounter=mounter)
 
-    def run(self, options, posargs):
+    def run(self):
+        options = self.options
+        posargs = self.posargs
         mounter = self.mounter
         if options.all:
             success = mounter.unmount_all(detach=options.detach,

@@ -79,10 +79,6 @@ class DBusService(object):
         obj = bus.get_object(cls.BusName, cls.ObjectPath)
         return DBusProxy(obj, cls.Interface)
 
-    @classmethod
-    def create(cls, bus=None, mainloop=None):
-        return cls(cls.connect_service(bus, mainloop or cls.mainloop))
-
 
 class Emitter(object):
 

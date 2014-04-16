@@ -52,14 +52,9 @@ class UdiskieMenu(object):
         'detach': 'Unpower %s',
         'quit': 'Quit', }
 
-    def __init__(self, mounter, actions):
-        self._mounter = mounter
-        self._actions = actions
-
-    @classmethod
-    def create(cls, mounter, actions={}):
+    def __init__(self, mounter, actions={}):
         """
-        Create a new menu maker.
+        Initialize a new menu maker.
 
         :param object mounter: mount operation provider
         :param dict actions: actions for menu items
@@ -81,6 +76,7 @@ class UdiskieMenu(object):
         NOTE: If using a main loop other than ``gtk.main`` the 'quit' action
         must be customized.
         """
+        self._mounter = mounter
         setdefault(actions, {
             'browse': mounter.browse,
             'mount': mounter.mount,
@@ -90,7 +86,7 @@ class UdiskieMenu(object):
             'eject': partial(mounter.eject, force=True),
             'detach': partial(mounter.detach, force=True),
             'quit': gtk.main_quit, })
-        return cls(mounter, actions)
+        self._actions = actions
 
     def __call__(self):
         """
