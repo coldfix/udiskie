@@ -118,7 +118,7 @@ Mount '/dev/sdb1':
 
 Configuration
 -------------
-*udiskie* uses filters to apply additional mount options. On startup *udiskie* reads the filters in `$XDG_CONFIG_HOME/udiskie.conf` (or the file specified with *-C*). Filters can match the filesystem type or the device UUID. The option '__ignore__' instructs udiskie not to automount and display the matched device. The configuration file can also be used to specify defaults for some of the command line parameters.
+*udiskie* uses filters to apply additional mount options. On startup *udiskie* reads the filters in `$XDG_CONFIG_HOME/udiskie/filters.conf` (or the file specified with *-C*). Filters can match the filesystem type or the device UUID. The option \'+\_\_ignore__+' instructs udiskie not to automount and display the matched device. The configuration file can also be used to specify defaults for some of the command line parameters.
 
 Example Configuration File
 --------------------------
