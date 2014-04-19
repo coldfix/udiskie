@@ -71,6 +71,9 @@ class _EntryPoint(object):
         parser.add_option('-v', '--verbose', dest='log_level',
                           action='store_const', default=logging.INFO,
                           const=logging.DEBUG, help='verbose output')
+        parser.add_option('-q', '--quiet', dest='log_level',
+                          action='store_const', default=logging.INFO,
+                          const=logging.ERROR, help='quiet output')
         parser.add_option('-1', '--use-udisks1', dest='udisks_version',
                           action='store_const', default=0, const=1,
                           help='use udisks1 as underlying daemon (default)')

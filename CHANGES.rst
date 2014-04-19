@@ -25,6 +25,7 @@ There are some backward incompatible changes, hence the version break:
 - add 'Retry' button to failed notifications
 - remove automatic retries to unlock LUKS partitions
 - pass only device name to external password prompt
+- add '--quiet' command line option
 
 0.6.4
 ~~~~~

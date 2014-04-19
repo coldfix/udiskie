@@ -12,11 +12,11 @@ udiskie - automatic disk mounting service using udisks
 
 Synopsis
 --------
-'udiskie' [-hv12CPstTFN]
+'udiskie' [-hvq12CPstTFN]
 
-'udiskie-mount' [-hv12CPr] (-a | DEVICE...)
+'udiskie-mount' [-hvq12CPr] (-a | DEVICE...)
 
-'udiskie-umount' [-hv12Ced] (-a | PATH...)
+'udiskie-umount' [-hvq12Ced] (-a | PATH...)
 
 
 Description
@@ -30,7 +30,10 @@ Options
 	Show help message and exit.
 
 *-v, \--verbose*::
-	Verbose output.
+	Verbose output. Can't be used together with the *-q* option.
+
+*-q, \--quiet*::
+	Quiet output. Can't be used together with the *-v* option.
 
 *-1, \--use-udisks1*::
 	Use UDisks1 as DBus backend (default)
