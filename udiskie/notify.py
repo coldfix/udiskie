@@ -1,44 +1,55 @@
 """
-Udiskie notification daemon.
+Notification utility.
 """
+
 __all__ = ['Notify']
 
+
 class Notify(object):
+
     """
     Notification tool.
 
     Can be connected to udisks daemon in order to automatically issue
     notifications when system status has changed.
 
+    NOTE: the action buttons in the notifications don't work with all
+    notification services.
     """
-    def __init__(self, notify, mounter=None, config=None):
+
+    def __init__(self, notify, mounter, timeout=None):
         """
-        Initialize notifier.
+        Initialize notifier and connect to service.
 
-        A notify service such as pynotify or notify2 should be passed in.
-
+        :param notify: notification service module (pynotify or notify2)
+        :param mounter: Mounter object
+        :param dict timeout: timeouts
         """
         self._notify = notify
         self._mounter = mounter
-        self._config = config
+        self._timeout = timeout
         # pynotify does not store hard references to the notification
         # objects. When a signal is received and the notification does not
         # exist anymore, no handller will be called. Therefore, we need to
         # prevent these notifications from being destroyed by storing
         # references (note, notify2 doesn't need this):
         self._notifications = []
-
-    def subscribe(self, daemon):
-        """Subscribe all enabled events to the daemon."""
+        # Subscribe all enabled events to the daemon:
+        udisks = mounter.udisks
         for event in ['device_mounted', 'device_unmounted',
                       'device_locked', 'device_unlocked',
                       'device_added', 'device_removed',
                       'job_failed']:
             if self._enabled(event):
-                daemon.connect(getattr(self, event), event)
+                udisks.connect(event, getattr(self, event))
 
     # event handlers:
     def device_mounted(self, device):
+        """
+        Show 'Device mounted' notification with 'Browse directory' button.
+
+        :param device: device object
+        """
         label = device.id_label
         mount_path = device.mount_paths[0]
         notification = self._notification(
@@ -50,7 +61,7 @@ class Notify(object):
             # Show a 'Browse directory' button in mount notifications.
             # Note, this only works with some libnotify services.
             def on_browse(notification, action):
-                self._mounter.browse_device(device)
+                self._mounter.browse(device)
             notification.add_action('browse', "Browse directory", on_browse)
             # Need to store a reference (see above) only if there is a
             # signal connected:
@@ -59,6 +70,11 @@ class Notify(object):
         notification.show()
 
     def device_unmounted(self, device):
+        """
+        Show 'Device unmounted' notification.
+
+        :param device: device object
+        """
         label = device.id_label
         self._notification(
             'device_unmounted',
@@ -67,6 +83,11 @@ class Notify(object):
             'drive-removable-media').show()
 
     def device_locked(self, device):
+        """
+        Show 'Device locked' notification.
+
+        :param device: device object
+        """
         device_file = device.device_presentation
         self._notification(
             'device_locked',
@@ -75,6 +96,11 @@ class Notify(object):
             'drive-removable-media').show()
 
     def device_unlocked(self, device):
+        """
+        Show 'Device unlocked' notification.
+
+        :param device: device object
+        """
         device_file = device.device_presentation
         self._notification(
             'device_unlocked',
@@ -83,6 +109,11 @@ class Notify(object):
             'drive-removable-media').show()
 
     def device_added(self, device):
+        """
+        Show 'Device added' notification.
+
+        :param device: device object
+        """
         device_file = device.device_presentation
         if (device.is_drive or device.is_toplevel) and device_file:
             self._notification(
@@ -92,6 +123,11 @@ class Notify(object):
                 'drive-removable-media').show()
 
     def device_removed(self, device):
+        """
+        Show 'Device removed' notification.
+
+        :param device: device object
+        """
         device_file = device.device_presentation
         if (device.is_drive or device.is_toplevel) and device_file:
             self._notification(
@@ -101,6 +137,11 @@ class Notify(object):
                 'drive-removable-media').show()
 
     def job_failed(self, device, action, message):
+        """
+        Show 'Job failed' notification with 'Retry' button.
+
+        :param device: device object
+        """
         device_file = device.device_presentation or device.object_path
         if message:
             text = 'failed to %s %s:\n%s' % (action, device_file, message)
@@ -110,7 +151,7 @@ class Notify(object):
                                           'Job failed', text,
                                           'drive-removable-media')
         try:
-            retry = getattr(self._mounter, action + '_device')
+            retry = getattr(self._mounter, action)
         except AttributeError:
             pass
         else:
@@ -126,6 +167,18 @@ class Notify(object):
         notification.show()
 
     def _notification(self, event, summary, message, icon):
+        """
+        Create a notification object.
+
+        :param str event: event name
+        :param str summary: notification title
+        :param str message: notification body
+        :param str icon: icon name
+        :returns: notification object
+
+        This is just a small convenience method to get the timeouts
+        correct everywhere.
+        """
         notification = self._notify.Notification(summary, message, icon)
         timeout = self._get_timeout(event)
         if timeout != -1:
@@ -133,15 +186,29 @@ class Notify(object):
         return notification
 
     def _enabled(self, event):
+        """
+        Check if the notification for an event is enabled.
+
+        :param str event: event name
+        :returns: if the event notification is enabled
+        :rtype: bool
+        """
         return self._get_timeout(event) is not None
 
     def _get_timeout(self, event):
-        if not self._config:
+        """
+        Get the timeout for an event from the config.
+
+        :param str event: event name
+        :returns: timeout in seconds
+        :rtype: int, float or NoneType
+        """
+        if not self._timeout:
             return -1
         try:
-            timeout = self._config[event]
+            timeout = self._timeout[event]
         except KeyError:
-            timeout = self._config.get('timeout', -1)
+            timeout = self._timeout.get('timeout', -1)
         if timeout in ('', None):
             return None
         try:

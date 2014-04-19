@@ -4,21 +4,25 @@ vim:set ts=4 sw=4 syntax=asciidoc noet:
 udiskie(8)
 ==========
 
+
 Name
 ----
 udiskie - automatic disk mounting service using udisks
 
+
 Synopsis
 --------
-'udiskie' [-hv12CPstTFN]
+'udiskie' [-hvq12CPstTFN]
 
-'udiskie-mount' [-h12vCPr] (-a | DEVICE...)
+'udiskie-mount' [-hvq12CPr] (-a | DEVICE...)
 
-'udiskie-umount' [-h12vCed] (-a | PATH...)
+'udiskie-umount' [-hvq12Ced] (-a | PATH...)
+
 
 Description
 -----------
-*udiskie* uses udisks to automatically mount removable media, such as CDs and flash drives. It will mount the media in a new directory under \'+/media+', using the device name if available. It is lightweight and runs as a daemon.
+*udiskie* uses udisks to automatically mount removable media, such as CDs and flash drives. It will mount the media in a new directory under '/media', using the device name if available. It is lightweight and runs as a daemon.
+
 
 Options
 -------
@@ -26,7 +30,10 @@ Options
 	Show help message and exit.
 
 *-v, \--verbose*::
-	Verbose output.
+	Verbose output. Can't be used together with the *-q* option.
+
+*-q, \--quiet*::
+	Quiet output. Can't be used together with the *-v* option.
 
 *-1, \--use-udisks1*::
 	Use UDisks1 as DBus backend (default)
@@ -38,37 +45,41 @@ Options
     Alternate filter configuration.
 
 *-P PROMPT, \--password-prompt=PROMPT*::
-	Password prompt to use for unlocking. Default is 'zenity'. This must be an executable that receives as its first two arguments the text and title to display and should print the password to its stdout in UTF-8 encoding.
+	Password prompt to use for unlocking. Default is \'+zenity+'. This must be an executable that receives as its first argument the device path and should print the password to its stdout in UTF-8 encoding. This option is deprecated and will probably be replaced by a python commands file.
 
 *-r, \--recursive*::
-	Recursively mount cleartext partitions after unlocking a LUKS device. This will happen by default running the udiskie daemon.
+	Recursively mount cleartext partitions after unlocking a LUKS device. This will happen by default when running the udiskie daemon.
 
 *-s, \--suppress*::
 	Suppress pop-up notifications.
 
 *-t, \--tray*::
-	Show tray icon. Can't be used together with the '-T' option.
+	Show tray icon. Can't be used together with the *-T* option.
 
 *-T, \--auto-tray*::
-	Show tray icon without 'Quit' menuitem that automatically hides when there is no action available. Can't be used together with the '-t' option.
+	Show tray icon that automatically hides when there is no action available. Can't be used together with the *-t* option.
 
 *-N, \--no-automount*::
 	Disable automounting new devices.
 
 *-F PROGRAM, \--file-manager=PROGRAM*::
-	Set program to open mounted directories. Default is 'xdg-open'. Pass an empty string to disable this feature.
+	Set program to open mounted directories. Default is \'+xdg-open+'. Pass an empty string to disable this feature. This option is deprecated and will probably be replaced by a python commands file.
 
 *-a, \--all*::
 	Mount or unmount all external devices.
 
 *-e, \--eject*::
-	Eject media from the drive.
+	Eject media from the drive, e.g CDROM.
 
 *-d, \--detach*::
 	Detach drive by e.g. powering down its physical port.
 
+
 Dependencies
 ------------
+
+*udisks1* or *udisks2*::
+	backend service required for all operation modes.
 
 *dbus-python*::
 	required for all operation modes.
@@ -84,6 +95,7 @@ Dependencies
 
 *PyGTK*::
 	to show the system tray icon
+
 
 Example Usage[[EU]]
 -------------------
@@ -102,6 +114,7 @@ Mount all media:
 Mount '/dev/sdb1':
 
 	udiskie-mount /dev/sdb1
+
 
 Configuration
 -------------
@@ -159,6 +172,7 @@ https://pypi.python.org/pypi/notify2
 http://freecode.com/projects/zenity
 
 http://www.pygtk.org
+
 
 Authors
 -------

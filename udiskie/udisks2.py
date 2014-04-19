@@ -8,19 +8,18 @@ Requires UDisks2 2.1.1 as described here:
 
 This wraps the DBus API of Udisks2 providing a common interface with the
 udisks1 module.
-
 """
-__all__ = ['Sniffer', 'Daemon']
 
+from copy import copy, deepcopy
 import logging
 import os.path
-from udiskie.common import DBusProxy, DBusProperties, Emitter, DBusException, DBusService
-from copy import copy, deepcopy
 
-try:                    # python2
-    from itertools import ifilter as filter
-except ImportError:     # python3
-    pass
+from udiskie.common import Emitter, samefile
+from udiskie.compat import filter
+from udiskie.dbus import DBusProxy, DBusProperties, DBusException, DBusService
+
+__all__ = ['Sniffer', 'Daemon']
+
 
 def object_kind(object_path):
     try:
@@ -32,15 +31,11 @@ def object_kind(object_path):
     except IndexError:
         return None
 
+
 def filter_opt(opt):
+    """Remove ``None`` values from a dictionary."""
     return {k: v for k,v in opt.items() if v is not None}
 
-def samefile(a, b):
-    """Check if two pathes represent the same file."""
-    try:
-        return os.path.samefile(a, b)
-    except OSError:
-        return os.path.normpath(a) == os.path.normpath(b)
 
 Interface = dict(
     Manager        = 'org.freedesktop.UDisks2.Manager',
@@ -58,6 +53,7 @@ Interface = dict(
     ObjectManager  = 'org.freedesktop.DBus.ObjectManager',
     Properties     = 'org.freedesktop.DBus.Properties',
 )
+
 
 #----------------------------------------
 # byte array to string conversion
@@ -88,12 +84,15 @@ def encode(s):
     else:
         return s
 
+
 #----------------------------------------
 # Internal helper classes
 #----------------------------------------
 
 class AttrDictView(object):
+
     """Provide attribute access view to a dictionary."""
+
     def __init__(self, data):
         self.__data = data
 
@@ -103,7 +102,9 @@ class AttrDictView(object):
         except KeyError:
             raise AttributeError
 
+
 class OfflineProxy(object):
+
     """
     Provide offline attribute access to a single interface on a DBus object.
 
@@ -111,33 +112,33 @@ class OfflineProxy(object):
 
     This access method is to be preferred over the dynamic property lookup
     in many cases as it is immune to a number of race conditions.
-
     """
+
     def __init__(self, proxy, data):
         """
         Initialize wrapper.
 
         :param DBusProxy proxy: for dynamic property/method lookup
         :param dict data: for static property lookup
-
         """
         self.property = AttrDictView(data)
         self.method = proxy.method
 
+
 class OfflineInterfaceService(object):
+
     """
     Provide offline attribute access to multiple interfaces on a DBus object.
 
     Method access is performed dynamically via the given DBus proxy object.
-
     """
+
     def __init__(self, proxy, data):
         """
         Store DBus proxy and static property values.
 
         :param dbus.proxies.ProxyObject proxy: DBus object for method access
         :param dict data: interface and their properties a{sa{sv}}
-
         """
         self._proxy = proxy
         self._data = data
@@ -151,20 +152,21 @@ class OfflineInterfaceService(object):
         except:
             return NullProxy(key, self._proxy.object_path)
 
+
 class OnlineInterfaceService(object):
+
     """
     Provide online attribute access to multiple interfaces on a DBus object.
 
     Both method and property access is performed dynamically via the given
     DBus proxy object.
-
     """
+
     def __init__(self, proxy):
         """
         Store DBus proxy.
 
         :param dbus.proxies.ProxyObject proxy: DBus object for online access
-
         """
         self._proxy = proxy
         self._check = DBusProxy(proxy, Interface['Properties']).method.GetAll
@@ -179,13 +181,19 @@ class OnlineInterfaceService(object):
 
     # TODO: need reliable and fast __nonzero__ check
 
+
 class NoneServer(object):
+
     """Yield None when asked for any attribute."""
+
     def __getattr__(self, key):
         return None
 
+
 class NullProxy(object):
+
     """Interface not available."""
+
     def __init__(self, name, object_path):
         self.object_path = object_path
         self._name = name
@@ -206,6 +214,7 @@ class NullProxy(object):
 #----------------------------------------
 
 class Device(object):
+
     """
     Wrapper class for DBus API objects representing devices.
 
@@ -214,8 +223,8 @@ class Device(object):
     ``OfflineInterfaceService``.
 
     This class is intended to be used only internally.
-
     """
+
     Exception = DBusException
 
     def __init__(self, udisks, object_path, interface_service):
@@ -225,7 +234,6 @@ class Device(object):
         :param UDisks2 udisks: used to create other Device instances
         :param str object_path: object path of the device
         :param InterfaceService interface_service: used to access DBus API
-
         """
         self._udisks = udisks
         self.object_path = object_path
@@ -298,6 +306,7 @@ class Device(object):
     # Drive properties
     @property
     def is_toplevel(self):
+        """Check if the device is not a child device."""
         return not self.is_partition and not self.is_luks_cleartext
 
     @property
@@ -307,7 +316,6 @@ class Device(object):
 
         This method is used internally to unify the behaviour of top level
         devices in udisks1 and udisks2.
-
         """
         return self.drive if self.is_toplevel else self
 
@@ -366,6 +374,7 @@ class Device(object):
 
     @property
     def is_crypto(self):
+        """Check if the device is a crypto device."""
         return self.id_usage == 'crypto'
 
     @property
@@ -377,7 +386,6 @@ class Device(object):
 
         IdUsage     'filesystem'    'crypto'
         IdType      'ext4'          'crypto_LUKS'
-
         """
         return decode(self._I.Block.property.IdType)
 
@@ -538,15 +546,17 @@ class Device(object):
                     return True
         return False
 
+
 #----------------------------------------
 # UDisks2 service wrapper
 #----------------------------------------
 
 class UDisks2(DBusService):
-    """
-    Base class for UDisks2 service wrappers.
 
     """
+    Base class for UDisks2 service wrappers.
+    """
+
     BusName = 'org.freedesktop.UDisks2'
     ObjectPath = '/org/freedesktop/UDisks2'
     Interface = Interface['ObjectManager']
@@ -565,7 +575,6 @@ class UDisks2(DBusService):
 
         This searches through all accessible devices and compares device
         path as well as mount pathes.
-
         """
         for device in self:
             if device.is_file(path):
@@ -573,6 +582,7 @@ class UDisks2(DBusService):
         logger = logging.getLogger(__name__)
         logger.warn('Device not found: %s' % path)
         return None
+
 
 class Sniffer(UDisks2):
     """
@@ -582,8 +592,8 @@ class Sniffer(UDisks2):
     'org.freedesktop.UDisks2'. Access to properties and device states is
     completely online, meaning the properties are requested from dbus as
     they are accessed in the python object.
-
     """
+
     # Construction
     def __init__(self, proxy=None):
         """
@@ -591,7 +601,6 @@ class Sniffer(UDisks2):
 
         :param dbus.Bus bus: connection to system bus
         :param common.DBusProxy proxy: proxy to udisks object
-
         """
         self._proxy = proxy or self.connect_service()
 
@@ -615,6 +624,7 @@ class Sniffer(UDisks2):
 
 
 class Daemon(Emitter, UDisks2):
+
     """
     Listen to state changes to provide automatic synchronization.
 
@@ -626,12 +636,14 @@ class Daemon(Emitter, UDisks2):
         - device_mounted  / device_unmounted
         - media_added     / media_removed
         - device_changed  / job_failed
-
     """
+
     mainloop = True
 
     def __init__(self, proxy=None):
+
         """Initialize object and start listening to UDisks2 events."""
+
         event_names = (tuple(stem + suffix
                              for suffix in ('ed','ing')
                              for stem in (
@@ -678,7 +690,7 @@ class Daemon(Emitter, UDisks2):
             path_keyword='job_name')
         self._sync()
 
-        self.connect(self._object_added, 'object_added')
+        self.connect('object_added', self._object_added)
 
     def _sync(self):
         """Synchronize state."""
@@ -741,7 +753,7 @@ class Daemon(Emitter, UDisks2):
             del self._objects[object_path][interface]
         new_state = self._objects[object_path]
 
-        if 'org.freedesktop.UDisks2.Drive' in interfaces:
+        if Interface['Drive'] in interfaces:
             self._detect_toggle(
                 'has_media',
                 self.get(object_path, old_state),
@@ -765,7 +777,6 @@ class Daemon(Emitter, UDisks2):
         Internal method.
 
         Called when a DBusProperty of any managed object changes.
-
         """
         # update device state:
         old_state = deepcopy(self._objects[object_path])
@@ -774,14 +785,14 @@ class Daemon(Emitter, UDisks2):
         for key,value in changed_properties.items():
             self._objects[object_path][interface_name][key] = value
         new_state = self._objects[object_path]
-
-        if interface_name == 'org.freedesktop.UDisks2.Drive':
+        # detect changes and trigger events:
+        if interface_name == Interface['Drive']:
             self._detect_toggle(
                 'has_media',
                 self.get(object_path, old_state),
                 self.get(object_path, new_state),
                 'media_added', 'media_removed')
-        elif interface_name == 'org.freedesktop.UDisks2.Filesystem':
+        elif interface_name == Interface['Filesystem']:
             self._detect_toggle(
                 'is_mounted',
                 self.get(object_path, old_state),
@@ -826,10 +837,8 @@ class Daemon(Emitter, UDisks2):
         Internal method.
 
         Called when a job of a long running task completes.
-
         """
         if success:
             self._job_changed(job_name, True)
         else:
             self._job_failed(job_name, message)
-

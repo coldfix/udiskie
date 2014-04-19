@@ -1,16 +1,25 @@
 """
-Udiskie user prompt utility.
+User prompt utility.
 """
-__all__ = ['password']
 
-import subprocess
 from distutils.spawn import find_executable
 import logging
+import subprocess
+
+
+__all__ = ['password', 'browser']
+
 
 def password(prompt_name='zenity'):
+
     """
     Create a password prompt function.
+
+    :param str prompt_name: password program name
+    :returns: one-parameter prompt function
+    :rtype: callable
     """
+
     if not prompt_name:
         return None
 
@@ -18,34 +27,47 @@ def password(prompt_name='zenity'):
     if executable is None:
         return None
 
+    text = 'Enter password for {0.device_presentation}:'
+
     # builtin variant: enter password via zenity:
     if prompt_name == 'zenity':
-        def doprompt(text, title):
-            return subprocess.check_output([executable,
+        def doprompt(device):
+            return subprocess.check_output([
+                executable,
                 '--entry', '--hide-text',
-                '--text', text, '--title', title ])
+                '--text', text.format(device),
+                '--title', 'Unlock encrypted device' ])
 
     # builtin variant: enter password via systemd-ask-password:
     elif prompt_name == 'systemd-ask-password':
-        def doprompt(text, title):
-            return subprocess.check_output([executable, text])
+        def doprompt(device):
+            return subprocess.check_output([executable, text.format(device)])
 
     # enter password via user supplied binary:
     else:
-        def doprompt(text, title):
-            return subprocess.check_output([executable, text, title])
+        def doprompt(device):
+            return subprocess.check_output([executable,
+                                            device.device_presentation])
 
-    def password_prompt(text, title):
+    def password_prompt(device):
         try:
-            return doprompt(text, title).decode('utf-8').rstrip('\n')
+            answer = doprompt(device).decode('utf-8')
+            # strip trailing newline from program output:
+            return answer.rstrip('\n')
         except subprocess.CalledProcessError:
+            # usually this means the user cancelled
             return None
 
     return password_prompt
 
+
 def browser(browser_name='xdg-open'):
     """
     Create a browse-directory function.
+
+    :param str browser_name: file manager program name
+    :returns: one-parameter open function
+    :rtype: callable
     """
     if not browser_name:
         return None

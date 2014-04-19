@@ -1,32 +1,33 @@
 """
 Tray icon for udiskie.
 """
-__all__ = ['UdiskieMenu', 'SmartUdiskieMenu',
-           'TrayIcon',
-           'main']
 
-import gtk
-from functools import partial
 from collections import namedtuple
+from functools import partial
 from itertools import chain
 
-def setdefault(self, other):
-    """Merge two dictionaries like .update() but don't overwrite values."""
-    for k,v in other.items():
-        self.setdefault(k, v)
+import gtk
+
+from udiskie.common import setdefault
+
+
+__all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
+
 
 # data structs containing the menu hierarchy:
 Node = namedtuple('Node', ['root', 'branches', 'device', 'label', 'methods'])
 Action = namedtuple('Action', ['label', 'device', 'method'])
 Branch = namedtuple('Branch', ['label', 'groups'])
 
+
 class UdiskieMenu(object):
+
     """
     Builder for udiskie menus.
 
     Objects of this class generate action menus when being called.
-
     """
+
     _menu_icons = {
         'browse': gtk.STOCK_OPEN,
         'mount': 'udiskie-mount',
@@ -47,17 +48,11 @@ class UdiskieMenu(object):
         'detach': 'Unpower %s',
         'quit': 'Quit', }
 
-    def __init__(self, mounter, actions):
-        self._mounter = mounter
-        self._actions = actions
-
-    @classmethod
-    def create(cls, mounter=None, udisks=None, actions={}):
+    def __init__(self, mounter, actions={}):
         """
-        Create a new menu maker.
+        Initialize a new menu maker.
 
         :param object mounter: mount operation provider
-        :param object udisks: udisks wrapper (only if ``mounter is None``)
         :param dict actions: actions for menu items
         :returns: a new menu maker
         :rtype: cls
@@ -76,25 +71,18 @@ class UdiskieMenu(object):
 
         NOTE: If using a main loop other than ``gtk.main`` the 'quit' action
         must be customized.
-
         """
-        if mounter is None:
-            if udisks is None:
-                from udiskie.udisks import Sniffer
-                udisks = Sniffer()
-            from udiskie.mount import Mounter
-            from udiskie.prompt import password
-            mounter = Mounter(prompt=password(), udisks=udisks)
+        self._mounter = mounter
         setdefault(actions, {
-            'browse': mounter.browse_device,
-            'mount': mounter.mount_device,
-            'unmount': mounter.unmount_device,
-            'unlock': mounter.unlock_device,
-            'lock': partial(mounter.remove_device, force=True),
-            'eject': partial(mounter.eject_device, force=True),
-            'detach': partial(mounter.detach_device, force=True),
+            'browse': mounter.browse,
+            'mount': mounter.mount,
+            'unmount': mounter.unmount,
+            'unlock': mounter.unlock,
+            'lock': partial(mounter.remove, force=True),
+            'eject': partial(mounter.eject, force=True),
+            'detach': partial(mounter.detach, force=True),
             'quit': gtk.main_quit, })
-        return cls(mounter, actions)
+        self._actions = actions
 
     def __call__(self):
         """
@@ -102,7 +90,6 @@ class UdiskieMenu(object):
 
         :returns: a new menu
         :rtype: gtk.Menu
-
         """
         # create actions items
         menu = self._branchmenu(self._prepare_menu(self.detect()).groups)
@@ -119,7 +106,6 @@ class UdiskieMenu(object):
 
         :returns: root of device hierarchy
         :rtype: Node
-
         """
         root = Node(None, [], None, "", [])
         device_nodes = dict(map(self._device_node,
@@ -136,7 +122,6 @@ class UdiskieMenu(object):
         :param Branch groups: contains information about the menu
         :returns: a new menu object holding all groups of the node
         :rtype: gtk.Menu
-
         """
         menu = gtk.Menu()
         separate = False
@@ -169,7 +154,6 @@ class UdiskieMenu(object):
         :param onclick: onclick handler, either a callable or gtk.Menu
         :returns: the menu item object
         :rtype: gtk.MenuItem
-
         """
         if icon is None:
             item = gtk.MenuItem()
@@ -196,7 +180,6 @@ class UdiskieMenu(object):
         :param tuple bind: parameters for the onclick handler
         :returns: the menu item object
         :rtype: gtk.MenuItem
-
         """
         return self._menuitem(
             self._menu_labels[action] % tuple(feed),
@@ -243,7 +226,6 @@ class UdiskieMenu(object):
         :param Node node: root node of device hierarchy
         :returns: menu hierarchy
         :rtype: Branch
-
         """
         return Branch(
             label=node.label,
@@ -261,10 +243,10 @@ class UdiskieMenu(object):
         :param str name: name of the menu item
         :returns: the loaded icon
         :rtype: gtk.Image
-
         """
         return gtk.image_new_from_icon_name(self._menu_icons[name],
                                             gtk.ICON_SIZE_MENU)
+
 
 class SmartUdiskieMenu(UdiskieMenu):
 
@@ -274,7 +256,6 @@ class SmartUdiskieMenu(UdiskieMenu):
 
         :param Node node: device
         :param str presentation: node label
-
         """
         return [Action(presentation, node.device, method)
                 for method in node.methods]
@@ -286,7 +267,6 @@ class SmartUdiskieMenu(UdiskieMenu):
         :param Node node: device
         :param list outer_methods: mix-in methods of root device
         :param str presentation: node label
-
         """
         if not presentation or (node.device.is_mounted or
                                 not node.device.is_luks_cleartext):
@@ -307,43 +287,40 @@ class SmartUdiskieMenu(UdiskieMenu):
             return ()
 
     def _prepare_menu(self, node):
+        """Overrides UdiskieMenu._prepare_menu."""
         return Branch(
             label=node.label,
             groups=[list(self._leaves_group(node, [], ""))])
 
-#----------------------------------------
-# menu actions
-#----------------------------------------
+
 class TrayIcon(object):
-    def __init__(self, menumaker=None, statusicon=None):
-        """Create a simple gtk.StatusIcon"""
+
+    """Default TrayIcon class."""
+
+    def __init__(self, menumaker, statusicon=None):
+        """
+        Create and show a simple gtk.StatusIcon.
+
+        :param UdiskieMenu menumaker: menu factory
+        :param gtk.StatusIcon statusicon: status icon
+        """
         self._icon = statusicon or self._create_statusicon()
-        self._menu = menumaker or SmartUdiskieMenu.create()
+        self._menu = menumaker
         self._conn_left = None
         self._conn_right = None
         self.show()
 
     @classmethod
     def _create_statusicon(self):
+        """Return a new gtk.StatusIcon."""
         statusicon = gtk.StatusIcon()
         statusicon.set_from_stock(gtk.STOCK_CDROM)
         statusicon.set_tooltip("udiskie")
         return statusicon
 
-    @classmethod
-    def main(cls):
-        """Run udiskie tray icon in a main loop."""
-        icon = cls()
-        try:
-            gtk.main()
-        except KeyboardInterrupt:
-            pass
-        finally:
-            icon.hide()
-
     @property
     def visible(self):
-        """Return shown state of icon."""
+        """Return visibility state of icon."""
         return bool(self._conn_left)
 
     def show(self, show=True):
@@ -399,37 +376,57 @@ class TrayIcon(object):
                 activate_time=time,
                 data=icon)
 
+
 class AutoTray(TrayIcon):
-    def __init__(self, menumaker=None):
+
+    """
+    TrayIcon that automatically hides.
+
+    The menu has no 'Quit' item, and the tray icon will automatically hide
+    if there is no action available.
+    """
+
+    def __init__(self, menumaker):
+        """
+        Create and automatically set visibility of a new status icon.
+
+        Overrides TrayIcon.__init__.
+        """
+        # The reason to overwrite TrayIcon.__init__ is that the AutoTray
+        # icon may need to be hidden at initialization time. When creating a
+        # gtk.StatusIcon, it will initially be visible, creating a minor
+        # nuisance.
         self._icon = None
-        self._menu = menumaker or SmartUdiskieMenu.create()
+        self._menu = menumaker
         self._conn_left = None
         self._conn_right = None
         # Okay, the following is BAD:
         menumaker._actions['quit'] = None
-        menumaker._mounter._udisks.connect(self)
+        menumaker._mounter.udisks.connect_all(self)
         self.show(self.has_menu())
 
     def _show(self):
+        """Extends TrayIcon._show: create a new status icon."""
         self._icon = self._create_statusicon()
         super(AutoTray, self)._show()
 
     def _hide(self):
+        """Extends TrayIcon._hide: forget the status icon."""
         super(AutoTray, self)._hide()
         self._icon = None
 
     def has_menu(self):
+        """Check if a menu action is available."""
         return any(self._menu._prepare_menu(self._menu.detect()).groups)
 
     def device_changed(self, old_state, new_state):
+        """Update visibility."""
         self.show(self.has_menu())
 
     def device_added(self, device):
+        """Update visibility."""
         self.show(self.has_menu())
 
     def device_removed(self, device):
+        """Update visibility."""
         self.show(self.has_menu())
-
-if __name__ == '__main__':
-    TrayIcon.main()
-

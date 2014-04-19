@@ -1,16 +1,22 @@
 """
-Udiskie CLI entry points.
+Command line interface logic.
+
+The application classes in this module are installed as executables via
+setuptools entry points.
 """
+
+import logging
+import optparse
+import sys
+import warnings
+
+
 __all__ = ['Daemon', 'Mount', 'Umount']
 
-import warnings
+
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
-import optparse
-import sys
-import logging
-from functools import partial
 
 def udisks_service_object(clsname, version=None):
     """
@@ -18,20 +24,19 @@ def udisks_service_object(clsname, version=None):
 
     :param str clsname: requested service object
     :param int version: requested udisks backend version
-    :return: udisks service wrapper object
+    :returns: udisks service wrapper object
     :raises dbus.DBusException: if unable to connect to UDisks dbus service.
     :raises ValueError: if the version is invalid
 
     If ``version`` has a false truth value, try to connect to UDisks1 and
     fall back to UDisks2 if not available.
-
     """
     def udisks1():
         import udiskie.udisks1
-        return getattr(udiskie.udisks1, clsname).create()
+        return getattr(udiskie.udisks1, clsname)()
     def udisks2():
         import udiskie.udisks2
-        return getattr(udiskie.udisks2, clsname).create()
+        return getattr(udiskie.udisks2, clsname)()
     if not version:
         from udiskie.common import DBusException
         try:
@@ -49,22 +54,26 @@ def udisks_service_object(clsname, version=None):
     else:
         raise ValueError("UDisks version not supported: %s!" % (version,))
 
+
 class _EntryPoint(object):
+
     """
-    Base class for other entry points.
+    Abstract base class for program entry points.
+
+    Concrete implementations need to implement :meth:`run` and
+    :meth:`_init` to be usable with :meth:`main`.
     """
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
 
     @classmethod
     def program_options_parser(cls):
-        """
-        Return a command line option parser for options common to all modes.
-        """
+        """Return a parser for common program options."""
         parser = optparse.OptionParser()
         parser.add_option('-v', '--verbose', dest='log_level',
                           action='store_const', default=logging.INFO,
                           const=logging.DEBUG, help='verbose output')
+        parser.add_option('-q', '--quiet', dest='log_level',
+                          action='store_const', default=logging.INFO,
+                          const=logging.ERROR, help='quiet output')
         parser.add_option('-1', '--use-udisks1', dest='udisks_version',
                           action='store_const', default=0, const=1,
                           help='use udisks1 as underlying daemon (default)')
@@ -79,17 +88,16 @@ class _EntryPoint(object):
                           metavar='FILE', help='config file')
         return parser
 
-    @classmethod
-    def main(cls, argv=None):
+    def __init__(self, argv=None):
         """
-        Run the entry point.
+        Parse command line options, read config and initialize members.
+
+        :param list argv: command line parameters
         """
         import udiskie.config
-
         # parse program options (retrieve log level and config file name):
-        parser = cls.program_options_parser()
+        parser = self.program_options_parser()
         options, posargs = parser.parse_args(argv)
-
         # initialize logging configuration:
         log_level = options.log_level
         if log_level <= logging.DEBUG:
@@ -97,25 +105,69 @@ class _EntryPoint(object):
         else:
             fmt = '%(message)s'
         logging.basicConfig(level=log_level, format=fmt)
-
         # parse config options (reparse to get the real values now):
-        config = udiskie.config.Config.from_config_file(options.config_file)
+        config = udiskie.config.Config.from_file(options.config_file)
         parser.set_defaults(**config.program_options)
         options, posargs = parser.parse_args(argv)
+        # initialize instance variables
+        self.config = config
+        self.options = options
+        self.posargs = posargs
+        self._init(config, options, posargs)
 
-        return cls.create(config, options, posargs).run(options, posargs)
+    @classmethod
+    def main(cls, argv=None):
+        """
+        Run program.
+
+        :param list argv: command line parameters
+        :returns: program exit code
+        :rtype: int
+        """
+        return cls(argv).run()
+
+    def _init(self, config, options, posargs):
+        """
+        Fully initialize Daemon object.
+
+        :param Config config: configuration object
+        :param options: program options as returned by optparse
+        :param list posargs: positional arguments as returned by optparse
+        """
+        raise NotImplementedError("{0}._init".format(self.__class__.__name__))
+
+    def run(self):
+        """
+        Run main program logic.
+
+        :param options: program options as returned by optparse
+        :param list posargs: positional arguments as returned by optparse
+        :returns: exit code
+        :rtype: int
+        """
+        raise NotImplementedError("{0}.run".format(self.__class__.__name__))
 
 
 class Daemon(_EntryPoint):
+
     """
     Execute udiskie as a daemon.
+
+    The daemon listens to UDisks events and has the following optional
+    components:
+
+    - :class:`automount.AutoMounter`
+    - :class:`notify.Notify`
+    - :class:`tray.TrayIcon`
     """
+
     @classmethod
     def program_options_parser(cls):
+        """Extends _EntryPoint.program_option_parser."""
         parser = _EntryPoint.program_options_parser()
         parser.add_option('-P', '--password-prompt', dest='password_prompt',
                           action='store', default='zenity', metavar='PROGRAM',
-                          help="replace password prompt")
+                          help="replace password prompt [deprecated]")
         parser.add_option('-s', '--suppress', dest='suppress_notify',
                           action='store_true', default=False,
                           help='suppress popup notifications')
@@ -127,14 +179,17 @@ class Daemon(_EntryPoint):
                           const='AutoTray', help='show tray icon')
         parser.add_option('-F', '--file-manager', action='store',
                           dest='file_manager', default='xdg-open',
-                          metavar='PROGRAM', help="to open mount pathes")
+                          metavar='PROGRAM',
+                          help="to open mount pathes [deprecated]")
         parser.add_option('-N', '--no-automount', action='store_false',
                           dest='automount', default=True,
                           help="do not automount new devices")
         return parser
 
-    @classmethod
-    def create(cls, config, options, posargs):
+    def _init(self, config, options, posargs):
+
+        """Implements _EntryPoint._init."""
+
         import gobject
         import udiskie.mount
         import udiskie.prompt
@@ -158,8 +213,7 @@ class Daemon(_EntryPoint):
             notify_service.init('udiskie.mount')
             notify = udiskie.notify.Notify(notify_service,
                                            mounter=mounter,
-                                           config=config.notifications)
-            notify.subscribe(daemon)
+                                           timeout=config.notifications)
 
         # tray icon (optional):
         if options.tray:
@@ -168,8 +222,9 @@ class Daemon(_EntryPoint):
                             'AutoTray': udiskie.tray.AutoTray}
             if options.tray not in tray_classes:
                 raise ValueError("Invalid tray: %s" % (options.tray,))
-            menu_maker = udiskie.tray.SmartUdiskieMenu.create(mounter)
-            menu_maker._actions['quit'] = mainloop.quit
+            menu_maker = udiskie.tray.SmartUdiskieMenu(
+                mounter,
+                {'quit': mainloop.quit})
             TrayIcon = tray_classes[options.tray]
             statusicon = TrayIcon(menu_maker)
         else:
@@ -178,28 +233,32 @@ class Daemon(_EntryPoint):
         # automounter
         if options.automount:
             import udiskie.automount
-            automount = udiskie.automount.AutoMounter(mounter)
-            daemon.connect(automount)
+            udiskie.automount.AutoMounter(mounter)
 
         # Note: mounter and statusicon are saved so these are kept alive:
-        return cls(mainloop=mainloop,
-                   mounter=mounter,
-                   statusicon=statusicon)
+        self.mainloop = mainloop
+        self.mounter = mounter
+        self.statusicon = statusicon
 
-    def run(self, options, posargs):
-        if options.automount:
-            self.mounter.mount_all()
+    def run(self):
+        """Implements _EntryPoint.run."""
+        if self.options.automount:
+            self.mounter.add_all()
         try:
             return self.mainloop.run()
         except KeyboardInterrupt:
             return 0
 
+
 class Mount(_EntryPoint):
+
     """
-    Execute the mount command.
+    Execute the mount command line utility.
     """
+
     @classmethod
     def program_options_parser(cls):
+        """Extends _EntryPoint._program_options_parser."""
         parser = _EntryPoint.program_options_parser()
         parser.add_option('-P', '--password-prompt', dest='password_prompt',
                           action='store', default='zenity', metavar='PROGRAM',
@@ -212,41 +271,45 @@ class Mount(_EntryPoint):
                           help='recursively mount LUKS partitions (if the automount daemon is running, this is not necessary)')
         return parser
 
-    @classmethod
-    def create(cls, config, options, posargs):
+    def _init(self, config, options, posargs):
+        """Implements _EntryPoint._init."""
         import udiskie.mount
         import udiskie.prompt
-        mounter = udiskie.mount.Mounter(
+        self.mounter = udiskie.mount.Mounter(
             filter=config.filter_options,
             prompt=udiskie.prompt.password(options.password_prompt),
             udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
-        return cls(mounter=mounter)
 
-    def run(self, options, posargs):
+    def run(self):
+        """Implements _EntryPoint.run."""
+        options = self.options
+        posargs = self.posargs
         mounter = self.mounter
         recursive = options.recursive
-
         # mount all present devices
         if options.all:
-            success = mounter.mount_all(recursive=recursive)
+            success = mounter.add_all(recursive=recursive)
         # only mount the desired devices
         elif len(posargs) > 0:
             success = True
             for path in posargs:
-                success = success and mounter.mount(path, recursive=recursive)
+                success = success and mounter.add(path, recursive=recursive)
         # print command line options
         else:
             self.program_options_parser().print_help()
             success = False
-
         return 0 if success else 1
 
+
 class Umount(_EntryPoint):
+
     """
-    Execute the umount command.
+    Execute the unmount command line utility.
     """
+
     @classmethod
     def program_options_parser(cls):
+        """Extends _EntryPoint._program_options_parser."""
         parser = _EntryPoint.program_options_parser()
         parser.add_option('-a', '--all', dest='all', default=False,
                           action='store_true', help='all devices')
@@ -256,26 +319,27 @@ class Umount(_EntryPoint):
                           action='store_true', help='Detach drive (power off)')
         return parser
 
-    @classmethod
-    def create(cls, config, options, posargs):
+    def _init(self, config, options, posargs):
+        """Implements _EntryPoint._init."""
         import udiskie.mount
-        mounter = udiskie.mount.Mounter(
+        self.mounter = udiskie.mount.Mounter(
             udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
-        return cls(mounter=mounter)
 
-    def run(self, options, posargs):
+    def run(self):
+        """Implements _EntryPoint.run."""
+        options = self.options
+        posargs = self.posargs
         mounter = self.mounter
         if options.all:
-            success = mounter.unmount_all(detach=options.detach,
-                                          eject=options.eject, lock=True)
+            success = mounter.remove_all(detach=options.detach,
+                                         eject=options.eject, lock=True)
         elif len(posargs) > 0:
             success = True
             for path in posargs:
                 success = (success and
-                           mounter.unmount(path, detach=options.detach,
-                                           eject=options.eject, lock=True))
+                           mounter.remove(path, detach=options.detach,
+                                          eject=options.eject, lock=True))
         else:
             self.program_options_parser().print_help()
             success = False
         return 0 if success else 1
-

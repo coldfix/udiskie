@@ -1,28 +1,57 @@
 """
-Udiskie automounter daemon.
+Automount utility.
 """
+
 __all__ = ['AutoMounter']
 
+
 class AutoMounter(object):
+
     """
-    Automatically mount newly added media.
+    Automount utility.
+
+    Being connected to the udiskie daemon, this component automatically
+    mounts newly discovered external devices. Instances are constructed with
+    a Mounter object, like so:
+
+    >>> AutoMounter(Mounter(udisks=Daemon()))
     """
+
     def __init__(self, mounter):
+        """
+        Store mounter as member variable and connect to the underlying udisks.
+
+        :param Mounter mounter: mounter object
+        """
         self._mounter = mounter
+        mounter.udisks.connect_all(self)
 
-    def device_added(self, udevice):
-        self._mounter.add_device(udevice)
+    def device_added(self, device):
+        """
+        Mount newly added devices.
 
-    def media_added(self, udevice):
-        self._mounter.add_device(udevice)
+        :param Device device: newly added device
+        """
+        if self._mounter.is_handleable(device):
+            self._mounter.add(device)
+
+    def media_added(self, device):
+        """
+        Mount newly added media.
+
+        :param Device device: device with newly added media
+        """
+        if self._mounter.is_handleable(device):
+            self._mounter.add(device)
 
     def device_changed(self, old_state, new_state):
         """
-        Check whether is_external changed, then mount
-        """
-        # fixes usecase: mount luks-cleartext when opened by
-        # non-udiskie-software problem: in this case the device is not seen as
-        # external from the beginning and thus not mounted
-        if not old_state.is_external and new_state.is_external:
-            self._mounter.add_device(new_state)
+        Mount newly mountable devices.
 
+        :param Device old_state: before change
+        :param Device new_state: after change
+        """
+        # udisks2 sometimes adds empty devices and later updates them which
+        # makes is_external become true not at device_added time:
+        if self._mounter.is_handleable(new_state) and not self._mounter.is_handleable(old_state):
+            self._mounter.add(new_state)
