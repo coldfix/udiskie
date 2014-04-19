@@ -38,7 +38,7 @@ uuid.ignored-device = __ignore__
 uuid.device-with-options = noatime,nouser
 fstype.vfat = ro,nouser''')
 
-        self.filter_matcher = Config.from_config_file(self.config_file).filter_options
+        self.filter_matcher = Config.from_file(self.config_file).filter_options
     
     def tearDown(self):
         """Remove the config file."""
@@ -65,7 +65,7 @@ fstype.vfat = ro,nouser''')
     def test_options(self):
         """Test the FilterMatcher.get_mount_options() method."""
         self.assertItemsEqual(
-            ['noatime', 'ro', 'nouser'],
+            ['noatime', 'nouser'],
             self.filter_matcher.get_mount_options(
                 TestDev('/options', 'vfat', 'device-with-options')))
         self.assertItemsEqual(

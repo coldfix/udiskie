@@ -175,7 +175,7 @@ class Config(object):
             from xdg.BaseDirectory import xdg_config_home as config_home
         except ImportError:
             config_home = os.path.expanduser('~/.config')
-        return os.path.join(config_home, 'udiskie.conf')
+        return os.path.join(config_home, 'udiskie', 'filters.conf')
 
     @classmethod
     def from_file(cls, path=None):
