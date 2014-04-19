@@ -7,6 +7,7 @@ import logging
 import sys
 
 from udiskie.compat import filter, basestring
+from udiskie.locale import _
 
 
 __all__ = ['Mounter']
@@ -42,7 +43,7 @@ class Mounter(object):
         self._filter = filter
         self._prompt = prompt
         self._browser = browser
-        self._logger = logging.getLogger(__name__)
+        self._log = logging.getLogger(__name__)
         try:
             # propagate error messages to UDisks1 daemon for 'Job failed'
             # notifications.
@@ -61,10 +62,10 @@ class Mounter(object):
         """
         device = self._get_device(device_or_path)
         if not device.is_mounted:
-            self._logger.error("not browsing unmounted device: %s" % (device,))
+            self._log.error(_("not browsing {0}: not mounted", device))
             return False
         if not self._browser:
-            self._logger.error("not browsing device: %s, no browser specified" % (device,))
+            self._log.error(_("not browsing {0}: no program", device))
             return False
         self._browser(device.mount_paths[0])
         return True
@@ -102,10 +103,10 @@ class Mounter(object):
         """
         device = self._get_device(device_or_path)
         if not self.is_handleable(device) or not device.is_filesystem:
-            self._logger.debug('not unmounting unhandled device %s' % (device,))
+            self._log.warn(_('not unmounting {0}: unhandled device', device))
             return False
         if not device.is_mounted:
-            self._logger.debug('not unmounting unmounted device %s' % (device,))
+            self._log.info(_('not unmounting {0}: not mounted', device))
             return True
         return self._action(device, 'unmount')
 
@@ -121,17 +122,17 @@ class Mounter(object):
         """
         device = self._get_device(device_or_path)
         if not self.is_handleable(device) or not device.is_crypto:
-            self._logger.debug('not unlocking unhandled device %s' % (device,))
+            self._log.warn(_('not unlocking {0}: unhandled device', device))
             return False
         if device.is_unlocked:
-            self._logger.debug('not unlocking unlocked device %s' % (device,))
+            self._log.info(_('not unlocking {0}: already unlocked', device))
             return True
         if not self._prompt:
-            self._logger.warn('not unlocking device %s: no prompt available' % (device,))
+            self._log.error(_('not unlocking {0}: no password prompt', device))
             return False
         password = self._prompt(device)
         if password is None:
-            self._logger.debug('not unlocking device %s: cancelled by user' % (device,))
+            self._log.debug(_('not unlocking {0}: cancelled by user', device))
             return False
         # pass password as non-keyword argument to avoid it being logged
         return self._action(device, 'unlock', password)
@@ -147,10 +148,10 @@ class Mounter(object):
         """
         device = self._get_device(device_or_path)
         if not self.is_handleable(device) or not device.is_crypto:
-            self._logger.debug('not locking unhandled device %s' % (device,))
+            self._log.warn(_('not locking {0}: unhandled device', device))
             return False
         if not device.is_unlocked:
-            self._logger.debug('not locking locked device %s' % (device,))
+            self._log.info(_('not locking {0}: not unlocked', device))
             return True
         return self._action(device, 'lock')
 
@@ -182,8 +183,8 @@ class Mounter(object):
                 if dev.is_partition and dev.partition_slave == device:
                     success = self.add(dev, recursive=True) and success
         else:
-            self._logger.debug('not adding unhandled device %s' % (device,))
-            success = True
+            self._log.info(_('not adding {0}: unhandled device', device))
+            return False
         return success
 
     def remove(self, device_or_path, force=False, detach=False, eject=False,
@@ -217,8 +218,9 @@ class Mounter(object):
                     (dev.is_toplevel and dev.drive == device and dev != device)):
                     success = self.remove(dev, force=True, detach=detach, eject=eject, lock=lock) and success
         else:
-            self._logger.debug('not removing unhandled device %s' % (device,))
-            success = True
+            self._log.info(_('not removing {0}: unhandled device', device))
+            success = False
+        # if these operations work, everything is fine, we can return True:
         if lock and device.is_luks_cleartext:
             success = self.lock(device.luks_cleartext_slave)
         if eject and device.is_drive and device.is_ejectable:
@@ -241,7 +243,7 @@ class Mounter(object):
         device = self._get_device(device_or_path)
         drive = device.drive
         if not (drive.is_drive and drive.is_ejectable):
-            self._logger.debug('drive not ejectable: %s' % drive)
+            self._log.warn(_('not ejecting {0}: drive not ejectable', drive))
             return False
         if force:
             self.remove(drive, force=True)
@@ -260,7 +262,7 @@ class Mounter(object):
         device = self._get_device(device_or_path)
         drive = device.root
         if not drive.is_detachable:
-            self._logger.debug('drive not detachable: %s' % drive)
+            self._log.warn(_('not detaching {0}: drive not detachable', drive))
             return False
         if force:
             self.remove(drive, force=True)
