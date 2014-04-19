@@ -633,8 +633,8 @@ class Daemon(Emitter, UDisks):
         'FilesystemUnmount': 'unmount',
         'LuksUnlock': 'unlock',
         'LuksLock': 'lock',
-        'DriveDetach': 'device_remove',
-        'DriveEject': 'media_remove' }
+        'DriveDetach': 'detach',
+        'DriveEject': 'eject' }
 
     _event_mapping = {'mount': 'device_mount',
                       'unmount': 'device_unmount',
