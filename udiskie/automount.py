@@ -32,7 +32,8 @@ class AutoMounter(object):
 
         :param Device device: newly added device
         """
-        self._mounter.add(device)
+        if self._mounter.is_handleable(device):
+            self._mounter.add(device)
 
     def media_added(self, device):
         """
@@ -40,7 +41,8 @@ class AutoMounter(object):
 
         :param Device device: device with newly added media
         """
-        self._mounter.add(device)
+        if self._mounter.is_handleable(device):
+            self._mounter.add(device)
 
     def device_changed(self, old_state, new_state):
         """

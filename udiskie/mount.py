@@ -2,15 +2,39 @@
 Mount utilities.
 """
 
-from functools import wraps
 import logging
 import sys
 
+from udiskie.common import wraps
 from udiskie.compat import filter, basestring
 from udiskie.locale import _
 
 
 __all__ = ['Mounter']
+
+
+def _device_method(fn):
+    @wraps(fn)
+    def wrapper(self, device_or_path, *args, **kwargs):
+        if isinstance(device_or_path, basestring):
+            device = self.udisks.find(device_or_path)
+            if device:
+                self._log.debug(_('found device owning "{0}": "{1}"',
+                                device_or_path, device))
+            else:
+                self._log.error(_('no device found owning "{0}"', device_or_path))
+                return False
+        else:
+            device = device_or_path
+        try:
+            return fn(self, device, *args, **kwargs)
+        except device.Exception:
+            err = sys.exc_info()[1]
+            self._log.error(_('failed to {0} {1}: {2}',
+                            fn.__name__, device, err.message))
+            self._set_error(device, fn.__name__, err.message)
+            return False
+    return wrapper
 
 
 class Mounter(object):
@@ -51,76 +75,81 @@ class Mounter(object):
         except AttributeError:
             self._set_error = lambda device, action, message: None
 
-    def browse(self, device_or_path):
+    @_device_method
+    def browse(self, device):
         """
         Browse device.
 
-        :param device_or_path: device object, block device path or mount path
+        :param device: device object, block device path or mount path
         :returns: success
         :rtype: bool
-        :raises IOError: if the path does not correspond to a device
         """
-        device = self._get_device(device_or_path)
         if not device.is_mounted:
             self._log.error(_("not browsing {0}: not mounted", device))
             return False
         if not self._browser:
             self._log.error(_("not browsing {0}: no program", device))
             return False
+        self._log.debug(_('opening {0} on {0.mount_paths[0]}', device))
         self._browser(device.mount_paths[0])
+        self._log.info(_('opened {0} on {0.mount_paths[0]}', device))
         return True
 
     # mount/unmount
-    def mount(self, device_or_path):
+    @_device_method
+    def mount(self, device):
         """
         Mount the device if not already mounted.
 
-        :param device_or_path: device object, block device path or mount path
+        :param device: device object, block device path or mount path
         :returns: whether the device is mounted.
         :rtype: bool
-        :raises IOError: if the path does not correspond to a device
         """
-        device = self._get_device(device_or_path)
         if not self.is_handleable(device) or not device.is_filesystem:
-            self._logger.debug('not mounting unhandled device %s' % (device,))
+            self._log.warn(_('not mounting {0}: unhandled device', device))
             return False
         if device.is_mounted:
-            self._logger.debug('not mounting mounted device %s' % (device,))
+            self._log.info(_('not mounting {0}: already mounted', device))
             return True
         fstype = str(device.id_type)
         filter = self._filter
         options = ','.join(filter.get_mount_options(device) if filter else [])
-        return self._action(device, 'mount', fstype=fstype, options=options)
+        kwargs = dict(fstype=fstype, options=options)
+        self._log.debug(_('mounting {0} with {1}', device, kwargs))
+        mount_path = device.mount(**kwargs)
+        self._log.info(_('mounted {0} on {1}', device, mount_path))
+        return True
 
-    def unmount(self, device_or_path):
+    @_device_method
+    def unmount(self, device):
         """
         Unmount a Device if mounted.
 
-        :param device_or_path: device object, block device path or mount path
+        :param device: device object, block device path or mount path
         :returns: whether the device is unmounted
         :rtype: bool
-        :raises IOError: if the path does not correspond to a device
         """
-        device = self._get_device(device_or_path)
         if not self.is_handleable(device) or not device.is_filesystem:
             self._log.warn(_('not unmounting {0}: unhandled device', device))
             return False
         if not device.is_mounted:
             self._log.info(_('not unmounting {0}: not mounted', device))
             return True
-        return self._action(device, 'unmount')
+        self._log.debug(_('unmounting {0}', device))
+        device.unmount()
+        self._log.info(_('unmounted {0}', device))
+        return True
 
     # unlock/lock (LUKS)
-    def unlock(self, device_or_path):
+    @_device_method
+    def unlock(self, device):
         """
         Unlock the device if not already unlocked.
 
-        :param device_or_path: device object, block device path or mount path
+        :param device: device object, block device path or mount path
         :returns: whether the device is unlocked
         :rtype: bool
-        :raises IOError: if the path does not correspond to a device
         """
-        device = self._get_device(device_or_path)
         if not self.is_handleable(device) or not device.is_crypto:
             self._log.warn(_('not unlocking {0}: unhandled device', device))
             return False
@@ -134,49 +163,50 @@ class Mounter(object):
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))
             return False
-        # pass password as non-keyword argument to avoid it being logged
-        return self._action(device, 'unlock', password)
+        self._log.debug(_('unlocking {0}', device))
+        device.unlock(password)
+        self._log.info(_('unlocked {0}', device))
+        return True
 
-    def lock(self, device_or_path):
+    @_device_method
+    def lock(self, device):
         """
         Lock device if unlocked.
 
-        :param device_or_path: device object, block device path or mount path
+        :param device: device object, block device path or mount path
         :returns: whether the device is locked
         :rtype: bool
-        :raises IOError: if the path does not correspond to a device
         """
-        device = self._get_device(device_or_path)
         if not self.is_handleable(device) or not device.is_crypto:
             self._log.warn(_('not locking {0}: unhandled device', device))
             return False
         if not device.is_unlocked:
             self._log.info(_('not locking {0}: not unlocked', device))
             return True
-        return self._action(device, 'lock')
+        self._log.debug(_('locking {0}', device))
+        device.lock()
+        self._log.info(_('locked {0}', device))
+        return True
 
     # add/remove (unlock/lock or mount/unmount)
-    def add(self, device_or_path, recursive=False):
+    @_device_method
+    def add(self, device, recursive=False):
         """
         Mount or unlock the device depending on its type.
 
-        :param device_or_path: device object, block device path or mount path
+        :param device: device object, block device path or mount path
         :param bool recursive: recursively mount and unlock child devices
         :returns: whether all attempted operations succeeded
         :rtype: bool
-        :raises IOError: if the path does not correspond to a device
         """
-        device = self._get_device(device_or_path)
-        if not self.is_handleable(device):
-            self._logger.debug('not adding unhandled device %s' % (device,))
-            return False
         if device.is_filesystem:
             success = self.mount(device)
         elif device.is_crypto:
             success = self.unlock(device)
             if success and recursive:
+                # TODO: update device
                 success = self.add(device.luks_cleartext_holder,
-                                          recursive=True)
+                                   recursive=True)
         elif recursive and device.is_partition_table:
             success = True
             for dev in self.get_all_handleable():
@@ -187,24 +217,20 @@ class Mounter(object):
             return False
         return success
 
-    def remove(self, device_or_path, force=False, detach=False, eject=False,
+    @_device_method
+    def remove(self, device, force=False, detach=False, eject=False,
                lock=False):
         """
         Unmount or lock the device depending on device type.
 
-        :param device_or_path: device object, block device path or mount path
+        :param device: device object, block device path or mount path
         :param bool force: recursively remove all child devices
         :param bool detach: detach the root drive
         :param bool eject: remove media from the root drive
         :param bool lock: lock the associated LUKS cleartext slave
         :returns: whether all attempted operations succeeded
         :rtype: bool
-        :raises IOError: if the path does not correspond to a device
         """
-        device = self._get_device(device_or_path)
-        if not self.is_handleable(device):
-            self._logger.debug('not removing unhandled device %s' % (device,))
-            return False
         if device.is_filesystem:
             success = self.unmount(device)
         elif device.is_crypto:
@@ -224,49 +250,59 @@ class Mounter(object):
         if lock and device.is_luks_cleartext:
             success = self.lock(device.luks_cleartext_slave)
         if eject and device.is_drive and device.is_ejectable:
-            success = self.eject(device) and success
+            success = self.eject(device)
         if detach and device.is_drive and device.is_detachable:
-            success = self.detach(device) and success
+            success = self.detach(device)
         return success
 
     # eject/detach device
-    def eject(self, device_or_path, force=False):
+    @_device_method
+    def eject(self, device, force=False):
         """
         Eject a device after unmounting all its mounted filesystems.
 
-        :param device_or_path: device object, block device path or mount path
+        :param device: device object, block device path or mount path
         :param bool force: remove child devices before trying to eject
         :returns: whether the operation succeeded
         :rtype: bool
-        :raises IOError: if the path does not correspond to a device
         """
-        device = self._get_device(device_or_path)
+        if not self.is_handleable(device):
+            self._log.warn(_('not ejecting {0}: unhandled device'))
+            return False
         drive = device.drive
         if not (drive.is_drive and drive.is_ejectable):
             self._log.warn(_('not ejecting {0}: drive not ejectable', drive))
             return False
         if force:
             self.remove(drive, force=True)
-        return self._action(device, 'eject')
+        self._log.debug(_('ejecting {0}', device))
+        device.eject()
+        self._log.info(_('ejected {0}', device))
+        return True
 
-    def detach(self, device_or_path, force=False):
+    @_device_method
+    def detach(self, device, force=False):
         """
         Detach a device after unmounting all its mounted filesystems.
 
-        :param device_or_path: device object, block device path or mount path
+        :param device: device object, block device path or mount path
         :param bool force: remove child devices before trying to detach
         :returns: whether the operation succeeded
         :rtype: bool
-        :raises IOError: if the path does not correspond to a device
         """
-        device = self._get_device(device_or_path)
+        if not self.is_handleable(device):
+            self._log.warn(_('not detaching {0}: unhandled device'))
+            return False
         drive = device.root
         if not drive.is_detachable:
             self._log.warn(_('not detaching {0}: drive not detachable', drive))
             return False
         if force:
             self.remove(drive, force=True)
-        return self._action(device, 'detach')
+        self._log.debug(_('detaching {0}', device))
+        device.detach()
+        self._log.info(_('detached {0}', device))
+        return True
 
     # mount_all/unmount_all
     def add_all(self, recursive=False):
@@ -358,18 +394,18 @@ class Mounter(object):
         return success
 
     # iterate devices
-    def is_handleable(self, device_or_path):
+    @_device_method
+    def is_handleable(self, device):
         """
         Check whether this device should be handled by udiskie.
 
-        :param device_or_path: device object, block device path or mount path
+        :param device: device object, block device path or mount path
         :returns: handleability
         :rtype: bool
 
         Currently this just means that the device is removable and holds a
         filesystem or the device is a LUKS encrypted volume.
         """
-        device = self._get_device(device_or_path)
         return (device.is_block and
                 device.is_external and
                 (not self._filter or not self._filter.is_ignored(device)))
@@ -385,50 +421,3 @@ class Mounter(object):
         race conditions inside udiskie.
         """
         return filter(self.is_handleable, self.udisks)
-
-    # internals
-    def _get_device(self, device_or_path):
-        """
-        Resolve pathes to device object.
-
-        :param device_or_path: device object, block device path or mount path
-        :returns: device object
-        :rtype: Device
-        :raises IOError: if the path does not belong to a block device
-        """
-        if isinstance(device_or_path, basestring):
-            device = self.udisks.find(device_or_path)
-            if not device:
-                self._logger.error('no device found owning "%s"' % (device_or_path,))
-                raise IOError('no device found owning "%s"' % (device_or_path,))
-            self._logger.debug('found device owning "%s": "%s"' % (device_or_path, device))
-            return device
-        else:
-            return device_or_path
-
-    def _action(self, device, action, *args, **kwargs):
-        """
-        Perform action, log errors and return success.
-
-        :param device: operated device
-        :param str action: on of mount|unmount|unlock|lock|eject|detach
-        :param *args: secure parameters (not to be logged)
-        :param **kwargs: unsecure parameters (to be logged)
-
-        All keyword parameters will be logged. For private parameters, such
-        as the password for unlock, positional parameters must be used.
-        """
-        self._logger.debug('{0}ing {1} with {2}'
-                            .format(action, device, kwargs))
-        try:
-            result = getattr(device, action)(*args, **kwargs)
-        except device.Exception:
-            err = sys.exc_info()[1]
-            self._logger.error('failed to {0} {1}: {2}'
-                            .format(action, device, err.message))
-            self._set_error(device, action, err.message)
-            return False
-        else:
-            self._logger.info('{0}ed {1} => {2}'
-                            .format(action, device, result))
-            return True

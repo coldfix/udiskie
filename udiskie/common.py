@@ -7,7 +7,14 @@ import os.path
 
 __all__ = ['Emitter',
            'samefile',
-           'setdefault']
+           'setdefault',
+           'wraps']
+
+
+try:
+    from black_magic.decorator import wraps
+except ImportError:
+    from functools import wraps
 
 
 class Emitter(object):
