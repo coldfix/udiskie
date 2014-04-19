@@ -12,7 +12,7 @@ import dbus
 import dbusmock
 
 # tested library:
-from udiskie.common import DBusProxy
+from udiskie.dbus import DBusProxy
 
 
 class TestDBusProxy(dbusmock.DBusTestCase):

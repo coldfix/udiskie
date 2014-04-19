@@ -38,7 +38,7 @@ def udisks_service_object(clsname, version=None):
         import udiskie.udisks2
         return getattr(udiskie.udisks2, clsname)()
     if not version:
-        from udiskie.common import DBusException
+        from udiskie.dbus import DBusException
         try:
             return udisks1()
         except DBusException:
