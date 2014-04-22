@@ -408,6 +408,7 @@ class Mounter(object):
         """
         return (device.is_block and
                 device.is_external and
+                not device.is_ignored and
                 (not self._filter or not self._filter.is_ignored(device)))
 
     def get_all_handleable(self):
