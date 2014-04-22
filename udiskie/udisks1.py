@@ -189,7 +189,7 @@ class OnlineDevice(DBusProxy, DeviceBase):
     @property
     def is_ignored(self):
         """Check if the device should be ignored."""
-        return self._I.Block.property.DevicePresentationHide
+        return self.property.DevicePresentationHide
 
     @property
     def id_type(self):
