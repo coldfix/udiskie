@@ -187,6 +187,11 @@ class OnlineDevice(DBusProxy, DeviceBase):
         return self.id_usage == 'crypto'
 
     @property
+    def is_ignored(self):
+        """Check if the device should be ignored."""
+        return self._I.Block.property.DevicePresentationHide
+
+    @property
     def id_type(self):
         """"
         Return IdType property.
