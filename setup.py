@@ -75,6 +75,7 @@ setup(
     },
     install_requires=[
         'PyYAML',
+        'docopt',
         # Currently not building out of the box:
         # 'PyGObject',
     ],

@@ -10,7 +10,6 @@ import os
 import sys
 
 from udiskie.compat import basestring
-from udiskie.common import setdefault
 
 
 __all__ = ['DeviceFilter',
@@ -178,19 +177,6 @@ class Config(object):
                 os.path.join(config_home, 'udiskie', 'config.json')]
 
     @classmethod
-    def default_program_options(cls):
-        """
-        Return the default program options.
-
-        :rtype: dict
-        """
-        return {'udisks_version': 0,
-                'tray': False,
-                'automount': True,
-                'notify': True,
-                'file_manager': 'xdg-open'}
-
-    @classmethod
     def from_file(cls, path=None):
         """
         Read config file.
@@ -200,6 +186,7 @@ class Config(object):
         :rtype: Config
         :raises IOError: if the path does not exist
         """
+        # None => use default
         if path is None:
             for path in cls.default_pathes():
                 try:
@@ -212,6 +199,9 @@ class Config(object):
                     logging.getLogger(__name__).warn(
                         "Failed to read {0!r}: {1}"
                         .format(path, sys.exc_info()[1]))
+            return cls({})
+        # False/'' => no config
+        if not path:
             return cls({})
         if os.path.splitext(path)[1].lower() == '.json':
             from json import load
@@ -236,7 +226,6 @@ class Config(object):
     def program_options(self):
         """Get the program options dictionary from the config file."""
         config_options = self._data.get('program_options', {}).copy()
-        setdefault(config_options, self.default_program_options())
         return config_options
 
     @property
