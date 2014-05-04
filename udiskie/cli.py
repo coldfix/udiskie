@@ -80,9 +80,6 @@ class _EntryPoint(object):
         parser.add_option('-2', '--use-udisks2', dest='udisks_version',
                           action='store_const', default=0, const=2,
                           help='use udisks2 as underlying daemon (experimental)')
-        parser.add_option('-f', '--filters', dest='config_file',
-                          action='store', default=None,
-                          metavar='FILE', help='synonym of --config [deprecated]')
         parser.add_option('-C', '--config', dest='config_file',
                           action='store', default=None,
                           metavar='FILE', help='config file')
