@@ -1,8 +1,8 @@
 CHANGELOG
 ---------
 
-0.7.0 (in preparation)
-~~~~~~~~~~~~~~~~~~~~~~
+0.7.0
+~~~~~
 
 There are some backward incompatible changes, hence the version break:
 
