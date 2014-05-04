@@ -5,6 +5,8 @@ CHANGELOG
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - remove the '--filters' parameter for good
+- change config format to YAML
+- change default config path to $XDG_CONFIG_HOME/udiskie/config.yml
 
 
 0.7.0

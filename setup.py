@@ -84,6 +84,7 @@ setup(
         'notifications': ['notify2']
     },
     install_requires=[
+        'PyYAML',
         # Currently not building out of the box:
         # 'PyGObject',
         # 'dbus-python',

@@ -27,7 +27,8 @@ class Notify(object):
         """
         self._notify = notify
         self._mounter = mounter
-        self._timeout = timeout
+        self._timeout = timeout or {}
+        self._default = self._timeout.get('timeout', -1)
         # pynotify does not store hard references to the notification
         # objects. When a signal is received and the notification does not
         # exist anymore, no handller will be called. Therefore, we need to
@@ -193,7 +194,7 @@ class Notify(object):
         :returns: if the event notification is enabled
         :rtype: bool
         """
-        return self._get_timeout(event) is not None
+        return self._get_timeout(event) not in (None, False)
 
     def _get_timeout(self, event):
         """
@@ -203,15 +204,4 @@ class Notify(object):
         :returns: timeout in seconds
         :rtype: int, float or NoneType
         """
-        if not self._timeout:
-            return -1
-        try:
-            timeout = self._timeout[event]
-        except KeyError:
-            timeout = self._timeout.get('timeout', -1)
-        if timeout in ('', None):
-            return None
-        try:
-            return int(timeout)
-        except ValueError:
-            return float(timeout)
+        return self._timeout.get(event, self._default)

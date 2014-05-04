@@ -170,10 +170,10 @@ class Daemon(_EntryPoint):
                           help='suppress popup notifications')
         parser.add_option('-t', '--tray', dest='tray',
                           action='store_const', default=None,
-                          const='TrayIcon', help='show tray icon')
+                          const=True, help='show tray icon')
         parser.add_option('-T', '--auto-tray', dest='tray',
                           action='store_const', default=None,
-                          const='AutoTray', help='show tray icon')
+                          const='auto', help='show tray icon')
         parser.add_option('-F', '--file-manager', action='store',
                           dest='file_manager', default='xdg-open',
                           metavar='PROGRAM',
@@ -192,7 +192,7 @@ class Daemon(_EntryPoint):
         import udiskie.prompt
 
         mainloop = gobject.MainLoop()
-        daemon = udisks_service_object('Daemon', int(options.udisks_version))
+        daemon = udisks_service_object('Daemon', options.udisks_version)
         browser = udiskie.prompt.browser(options.file_manager)
         mounter = udiskie.mount.Mounter(
             filter=config.filter_options,
@@ -215,8 +215,8 @@ class Daemon(_EntryPoint):
         # tray icon (optional):
         if options.tray:
             import udiskie.tray
-            tray_classes = {'TrayIcon': udiskie.tray.TrayIcon,
-                            'AutoTray': udiskie.tray.AutoTray}
+            tray_classes = {True: udiskie.tray.TrayIcon,
+                            'auto': udiskie.tray.AutoTray}
             if options.tray not in tray_classes:
                 raise ValueError("Invalid tray: %s" % (options.tray,))
             menu_maker = udiskie.tray.SmartUdiskieMenu(
@@ -275,7 +275,7 @@ class Mount(_EntryPoint):
         self.mounter = udiskie.mount.Mounter(
             filter=config.filter_options,
             prompt=udiskie.prompt.password(options.password_prompt),
-            udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
+            udisks=udisks_service_object('Sniffer', options.udisks_version))
 
     def run(self):
         """Implements _EntryPoint.run."""
@@ -320,7 +320,7 @@ class Umount(_EntryPoint):
         """Implements _EntryPoint._init."""
         import udiskie.mount
         self.mounter = udiskie.mount.Mounter(
-            udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
+            udisks=udisks_service_object('Sniffer', options.udisks_version))
 
     def run(self):
         """Implements _EntryPoint.run."""

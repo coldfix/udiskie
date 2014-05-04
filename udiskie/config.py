@@ -1,25 +1,20 @@
 """
 Config utilities.
+
+For an example config file, see the manual. If you don't have the man page
+installed, a raw version is available in doc/udiskie.8.txt.
 """
 
 import logging
 import os
-import re
+import yaml
 
-try:                    # python2
-    from ConfigParser import SafeConfigParser, NoSectionError
-except ImportError:     # python3
-    from configparser import SafeConfigParser, NoSectionError
+from udiskie.compat import basestring
 
 
-__all__ = ['InvalidFilter',
-           'OptionFilter',
+__all__ = ['OptionFilter',
            'FilterMatcher',
            'Config']
-
-
-class InvalidFilter(ValueError):
-    """Raised when a filter configuration entry is invalid."""
 
 
 class OptionFilter(object):
@@ -30,18 +25,16 @@ class OptionFilter(object):
         'fstype': 'id_type',
         'uuid': 'id_uuid' }
 
-    def __init__(self, key, value, options):
+    def __init__(self, match, options):
         """
         Construct an instance.
 
-        :param string key: device attribute name
-        :param string value: device attribute value to be matched
+        :param dict match: device attributes
         :param list options: mount options for matching devices
         """
         self._log = logging.getLogger(__name__)
-        self._key = key
-        self._value = value
-        self._options = list(options)
+        self._match = match
+        self._options = options
         self._log.debug('%s created' % self)
 
     @classmethod
@@ -49,22 +42,19 @@ class OptionFilter(object):
         """
         Construct an instance from an entry in a config file.
 
-        :param tuple config_item: (LHS,RHS) of the config line
+        :param dict config_item:
         """
-        expr, options = config_item
-        try:
-            key,value = re.match(r'(\w+)\.(\S+)', expr).groups()
-        except AttributeError:
-            raise InvalidFilter('Invalid format: %s' % expr)
-        if key not in cls.VALID_PARAMETERS:
-            raise InvalidFilter("Invalid key: %s" % self)
-        return cls(cls.VALID_PARAMETERS[key], value,
-                   (S.strip() for S in options.split(',')))
+        match = {internal_name: config_item[public_name]
+                 for public_name, internal_name in cls.VALID_PARAMETERS.items()
+                 if public_name in config_item}
+        options = config_item['options']
+        if isinstance(options, basestring):
+            options = [o.strip() for o in options.split(',')]
+        return cls(match, options)
 
     def __str__(self):
-        return '<OptionFilter %s=%s: %s>' % (self._key,
-                                             self._value,
-                                             self._options)
+        return ('<OptionFilter match={!r}: options={!r}>'
+                .format(self._match, self._options))
 
     def match(self, device):
         """
@@ -72,7 +62,8 @@ class OptionFilter(object):
 
         :param Device device: device to be checked
         """
-        return getattr(device, self._key) == self._value
+        return all(getattr(device, k) == v
+                   for k, v in self._match.items())
 
     def get_options(self, device):
         """
@@ -105,19 +96,6 @@ class FilterMatcher(object):
         Construct a FilterMatcher instance from config file section.
 
         :param string config_section: list of config items
-
-        The left hand side consists of either the property key to match and
-        the value to search for separated by a dot: 'key.value'. Currently,
-        the only possible keys are 'fstype' and 'uuid'. The right hand side
-        is a comma separated list of all options. The special value
-        '__ignore__' is used to specify that a device will not be handled
-        by udiskie.
-
-        Example:
-
-        >>> filter = FilterMatcher.from_config_section([
-        ...     ('fstype.vfat', 'ro,nouser'),
-        ...     ('uuid.d730f9ea-1751-4f83-8244-c9b3e6b78c3a', '__ignore__')])
         """
         return cls(map(OptionFilter.from_config_item, config_section))
 
@@ -151,11 +129,6 @@ class Config(object):
 
     """Udiskie config in memory representation."""
 
-    # config file sections
-    MOUNT_OPTIONS_SECTION = 'mount_options'
-    PROGRAM_OPTIONS_SECTION = 'program_options'
-    NOTIFICATIONS_SECTION = 'notifications'
-
     def __init__(self, data):
         """
         Initialize with preparsed data object.
@@ -175,96 +148,35 @@ class Config(object):
             from xdg.BaseDirectory import xdg_config_home as config_home
         except ImportError:
             config_home = os.path.expanduser('~/.config')
-        return os.path.join(config_home, 'udiskie', 'filters.conf')
+        return os.path.join(config_home, 'udiskie', 'config.yml')
 
     @classmethod
     def from_file(cls, path=None):
         """
         Read config file.
 
-        :param str path: config file name
+        :param str path: YAML config file name
         :returns: configuration object
         :rtype: Config
-
-        Config files should look as follows:
-
-        .. code-block:: cfg
-
-            [mount_options]
-            fstype.vfat=sync
-            uuid.9d53-13ba=noexec,nodev
-            uuid.abcd-ef01=__ignore__
-
-            [program_options]
-            # Allowed values are '1' and '2'
-            udisks_version=2
-            # 'zenity', 'systemd-ask-password' or user program:
-            password_prompt=zenity
-            # valid values are: 'AutoTray', 'TrayIcon'
-            tray=AutoTray
-            # Leave empty to set to ``False``:
-            automount=
-            # Use '1' for ``True``:
-            suppress_notify=1
-            # Default program:
-            file_manager=xdg-open
-
-            [notifications]
-            # Default timeout in seconds:
-            timeout=1.5
-            # Overwrite timeout for 'device_mounted' notification:
-            device_mounted=5
-            # Leave empty to disable:
-            device_unmounted=
-            device_added=
-            device_removed=
-            # Use the libnotify default timeout:
-            device_unlocked=-1
-            device_locked=-1
-            job_failed=-1
-
-        The left hand side consists of either the property key to match and
-        the value to search for separated by a dot: 'key.value'. Currently,
-        the only possible keys are 'fstype' and 'uuid'. The right hand side
-        is a comma separated list of all options. The special value
-        '__ignore__' is used to specify that a device will not be handled
-        by udiskie.
         """
-        parser = SafeConfigParser()
-        parser.read(path or cls.default_path())
-        return cls(parser)
+        try:
+            with open(path or cls.default_path()) as f:
+                return cls(yaml.safe_load(f))
+        except IOError:
+            return cls({})
 
     @property
     def filter_options(self):
         """Get a :class:`FilterMatcher` instance from the config data."""
-        try:
-            mount_options = self._data.items(self.MOUNT_OPTIONS_SECTION)
-        except NoSectionError:
-            return FilterMatcher([])
-        else:
-            return FilterMatcher.from_config_section(mount_options)
+        return FilterMatcher.from_config_section(
+            self._data.get('mount_options', []))
 
     @property
     def program_options(self):
         """Get the program options dictionary from the config file."""
-        return self._get_section(self.PROGRAM_OPTIONS_SECTION)
+        return self._data.get('program_options', {})
 
     @property
     def notifications(self):
         """Get the notification timeouts dictionary from the config file."""
-        return self._get_section(self.NOTIFICATIONS_SECTION)
-
-    def _get_section(self, name):
-        """
-        Get a section as dictionary from the config file. Internal method.
-
-        :param str name: config section
-        :returns: the deserialized section
-        :rtype: dict
-        """
-        try:
-            items = self._data.items(name)
-        except NoSectionError:
-            return {}
-        else:
-            return dict((k, v.strip()) for k,v in items)
+        return self._data.get('notifications', {})
