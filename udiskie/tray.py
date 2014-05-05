@@ -163,6 +163,9 @@ class UdiskieMenu(object):
             except TypeError:
                 item = Gtk.ImageMenuItem()
                 item.set_image(icon)
+            # I don't really care for the "show icons only for nouns, not
+            # for verbs" policy:
+            item.set_always_show_image(True)
         if label is not None:
             item.set_label(label)
         if isinstance(onclick, Gtk.Menu):
