@@ -93,9 +93,6 @@ Dependencies
 *zenity*::
 	to unlock LUKS devices
 
-*PyGTK*::
-	to show the system tray icon
-
 *PyYAML*::
 	to read the config file
 
@@ -167,8 +164,6 @@ http://www.galago-project.org/files/releases/source/notify-python
 https://pypi.python.org/pypi/notify2
 
 http://freecode.com/projects/zenity
-
-http://www.pygtk.org
 
 
 Authors

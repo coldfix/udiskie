@@ -187,11 +187,11 @@ class Daemon(_EntryPoint):
 
         """Implements _EntryPoint._init."""
 
-        import gobject
+        from gi.repository import GObject
         import udiskie.mount
         import udiskie.prompt
 
-        mainloop = gobject.MainLoop()
+        mainloop = GObject.MainLoop()
         daemon = udisks_service_object('Daemon', options.udisks_version)
         browser = udiskie.prompt.browser(options.file_manager)
         mounter = udiskie.mount.Mounter(

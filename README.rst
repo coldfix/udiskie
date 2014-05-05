@@ -47,7 +47,6 @@ downloaded and installed from PyPI:
 - PyGObject_ to run the automount/notification daemon (provides the main loop)
 - notify2_ or notify-python_ for mount notifications
 - Zenity_ to show a password prompt to unlock LUKS devices
-- PyGTK_ to show the system tray icon
 
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
 .. _dbus-python: http://dbus.freedesktop.org/doc/dbus-python/
@@ -55,7 +54,6 @@ downloaded and installed from PyPI:
 .. _notify-python: http://www.galago-project.org/files/releases/source/notify-python/
 .. _notify2: https://pypi.python.org/pypi/notify2
 .. _Zenity: http://freecode.com/projects/zenity
-.. _PyGTK: http://www.pygtk.org
 
 
 Permissions
