@@ -7,6 +7,7 @@ import sys
 
 from udiskie.common import wraps
 from udiskie.compat import filter, basestring
+from udiskie.config import IgnoreDevice, FilterMatcher
 from udiskie.locale import _
 
 
@@ -51,7 +52,11 @@ class Mounter(object):
     should always be passed as keyword arguments.
     """
 
-    def __init__(self, udisks, filter=None, prompt=None, browser=None):
+    def __init__(self, udisks,
+                 mount_options=None,
+                 ignore_device=None,
+                 prompt=None,
+                 browser=None):
         """
         Initialize mounter with the given defaults.
 
@@ -64,7 +69,12 @@ class Mounter(object):
         If browser is None, browse will not work.
         """
         self.udisks = udisks
-        self._filter = filter
+        self._mount_options = mount_options or (lambda device: None)
+        self._ignore_device = ignore_device or FilterMatcher([], False)
+        self._ignore_device._filters += [
+            IgnoreDevice({'is_block': False, 'ignore': True}),
+            IgnoreDevice({'is_external': False, 'ignore': True}),
+            IgnoreDevice({'is_ignored': True, 'ignore': True})]
         self._prompt = prompt
         self._browser = browser
         self._log = logging.getLogger(__name__)
@@ -112,8 +122,7 @@ class Mounter(object):
             self._log.info(_('not mounting {0}: already mounted', device))
             return True
         fstype = str(device.id_type)
-        filter = self._filter
-        options = ','.join(filter.get_mount_options(device) if filter else [])
+        options = self._mount_options(device)
         kwargs = dict(fstype=fstype, options=options)
         self._log.debug(_('mounting {0} with {1}', device, kwargs))
         mount_path = device.mount(**kwargs)
@@ -406,10 +415,7 @@ class Mounter(object):
         Currently this just means that the device is removable and holds a
         filesystem or the device is a LUKS encrypted volume.
         """
-        return (device.is_block and
-                device.is_external and
-                not device.is_ignored and
-                (not self._filter or not self._filter.is_ignored(device)))
+        return not self._ignore_device(device)
 
     def get_all_handleable(self):
         """

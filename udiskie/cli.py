@@ -75,14 +75,11 @@ class _EntryPoint(object):
                           action='store_const', default=logging.INFO,
                           const=logging.ERROR, help='quiet output')
         parser.add_option('-1', '--use-udisks1', dest='udisks_version',
-                          action='store_const', default=0, const=1,
+                          action='store_const', const=1,
                           help='use udisks1 as underlying daemon (default)')
         parser.add_option('-2', '--use-udisks2', dest='udisks_version',
-                          action='store_const', default=0, const=2,
+                          action='store_const', const=2,
                           help='use udisks2 as underlying daemon (experimental)')
-        parser.add_option('-f', '--filters', dest='config_file',
-                          action='store', default=None,
-                          metavar='FILE', help='synonym of --config [deprecated]')
         parser.add_option('-C', '--config', dest='config_file',
                           action='store', default=None,
                           metavar='FILE', help='config file')
@@ -166,22 +163,22 @@ class Daemon(_EntryPoint):
         """Extends _EntryPoint.program_option_parser."""
         parser = _EntryPoint.program_options_parser()
         parser.add_option('-P', '--password-prompt', dest='password_prompt',
-                          action='store', default='zenity', metavar='PROGRAM',
+                          action='store', metavar='PROGRAM',
                           help="replace password prompt [deprecated]")
-        parser.add_option('-s', '--suppress', dest='suppress_notify',
-                          action='store_true', default=False,
+        parser.add_option('-s', '--suppress', dest='notify',
+                          action='store_false',
                           help='suppress popup notifications')
         parser.add_option('-t', '--tray', dest='tray',
-                          action='store_const', default=None,
-                          const='TrayIcon', help='show tray icon')
+                          action='store_const',
+                          const=True, help='show tray icon')
         parser.add_option('-T', '--auto-tray', dest='tray',
-                          action='store_const', default=None,
-                          const='AutoTray', help='show tray icon')
+                          action='store_const',
+                          const='auto', help='show tray icon')
         parser.add_option('-F', '--file-manager', action='store',
-                          dest='file_manager', default='xdg-open',
+                          dest='file_manager',
                           metavar='PROGRAM',
                           help="to open mount pathes [deprecated]")
-        parser.add_option('-N', '--no-automount', action='store_false',
+        parser.add_option('-N', '--no-automount',
                           dest='automount', default=True,
                           help="do not automount new devices")
         return parser
@@ -195,16 +192,17 @@ class Daemon(_EntryPoint):
         import udiskie.prompt
 
         mainloop = gobject.MainLoop()
-        daemon = udisks_service_object('Daemon', int(options.udisks_version))
+        daemon = udisks_service_object('Daemon', options.udisks_version)
         browser = udiskie.prompt.browser(options.file_manager)
         mounter = udiskie.mount.Mounter(
-            filter=config.filter_options,
+            mount_options=config.mount_options,
+            ignore_device=config.ignore_device,
             prompt=udiskie.prompt.password(options.password_prompt),
             browser=browser,
             udisks=daemon)
 
         # notifications (optional):
-        if not options.suppress_notify:
+        if options.notify:
             import udiskie.notify
             try:
                 import notify2 as notify_service
@@ -218,8 +216,8 @@ class Daemon(_EntryPoint):
         # tray icon (optional):
         if options.tray:
             import udiskie.tray
-            tray_classes = {'TrayIcon': udiskie.tray.TrayIcon,
-                            'AutoTray': udiskie.tray.AutoTray}
+            tray_classes = {True: udiskie.tray.TrayIcon,
+                            'auto': udiskie.tray.AutoTray}
             if options.tray not in tray_classes:
                 raise ValueError("Invalid tray: %s" % (options.tray,))
             menu_maker = udiskie.tray.SmartUdiskieMenu(
@@ -276,9 +274,10 @@ class Mount(_EntryPoint):
         import udiskie.mount
         import udiskie.prompt
         self.mounter = udiskie.mount.Mounter(
-            filter=config.filter_options,
+            mount_options=config.mount_options,
+            ignore_device=config.ignore_device,
             prompt=udiskie.prompt.password(options.password_prompt),
-            udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
+            udisks=udisks_service_object('Sniffer', options.udisks_version))
 
     def run(self):
         """Implements _EntryPoint.run."""
@@ -323,7 +322,7 @@ class Umount(_EntryPoint):
         """Implements _EntryPoint._init."""
         import udiskie.mount
         self.mounter = udiskie.mount.Mounter(
-            udisks=udisks_service_object('Sniffer', int(options.udisks_version)))
+            udisks=udisks_service_object('Sniffer', options.udisks_version))
 
     def run(self):
         """Implements _EntryPoint.run."""

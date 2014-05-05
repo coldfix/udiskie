@@ -7,7 +7,7 @@ udiskie(8)
 
 Name
 ----
-udiskie - automatic disk mounting service using udisks
+udiskie - automatic disk mounting service using UDisks
 
 
 Synopsis
@@ -21,7 +21,7 @@ Synopsis
 
 Description
 -----------
-*udiskie* uses udisks to automatically mount removable media, such as CDs and flash drives. It will mount the media in a new directory under '/media', using the device name if available. It is lightweight and runs as a daemon.
+*udiskie* uses UDisks to automatically mount removable media, such as CDs and flash drives. It will mount the media in a new directory under '/media' or '/run/media', using the device name if available. It is lightweight and runs as a daemon.
 
 
 Options
@@ -78,7 +78,7 @@ Options
 Dependencies
 ------------
 
-*udisks1* or *udisks2*::
+*UDisks1* or *UDisks2*::
 	backend service required for all operation modes.
 
 *dbus-python*::
@@ -95,6 +95,9 @@ Dependencies
 
 *PyGTK*::
 	to show the system tray icon
+
+*PyYAML*::
+	to read the config file
 
 
 Example Usage[[EU]]
@@ -118,43 +121,37 @@ Mount '/dev/sdb1':
 
 Configuration
 -------------
-*udiskie* uses filters to apply additional mount options. On startup *udiskie* reads the filters in `$XDG_CONFIG_HOME/udiskie/filters.conf` (or the file specified with *-C*). Filters can match the filesystem type or the device UUID. The option \'+\_\_ignore__+' instructs udiskie not to automount and display the matched device. The configuration file can also be used to specify defaults for some of the command line parameters.
+The file 'config.yml' in '$XDG_CONFIG_HOME/udiskie' or '~/.config/udiskie' can be used to configure defaults for some command line parameters and customize ignore-rules for devices. The following example demonstrates the usage of the configuration file:
 
-Example Configuration File
---------------------------
 ----------------------------------------------------------------------
-[mount_options]
-fstype.vfat=sync
-uuid.9d53-13ba=noexec,nodev
-uuid.abcd-ef01=__ignore__
+program_options:
+  udisks_version: 2         # 1, 2
+  password_prompt: zenity   # zenity, systemd-ask-password, null
+  tray: auto                # auto, true, false
+  automount: false
+  notify: true
+  file_manager: xdg-open
 
-[program_options]
-# Allowed values are '1' and '2'
-udisks_version=2
-# 'zenity', 'systemd-ask-password' or user program:
-password_prompt=zenity
-# valid values are: 'AutoTray', 'TrayIcon'
-tray=AutoTray
-# Leave empty to set to ``False``:
-automount=
-# Use '1' for ``True``:
-suppress_notify=1
-# Default program:
-file_manager=xdg-open
+mount_options:              # the first matching entry is used:
+- id_type: vfat             # match file system type
+  options: ro               # list of mount options
+- id_uuid: 9d53-13ba        # match by device UUID
+  options: [noexec, nodev]  # mount options can be given as list
 
-[notifications]
-# Default timeout in seconds:
-timeout=1.5
-# Overwrite timeout for 'device_mounted' notification:
-device_mounted=5
-# Leave empty to disable:
-device_unmounted=
-device_added=
-device_removed=
-# Use the libnotify default timeout:
-device_unlocked=-1
-device_locked=-1
-job_failed=-1
+ignore_device:              # the first matching entry is used:
+- id_uuid: abcd-ef01        # ignore this device
+- device_file: /dev/dm-5
+  ignore: false             # never ignore this device
+
+notifications:
+  timeout: 1.5              # Default timeout in seconds
+  device_mounted: 5         # overwrite
+  device_unmounted: false   # disable
+  device_added: false
+  device_removed: false
+  device_unlocked: -1       # Use the libnotify default timeout
+  device_locked: -1
+  job_failed: -1
 ----------------------------------------------------------------------
 
 See Also

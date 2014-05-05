@@ -33,7 +33,7 @@ __all__ = ['Sniffer', 'Daemon']
 
 def filter_opt(opt):
     """Remove ``None`` values from a dictionary."""
-    return [k for k,v in opt.items() if v is not None]
+    return [k for k,v in opt.items() if v]
 
 
 class DeviceBase(object):
@@ -151,7 +151,7 @@ class OnlineDevice(DBusProxy, DeviceBase):
         return self.property.DeviceIsMediaAvailable
 
     # Drive methods
-    def eject(self, unmount=None):
+    def eject(self, unmount=False):
         """Eject media from the device."""
         return self.method.DriveEject(filter_opt({'unmount': unmount}))
 
@@ -281,14 +281,14 @@ class OnlineDevice(DBusProxy, DeviceBase):
     def mount(self,
               fstype=None,
               options=None,
-              auth_no_user_interaction=None):
+              auth_no_user_interaction=False):
         """Mount filesystem."""
-        options = list(filter(None, (options or '').split(','))) + filter_opt({
+        options = (options or []) + filter_opt({
             'auth_no_user_interaction': auth_no_user_interaction
         })
         return self.method.FilesystemMount(fstype or self.id_type, options)
 
-    def unmount(self, force=None):
+    def unmount(self, force=False):
         """Unmount filesystem."""
         return self.method.FilesystemUnmount(filter_opt({'force': force}))
 

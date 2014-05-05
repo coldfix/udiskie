@@ -1,70 +1,83 @@
 """
 Config utilities.
+
+For an example config file, see the manual. If you don't have the man page
+installed, a raw version is available in doc/udiskie.8.txt.
 """
 
 import logging
 import os
-import re
+import sys
 
-try:                    # python2
-    from ConfigParser import SafeConfigParser, NoSectionError
-except ImportError:     # python3
-    from configparser import SafeConfigParser, NoSectionError
+from udiskie.compat import basestring
+from udiskie.common import setdefault
 
 
-__all__ = ['InvalidFilter',
-           'OptionFilter',
+__all__ = ['DeviceFilter',
            'FilterMatcher',
            'Config']
 
 
-class InvalidFilter(ValueError):
-    """Raised when a filter configuration entry is invalid."""
+def lower(s):
+    try:
+        return s.lower()
+    except AttributeError:
+        return s
 
 
-class OptionFilter(object):
+class DeviceFilter(object):
 
-    """Specify mount options for matching devices."""
+    """Associate a certain value to matching devices."""
 
-    VALID_PARAMETERS = {
-        'fstype': 'id_type',
-        'uuid': 'id_uuid' }
+    VALID_PARAMETERS = [
+        'is_drive',
+        'is_block',
+        'is_partition_table',
+        'is_partition',
+        'is_filesystem',
+        'is_luks',
+        'is_toplevel',
+        'is_detachable',
+        'is_ejectable',
+        'has_media',
+        'device_file',
+        'device_presentation',
+        'id_usage',
+        'is_crypto',
+        'is_ignored',
+        'id_type',
+        'id_label',
+        'id_uuid',
+        'is_luks_cleartext',
+        'is_external',
+        'is_systeminternal',
+        'is_mounted',
+        'mount_paths',
+        'is_unlocked',
+        'in_use',
+    ]
 
-    def __init__(self, key, value, options):
+    def __init__(self, match, value):
         """
         Construct an instance.
 
-        :param string key: device attribute name
-        :param string value: device attribute value to be matched
-        :param list options: mount options for matching devices
+        :param dict match: device attributes
+        :param list value: value
         """
         self._log = logging.getLogger(__name__)
-        self._key = key
+        self._match = match.copy()
+        # the use of keys() makes deletion inside the loop safe:
+        for k in self._match.keys():
+            if k not in self.VALID_PARAMETERS:
+                self._log.warn('Unknown matching attribute: {!r}'.format(k))
+                del self._match[k]
         self._value = value
-        self._options = list(options)
         self._log.debug('%s created' % self)
 
-    @classmethod
-    def from_config_item(cls, config_item):
-        """
-        Construct an instance from an entry in a config file.
-
-        :param tuple config_item: (LHS,RHS) of the config line
-        """
-        expr, options = config_item
-        try:
-            key,value = re.match(r'(\w+)\.(\S+)', expr).groups()
-        except AttributeError:
-            raise InvalidFilter('Invalid format: %s' % expr)
-        if key not in cls.VALID_PARAMETERS:
-            raise InvalidFilter("Invalid key: %s" % self)
-        return cls(cls.VALID_PARAMETERS[key], value,
-                   (S.strip() for S in options.split(',')))
-
     def __str__(self):
-        return '<OptionFilter %s=%s: %s>' % (self._key,
-                                             self._value,
-                                             self._options)
+        return ('{}(match={!r}, value={!r})'
+                .format(self.__class__.__name__,
+                        self._match, self._value))
 
     def match(self, device):
         """
@@ -72,11 +85,12 @@ class OptionFilter(object):
 
         :param Device device: device to be checked
         """
-        return getattr(device, self._key) == self._value
+        return all(lower(getattr(device, k)) == lower(v)
+                   for k, v in self._match.items())
 
-    def get_options(self, device):
+    def value(self, device):
         """
-        Get list of mount options for the device.
+        Get the associated value.
 
         :param Device device: matched device
 
@@ -84,77 +98,62 @@ class OptionFilter(object):
         method is undefined.
         """
         self._log.debug('%s used for %s' % (self, device.object_path))
-        return self._options
+        return self._value
+
+
+class MountOptions(DeviceFilter):
+
+    """Associate a list of mount options to matched devices."""
+
+    def __init__(self, config_item):
+        """Parse the MountOptions filter from the config item."""
+        config_item = config_item.copy()
+        options = config_item.pop('options')
+        if isinstance(options, basestring):
+            options = [o.strip() for o in options.split(',')]
+        super(MountOptions, self).__init__(config_item, options)
+
+
+class IgnoreDevice(DeviceFilter):
+
+    """Associate a boolean ignore flag to matched devices."""
+
+    def __init__(self, config_item):
+        """Parse the IgnoreDevice filter from the config item."""
+        config_item = config_item.copy()
+        ignore = config_item.pop('ignore', True)
+        super(IgnoreDevice, self).__init__(config_item, ignore)
 
 
 class FilterMatcher(object):
 
-    """Matches devices against multiple `OptionFilter`s."""
+    """Matches devices against multiple `DeviceFilter`s."""
 
-    def __init__(self, filters):
+    def __init__(self, filters, default):
         """
-        Construct a FilterMatcher instance from list of OptionFilters.
+        Construct a FilterMatcher instance from list of DeviceFilter.
 
-        :param list filters: list of callable(Device) -> list
+        :param list filters:
         """
         self._filters = list(filters)
+        self._default = default
 
-    @classmethod
-    def from_config_section(cls, config_section):
+    def __call__(self, device):
         """
-        Construct a FilterMatcher instance from config file section.
+        Matches devices against multiple :class:`DeviceFilter`s.
 
-        :param string config_section: list of config items
-
-        The left hand side consists of either the property key to match and
-        the value to search for separated by a dot: 'key.value'. Currently,
-        the only possible keys are 'fstype' and 'uuid'. The right hand side
-        is a comma separated list of all options. The special value
-        '__ignore__' is used to specify that a device will not be handled
-        by udiskie.
-
-        Example:
-
-        >>> filter = FilterMatcher.from_config_section([
-        ...     ('fstype.vfat', 'ro,nouser'),
-        ...     ('uuid.d730f9ea-1751-4f83-8244-c9b3e6b78c3a', '__ignore__')])
-        """
-        return cls(map(OptionFilter.from_config_item, config_section))
-
-    def get_mount_options(self, device):
-        """
-        Retrieve list of mount options for device.
-
+        :param default: default value
+        :param list filters: device filters
         :param Device device: device to be mounted
-        :returns: mount options
-        :rtype: list
+        :returns: value of the first matching filter
         """
-        matching_mount_options = (filt.get_options(device)
-                                  for filt in self._filters
-                                  if filt.match(device))
-        return next(iter(matching_mount_options), [])
-
-    def is_ignored(self, device):
-        """
-        Check if the device should be ignored by udiskie.
-
-        :param Device device: device to be checked
-        :returns: if the device should be ignored
-        :rtype: bool
-        """
-        return any('__ignore__' in filt.get_options(device)
-                   for filt in self._filters
-                   if filt.match(device))
+        matches = (f.value(device) for f in self._filters if f.match(device))
+        return next(matches, self._default)
 
 
 class Config(object):
 
     """Udiskie config in memory representation."""
-
-    # config file sections
-    MOUNT_OPTIONS_SECTION = 'mount_options'
-    PROGRAM_OPTIONS_SECTION = 'program_options'
-    NOTIFICATIONS_SECTION = 'notifications'
 
     def __init__(self, data):
         """
@@ -165,106 +164,83 @@ class Config(object):
         self._data = data
 
     @classmethod
-    def default_path(cls):
+    def default_pathes(cls):
         """
-        Return the default config file path.
+        Return the default config file pathes.
 
-        :rtype: str
+        :rtype: list
         """
         try:
             from xdg.BaseDirectory import xdg_config_home as config_home
         except ImportError:
             config_home = os.path.expanduser('~/.config')
-        return os.path.join(config_home, 'udiskie', 'filters.conf')
+        return [os.path.join(config_home, 'udiskie', 'config.yml'),
+                os.path.join(config_home, 'udiskie', 'config.json')]
+
+    @classmethod
+    def default_program_options(cls):
+        """
+        Return the default program options.
+
+        :rtype: dict
+        """
+        return {'udisks_version': 0,
+                'password_prompt': 'zenity',
+                'tray': False,
+                'automount': True,
+                'notify': True,
+                'file_manager': 'xdg-open'}
 
     @classmethod
     def from_file(cls, path=None):
         """
         Read config file.
 
-        :param str path: config file name
+        :param str path: YAML config file name
         :returns: configuration object
         :rtype: Config
-
-        Config files should look as follows:
-
-        .. code-block:: cfg
-
-            [mount_options]
-            fstype.vfat=sync
-            uuid.9d53-13ba=noexec,nodev
-            uuid.abcd-ef01=__ignore__
-
-            [program_options]
-            # Allowed values are '1' and '2'
-            udisks_version=2
-            # 'zenity', 'systemd-ask-password' or user program:
-            password_prompt=zenity
-            # valid values are: 'AutoTray', 'TrayIcon'
-            tray=AutoTray
-            # Leave empty to set to ``False``:
-            automount=
-            # Use '1' for ``True``:
-            suppress_notify=1
-            # Default program:
-            file_manager=xdg-open
-
-            [notifications]
-            # Default timeout in seconds:
-            timeout=1.5
-            # Overwrite timeout for 'device_mounted' notification:
-            device_mounted=5
-            # Leave empty to disable:
-            device_unmounted=
-            device_added=
-            device_removed=
-            # Use the libnotify default timeout:
-            device_unlocked=-1
-            device_locked=-1
-            job_failed=-1
-
-        The left hand side consists of either the property key to match and
-        the value to search for separated by a dot: 'key.value'. Currently,
-        the only possible keys are 'fstype' and 'uuid'. The right hand side
-        is a comma separated list of all options. The special value
-        '__ignore__' is used to specify that a device will not be handled
-        by udiskie.
+        :raises IOError: if the path does not exist
         """
-        parser = SafeConfigParser()
-        parser.read(path or cls.default_path())
-        return cls(parser)
+        if path is None:
+            for path in cls.default_pathes():
+                try:
+                    return cls.from_file(path)
+                except IOError:
+                    logging.getLogger(__name__).debug(
+                        "Failed to read config file: {0}"
+                        .format(sys.exc_info()[1]))
+                except ImportError:
+                    logging.getLogger(__name__).warn(
+                        "Failed to read {0!r}: {1}"
+                        .format(path, sys.exc_info()[1]))
+            return cls({})
+        if os.path.splitext(path)[1].lower() == '.json':
+            from json import load
+        else:
+            from yaml import safe_load as load
+        with open(path) as f:
+            return cls(load(f))
 
     @property
-    def filter_options(self):
-        """Get a :class:`FilterMatcher` instance from the config data."""
-        try:
-            mount_options = self._data.items(self.MOUNT_OPTIONS_SECTION)
-        except NoSectionError:
-            return FilterMatcher([])
-        else:
-            return FilterMatcher.from_config_section(mount_options)
+    def mount_options(self):
+        """Get a MountOptions filter list from the config data."""
+        config_list = self._data.get('mount_options', [])
+        return FilterMatcher(map(MountOptions, config_list), None)
+
+    @property
+    def ignore_device(self):
+        """Get a IgnoreDevice filter list from the config data"""
+        config_list = self._data.get('ignore_device', [])
+        return FilterMatcher(map(IgnoreDevice, config_list), False)
 
     @property
     def program_options(self):
         """Get the program options dictionary from the config file."""
-        return self._get_section(self.PROGRAM_OPTIONS_SECTION)
+        config_options = self._data.get('program_options', {}).copy()
+        setdefault(config_options, self.default_program_options())
+        return config_options
 
     @property
     def notifications(self):
         """Get the notification timeouts dictionary from the config file."""
-        return self._get_section(self.NOTIFICATIONS_SECTION)
-
-    def _get_section(self, name):
-        """
-        Get a section as dictionary from the config file. Internal method.
-
-        :param str name: config section
-        :returns: the deserialized section
-        :rtype: dict
-        """
-        try:
-            items = self._data.items(name)
-        except NoSectionError:
-            return {}
-        else:
-            return dict((k, v.strip()) for k,v in items)
+        return self._data.get('notifications', {})
