@@ -267,14 +267,22 @@ class Mount(_EntryPoint):
         parser.add_option('-r', '--recursive', dest='recursive',
                           action='store_true', default=False,
                           help='recursively mount LUKS partitions (if the automount daemon is running, this is not necessary)')
+        parser.add_option('-o', '--options', dest='mount_options',
+                          action='store', default=None,
+                          help='Set custom mount options.')
         return parser
 
     def _init(self, config, options, posargs):
         """Implements _EntryPoint._init."""
         import udiskie.mount
         import udiskie.prompt
+        if options.mount_options:
+            opts = [o.strip() for o in options.mount_options.split(',')]
+            mount_options = lambda dev: opts
+        else:
+            mount_options = config.mount_options
         self.mounter = udiskie.mount.Mounter(
-            mount_options=config.mount_options,
+            mount_options=mount_options,
             ignore_device=config.ignore_device,
             prompt=udiskie.prompt.password(options.password_prompt),
             udisks=udisks_service_object('Sniffer', options.udisks_version))
