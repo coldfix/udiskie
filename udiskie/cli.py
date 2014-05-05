@@ -165,8 +165,8 @@ class Daemon(_EntryPoint):
         parser.add_option('-P', '--password-prompt', dest='password_prompt',
                           action='store', default='zenity', metavar='PROGRAM',
                           help="replace password prompt [deprecated]")
-        parser.add_option('-s', '--suppress', dest='suppress_notify',
-                          action='store_true', default=False,
+        parser.add_option('-s', '--suppress', dest='notify',
+                          action='store_false', default=True,
                           help='suppress popup notifications')
         parser.add_option('-t', '--tray', dest='tray',
                           action='store_const', default=None,
@@ -202,7 +202,7 @@ class Daemon(_EntryPoint):
             udisks=daemon)
 
         # notifications (optional):
-        if not options.suppress_notify:
+        if options.notify:
             import udiskie.notify
             try:
                 import notify2 as notify_service
