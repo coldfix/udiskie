@@ -34,13 +34,13 @@ class TestFilterMatcher(unittest.TestCase):
         with open(self.config_file, 'wt') as f:
             f.write('''
 mount_options:
-- uuid: device-with-options
+- id_uuid: device-with-options
   options: noatime,nouser
-- fstype: vfat
+- id_type: vfat
   options: ro,nouser
 
 ignore_device:
-- uuid: ignored-DEVICE
+- id_uuid: ignored-DEVICE
 ''')
 
         config = Config.from_file(self.config_file)

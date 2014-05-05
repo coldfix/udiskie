@@ -28,9 +28,33 @@ class DeviceFilter(object):
 
     """Associate a certain value to matching devices."""
 
-    VALID_PARAMETERS = {
-        'fstype': 'id_type',
-        'uuid': 'id_uuid' }
+    VALID_PARAMETERS = [
+        'is_drive',
+        'is_block',
+        'is_partition_table',
+        'is_partition',
+        'is_filesystem',
+        'is_luks',
+        'is_toplevel',
+        'is_detachable',
+        'is_ejectable',
+        'has_media',
+        'device_file',
+        'device_presentation',
+        'id_usage',
+        'is_crypto',
+        'is_ignored',
+        'id_type',
+        'id_label',
+        'id_uuid',
+        'is_luks_cleartext',
+        'is_external',
+        'is_systeminternal',
+        'is_mounted',
+        'mount_paths',
+        'is_unlocked',
+        'in_use',
+    ]
 
     def __init__(self, match, value):
         """
@@ -40,7 +64,12 @@ class DeviceFilter(object):
         :param list value: value
         """
         self._log = logging.getLogger(__name__)
-        self._match = {self.VALID_PARAMETERS[k]: v for k, v in match.items()}
+        self._match = match.copy()
+        # the use of keys() makes deletion inside the loop safe:
+        for k in self._match.keys():
+            if k not in self.VALID_PARAMETERS:
+                self._log.warn('Unknown matching attribute: {!r}'.format(k))
+                del self._match[k]
         self._value = value
         self._log.debug('%s created' % self)
 
