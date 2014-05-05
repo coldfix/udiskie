@@ -10,6 +10,7 @@ import os
 import sys
 
 from udiskie.compat import basestring
+from udiskie.common import setdefault
 
 
 __all__ = ['DeviceFilter',
@@ -177,6 +178,20 @@ class Config(object):
                 os.path.join(config_home, 'udiskie', 'config.json')]
 
     @classmethod
+    def default_program_options(cls):
+        """
+        Return the default program options.
+
+        :rtype: dict
+        """
+        return {'udisks_version': 0,
+                'password_prompt': 'zenity',
+                'tray': False,
+                'automount': True,
+                'notify': True,
+                'file_manager': 'xdg-open'}
+
+    @classmethod
     def from_file(cls, path=None):
         """
         Read config file.
@@ -221,7 +236,9 @@ class Config(object):
     @property
     def program_options(self):
         """Get the program options dictionary from the config file."""
-        return self._data.get('program_options', {})
+        config_options = self._data.get('program_options', {}).copy()
+        setdefault(config_options, self.default_program_options())
+        return config_options
 
     @property
     def notifications(self):

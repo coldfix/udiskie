@@ -75,10 +75,10 @@ class _EntryPoint(object):
                           action='store_const', default=logging.INFO,
                           const=logging.ERROR, help='quiet output')
         parser.add_option('-1', '--use-udisks1', dest='udisks_version',
-                          action='store_const', default=0, const=1,
+                          action='store_const', const=1,
                           help='use udisks1 as underlying daemon (default)')
         parser.add_option('-2', '--use-udisks2', dest='udisks_version',
-                          action='store_const', default=0, const=2,
+                          action='store_const', const=2,
                           help='use udisks2 as underlying daemon (experimental)')
         parser.add_option('-C', '--config', dest='config_file',
                           action='store', default=None,
@@ -163,22 +163,22 @@ class Daemon(_EntryPoint):
         """Extends _EntryPoint.program_option_parser."""
         parser = _EntryPoint.program_options_parser()
         parser.add_option('-P', '--password-prompt', dest='password_prompt',
-                          action='store', default='zenity', metavar='PROGRAM',
+                          action='store', metavar='PROGRAM',
                           help="replace password prompt [deprecated]")
         parser.add_option('-s', '--suppress', dest='notify',
-                          action='store_false', default=True,
+                          action='store_false',
                           help='suppress popup notifications')
         parser.add_option('-t', '--tray', dest='tray',
-                          action='store_const', default=None,
+                          action='store_const',
                           const=True, help='show tray icon')
         parser.add_option('-T', '--auto-tray', dest='tray',
-                          action='store_const', default=None,
+                          action='store_const',
                           const='auto', help='show tray icon')
         parser.add_option('-F', '--file-manager', action='store',
-                          dest='file_manager', default='xdg-open',
+                          dest='file_manager',
                           metavar='PROGRAM',
                           help="to open mount pathes [deprecated]")
-        parser.add_option('-N', '--no-automount', action='store_false',
+        parser.add_option('-N', '--no-automount',
                           dest='automount', default=True,
                           help="do not automount new devices")
         return parser
