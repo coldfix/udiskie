@@ -113,7 +113,7 @@ class Mounter(object):
             return True
         fstype = str(device.id_type)
         filter = self._filter
-        options = ','.join(filter.get_mount_options(device) if filter else [])
+        options = filter.get_mount_options(device) if filter else []
         kwargs = dict(fstype=fstype, options=options)
         self._log.debug(_('mounting {0} with {1}', device, kwargs))
         mount_path = device.mount(**kwargs)

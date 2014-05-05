@@ -488,7 +488,7 @@ class Device(object):
         """Mount filesystem."""
         return self._I.Filesystem.method.Mount(filter_opt({
             'fstype': fstype,
-            'options': options,
+            'options': ','.join(options or []),
             'auth.no_user_interaction': auth_no_user_interaction
         }))
 
