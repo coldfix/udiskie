@@ -7,7 +7,7 @@ installed, a raw version is available in doc/udiskie.8.txt.
 
 import logging
 import os
-import yaml
+import sys
 
 from udiskie.compat import basestring
 
@@ -163,17 +163,18 @@ class Config(object):
         self._data = data
 
     @classmethod
-    def default_path(cls):
+    def default_pathes(cls):
         """
-        Return the default config file path.
+        Return the default config file pathes.
 
-        :rtype: str
+        :rtype: list
         """
         try:
             from xdg.BaseDirectory import xdg_config_home as config_home
         except ImportError:
             config_home = os.path.expanduser('~/.config')
-        return os.path.join(config_home, 'udiskie', 'config.yml')
+        return [os.path.join(config_home, 'udiskie', 'config.yml'),
+                os.path.join(config_home, 'udiskie', 'config.json')]
 
     @classmethod
     def from_file(cls, path=None):
@@ -183,12 +184,27 @@ class Config(object):
         :param str path: YAML config file name
         :returns: configuration object
         :rtype: Config
+        :raises IOError: if the path does not exist
         """
-        try:
-            with open(path or cls.default_path()) as f:
-                return cls(yaml.safe_load(f))
-        except IOError:
+        if path is None:
+            for path in cls.default_pathes():
+                try:
+                    return cls.from_file(path)
+                except IOError:
+                    logging.getLogger(__name__).debug(
+                        "Failed to read config file: {0}"
+                        .format(sys.exc_info()[1]))
+                except ImportError:
+                    logging.getLogger(__name__).warn(
+                        "Failed to read {0!r}: {1}"
+                        .format(path, sys.exc_info()[1]))
             return cls({})
+        if os.path.splitext(path)[1].lower() == '.json':
+            from json import load
+        else:
+            from yaml import safe_load as load
+        with open(path) as f:
+            return cls(load(f))
 
     @property
     def mount_options(self):
