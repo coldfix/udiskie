@@ -8,7 +8,8 @@ CHANGELOG
 - change config format to YAML
 - change default config path to $XDG_CONFIG_HOME/udiskie/config.yml
 - separate ignore filters from mount option filters
-- allow to match multiple attributes against a device
+- allow to match multiple attributes against a device (AND-wise)
+- allow to overwrite udiskies default handleability settings
 
 
 0.7.0

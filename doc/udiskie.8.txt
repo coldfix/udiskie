@@ -139,6 +139,8 @@ mount_options:				# CAUTION: only the first matching entry is used!
 
 ignore_device:
 - id_uuid: abcd-ef01        # ignore this device
+- device_file: /dev/dm-5
+  ignore: false             # never ignore this device, even if it's internal
 
 notifications:
   timeout: 1.5              # Default timeout in seconds

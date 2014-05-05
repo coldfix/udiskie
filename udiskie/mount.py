@@ -7,6 +7,7 @@ import sys
 
 from udiskie.common import wraps
 from udiskie.compat import filter, basestring
+from udiskie.config import IgnoreDevice, FilterMatcher
 from udiskie.locale import _
 
 
@@ -69,7 +70,11 @@ class Mounter(object):
         """
         self.udisks = udisks
         self._mount_options = mount_options or (lambda device: None)
-        self._ignore_device = ignore_device or (lambda device: False)
+        self._ignore_device = ignore_device or FilterMatcher([], False)
+        self._ignore_device._filters += [
+            IgnoreDevice({'is_block': False, 'ignore': True}),
+            IgnoreDevice({'is_external': False, 'ignore': True}),
+            IgnoreDevice({'is_ignored': True, 'ignore': True})]
         self._prompt = prompt
         self._browser = browser
         self._log = logging.getLogger(__name__)
@@ -410,10 +415,7 @@ class Mounter(object):
         Currently this just means that the device is removable and holds a
         filesystem or the device is a LUKS encrypted volume.
         """
-        return (device.is_block and
-                device.is_external and
-                not device.is_ignored and
-                not self._ignore_device(device))
+        return not self._ignore_device(device)
 
     def get_all_handleable(self):
         """
