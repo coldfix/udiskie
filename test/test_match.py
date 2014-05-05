@@ -40,7 +40,7 @@ mount_options:
   options: ro,nouser
 
 ignore_device:
-- uuid: ignored-device
+- uuid: ignored-DEVICE
 ''')
 
         config = Config.from_file(self.config_file)
@@ -56,7 +56,7 @@ ignore_device:
         """Test the FilterMatcher.is_ignored() method."""
         self.assertTrue(
             self.ignore_device(
-                TestDev('/ignore', 'vfat', 'ignored-device')))
+                TestDev('/ignore', 'vfat', 'IGNORED-device')))
         self.assertFalse(
             self.ignore_device(
                 TestDev('/options', 'vfat', 'device-with-options')))

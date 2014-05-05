@@ -17,6 +17,13 @@ __all__ = ['DeviceFilter',
            'Config']
 
 
+def lower(s):
+    try:
+        return s.lower()
+    except AttributeError:
+        return s
+
+
 class DeviceFilter(object):
 
     """Associate a certain value to matching devices."""
@@ -48,7 +55,7 @@ class DeviceFilter(object):
 
         :param Device device: device to be checked
         """
-        return all(getattr(device, k) == v
+        return all(lower(getattr(device, k)) == lower(v)
                    for k, v in self._match.items())
 
     def value(self, device):
