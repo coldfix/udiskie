@@ -7,6 +7,8 @@ CHANGELOG
 - remove the '--filters' parameter for good
 - change config format to YAML
 - change default config path to $XDG_CONFIG_HOME/udiskie/config.yml
+- separate ignore filters from mount option filters
+- allow to match multiple attributes against a device
 
 
 0.7.0

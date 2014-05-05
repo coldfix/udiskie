@@ -51,7 +51,11 @@ class Mounter(object):
     should always be passed as keyword arguments.
     """
 
-    def __init__(self, udisks, filter=None, prompt=None, browser=None):
+    def __init__(self, udisks,
+                 mount_options=None,
+                 ignore_device=None,
+                 prompt=None,
+                 browser=None):
         """
         Initialize mounter with the given defaults.
 
@@ -64,7 +68,8 @@ class Mounter(object):
         If browser is None, browse will not work.
         """
         self.udisks = udisks
-        self._filter = filter
+        self._mount_options = mount_options or (lambda device: None)
+        self._ignore_device = ignore_device or (lambda device: False)
         self._prompt = prompt
         self._browser = browser
         self._log = logging.getLogger(__name__)
@@ -112,8 +117,7 @@ class Mounter(object):
             self._log.info(_('not mounting {0}: already mounted', device))
             return True
         fstype = str(device.id_type)
-        filter = self._filter
-        options = filter.get_mount_options(device) if filter else []
+        options = self._mount_options(device)
         kwargs = dict(fstype=fstype, options=options)
         self._log.debug(_('mounting {0} with {1}', device, kwargs))
         mount_path = device.mount(**kwargs)
@@ -409,7 +413,7 @@ class Mounter(object):
         return (device.is_block and
                 device.is_external and
                 not device.is_ignored and
-                (not self._filter or not self._filter.is_ignored(device)))
+                not self._ignore_device(device))
 
     def get_all_handleable(self):
         """

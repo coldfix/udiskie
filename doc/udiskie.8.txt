@@ -131,13 +131,14 @@ program_options:
   notify: true
   file_manager: xdg-open
 
-mount_options:
+mount_options:				# CAUTION: only the first matching entry is used!
 - fstype: vfat              # match file system type
-  options: sync             # list of mount options
+  options: ro               # list of mount options
 - uuid: 9d53-13ba
   options: noexec,nodev
-- uuid: abcd-ef01
-  options: __ignore__       # ignore this device
+
+ignore_device:
+- uuid: abcd-ef01           # ignore this device
 
 notifications:
   timeout: 1.5              # Default timeout in seconds

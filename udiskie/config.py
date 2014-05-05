@@ -12,49 +12,35 @@ import yaml
 from udiskie.compat import basestring
 
 
-__all__ = ['OptionFilter',
+__all__ = ['DeviceFilter',
            'FilterMatcher',
            'Config']
 
 
-class OptionFilter(object):
+class DeviceFilter(object):
 
-    """Specify mount options for matching devices."""
+    """Associate a certain value to matching devices."""
 
     VALID_PARAMETERS = {
         'fstype': 'id_type',
         'uuid': 'id_uuid' }
 
-    def __init__(self, match, options):
+    def __init__(self, match, value):
         """
         Construct an instance.
 
         :param dict match: device attributes
-        :param list options: mount options for matching devices
+        :param list value: value
         """
         self._log = logging.getLogger(__name__)
-        self._match = match
-        self._options = options
+        self._match = {self.VALID_PARAMETERS[k]: v for k, v in match.items()}
+        self._value = value
         self._log.debug('%s created' % self)
 
-    @classmethod
-    def from_config_item(cls, config_item):
-        """
-        Construct an instance from an entry in a config file.
-
-        :param dict config_item:
-        """
-        match = {internal_name: config_item[public_name]
-                 for public_name, internal_name in cls.VALID_PARAMETERS.items()
-                 if public_name in config_item}
-        options = config_item['options']
-        if isinstance(options, basestring):
-            options = [o.strip() for o in options.split(',')]
-        return cls(match, options)
-
     def __str__(self):
-        return ('<OptionFilter match={!r}: options={!r}>'
-                .format(self._match, self._options))
+        return ('{}(match={!r}, value={!r})'
+                .format(self.__class__.__name__,
+                        self._match, self._value))
 
     def match(self, device):
         """
@@ -65,9 +51,9 @@ class OptionFilter(object):
         return all(getattr(device, k) == v
                    for k, v in self._match.items())
 
-    def get_options(self, device):
+    def value(self, device):
         """
-        Get list of mount options for the device.
+        Get the associated value.
 
         :param Device device: matched device
 
@@ -75,54 +61,57 @@ class OptionFilter(object):
         method is undefined.
         """
         self._log.debug('%s used for %s' % (self, device.object_path))
-        return self._options
+        return self._value
+
+
+class MountOptions(DeviceFilter):
+
+    """Associate a list of mount options to matched devices."""
+
+    def __init__(self, config_item):
+        """Parse the MountOptions filter from the config item."""
+        config_item = config_item.copy()
+        options = config_item.pop('options')
+        if isinstance(options, basestring):
+            options = [o.strip() for o in options.split(',')]
+        super(MountOptions, self).__init__(config_item, options)
+
+
+class IgnoreDevice(DeviceFilter):
+
+    """Associate a boolean ignore flag to matched devices."""
+
+    def __init__(self, config_item):
+        """Parse the IgnoreDevice filter from the config item."""
+        config_item = config_item.copy()
+        ignore = config_item.pop('ignore', True)
+        super(IgnoreDevice, self).__init__(config_item, ignore)
 
 
 class FilterMatcher(object):
 
-    """Matches devices against multiple `OptionFilter`s."""
+    """Matches devices against multiple `DeviceFilter`s."""
 
-    def __init__(self, filters):
+    def __init__(self, filters, default):
         """
-        Construct a FilterMatcher instance from list of OptionFilters.
+        Construct a FilterMatcher instance from list of DeviceFilter.
 
-        :param list filters: list of callable(Device) -> list
+        :param list filters:
         """
         self._filters = list(filters)
+        self._default = default
 
-    @classmethod
-    def from_config_section(cls, config_section):
+    def __call__(self, device):
         """
-        Construct a FilterMatcher instance from config file section.
+        Matches devices against multiple :class:`DeviceFilter`s.
 
-        :param string config_section: list of config items
-        """
-        return cls(map(OptionFilter.from_config_item, config_section))
-
-    def get_mount_options(self, device):
-        """
-        Retrieve list of mount options for device.
-
+        :param default: default value
+        :param list filters: device filters
         :param Device device: device to be mounted
-        :returns: mount options
-        :rtype: list
+        :returns: value of the first matching filter
         """
-        matching_mount_options = (filt.get_options(device)
-                                  for filt in self._filters
-                                  if filt.match(device))
-        return next(iter(matching_mount_options), [])
-
-    def is_ignored(self, device):
-        """
-        Check if the device should be ignored by udiskie.
-
-        :param Device device: device to be checked
-        :returns: if the device should be ignored
-        :rtype: bool
-        """
-        return any('__ignore__' in filt.get_options(device)
-                   for filt in self._filters
-                   if filt.match(device))
+        matches = (f.value(device) for f in self._filters if f.match(device))
+        return next(matches, self._default)
 
 
 class Config(object):
@@ -166,10 +155,16 @@ class Config(object):
             return cls({})
 
     @property
-    def filter_options(self):
-        """Get a :class:`FilterMatcher` instance from the config data."""
-        return FilterMatcher.from_config_section(
-            self._data.get('mount_options', []))
+    def mount_options(self):
+        """Get a MountOptions filter list from the config data."""
+        config_list = self._data.get('mount_options', [])
+        return FilterMatcher(map(MountOptions, config_list), None)
+
+    @property
+    def ignore_device(self):
+        """Get a IgnoreDevice filter list from the config data"""
+        config_list = self._data.get('ignore_device', [])
+        return FilterMatcher(map(IgnoreDevice, config_list), False)
 
     @property
     def program_options(self):

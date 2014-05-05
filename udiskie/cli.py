@@ -195,7 +195,8 @@ class Daemon(_EntryPoint):
         daemon = udisks_service_object('Daemon', options.udisks_version)
         browser = udiskie.prompt.browser(options.file_manager)
         mounter = udiskie.mount.Mounter(
-            filter=config.filter_options,
+            mount_options=config.mount_options,
+            ignore_device=config.ignore_device,
             prompt=udiskie.prompt.password(options.password_prompt),
             browser=browser,
             udisks=daemon)
@@ -273,7 +274,8 @@ class Mount(_EntryPoint):
         import udiskie.mount
         import udiskie.prompt
         self.mounter = udiskie.mount.Mounter(
-            filter=config.filter_options,
+            mount_options=config.mount_options,
+            ignore_device=config.ignore_device,
             prompt=udiskie.prompt.password(options.password_prompt),
             udisks=udisks_service_object('Sniffer', options.udisks_version))
 

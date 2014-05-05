@@ -13,7 +13,7 @@ import shutil
 import os.path
 import gc
 
-from udiskie.config import OptionFilter, Config
+from udiskie.config import Config
 
 class TestDev(object):
     def __init__(self, object_path, id_type, id_uuid):
@@ -33,13 +33,20 @@ class TestFilterMatcher(unittest.TestCase):
 
         with open(self.config_file, 'wt') as f:
             f.write('''
-[mount_options]
-uuid.ignored-device = __ignore__
-uuid.device-with-options = noatime,nouser
-fstype.vfat = ro,nouser''')
+mount_options:
+- uuid: device-with-options
+  options: noatime,nouser
+- fstype: vfat
+  options: ro,nouser
 
-        self.filter_matcher = Config.from_file(self.config_file).filter_options
-    
+ignore_device:
+- uuid: ignored-device
+''')
+
+        config = Config.from_file(self.config_file)
+        self.mount_options = config.mount_options
+        self.ignore_device = config.ignore_device
+
     def tearDown(self):
         """Remove the config file."""
         gc.collect()
@@ -48,36 +55,31 @@ fstype.vfat = ro,nouser''')
     def test_ignored(self):
         """Test the FilterMatcher.is_ignored() method."""
         self.assertTrue(
-            self.filter_matcher.is_ignored(
+            self.ignore_device(
                 TestDev('/ignore', 'vfat', 'ignored-device')))
         self.assertFalse(
-            self.filter_matcher.is_ignored(
+            self.ignore_device(
                 TestDev('/options', 'vfat', 'device-with-options')))
         self.assertFalse(
-            self.filter_matcher.is_ignored(
+            self.ignore_device(
                 TestDev('/nomatch', 'vfat', 'no-matching-id')))
-
-    try:
-        unittest.TestCase.assertItemsEqual
-    except AttributeError:
-        assertItemsEqual = unittest.TestCase.assertCountEqual
 
     def test_options(self):
         """Test the FilterMatcher.get_mount_options() method."""
-        self.assertItemsEqual(
+        self.assertEqual(
             ['noatime', 'nouser'],
-            self.filter_matcher.get_mount_options(
+            self.mount_options(
                 TestDev('/options', 'vfat', 'device-with-options')))
-        self.assertItemsEqual(
+        self.assertEqual(
             ['noatime', 'nouser'],
-            self.filter_matcher.get_mount_options(
+            self.mount_options(
                 TestDev('/optonly', 'ext', 'device-with-options')))
-        self.assertItemsEqual(
+        self.assertEqual(
             ['ro', 'nouser'],
-            self.filter_matcher.get_mount_options(
+            self.mount_options(
                 TestDev('/fsonly', 'vfat', 'no-matching-id')))
-        self.assertItemsEqual(
-            [],
-            self.filter_matcher.get_mount_options(
+        self.assertEqual(
+            None,
+            self.mount_options(
                 TestDev('/nomatch', 'ext', 'no-matching-id')))
 
