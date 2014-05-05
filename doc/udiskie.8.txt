@@ -7,7 +7,7 @@ udiskie(8)
 
 Name
 ----
-udiskie - automatic disk mounting service using udisks
+udiskie - automatic disk mounting service using UDisks
 
 
 Synopsis
@@ -21,7 +21,7 @@ Synopsis
 
 Description
 -----------
-*udiskie* uses udisks to automatically mount removable media, such as CDs and flash drives. It will mount the media in a new directory under '/media', using the device name if available. It is lightweight and runs as a daemon.
+*udiskie* uses UDisks to automatically mount removable media, such as CDs and flash drives. It will mount the media in a new directory under '/media' or '/run/media', using the device name if available. It is lightweight and runs as a daemon.
 
 
 Options
@@ -78,7 +78,7 @@ Options
 Dependencies
 ------------
 
-*udisks1* or *udisks2*::
+*UDisks1* or *UDisks2*::
 	backend service required for all operation modes.
 
 *dbus-python*::
@@ -95,6 +95,9 @@ Dependencies
 
 *PyGTK*::
 	to show the system tray icon
+
+*PyYAML*::
+	to read the config file
 
 
 Example Usage[[EU]]
@@ -118,10 +121,8 @@ Mount '/dev/sdb1':
 
 Configuration
 -------------
-*udiskie* uses filters to apply additional mount options. On startup *udiskie* reads the file `$XDG_CONFIG_HOME/udiskie/config.yml`. Filters can match the filesystem type and the device UUID. The option \'+\_\_ignore\__+' instructs udiskie not to automount and display the matched device. The configuration file can also be used to specify defaults for some of the command line parameters.
+The file 'config.yml' in '$XDG_CONFIG_HOME/udiskie' or '~/.config/udiskie' can be used to configure defaults for some command line parameters and customize ignore-rules for devices. The following example demonstrates the usage of the configuration file:
 
-Example Configuration File
---------------------------
 ----------------------------------------------------------------------
 program_options:
   udisks_version: 2         # 1, 2
@@ -131,16 +132,16 @@ program_options:
   notify: true
   file_manager: xdg-open
 
-mount_options:				# CAUTION: only the first matching entry is used!
+mount_options:              # the first matching entry is used:
 - id_type: vfat             # match file system type
   options: ro               # list of mount options
 - id_uuid: 9d53-13ba        # match by device UUID
   options: [noexec, nodev]  # mount options can be given as list
 
-ignore_device:
+ignore_device:              # the first matching entry is used:
 - id_uuid: abcd-ef01        # ignore this device
 - device_file: /dev/dm-5
-  ignore: false             # never ignore this device, even if it's internal
+  ignore: false             # never ignore this device
 
 notifications:
   timeout: 1.5              # Default timeout in seconds
