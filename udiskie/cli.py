@@ -179,7 +179,7 @@ class Daemon(_EntryPoint):
                           metavar='PROGRAM',
                           help="to open mount pathes [deprecated]")
         parser.add_option('-N', '--no-automount',
-                          dest='automount', default=True,
+                          dest='automount', action='store_false',
                           help="do not automount new devices")
         return parser
 
