@@ -44,15 +44,12 @@ downloaded and installed from PyPI:
 - UDisks_ required for all operation modes. UDisks2 support is experimental
   and has to be requested explicitly via the command line parameter ``-2``.
 - dbus-python_ required for all operation modes
-- PyGObject_ to run the automount/notification daemon (provides the main loop)
-- notify2_ or notify-python_ for mount notifications
+- PyGObject_ required for all operation modes
 - Zenity_ to show a password prompt to unlock LUKS devices
 
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
 .. _dbus-python: http://dbus.freedesktop.org/doc/dbus-python/
-.. _PyGObject: http://ftp.gnome.org/pub/gnome/sources/pygobject/
-.. _notify-python: http://www.galago-project.org/files/releases/source/notify-python/
-.. _notify2: https://pypi.python.org/pypi/notify2
+.. _PyGObject: https://wiki.gnome.org/action/show/Projects/PyGObject
 .. _Zenity: http://freecode.com/projects/zenity
 
 

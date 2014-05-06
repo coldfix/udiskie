@@ -87,9 +87,6 @@ Dependencies
 *PyGObject*::
 	to run the automount/notification daemon (provides the main loop)
 
-*notify-python* or *notify2*::
-	for mount notifications
-
 *zenity*::
 	to unlock LUKS devices
 

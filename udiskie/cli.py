@@ -204,12 +204,9 @@ class Daemon(_EntryPoint):
         # notifications (optional):
         if options.notify:
             import udiskie.notify
-            try:
-                import notify2 as notify_service
-            except ImportError:
-                import pynotify as notify_service
-            notify_service.init('udiskie.mount')
-            notify = udiskie.notify.Notify(notify_service,
+            from gi.repository import Notify
+            Notify.init('udiskie.mount')
+            notify = udiskie.notify.Notify(Notify.Notification.new,
                                            mounter=mounter,
                                            timeout=config.notifications)
 
