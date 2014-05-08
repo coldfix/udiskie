@@ -7,21 +7,22 @@ import logging
 from os import path
 
 # check availability of runtime dependencies
-def check_any(*packages):
-    """Issue a warning if none of the packages is available."""
-    errors = []
-    for package in packages:
-        try:
-            __import__(package)
-            return True
-        except ImportError:
-            errors.append(sys.exc_info()[1])
-    logging.warn("\n\t".join(["Missing runtime dependencies:"]
-                             + [str(e) for e in errors]))
-    return False
+def check_dependency(package):
+    """Issue a warning if the package is not available."""
+    try:
+        __import__(package)
+    except ImportError:
+        logging.warn("\n\t".join(["Missing runtime dependencies:",
+                                  str(sys.exc_info()[1])]))
+    except RuntimeError:
+        logging.warn("\n\t".join(["Bad runtime dependency:",
+                                  str(sys.exc_info()[1])]))
 
-check_any('dbus')
-check_any('gi.repository')
+check_dependency('gi.repository.DBus')
+check_dependency('gi.repository.GLib')
+check_dependency('gi.repository.Gtk')
+check_dependency('gi.repository.Notify')
+
 
 # read long_description from README.rst
 long_description = None
@@ -82,7 +83,6 @@ setup(
         'PyYAML',
         # Currently not building out of the box:
         # 'PyGObject',
-        # 'dbus-python',
     ],
     tests_require=[
         'python-dbusmock>=0.7.2'

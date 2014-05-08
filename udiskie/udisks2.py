@@ -16,7 +16,7 @@ import os.path
 
 from udiskie.common import Emitter, samefile
 from udiskie.compat import filter
-from udiskie.dbus import DBusProxy, DBusProperties, DBusException, DBusService
+from udiskie.dbus import DBusProxy, DBusException, DBusService
 
 __all__ = ['Sniffer', 'Daemon']
 
@@ -114,15 +114,20 @@ class OfflineProxy(object):
     in many cases as it is immune to a number of race conditions.
     """
 
-    def __init__(self, proxy, data):
+    def __init__(self, proxy, interface, data):
         """
         Initialize wrapper.
 
-        :param DBusProxy proxy: for dynamic property/method lookup
+        :param DBusObject proxy: for dynamic property/method lookup
         :param dict data: for static property lookup
         """
         self.property = AttrDictView(data)
-        self.method = proxy.method
+        self._proxy = proxy
+        self._interface = interface
+
+    @property
+    def method(self):
+        return self._proxy.get_interface(self._interface).method
 
 
 class OfflineInterfaceService(object):
@@ -145,10 +150,10 @@ class OfflineInterfaceService(object):
 
     def __getattr__(self, key):
         """Return a wrapper for the requested interface."""
-        key = Interface[key]
+        interface = Interface[key]
         try:
-            return OfflineProxy(DBusProxy(self._proxy, key),
-                                self._data[key])
+            return OfflineProxy(self._proxy, interface,
+                                self._data[interface])
         except:
             return NullProxy(key, self._proxy.object_path)
 
@@ -166,16 +171,17 @@ class OnlineInterfaceService(object):
         """
         Store DBus proxy.
 
-        :param dbus.proxies.ProxyObject proxy: DBus object for online access
+        :param DBusObject object: DBus object for online access
         """
         self._proxy = proxy
-        self._check = DBusProxy(proxy, Interface['Properties']).method.GetAll
+        properties = proxy.get_interface(Interface['Properties'])
+        self._check = properties.method.GetAll
 
     def __getattr__(self, key):
         """Return a wrapper for the requested interface."""
         try:
-            self._check(Interface[key])
-            return DBusProxy(self._proxy, Interface[key])
+            self._check('(s)', Interface[key])
+            return self._proxy.get_interface(Interface[key])
         except DBusException:
             return NullProxy(key, self._proxy.object_path)
 
@@ -337,15 +343,21 @@ class Device(object):
     # Drive methods
     def eject(self, auth_no_user_interaction=None):
         """Eject media from the device."""
-        return self._assocdrive._I.Drive.method.Eject(filter_opt({
-            'auth.no_user_interaction': auth_no_user_interaction
-        }))
+        return self._assocdrive._I.Drive.method.Eject(
+            '(a{sv})',
+            filter_opt({
+                'auth.no_user_interaction': auth_no_user_interaction
+            })
+        )
 
     def detach(self, auth_no_user_interaction=None):
         """Detach the device by e.g. powering down the physical port."""
-        return self._assocdrive._I.Drive.method.PowerOff(filter_opt({
-            'auth.no_user_interaction': auth_no_user_interaction
-        }))
+        return self._assocdrive._I.Drive.method.PowerOff(
+            '(a{sv})',
+            filter_opt({
+                'auth.no_user_interaction': auth_no_user_interaction
+            })
+        )
 
     #----------------------------------------
     # Block
@@ -486,18 +498,24 @@ class Device(object):
               options=None,
               auth_no_user_interaction=None):
         """Mount filesystem."""
-        return self._I.Filesystem.method.Mount(filter_opt({
-            'fstype': fstype,
-            'options': ','.join(options or []),
-            'auth.no_user_interaction': auth_no_user_interaction
-        }))
+        return self._I.Filesystem.method.Mount(
+            '(a{sv})',
+            filter_opt({
+                'fstype': fstype,
+                'options': ','.join(options or []),
+                'auth.no_user_interaction': auth_no_user_interaction
+            })
+        )
 
     def unmount(self, force=None, auth_no_user_interaction=None):
         """Unmount filesystem."""
-        return self._I.Filesystem.method.Unmount(filter_opt({
-            'force': force,
-            'auth.no_user_interaction': auth_no_user_interaction
-        }))
+        return self._I.Filesystem.method.Unmount(
+            '(a{sv})',
+            filter_opt({
+                'force': force,
+                'auth.no_user_interaction': auth_no_user_interaction
+            })
+        )
 
     #----------------------------------------
     # Encrypted
@@ -522,9 +540,13 @@ class Device(object):
     # Encrypted methods
     def unlock(self, password, auth_no_user_interaction=None):
         """Unlock Luks device."""
-        object_path = self._I.Encrypted.method.Unlock(password, filter_opt({
-            'auth.no_user_interaction': auth_no_user_interaction
-        }))
+        object_path = self._I.Encrypted.method.Unlock(
+            '(sa{sv})',
+            password,
+            filter_opt({
+                'auth.no_user_interaction': auth_no_user_interaction
+            })
+        )
         # UDisks2 may not have processed the InterfacesAdded signal yet.
         # Therefore it is necessary to query the interface data directly
         # from the DBus service:
@@ -532,9 +554,12 @@ class Device(object):
 
     def lock(self, auth_no_user_interaction=None):
         """Lock Luks device."""
-        return self._I.Encrypted.method.Lock(filter_opt({
-            'auth.no_user_interaction': auth_no_user_interaction
-        }))
+        return self._I.Encrypted.method.Lock(
+            '(a{sv})',
+            filter_opt({
+                'auth.no_user_interaction': auth_no_user_interaction
+            })
+        )
 
     #----------------------------------------
     # derived properties
@@ -623,7 +648,7 @@ class Sniffer(UDisks2):
         if not self._is_valid_object_path(object_path):
             return None
         return Device(self, object_path, OnlineInterfaceService(
-            self._proxy._bus.get_object(self.BusName, object_path)))
+            self._proxy.object.bus.get_object(object_path)))
 
     update = get
 
@@ -666,33 +691,22 @@ class Daemon(Emitter, UDisks2):
                           'job_failed'))
         super(Daemon, self).__init__(event_names)
 
-        self._proxy = proxy or self.connect_service()
+        self._proxy = proxy = proxy or self.connect_service()
         self._log = logging.getLogger(__name__)
         self._objects = {}
 
-        bus = self._proxy._bus
-        bus.add_signal_receiver(
-            self._interfaces_added,
-            signal_name='InterfacesAdded',
-            dbus_interface=Interface['ObjectManager'],
-            bus_name=self.BusName)
-        bus.add_signal_receiver(
-            self._interfaces_removed,
-            signal_name='InterfacesRemoved',
-            dbus_interface=Interface['ObjectManager'],
-            bus_name=self.BusName)
-        bus.add_signal_receiver(
-            self._properties_changed,
-            signal_name='PropertiesChanged',
-            dbus_interface=Interface['Properties'],
-            bus_name=self.BusName,
-            path_keyword='object_path')
-        bus.add_signal_receiver(
-            self._job_completed,
-            signal_name='Completed',
-            dbus_interface=Interface['Job'],
-            bus_name=self.BusName,
-            path_keyword='job_name')
+        proxy.connect('InterfacesAdded', self._interfaces_added)
+        proxy.connect('InterfacesRemoved', self._interfaces_removed)
+
+        bus = proxy.object.bus
+        bus.connect(Interface['Properties'],
+                    'PropertiesChanged',
+                    None,
+                    self._properties_changed)
+        bus.connect(Interface['Job'],
+                    'Completed',
+                    None,
+                    self._job_completed)
         self._sync()
 
         self.connect('object_added', self._object_added)
@@ -714,7 +728,7 @@ class Daemon(Emitter, UDisks2):
             if not interfaces_and_properties:
                 return None
         interface_service = OfflineInterfaceService(
-            self._proxy._bus.get_object(self.BusName, object_path),
+            self._proxy.object.bus.get_object(object_path),
             interfaces_and_properties)
         return Device(self, object_path, interface_service)
 

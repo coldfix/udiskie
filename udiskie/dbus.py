@@ -4,15 +4,19 @@ Common DBus utilities.
 
 from __future__ import absolute_import
 
-from dbus import Interface, SystemBus
-from dbus.exceptions import DBusException
-from dbus.mainloop.glib import DBusGMainLoop
+from gi.repository import Gio
+from gi.repository import DBus
 
 
 __all__ = ['DBusProperties',
            'DBusProxy',
+           'DBusObject',
+           'DBusBus',
            'DBusService',
            'DBusException']
+
+
+DBusException = DBus.Error
 
 
 class DBusProperties(object):
@@ -21,56 +25,253 @@ class DBusProperties(object):
     Dbus property map abstraction.
 
     Wraps properties of a DBus interface on a DBus object as attributes.
+
+    :ivar Gio.DBusProxy __proxy: proxy for the DBus.Properties interface
+    :ivar str __interface: inspected interface name
     """
 
-    def __init__(self, dbus_object, interface):
+    def __init__(self, object, name):
         """
         Initialize a proxy object with standard DBus property interface.
 
-        :param dbus.proxies.ProxyObject dbus_object: accessed object
-        :param str interface: accessed interface name
+        :param Gio.DBusObject object: accessed object
+        :param str name: interface name
         """
-        self.__proxy = Interface(
-            dbus_object,
-            dbus_interface='org.freedesktop.DBus.Properties')
-        self.__interface = interface
+        self.__proxy = object._get_interface(
+            'org.freedesktop.DBus.Properties')
+        self.__interface = name
 
-    def __getattr__(self, property):
+    def __getattr__(self, key):
         """
         Retrieve the property via the DBus proxy.
 
-        :param str property: name of the dbus property
-        :returns: the property
+        :param str key: name of the dbus property
+        :returns: the property value
         """
-        return self.__proxy.Get(self.__interface, property)
+        return self.__proxy.Get('(ss)', self.__interface, key)
 
 
 class DBusProxy(object):
 
     """
-    DBus proxy object.
+    DBus proxy object for a specific interface.
 
     Provides attribute accessors to properties and methods of a DBus
     interface on a DBus object.
 
-    :ivar object_path: object path of the DBus object
-    :ivar property: attribute access to DBus properties
-    :ivar method: attribute access to DBus methods
+    :ivar str object_path: object path of the DBus object
+    :ivar DBusProperties property: attribute access to DBus properties
+    :ivar Gio.DBusProxy method: attribute access to DBus methods
+    :ivar Gio.DBusProxy _proxy: underlying proxy object
     """
 
     Exception = DBusException
 
-    def __init__(self, proxy, interface):
+    def __init__(self, proxy):
         """
         Initialize property and method attribute accessors for the interface.
 
-        :param dbus.proxies.ProxyObject proxy: accessed object
+        :param Gio.DBusProxy proxy: accessed object
         :param str interface: accessed interface
         """
-        self.object_path = proxy.object_path
-        self.property = DBusProperties(proxy, interface)
-        self.method = Interface(proxy, interface)
-        self._bus = proxy._bus
+        self._proxy = proxy
+        self.object_path = proxy.get_object_path()
+        self.property = DBusProperties(self.object,
+                                       proxy.get_interface_name())
+        self.method = proxy
+
+    @property
+    def object(self):
+        """
+        Get a proxy for the underlying object.
+
+        :rtype: DBusObject
+        """
+        proxy = self._proxy
+        return DBusObject(proxy.get_connection(),
+                          proxy.get_name(),
+                          proxy.get_object_path())
+
+    def connect(self, event, handler):
+        """
+        Connect to a DBus signal.
+
+        :param str event: event name
+        :param handler: callback
+        :returns: subscription id
+        :rtype: int
+        """
+        interface = self._proxy.get_interface_name()
+        return self.object.connect(interface, event, handler)
+
+
+class DBusObject(object):
+
+    """
+    Simple proxy class for a DBus object.
+
+    :param Gio.DBusConnection connection:
+    :param str bus_name:
+    :param str object_path:
+    """
+
+    def __init__(self, connection, bus_name, object_path):
+        """
+        Initialize member variables.
+
+        :ivar Gio.DBusConnection connection:
+        :ivar str bus_name:
+        :ivar str object_path:
+
+        This performs IO at all.
+        """
+        self.connection = connection
+        self.bus_name = bus_name
+        self.object_path = object_path
+
+    def _get_interface(self, name):
+        """
+        Get a Gio native interface proxy for this Dbus object.
+
+        :param str name: interface name
+        :returns: a proxy object for the other interface
+        :rtype: Gio.DBusProxy
+        """
+        return Gio.DBusProxy.new_sync(
+            self.connection,
+            Gio.DBusProxyFlags.NONE,
+            info=None,
+            name=self.bus_name,
+            object_path=self.object_path,
+            interface_name=name)
+
+    def get_interface(self, name):
+        """
+        Get an interface proxy for this Dbus object.
+
+        :param str name: interface name
+        :returns: a proxy object for the other interface
+        :rtype: DBusProxy
+        """
+        return DBusProxy(self._get_interface(name))
+
+    @property
+    def bus(self):
+        """
+        Get a proxy object for the underlying bus.
+
+        :rtype: DBusBus
+        """
+        return DBusBus(self.connection, self.bus_name)
+
+    def connect(self, interface, event, handler):
+        """
+        Connect to a DBus signal.
+
+        :param str interface: interface name
+        :param str event: event name
+        :param handler: callback
+        :returns: subscription id
+        :rtype: int
+        """
+        object_path = self.object_path
+        return self.bus.connect(interface, event, object_path, handler)
+
+
+class DBusCallback(object):
+
+    def __init__(self, handler):
+        """Store reference to handler."""
+        self._handler = handler
+
+    def __call__(self,
+                 connection,
+                 sender_name,
+                 object_path,
+                 interface_name,
+                 signal_name,
+                 parameters,
+                 *user_data):
+        """Call handler unpacked signal parameters."""
+        return self._handler(*parameters.unpack())
+
+
+class DBusCallbackWithObjectPath(object):
+
+    def __init__(self, handler):
+        """Store reference to handler."""
+        self._handler = handler
+
+    def __call__(self,
+                 connection,
+                 sender_name,
+                 object_path,
+                 interface_name,
+                 signal_name,
+                 parameters,
+                 *user_data):
+        """Call handler with object_path and unpacked signal parameters."""
+        return self._handler(object_path, *parameters.unpack())
+
+
+class DBusBus(object):
+
+    """
+    Simple proxy class for a connected bus.
+
+    :ivar Gio.DBusConnection connection:
+    :ivar str bus_name:
+    """
+
+    def __init__(self, connection, bus_name):
+        """
+        Initialize member variables.
+
+        :param Gio.DBusConnection connection:
+        :param str bus_name:
+
+        This performs IO at all.
+        """
+        self.connection = connection
+        self.bus_name = bus_name
+
+    def get_object(self, object_path):
+        """
+        Get a object representing the specified object.
+
+        :param str object_path: object path
+        :returns: a simple representative for the object
+        :rtype: DBusObject
+        """
+        return DBusObject(self.connection, self.bus_name, object_path)
+
+    def connect(self, interface, event, object_path, handler):
+        """
+        Connect to a DBus signal.
+
+        :param str interface: interface name
+        :param str event: event name
+        :param str object_path: object path or ``None``
+        :param handler: callback
+        """
+        if object_path:
+            callback = DBusCallback(handler)
+        else:
+            callback = DBusCallbackWithObjectPath(handler)
+        return self.connection.signal_subscribe(
+            self.bus_name,
+            interface,
+            event,
+            object_path,
+            None,
+            Gio.DBusSignalFlags.NONE,
+            callback)
+
+    def disconnect(self, subscription_id):
+        """
+        Disconnect a DBus signal subscription.
+        """
+        self.connection.signal_unsubscribe(subscription_id)
 
 
 class DBusService(object):
@@ -82,26 +283,18 @@ class DBusService(object):
     mainloop = None
 
     @classmethod
-    def connect_service(cls, bus=None, mainloop=None):
+    def connect_service(cls):
         """
         Connect to the service object on DBus.
 
-        :param dbus.Bus bus: connection to system bus
-        :param dbus.mainloop.NativeMainLoop mainloop: system bus event loop
         :returns: new proxy object for the service
         :rtype: DBusProxy
         :raises BusException: if unable to connect to service.
-
-        The mainloop parameter is only relevant if no bus is given. In this
-        case if ``mainloop is True``, use the default (glib) mainloop provided
-        by dbus-python.
         """
-        if bus is None:
-            mainloop = mainloop if mainloop is not None else cls.mainloop
-            if mainloop is True:
-                mainloop = DBusGMainLoop()
-            elif mainloop is False:
-                mainloop = None
-            bus = SystemBus(mainloop=mainloop)
-        obj = bus.get_object(cls.BusName, cls.ObjectPath)
-        return DBusProxy(obj, cls.Interface)
+        return DBusProxy(Gio.DBusProxy.new_for_bus_sync(
+            Gio.BusType.SYSTEM,
+            Gio.DBusProxyFlags.NONE,
+            info=None,
+            name=cls.BusName,
+            object_path=cls.ObjectPath,
+            interface_name=cls.Interface))

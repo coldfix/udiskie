@@ -78,9 +78,6 @@ Dependencies
 *UDisks1* or *UDisks2*::
 	backend service required for all operation modes.
 
-*dbus-python*::
-	required for all operation modes.
-
 *PyGObject*::
 	to run the automount/notification daemon (provides the main loop)
 
@@ -145,13 +142,18 @@ See Also
 --------
 linkman:udisks[1]
 
-http://dbus.freedesktop.org/releases/dbus-python
+https://wiki.gnome.org/action/show/Projects/PyGObject
 
-http://ftp.gnome.org/pub/gnome/sources/pygobject/
+https://pypi.python.org/pypi/PyYAML
 
-http://www.galago-project.org/files/releases/source/notify-python
 
-https://pypi.python.org/pypi/notify2
+API references for development:
+
+http://udisks.freedesktop.org/docs/1.0.5/
+
+http://udisks.freedesktop.org/docs/latest/
+
+http://lazka.github.io/pgi-docs/index.html
 
 
 Authors

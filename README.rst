@@ -41,16 +41,13 @@ Dependencies
 Unfortunately, *udiskie* has dependencies that can not be automatically
 downloaded and installed from PyPI:
 
-- UDisks_ required for all operation modes. UDisks2 support is experimental
-  and has to be requested explicitly via the command line parameter ``-2``.
-- dbus-python_ required for all operation modes
-- PyGObject_ required for all operation modes
-- Zenity_ to show a password prompt to unlock LUKS devices
+- UDisks_ (either UDisks1 or UDisks2 is fine)
+- PyGObject_
+- PyYAML_
 
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
-.. _dbus-python: http://dbus.freedesktop.org/doc/dbus-python/
 .. _PyGObject: https://wiki.gnome.org/action/show/Projects/PyGObject
-.. _Zenity: http://freecode.com/projects/zenity
+.. _PyYAML: https://pypi.python.org/pypi/PyYAML
 
 
 Permissions
