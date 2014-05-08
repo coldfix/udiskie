@@ -3,8 +3,10 @@ User prompt utility.
 """
 
 from distutils.spawn import find_executable
+import getpass
 import logging
 import subprocess
+import sys
 
 from gi.repository import Gtk
 
@@ -100,63 +102,46 @@ def password_dialog(title, message):
         return None
 
 
-def password(prompt_name='zenity'):
+def get_password_gui(device):
+    """Get the password to unlock a device from GUI."""
+    text = 'Enter password for {0.device_presentation}: '.format(device)
+    try:
+        return password_dialog('udiskie', text)
+    except RuntimeError:
+        return None
 
+
+def get_password_tty(device):
+    """Get the password to unlock a device from terminal."""
+    text = 'Enter password for {0.device_presentation}: '.format(device)
+    try:
+        return getpass.getpass(text)
+    except EOFError:
+        print("")
+        return None
+
+
+def password(hint_gui):
     """
     Create a password prompt function.
 
-    :param str prompt_name: password program name
-    :returns: one-parameter prompt function
-    :rtype: callable
+    :param bool hint_gui: whether a GUI input dialog should be preferred
     """
-
-    if not prompt_name:
-        return None
-
-    text = 'Enter password for {0.device_presentation}:'
-
-    if prompt_name == 'builtin':
-        def doprompt(device):
-            try:
-                return password_dialog("udiskie", text.format(device))
-            except RuntimeError:
-                pass
-        return doprompt
-
-    executable = find_executable(prompt_name)
-    if executable is None:
-        return None
-
-    # builtin variant: enter password via zenity:
-    if prompt_name == 'zenity':
-        def doprompt(device):
-            return subprocess.check_output([
-                executable,
-                '--entry', '--hide-text',
-                '--text', text.format(device),
-                '--title', 'Unlock encrypted device' ])
-
-    # builtin variant: enter password via systemd-ask-password:
-    elif prompt_name == 'systemd-ask-password':
-        def doprompt(device):
-            return subprocess.check_output([executable, text.format(device)])
-
-    # enter password via user supplied binary:
-    else:
-        def doprompt(device):
-            return subprocess.check_output([executable,
-                                            device.device_presentation])
-
-    def password_prompt(device):
+    def gui():
         try:
-            answer = doprompt(device).decode('utf-8')
-            # strip trailing newline from program output:
-            return answer.rstrip('\n')
-        except subprocess.CalledProcessError:
-            # usually this means the user cancelled
+            require_Gtk()
+            return get_password_gui
+        except RuntimeError:
             return None
-
-    return password_prompt
+    def tty():
+        if sys.stdin.isatty():
+            return get_password_tty
+        else:
+            return None
+    if hint_gui:
+        return gui() or tty()
+    else:
+        return tty() or gui()
 
 
 def browser(browser_name='xdg-open'):

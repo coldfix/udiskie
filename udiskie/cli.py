@@ -162,9 +162,6 @@ class Daemon(_EntryPoint):
     def program_options_parser(cls):
         """Extends _EntryPoint.program_option_parser."""
         parser = _EntryPoint.program_options_parser()
-        parser.add_option('-P', '--password-prompt', dest='password_prompt',
-                          action='store', metavar='PROGRAM',
-                          help="replace password prompt [deprecated]")
         parser.add_option('-s', '--suppress', dest='notify',
                           action='store_false',
                           help='suppress popup notifications')
@@ -197,7 +194,7 @@ class Daemon(_EntryPoint):
         mounter = udiskie.mount.Mounter(
             mount_options=config.mount_options,
             ignore_device=config.ignore_device,
-            prompt=udiskie.prompt.password(options.password_prompt),
+            prompt=udiskie.prompt.password(True),
             browser=browser,
             udisks=daemon)
 
@@ -255,9 +252,6 @@ class Mount(_EntryPoint):
     def program_options_parser(cls):
         """Extends _EntryPoint._program_options_parser."""
         parser = _EntryPoint.program_options_parser()
-        parser.add_option('-P', '--password-prompt', dest='password_prompt',
-                          action='store', metavar='PROGRAM',
-                          help="replace password prompt")
         parser.add_option('-a', '--all', dest='all',
                           action='store_true', default=False,
                           help='mount all present devices')
@@ -273,7 +267,7 @@ class Mount(_EntryPoint):
         self.mounter = udiskie.mount.Mounter(
             mount_options=config.mount_options,
             ignore_device=config.ignore_device,
-            prompt=udiskie.prompt.password(options.password_prompt),
+            prompt=udiskie.prompt.password(False),
             udisks=udisks_service_object('Sniffer', options.udisks_version))
 
     def run(self):

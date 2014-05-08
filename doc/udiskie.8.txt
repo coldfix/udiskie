@@ -12,9 +12,9 @@ udiskie - automatic disk mounting service using UDisks
 
 Synopsis
 --------
-'udiskie' [-hvq12CPstTFN]
+'udiskie' [-hvq12CstTFN]
 
-'udiskie-mount' [-hvq12CPr] (-a | DEVICE...)
+'udiskie-mount' [-hvq12Cr] (-a | DEVICE...)
 
 'udiskie-umount' [-hvq12Ced] (-a | PATH...)
 
@@ -43,9 +43,6 @@ Options
 
 *-C FILE, \--config=FILE*::
     Alternate filter configuration.
-
-*-P PROMPT, \--password-prompt=PROMPT*::
-	Password prompt to use for unlocking. Default is \'+builtin+'. This must be an executable that receives as its first argument the device path and should print the password to its stdout in UTF-8 encoding. This option is deprecated and will probably be replaced by a python commands file.
 
 *-r, \--recursive*::
 	Recursively mount cleartext partitions after unlocking a LUKS device. This will happen by default when running the udiskie daemon.
@@ -117,7 +114,6 @@ The file 'config.yml' in '$XDG_CONFIG_HOME/udiskie' or '~/.config/udiskie' can b
 ----------------------------------------------------------------------
 program_options:
   udisks_version: 2         # 1, 2
-  password_prompt: builtin  # zenity, systemd-ask-password, null
   tray: auto                # auto, true, false
   automount: false
   notify: true
