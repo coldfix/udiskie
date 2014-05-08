@@ -12,6 +12,7 @@ CHANGELOG
 - allow to overwrite udiskies default handleability settings
 - raise exception if --config file doesn't exist
 - add --options parameter for udiskie-mount
+- simplify local installations
 
 
 0.7.0
