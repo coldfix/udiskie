@@ -45,7 +45,7 @@ Options
     Alternate filter configuration.
 
 *-P PROMPT, \--password-prompt=PROMPT*::
-	Password prompt to use for unlocking. Default is \'+zenity+'. This must be an executable that receives as its first argument the device path and should print the password to its stdout in UTF-8 encoding. This option is deprecated and will probably be replaced by a python commands file.
+	Password prompt to use for unlocking. Default is \'+builtin+'. This must be an executable that receives as its first argument the device path and should print the password to its stdout in UTF-8 encoding. This option is deprecated and will probably be replaced by a python commands file.
 
 *-r, \--recursive*::
 	Recursively mount cleartext partitions after unlocking a LUKS device. This will happen by default when running the udiskie daemon.
@@ -87,9 +87,6 @@ Dependencies
 *PyGObject*::
 	to run the automount/notification daemon (provides the main loop)
 
-*zenity*::
-	to unlock LUKS devices
-
 *PyYAML*::
 	to read the config file
 
@@ -120,7 +117,7 @@ The file 'config.yml' in '$XDG_CONFIG_HOME/udiskie' or '~/.config/udiskie' can b
 ----------------------------------------------------------------------
 program_options:
   udisks_version: 2         # 1, 2
-  password_prompt: zenity   # zenity, systemd-ask-password, null
+  password_prompt: builtin  # zenity, systemd-ask-password, null
   tray: auto                # auto, true, false
   automount: false
   notify: true
@@ -159,8 +156,6 @@ http://ftp.gnome.org/pub/gnome/sources/pygobject/
 http://www.galago-project.org/files/releases/source/notify-python
 
 https://pypi.python.org/pypi/notify2
-
-http://freecode.com/projects/zenity
 
 
 Authors

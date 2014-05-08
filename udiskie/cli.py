@@ -256,7 +256,7 @@ class Mount(_EntryPoint):
         """Extends _EntryPoint._program_options_parser."""
         parser = _EntryPoint.program_options_parser()
         parser.add_option('-P', '--password-prompt', dest='password_prompt',
-                          action='store', default='zenity', metavar='PROGRAM',
+                          action='store', metavar='PROGRAM',
                           help="replace password prompt")
         parser.add_option('-a', '--all', dest='all',
                           action='store_true', default=False,
