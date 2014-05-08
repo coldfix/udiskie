@@ -34,7 +34,7 @@ except IOError:
     pass
 
 
-theme_base = path.join(sys.prefix, 'share/icons/hicolor')
+theme_base = path.join('share/icons/hicolor')
 icon_resolutions = ([('scalable', 'svg')] +
                     [('{0}x{0}'.format(res), 'png') for res in [16]])
 icon_classes = {'actions': ('mount', 'unmount',
