@@ -66,7 +66,7 @@ class DeviceBase(object):
             samefile(path, mp) for mp in self.mount_paths)
 
 
-class OnlineDevice(DBusProxy, DeviceBase):
+class OnlineDevice(DeviceBase):
 
     """
     Online wrapper for org.freedesktop.UDisks.Device DBus API proxy objects.
@@ -79,13 +79,14 @@ class OnlineDevice(DBusProxy, DeviceBase):
     """
 
     # construction
-    def __init__(self, udisks, proxy):
+    def __init__(self, udisks, object):
         """
         Initialize an instance with the given DBus proxy object.
 
-        proxy must be an object acquired by a call to bus.get_object().
+        :param DBusObject object:
         """
-        super(OnlineDevice, self).__init__(proxy, self.Interface)
+        self._proxy = object.get_interface(self.Interface)
+        self.object_path = object.object_path
         self.udisks = udisks
 
     # availability of interfaces
@@ -93,7 +94,7 @@ class OnlineDevice(DBusProxy, DeviceBase):
     def is_valid(self):
         """Check if there is a valid DBus object for this object path."""
         try:
-            self.property.DeviceFile
+            self._proxy.property.DeviceFile
             return True
         except self.Exception:
             return False
@@ -101,7 +102,7 @@ class OnlineDevice(DBusProxy, DeviceBase):
     @property
     def is_drive(self):
         """Check if the device is a drive."""
-        return self.property.DeviceIsDrive
+        return self._proxy.property.DeviceIsDrive
 
     @property
     def is_block(self):
@@ -111,12 +112,12 @@ class OnlineDevice(DBusProxy, DeviceBase):
     @property
     def is_partition_table(self):
         """Check if the device is a partition table."""
-        return self.property.DeviceIsPartitionTable
+        return self._proxy.property.DeviceIsPartitionTable
 
     @property
     def is_partition(self):
         """Check if the device has a partition slave."""
-        return self.property.DeviceIsPartition
+        return self._proxy.property.DeviceIsPartition
 
     @property
     def is_filesystem(self):
@@ -126,7 +127,7 @@ class OnlineDevice(DBusProxy, DeviceBase):
     @property
     def is_luks(self):
         """Check if the device is a LUKS container."""
-        return self.property.DeviceIsLuks
+        return self._proxy.property.DeviceIsLuks
 
     #----------------------------------------
     # Drive
@@ -138,26 +139,28 @@ class OnlineDevice(DBusProxy, DeviceBase):
     @property
     def is_detachable(self):
         """Check if the drive that owns this device can be detached."""
-        return self.property.DriveCanDetach if self.is_drive else None
+        return self._proxy.property.DriveCanDetach if self.is_drive else None
 
     @property
     def is_ejectable(self):
         """Check if the drive that owns this device can be ejected."""
-        return self.property.DriveIsMediaEjectable if self.is_drive else None
+        return self._proxy.property.DriveIsMediaEjectable if self.is_drive else None
 
     @property
     def has_media(self):
         """Check if there is media available in the drive."""
-        return self.property.DeviceIsMediaAvailable
+        return self._proxy.property.DeviceIsMediaAvailable
 
     # Drive methods
     def eject(self, unmount=False):
         """Eject media from the device."""
-        return self.method.DriveEject(filter_opt({'unmount': unmount}))
+        return self._proxy.method.DriveEject(
+            '(as)',
+            filter_opt({'unmount': unmount}))
 
     def detach(self):
         """Detach the device by e.g. powering down the physical port."""
-        return self.method.DriveDetach([])
+        return self._proxy.method.DriveDetach('(as)', [])
 
     #----------------------------------------
     # Block
@@ -167,19 +170,19 @@ class OnlineDevice(DBusProxy, DeviceBase):
     @property
     def device_file(self):
         """The filesystem path of the device block file."""
-        return os.path.normpath(self.property.DeviceFile)
+        return os.path.normpath(self._proxy.property.DeviceFile)
 
     @property
     def device_presentation(self):
         """The device file path to present to the user."""
-        return self.property.DeviceFilePresentation
+        return self._proxy.property.DeviceFilePresentation
 
     # TODO: device_size missing
 
     @property
     def id_usage(self):
         """Device usage class, for example 'filesystem' or 'crypto'."""
-        return self.property.IdUsage
+        return self._proxy.property.IdUsage
 
     @property
     def is_crypto(self):
@@ -189,7 +192,7 @@ class OnlineDevice(DBusProxy, DeviceBase):
     @property
     def is_ignored(self):
         """Check if the device should be ignored."""
-        return self.property.DevicePresentationHide
+        return self._proxy.property.DevicePresentationHide
 
     @property
     def id_type(self):
@@ -201,27 +204,27 @@ class OnlineDevice(DBusProxy, DeviceBase):
         IdUsage     'filesystem'    'crypto'
         IdType      'ext4'          'crypto_LUKS'
         """
-        return self.property.IdType
+        return self._proxy.property.IdType
 
     @property
     def id_label(self):
         """Label of the device if available."""
-        return self.property.IdLabel
+        return self._proxy.property.IdLabel
 
     @property
     def id_uuid(self):
         """Device UUID."""
-        return self.property.IdUuid
+        return self._proxy.property.IdUuid
 
     @property
     def luks_cleartext_slave(self):
         """Get luks crypto device."""
-        return self.udisks[self.property.LuksCleartextSlave] if self.is_luks_cleartext else None
+        return self.udisks[self._proxy.property.LuksCleartextSlave] if self.is_luks_cleartext else None
 
     @property
     def is_luks_cleartext(self):
         """Check whether this is a luks cleartext device."""
-        return self.property.DeviceIsLuksCleartext
+        return self._proxy.property.DeviceIsLuksCleartext
 
     @property
     def is_external(self):
@@ -231,7 +234,7 @@ class OnlineDevice(DBusProxy, DeviceBase):
     @property
     def is_systeminternal(self):
         """Check if the device is internal."""
-        return self.property.DeviceIsSystemInternal
+        return self._proxy.property.DeviceIsSystemInternal
 
     @property
     def drive(self):
@@ -257,7 +260,7 @@ class OnlineDevice(DBusProxy, DeviceBase):
     @property
     def partition_slave(self):
         """Get the partition slave (container)."""
-        return self.udisks[self.property.PartitionSlave] if self.is_partition else None
+        return self.udisks[self._proxy.property.PartitionSlave] if self.is_partition else None
 
     #----------------------------------------
     # Filesystem
@@ -267,14 +270,14 @@ class OnlineDevice(DBusProxy, DeviceBase):
     @property
     def is_mounted(self):
         """Check if the device is mounted."""
-        return self.property.DeviceIsMounted
+        return self._proxy.property.DeviceIsMounted
 
     @property
     def mount_paths(self):
         """Return list of active mount paths."""
         if not self.is_mounted:
             return []
-        raw_paths = self.property.DeviceMountPaths
+        raw_paths = self._proxy.property.DeviceMountPaths
         return [os.path.normpath(path) for path in raw_paths]
 
     # Filesystem methods
@@ -286,11 +289,16 @@ class OnlineDevice(DBusProxy, DeviceBase):
         options = (options or []) + filter_opt({
             'auth_no_user_interaction': auth_no_user_interaction
         })
-        return self.method.FilesystemMount(fstype or self.id_type, options)
+        return self._proxy.method.FilesystemMount(
+            '(sas)',
+            fstype or self.id_type,
+            options)
 
     def unmount(self, force=False):
         """Unmount filesystem."""
-        return self.method.FilesystemUnmount(filter_opt({'force': force}))
+        return self._proxy.method.FilesystemUnmount(
+            '(as)',
+            filter_opt({'force': force}))
 
     #----------------------------------------
     # Encrypted
@@ -300,7 +308,7 @@ class OnlineDevice(DBusProxy, DeviceBase):
     @property
     def luks_cleartext_holder(self):
         """Get unlocked luks cleartext device."""
-        return self.udisks[self.property.LuksHolder] if self.is_luks else None
+        return self.udisks[self._proxy.property.LuksHolder] if self.is_luks else None
 
     @property
     def is_unlocked(self):
@@ -310,11 +318,15 @@ class OnlineDevice(DBusProxy, DeviceBase):
     # Encrypted methods
     def unlock(self, password):
         """Unlock Luks device."""
-        return self.udisks.update(self.method.LuksUnlock(password, []))
+        return self.udisks.update(
+            self._proxy.method.LuksUnlock(
+                '(sas)',
+                password,
+                []))
 
     def lock(self):
         """Lock Luks device."""
-        return self.method.LuksLock([])
+        return self._proxy.method.LuksLock('(as)', [])
 
     #----------------------------------------
     # derived properties
@@ -456,8 +468,9 @@ class Sniffer(UDisks):
 
     def get(self, object_path):
         """Create a Device instance from object path."""
-        return OnlineDevice(self, self._proxy._bus.get_object(self.BusName,
-                                                              object_path))
+        return OnlineDevice(
+            self,
+            self._proxy.object.bus.get_object(object_path))
     update = get
 
 
@@ -515,7 +528,8 @@ class Daemon(Emitter, UDisks):
                            'device_chang', )] + ['job_failed']
         super(Daemon, self).__init__(event_names)
 
-        sniffer = Sniffer(proxy or self.connect_service())
+        proxy = proxy or self.connect_service()
+        sniffer = Sniffer(proxy)
 
         self._sniffer = sniffer
         self._jobs = {}
@@ -525,23 +539,10 @@ class Daemon(Emitter, UDisks):
                         'eject': {}, 'detach': {}}
 
         self.connect('device_changed', self._on_device_changed)
-        bus = self._sniffer._proxy._bus
-        bus.add_signal_receiver(
-            self._device_added,
-            signal_name='DeviceAdded',
-            bus_name=self.BusName)
-        bus.add_signal_receiver(
-            self._device_removed,
-            signal_name='DeviceRemoved',
-            bus_name=self.BusName)
-        bus.add_signal_receiver(
-            self._device_changed,
-            signal_name='DeviceChanged',
-            bus_name=self.BusName)
-        bus.add_signal_receiver(
-            self._device_job_changed,
-            signal_name='DeviceJobChanged',
-            bus_name=self.BusName)
+        proxy.connect('DeviceAdded', self._device_added)
+        proxy.connect('DeviceRemoved', self._device_removed)
+        proxy.connect('DeviceChanged', self._device_changed)
+        proxy.connect('DeviceJobChanged', self._device_job_changed)
         self._sync()
 
     # Sniffer overrides

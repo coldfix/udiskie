@@ -23,23 +23,9 @@ before_install:
             python-gobject python3-gobject
             python-dbus python3-dbus
 
-  # Development files for custom builds:
-  # (build works for python2.x but fails on python3 since configure scripts
-  # can't find python headers in virtualenv)
-  # - sudo apt-get -qy install
-  #           libdbus-1-dev libdbus-glib-1-dev
-  #           gobject-introspection libgirepository1.0-dev
-  #           libcairo2-dev python-cairo-dev python3-cairo-dev
-
 # Setup (performed within virtualenv)
 install:
-  # Manually build dependencies (but don't insist):
-  # - PREFIX=$VIRTUAL_ENV ./build_requirements.sh || true
-
-  # For testing:
-  - pip install python-dbusmock
-
-  # Install package
+  # Check that package can be installed from source distribution:
   - python setup.py sdist
   - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
 

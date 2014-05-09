@@ -162,9 +162,6 @@ class Daemon(_EntryPoint):
     def program_options_parser(cls):
         """Extends _EntryPoint.program_option_parser."""
         parser = _EntryPoint.program_options_parser()
-        parser.add_option('-P', '--password-prompt', dest='password_prompt',
-                          action='store', metavar='PROGRAM',
-                          help="replace password prompt [deprecated]")
         parser.add_option('-s', '--suppress', dest='notify',
                           action='store_false',
                           help='suppress popup notifications')
@@ -187,29 +184,26 @@ class Daemon(_EntryPoint):
 
         """Implements _EntryPoint._init."""
 
-        import gobject
+        from gi.repository import GObject
         import udiskie.mount
         import udiskie.prompt
 
-        mainloop = gobject.MainLoop()
+        mainloop = GObject.MainLoop()
         daemon = udisks_service_object('Daemon', options.udisks_version)
         browser = udiskie.prompt.browser(options.file_manager)
         mounter = udiskie.mount.Mounter(
             mount_options=config.mount_options,
             ignore_device=config.ignore_device,
-            prompt=udiskie.prompt.password(options.password_prompt),
+            prompt=udiskie.prompt.password(True),
             browser=browser,
             udisks=daemon)
 
         # notifications (optional):
         if options.notify:
             import udiskie.notify
-            try:
-                import notify2 as notify_service
-            except ImportError:
-                import pynotify as notify_service
-            notify_service.init('udiskie.mount')
-            notify = udiskie.notify.Notify(notify_service,
+            from gi.repository import Notify
+            Notify.init('udiskie.mount')
+            notify = udiskie.notify.Notify(Notify.Notification.new,
                                            mounter=mounter,
                                            timeout=config.notifications)
 
@@ -258,9 +252,6 @@ class Mount(_EntryPoint):
     def program_options_parser(cls):
         """Extends _EntryPoint._program_options_parser."""
         parser = _EntryPoint.program_options_parser()
-        parser.add_option('-P', '--password-prompt', dest='password_prompt',
-                          action='store', default='zenity', metavar='PROGRAM',
-                          help="replace password prompt")
         parser.add_option('-a', '--all', dest='all',
                           action='store_true', default=False,
                           help='mount all present devices')
@@ -284,7 +275,7 @@ class Mount(_EntryPoint):
         self.mounter = udiskie.mount.Mounter(
             mount_options=mount_options,
             ignore_device=config.ignore_device,
-            prompt=udiskie.prompt.password(options.password_prompt),
+            prompt=udiskie.prompt.password(False),
             udisks=udisks_service_object('Sniffer', options.udisks_version))
 
     def run(self):

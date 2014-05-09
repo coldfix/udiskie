@@ -185,7 +185,6 @@ class Config(object):
         :rtype: dict
         """
         return {'udisks_version': 0,
-                'password_prompt': 'zenity',
                 'tray': False,
                 'automount': True,
                 'notify': True,

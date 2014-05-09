@@ -6,7 +6,7 @@ from collections import namedtuple
 from functools import partial
 from itertools import chain
 
-import gtk
+from gi.repository import Gtk
 
 from udiskie.common import setdefault
 
@@ -29,14 +29,14 @@ class UdiskieMenu(object):
     """
 
     _menu_icons = {
-        'browse': gtk.STOCK_OPEN,
+        'browse': Gtk.STOCK_OPEN,
         'mount': 'udiskie-mount',
         'unmount': 'udiskie-unmount',
         'unlock': 'udiskie-unlock',
         'lock': 'udiskie-lock',
         'eject': 'udiskie-eject',
         'detach': 'udiskie-detach',
-        'quit': gtk.STOCK_QUIT, }
+        'quit': Gtk.STOCK_QUIT, }
 
     _menu_labels = {
         'browse': 'Browse %s',
@@ -69,7 +69,7 @@ class UdiskieMenu(object):
             - detach    Detach (power down) a drive
             - quit      Exit the application
 
-        NOTE: If using a main loop other than ``gtk.main`` the 'quit' action
+        NOTE: If using a main loop other than ``Gtk.main`` the 'quit' action
         must be customized.
         """
         self._mounter = mounter
@@ -81,7 +81,7 @@ class UdiskieMenu(object):
             'lock': partial(mounter.remove, force=True),
             'eject': partial(mounter.eject, force=True),
             'detach': partial(mounter.detach, force=True),
-            'quit': gtk.main_quit, })
+            'quit': Gtk.main_quit, })
         self._actions = actions
 
     def __call__(self):
@@ -89,14 +89,14 @@ class UdiskieMenu(object):
         Create menu for udiskie mount operations.
 
         :returns: a new menu
-        :rtype: gtk.Menu
+        :rtype: Gtk.Menu
         """
         # create actions items
         menu = self._branchmenu(self._prepare_menu(self.detect()).groups)
         # append menu item for closing the application
         if self._actions.get('quit'):
             if len(menu) > 0:
-                menu.append(gtk.SeparatorMenuItem())
+                menu.append(Gtk.SeparatorMenuItem())
             menu.append(self._actionitem('quit'))
         return menu
 
@@ -121,14 +121,14 @@ class UdiskieMenu(object):
 
         :param Branch groups: contains information about the menu
         :returns: a new menu object holding all groups of the node
-        :rtype: gtk.Menu
+        :rtype: Gtk.Menu
         """
-        menu = gtk.Menu()
+        menu = Gtk.Menu()
         separate = False
         for group in groups:
             if len(group) > 0:
                 if separate:
-                    menu.append(gtk.SeparatorMenuItem())
+                    menu.append(Gtk.SeparatorMenuItem())
                 separate = True
             for node in group:
                 if isinstance(node, Action):
@@ -150,22 +150,25 @@ class UdiskieMenu(object):
         Create a generic menu item.
 
         :param str label: text
-        :param gtk.Image icon: icon (may be ``None``)
-        :param onclick: onclick handler, either a callable or gtk.Menu
+        :param Gtk.Image icon: icon (may be ``None``)
+        :param onclick: onclick handler, either a callable or Gtk.Menu
         :returns: the menu item object
-        :rtype: gtk.MenuItem
+        :rtype: Gtk.MenuItem
         """
         if icon is None:
-            item = gtk.MenuItem()
+            item = Gtk.MenuItem()
         else:
             try:
-                item = gtk.ImageMenuItem(stock_id=icon)
+                item = Gtk.ImageMenuItem(stock_id=icon)
             except TypeError:
-                item = gtk.ImageMenuItem()
+                item = Gtk.ImageMenuItem()
                 item.set_image(icon)
+            # I don't really care for the "show icons only for nouns, not
+            # for verbs" policy:
+            item.set_always_show_image(True)
         if label is not None:
             item.set_label(label)
-        if isinstance(onclick, gtk.Menu):
+        if isinstance(onclick, Gtk.Menu):
             item.set_submenu(onclick)
         else:
             item.connect('activate', onclick)
@@ -179,7 +182,7 @@ class UdiskieMenu(object):
         :param tuple feed: parameters for the label text
         :param tuple bind: parameters for the onclick handler
         :returns: the menu item object
-        :rtype: gtk.MenuItem
+        :rtype: Gtk.MenuItem
         """
         return self._menuitem(
             self._menu_labels[action] % tuple(feed),
@@ -242,10 +245,10 @@ class UdiskieMenu(object):
 
         :param str name: name of the menu item
         :returns: the loaded icon
-        :rtype: gtk.Image
+        :rtype: Gtk.Image
         """
-        return gtk.image_new_from_icon_name(self._menu_icons[name],
-                                            gtk.ICON_SIZE_MENU)
+        return Gtk.Image.new_from_icon_name(self._menu_icons[name],
+                                            Gtk.IconSize.MENU)
 
 
 class SmartUdiskieMenu(UdiskieMenu):
@@ -299,10 +302,10 @@ class TrayIcon(object):
 
     def __init__(self, menumaker, statusicon=None):
         """
-        Create and show a simple gtk.StatusIcon.
+        Create and show a simple Gtk.StatusIcon.
 
         :param UdiskieMenu menumaker: menu factory
-        :param gtk.StatusIcon statusicon: status icon
+        :param Gtk.StatusIcon statusicon: status icon
         """
         self._icon = statusicon or self._create_statusicon()
         self._menu = menumaker
@@ -312,10 +315,10 @@ class TrayIcon(object):
 
     @classmethod
     def _create_statusicon(self):
-        """Return a new gtk.StatusIcon."""
-        statusicon = gtk.StatusIcon()
-        statusicon.set_from_stock(gtk.STOCK_CDROM)
-        statusicon.set_tooltip("udiskie")
+        """Return a new Gtk.StatusIcon."""
+        statusicon = Gtk.StatusIcon()
+        statusicon.set_from_stock(Gtk.STOCK_CDROM)
+        statusicon.set_tooltip_text("udiskie")
         return statusicon
 
     @property
@@ -360,10 +363,12 @@ class TrayIcon(object):
         m.show_all()
         m.popup(parent_menu_shell=None,
                 parent_menu_item=None,
-                func=gtk.status_icon_position_menu,
+                func=icon.position_menu,
+                data=icon,
                 button=0,
-                activate_time=gtk.get_current_event_time(),
-                data=icon)
+                activate_time=Gtk.get_current_event_time())
+        # need to store reference or menu will be destroyed before showing:
+        self._m = m
 
     def _right_click_event(self, icon, button, time):
         """Handle a right click event (show the menu)."""
@@ -371,10 +376,12 @@ class TrayIcon(object):
         m.show_all()
         m.popup(parent_menu_shell=None,
                 parent_menu_item=None,
-                func=gtk.status_icon_position_menu,
+                func=icon.position_menu,
+                data=icon,
                 button=button,
-                activate_time=time,
-                data=icon)
+                activate_time=time)
+        # need to store reference or menu will be destroyed before showing:
+        self._m = m
 
 
 class AutoTray(TrayIcon):
@@ -394,7 +401,7 @@ class AutoTray(TrayIcon):
         """
         # The reason to overwrite TrayIcon.__init__ is that the AutoTray
         # icon may need to be hidden at initialization time. When creating a
-        # gtk.StatusIcon, it will initially be visible, creating a minor
+        # Gtk.StatusIcon, it will initially be visible, creating a minor
         # nuisance.
         self._icon = None
         self._menu = menumaker

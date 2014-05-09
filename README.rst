@@ -41,21 +41,13 @@ Dependencies
 Unfortunately, *udiskie* has dependencies that can not be automatically
 downloaded and installed from PyPI:
 
-- UDisks_ required for all operation modes. UDisks2 support is experimental
-  and has to be requested explicitly via the command line parameter ``-2``.
-- dbus-python_ required for all operation modes
-- PyGObject_ to run the automount/notification daemon (provides the main loop)
-- notify2_ or notify-python_ for mount notifications
-- Zenity_ to show a password prompt to unlock LUKS devices
-- PyGTK_ to show the system tray icon
+- UDisks_ (either UDisks1 or UDisks2 is fine)
+- PyGObject_
+- PyYAML_
 
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
-.. _dbus-python: http://dbus.freedesktop.org/doc/dbus-python/
-.. _PyGObject: http://ftp.gnome.org/pub/gnome/sources/pygobject/
-.. _notify-python: http://www.galago-project.org/files/releases/source/notify-python/
-.. _notify2: https://pypi.python.org/pypi/notify2
-.. _Zenity: http://freecode.com/projects/zenity
-.. _PyGTK: http://www.pygtk.org
+.. _PyGObject: https://wiki.gnome.org/action/show/Projects/PyGObject
+.. _PyYAML: https://pypi.python.org/pypi/PyYAML
 
 
 Permissions

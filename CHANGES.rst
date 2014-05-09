@@ -1,6 +1,15 @@
 CHANGELOG
 ---------
 
+1.0.0 (in preparation)
+~~~~~~~~~~~~~~~~~~~~~~
+
+- port to PyGObject, removing dependencies on pygtk, zenity, dbus-python,
+  python-notify
+- use a PyGObject based password dialog
+- remove --password-prompt parameter
+
+
 0.8.0
 ~~~~~
 

@@ -180,7 +180,7 @@ class Notify(object):
         This is just a small convenience method to get the timeouts
         correct everywhere.
         """
-        notification = self._notify.Notification(summary, message, icon)
+        notification = self._notify(summary, message, icon)
         timeout = self._get_timeout(event)
         if timeout != -1:
             notification.set_timeout(int(timeout * 1000))
