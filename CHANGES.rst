@@ -1,8 +1,8 @@
 CHANGELOG
 ---------
 
-0.8.0 (in preparation)
-~~~~~~~~~~~~~~~~~~~~~~
+0.8.0
+~~~~~
 
 - remove the '--filters' parameter for good
 - change config format to YAML
@@ -11,6 +11,8 @@ CHANGELOG
 - allow to match multiple attributes against a device (AND-wise)
 - allow to overwrite udiskies default handleability settings
 - raise exception if --config file doesn't exist
+- add --options parameter for udiskie-mount
+- simplify local installations
 
 
 0.7.0

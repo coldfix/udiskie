@@ -110,6 +110,13 @@ it like so:
     cp ./icons/scalable /usr/share/icons/hicolor -r
     gtk-update-icon-cache /usr/share/icons/hicolor
 
+When doing a local installation, for example in a virtualenv, you can
+manually change the installation prefix for the icon data files like so:
+
+.. code-block:: bash
+
+    python setup.py install --install-data ~/.local
+
 The icons roughly follow the `Tango style guidelines`_. Some icons incorporate
 the CDROM icon of the base icon theme of the `Tango desktop project`_
 (released into the public domain).

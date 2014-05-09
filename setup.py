@@ -33,7 +33,7 @@ except IOError:
     pass
 
 
-theme_base = path.join(sys.prefix, 'share/icons/hicolor')
+theme_base = path.join('share/icons/hicolor')
 icon_resolutions = ([('scalable', 'svg')] +
                     [('{0}x{0}'.format(res), 'png') for res in [16]])
 icon_classes = {'actions': ('mount', 'unmount',
@@ -51,7 +51,7 @@ class custom_install(install):
 
 setup(
     name='udiskie',
-    version='0.7.0',
+    version='0.8.0',
     description='Removable disk automounter for udisks',
     long_description=long_description,
     author='Byron Clark',

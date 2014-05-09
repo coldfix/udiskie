@@ -14,7 +14,7 @@ Synopsis
 --------
 'udiskie' [-hvq12CstTFN]
 
-'udiskie-mount' [-hvq12Cr] (-a | DEVICE...)
+'udiskie-mount' [-hvq12Cro] (-a | DEVICE...)
 
 'udiskie-umount' [-hvq12Ced] (-a | PATH...)
 
@@ -46,6 +46,9 @@ Options
 
 *-r, \--recursive*::
 	Recursively mount cleartext partitions after unlocking a LUKS device. This will happen by default when running the udiskie daemon.
+
+*-o OPTIONS, \--options=OPTIONS*::
+	Set mount options.
 
 *-s, \--suppress*::
 	Suppress pop-up notifications.
