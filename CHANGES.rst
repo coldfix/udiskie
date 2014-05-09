@@ -1,8 +1,8 @@
 CHANGELOG
 ---------
 
-0.8.0 (in preparation)
-~~~~~~~~~~~~~~~~~~~~~~
+0.8.0
+~~~~~
 
 - remove the '--filters' parameter for good
 - change config format to YAML
