@@ -36,9 +36,6 @@ install:
   # Manually build dependencies (but don't insist):
   # - PREFIX=$VIRTUAL_ENV ./build_requirements.sh || true
 
-  # For testing:
-  - pip install python-dbusmock
-
   # Install package
   - python setup.py sdist
   - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
