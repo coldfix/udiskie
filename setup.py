@@ -33,12 +33,8 @@ except IOError:
     pass
 
 
-theme_base = path.join('share/icons/hicolor')
-icon_resolutions = ([('scalable', 'svg')] +
-                    [('{0}x{0}'.format(res), 'png') for res in [16]])
-icon_classes = {'actions': ('mount', 'unmount',
-                            'lock', 'unlock',
-                            'eject', 'detach')}
+theme_base = path.join('share', 'icons', 'hicolor')
+icon_names = ['mount', 'unmount', 'lock', 'unlock', 'eject', 'detach']
 
 class custom_install(install):
     def run(self):
@@ -65,12 +61,10 @@ setup(
         'udiskie',
     ],
     data_files=[
-        (path.join(theme_base, icon_resolution, icon_class), [
-            path.join('icons', icon_resolution, icon_class,
-                      'udiskie-%s.%s' % (icon_name, icon_ext))
+        (path.join(theme_base, 'scalable', 'actions'), [
+            path.join('icons', 'scalable', 'actions',
+                      'udiskie-{0}.svg'.format(icon_name))
             for icon_name in icon_names])
-        for icon_resolution,icon_ext in icon_resolutions
-        for icon_class,icon_names in icon_classes.items()
     ],
     entry_points={
         'console_scripts': [
