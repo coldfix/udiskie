@@ -79,7 +79,7 @@ class Choice(object):
 
     def _check(self, args):
         """Exit in case of multiple exclusive arguments."""
-        if sum(args[arg] for arg in self._mapping) > 1:
+        if sum(bool(args[arg]) for arg in self._mapping) > 1:
             raise DocoptExit('These options are mutually exclusive: '
                              + ', '.join(self._mapping))
 
@@ -87,8 +87,14 @@ class Choice(object):
         """Get the option value from the parsed arguments."""
         self._check(args)
         for arg, val in self._mapping.items():
-            if args[arg]:
+            if args[arg] not in (None, False):
                 return val
+
+
+def Switch(name):
+    """Negatable option."""
+    return Choice({'--' + name: True,
+                   '--no-' + name: False})
 
 
 class Value(object):
@@ -102,6 +108,18 @@ class Value(object):
     def __call__(self, args):
         """Get the value of the command line argument."""
         return args[self._name]
+
+
+class OptionalValue(object):
+
+    def __init__(self, name):
+        """Set argument name."""
+        self._name = name
+        self._choice = Switch(name.lstrip('-'))
+
+    def __call__(self, args):
+        """Get the value of the command line argument."""
+        return self._choice(args) and args[self._name]
 
 
 class _EntryPoint(object):
@@ -125,6 +143,7 @@ class _EntryPoint(object):
             '--verbose': logging.DEBUG,
             '--quiet': logging.ERROR}),
         'udisks_version': Choice({
+            '--udisks-auto': 0,
             '--use-udisks1': 1,
             '--use-udisks2': 2}),
     }
@@ -147,7 +166,8 @@ class _EntryPoint(object):
             fmt = '%(message)s'
         logging.basicConfig(level=log_level, format=fmt)
         # parse config options
-        config = udiskie.config.Config.from_file(args['--config'])
+        config_file = OptionalValue('--config')(args)
+        config = udiskie.config.Config.from_file()
         options = {}
         options.update(default_opts)
         options.update(config.program_options)
@@ -231,11 +251,13 @@ class Daemon(_EntryPoint):
         udiskie (--help | --version)
 
     General options:
-        -C FILE, --config=FILE                  Set config file
+        -c FILE, --config=FILE                  Set config file
+        -C, --no-config                         Don't use config file
 
         -v, --verbose                           Increase verbosity (DEBUG)
         -q, --quiet                             Decrease verbosity
 
+        -0, --udisks-auto                       Auto discover UDisks version
         -1, --use-udisks1                       Use UDisks1 as backend
         -2, --use-udisks2                       Use UDisks2 as backend
 
@@ -243,11 +265,19 @@ class Daemon(_EntryPoint):
         -V, --version                           Show version information
 
     Daemon options:
-        -N, --no-automount                      do not automount new devices
-        -s, --suppress                          suppress popup notifications
-        -t, --tray                              show tray icon
-        -T, --auto-tray                         show tray icon (auto-hiding)
-        -F PROGRAM, --file-manager PROGRAM      [deprecated]
+        -a, --automount                         Automount new devices
+        -A, --no-automount                      Disable automounting
+
+        -n, --notify                            Show popup notifications
+        -N, --no-notify                         Disable notifications
+
+        -t, --tray                              Show tray icon
+        -s, --smart-tray                        Auto hide tray icon
+        -T, --no-tray                           Disable tray icon
+
+    Deprecated options:
+        -f PROGRAM, --file-manager PROGRAM      Set program for browsing
+        -F, --no-file-manager                   Disable browsing
     """
 
     name = 'udiskie'
@@ -260,14 +290,13 @@ class Daemon(_EntryPoint):
     })
 
     option_rules = extend(_EntryPoint.option_rules, {
-        'notify': Choice({
-            '--suppress': False}),
-        'automount': Choice({
-            '--no-automount': False}),
+        'automount': Switch('automount'),
+        'notify': Switch('notify'),
         'tray': Choice({
             '--tray': True,
-            '--auto-tray': 'auto'}),
-        'file_manager': Value('--file-manager'),
+            '--no-tray': False,
+            '--smart-tray': 'auto'}),
+        'file_manager': OptionalValue('--file-manager'),
     })
 
     def _init(self, config, options):
@@ -341,11 +370,13 @@ class Mount(_EntryPoint):
         udiskie-mount (--help | --version)
 
     General options:
-        -C FILE, --config=FILE                  Set config file
+        -c FILE, --config=FILE                  Set config file
+        -C, --no-config                         Don't use config file
 
         -v, --verbose                           Increase verbosity (DEBUG)
         -q, --quiet                             Decrease verbosity
 
+        -0, --udisks-auto                       Auto discover UDisks version
         -1, --use-udisks1                       Use UDisks1 as backend
         -2, --use-udisks2                       Use UDisks2 as backend
 
@@ -354,7 +385,10 @@ class Mount(_EntryPoint):
 
     Mount options:
         -a, --all                               Mount all handleable devices
+
         -r, --recursive                         Recursively mount partitions
+        -R, --no-recursive                      Disable recursive mounting
+
         -o OPTIONS, --options OPTIONS           Mount option list
     """
 
@@ -367,8 +401,7 @@ class Mount(_EntryPoint):
     })
 
     option_rules = extend(_EntryPoint.option_rules, {
-        'recursive': Choice({
-            '--recursive': True}),
+        'recursive': Switch('recursive'),
         'options': Value('--options'),
         '<device>': Value('DEVICE'),
     })
@@ -413,11 +446,13 @@ class Umount(_EntryPoint):
         udiskie-umount (--help | --version)
 
     General options:
-        -C FILE, --config=FILE      Set config file
+        -c FILE, --config=FILE      Set config file
+        -C, --no-config             Don't use config file
 
         -v, --verbose               Increase verbosity (DEBUG)
         -q, --quiet                 Decrease verbosity
 
+        -0, --udisks-auto           Auto discover UDisks version
         -1, --use-udisks1           Use UDisks1 as backend
         -2, --use-udisks2           Use UDisks2 as backend
 
@@ -426,8 +461,12 @@ class Umount(_EntryPoint):
 
     Unmount options:
         -a, --all                   Unmount all handleable devices
+
         -e, --eject                 Eject media from device if possible
+        -E, --no-eject              Don't eject media
+
         -d, --detach                Power off drive if possible
+        -D, --no-detach             Don't power off drive
     """
 
     name = 'udiskie-umount'
@@ -439,8 +478,8 @@ class Umount(_EntryPoint):
     })
 
     option_rules = extend(_EntryPoint.option_rules, {
-        'eject': Choice({'--eject': True}),
-        'detach': Choice({'--detach': True}),
+        'eject': Switch('eject'),
+        'detach': Switch('detach'),
         '<device>': Value('DEVICE'),
     })
 
