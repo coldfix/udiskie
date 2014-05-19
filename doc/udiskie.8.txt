@@ -104,17 +104,29 @@ Unmount options
 *-a, \--all*::
 	Unmount all handled devices.
 
+*-d, \--detach*::
+	Detach drive by e.g. powering down its physical port.
+
+*-D, \--no-detach*::
+	Don't detach drive (default).
+
 *-e, \--eject*::
 	Eject media from the drive, e.g CDROM.
 
 *-E, \--no-eject*::
 	Don't eject media (default).
 
-*-d, \--detach*::
-	Detach drive by e.g. powering down its physical port.
+*-f, \--force*::
+	Force removal (recursive unmounting).
 
-*-D, \--no-detach*::
-	Don't detach drive (default).
+*-F, \--no-force*::
+	Don't force removal (default).
+
+*-l, \--lock*::
+	Lock device after unmounting (default).
+
+*-L, \--no-lock*::
+	Don't lock device.
 
 
 Dependencies

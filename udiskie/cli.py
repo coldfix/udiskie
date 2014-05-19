@@ -462,24 +462,34 @@ class Umount(_EntryPoint):
     Unmount options:
         -a, --all                   Unmount all handleable devices
 
+        -d, --detach                Power off drive if possible
+        -D, --no-detach             Don't power off drive
+
         -e, --eject                 Eject media from device if possible
         -E, --no-eject              Don't eject media
 
-        -d, --detach                Power off drive if possible
-        -D, --no-detach             Don't power off drive
+        -f, --force                 Force removal (recursive unmounting)
+        -F, --no-force              Don't force removal
+
+        -l, --lock                  Lock device after unmounting
+        -L, --no-lock               Don't lock device
     """
 
     name = 'udiskie-umount'
 
     option_defaults = extend(_EntryPoint.option_defaults, {
-        'eject': False,
         'detach': False,
+        'eject': False,
+        'force': False,
+        'lock': True,
         '<device>': None,
     })
 
     option_rules = extend(_EntryPoint.option_rules, {
-        'eject': Switch('eject'),
         'detach': Switch('detach'),
+        'eject': Switch('eject'),
+        'force': Switch('force'),
+        'lock': Switch('lock'),
         '<device>': Value('DEVICE'),
     })
 
@@ -494,7 +504,8 @@ class Umount(_EntryPoint):
         mounter = self.mounter
         strategy = dict(detach=options['detach'],
                         eject=options['eject'],
-                        lock=True)
+                        force=options['force'],
+                        lock=options['lock'])
         if options['<device>']:
             success = True
             for path in options['<device>']:
