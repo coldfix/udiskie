@@ -323,7 +323,7 @@ class Daemon(_EntryPoint):
             udisks=daemon)
 
         # notifications (optional):
-        if not options['notify']:
+        if options['notify']:
             import udiskie.notify
             from gi.repository import Notify
             Notify.init('udiskie')
