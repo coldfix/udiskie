@@ -2,6 +2,7 @@ include doc/*.txt
 include doc/asciidoc.conf
 include doc/Makefile
 recursive-include icons *.svg *.png
+recursive-include lang *.pot *.po
 include CHANGES.rst
 include COPYING
 include README.rst
