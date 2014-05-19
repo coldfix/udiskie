@@ -42,12 +42,14 @@ Unfortunately, *udiskie* has dependencies that can not be automatically
 downloaded and installed from PyPI:
 
 - UDisks_ (either UDisks1 or UDisks2 is fine)
-- PyGObject_
-- PyYAML_
+- PyGObject_ (GTK3+)
+- PyYAML_ (builds from PyPI)
+- docopt_ (builds from PyPI)
 
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
 .. _PyGObject: https://wiki.gnome.org/action/show/Projects/PyGObject
 .. _PyYAML: https://pypi.python.org/pypi/PyYAML
+.. _docopt: http://docopt.org/
 
 
 Permissions
