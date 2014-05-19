@@ -11,7 +11,7 @@ import pkg_resources
 import sys
 import warnings
 
-from docopt import docopt
+from docopt import docopt, DocoptExit
 
 import udiskie.config
 import udiskie.mount
@@ -76,8 +76,15 @@ class Choice(object):
         """Set mapping between arguments and values."""
         self._mapping = mapping
 
+    def _check(self, args):
+        """Exit in case of multiple exclusive arguments."""
+        if sum(args[arg] for arg in self._mapping) > 1:
+            raise DocoptExit('These options are mutually exclusive: '
+                             + ', '.join(self._mapping))
+
     def __call__(self, args):
         """Get the option value from the parsed arguments."""
+        self._check(args)
         for arg, val in self._mapping.items():
             if args[arg]:
                 return val
@@ -214,7 +221,7 @@ class Daemon(_EntryPoint):
     udiskie: a user-level daemon for auto-mounting.
 
     Usage:
-        udiskie [-C FILE] [-v|-q] [-1|-2] [-Ns] [-F PROGRAM] [-t|-T]
+        udiskie [options]
         udiskie (--help | --version)
 
     General options:
@@ -324,7 +331,7 @@ class Mount(_EntryPoint):
     udiskie-mount: a user-level command line utility for mounting.
 
     Usage:
-        udiskie-mount [-C FILE] [-v|-q] [-1|-2] [-r] [-o OPTIONS] (-a | DEVICE...)
+        udiskie-mount [options] (-a | DEVICE...)
         udiskie-mount (--help | --version)
 
     General options:
@@ -396,7 +403,7 @@ class Umount(_EntryPoint):
     udiskie-umount: a user-level command line utility for unmounting.
 
     Usage:
-        udiskie-umount [-C FILE] [-v|-q] [-1|-2] [-e] [-d] (-a | DEVICE...)
+        udiskie-umount [options] (-a | DEVICE...)
         udiskie-umount (--help | --version)
 
     General options:
