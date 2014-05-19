@@ -7,7 +7,6 @@ setuptools entry points.
 
 import inspect
 import logging
-import optparse
 import pkg_resources
 import sys
 import warnings
@@ -233,7 +232,7 @@ class _EntryPoint(object):
         Fully initialize Daemon object.
 
         :param Config config: configuration object
-        :param options: program options as returned by optparse
+        :param options: program options
         """
         raise NotImplementedError()
 
@@ -241,7 +240,7 @@ class _EntryPoint(object):
         """
         Run main program logic.
 
-        :param options: program options as returned by optparse
+        :param options: program options
         :returns: exit code
         :rtype: int
         """
