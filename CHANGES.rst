@@ -8,6 +8,8 @@ CHANGELOG
   python-notify
 - use a PyGObject based password dialog
 - remove --password-prompt parameter
+- rename command line parameters
+- add negations for all command line parameters
 
 
 0.8.0
