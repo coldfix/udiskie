@@ -5,7 +5,7 @@ Common DBus utilities.
 from __future__ import absolute_import
 
 from gi.repository import Gio
-from gi.repository import DBus
+from gi.repository import GLib
 
 
 __all__ = ['DBusProperties',
@@ -16,7 +16,7 @@ __all__ = ['DBusProperties',
            'DBusException']
 
 
-DBusException = DBus.Error
+DBusException = GLib.GError
 
 
 class DBusProperties(object):

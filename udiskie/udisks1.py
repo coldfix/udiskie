@@ -25,7 +25,7 @@ import os.path
 
 from udiskie.common import Emitter, samefile
 from udiskie.compat import filter
-from udiskie.dbus import DBusProxy, DBusService
+from udiskie.dbus import DBusProxy, DBusService, DBusException
 
 
 __all__ = ['Sniffer', 'Daemon']
@@ -41,6 +41,8 @@ class DeviceBase(object):
     """Helper base class for devices."""
 
     Interface = 'org.freedesktop.UDisks.Device'
+
+    Exception = DBusException
 
     # string representation
     def __str__(self):
