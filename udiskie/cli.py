@@ -5,6 +5,7 @@ The application classes in this module are installed as executables via
 setuptools entry points.
 """
 
+import inspect
 import logging
 import optparse
 import pkg_resources
@@ -135,7 +136,7 @@ class _EntryPoint(object):
         :param list argv: command line parameters
         """
         # parse program options (retrieve log level and config file name):
-        args = docopt(self.__doc__, version=self.name + ' ' + self.version)
+        args = docopt(self.usage, version=self.name + ' ' + self.version)
         default_opts = self.option_defaults
         program_opts = self.program_options(args)
         # initialize logging configuration:
@@ -189,6 +190,11 @@ class _EntryPoint(object):
             return pkg_resources.get_distribution('udiskie').version
         except pkg_resources.DistributionNotFound:
             return '(unknown version)'
+
+    @property
+    def usage(self):
+        """Get the full usage string."""
+        return inspect.cleandoc(self.__doc__)
 
     @property
     def name(self):
