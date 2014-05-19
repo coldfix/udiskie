@@ -19,9 +19,7 @@ virtualenv:
 # (these can't be built via setuptools)
 before_install:
   - sudo apt-get -qy update
-  - sudo apt-get -qy install
-            python-gobject python3-gobject
-            python-dbus python3-dbus
+  - sudo apt-get -qy install python-gobject python3-gobject
 
 # Setup (performed within virtualenv)
 install:
