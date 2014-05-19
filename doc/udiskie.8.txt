@@ -12,11 +12,11 @@ udiskie - automatic disk mounting service using UDisks
 
 Synopsis
 --------
-'udiskie' [-hvq12CstTFN]
+'udiskie' [OPTIONS]
 
-'udiskie-mount' [-hvq12Cro] (-a | DEVICE...)
+'udiskie-mount' [OPTIONS] (-a | DEVICE...)
 
-'udiskie-umount' [-hvq12Ced] (-a | PATH...)
+'udiskie-umount' [OPTIONS] (-a | PATH...)
 
 
 Description
@@ -24,55 +24,109 @@ Description
 *udiskie* uses UDisks to automatically mount removable media, such as CDs and flash drives. It will mount the media in a new directory under '/media' or '/run/media', using the device name if available. It is lightweight and runs as a daemon.
 
 
-Options
--------
+Common options
+--------------
 *-h, \--help*::
 	Show help message and exit.
 
+*-V, \--version*::
+	Show help message and exit.
+
 *-v, \--verbose*::
-	Verbose output. Can't be used together with the *-q* option.
+	Verbose output.
 
 *-q, \--quiet*::
-	Quiet output. Can't be used together with the *-v* option.
+	Quiet output.
+
+*-0, \--udisks-auto*::
+	Auto discover UDisks version (default).
 
 *-1, \--use-udisks1*::
-	Use UDisks1 as DBus backend (default)
+	Use UDisks1 as DBus backend.
 
 *-2, \--use-udisks2*::
-	Use UDisks2 as DBus backend (experimental)
+	Use UDisks2 as DBus backend (experimental).
 
-*-C FILE, \--config=FILE*::
-    Alternate filter configuration.
+*-c FILE, \--config=FILE*::
+    Specify config file.
+
+*-C, \--no-config*::
+	Don't use any config file.
+
+
+Daemon options
+--------------
+*-a, \--automount*::
+	Enable automounting new devices (default).
+
+*-A, \--no-automount*::
+	Disable automounting new devices.
+
+*-n, \--notify*::
+	Enable pop-up notifications (default).
+
+*-N, \--disable-notify*::
+	Disable pop-up notifications.
+
+*-t, \--tray*::
+	Show tray icon.
+
+*-s, \--smart-tray*::
+	Show tray icon that automatically hides when there is no action available.
+
+*-T, \--no-tray*::
+	Disable tray icon (default).
+
+*-f PROGRAM, \--file-manager=PROGRAM*::
+	Set program to open mounted directories. Default is \'+xdg-open+'. Pass an empty string to disable this feature. This option is deprecated and will probably be replaced by a python commands file.
+
+*-F, \--no-file-manager*::
+	Disable browsing.
+
+
+Mount options
+-------------
+*-a, \--all*::
+	Mount all handled devices.
 
 *-r, \--recursive*::
 	Recursively mount cleartext partitions after unlocking a LUKS device. This will happen by default when running the udiskie daemon.
 
+*-R, \--no-recursive*::
+	Disable recursive mounting (default).
+
 *-o OPTIONS, \--options=OPTIONS*::
 	Set mount options.
 
-*-s, \--suppress*::
-	Suppress pop-up notifications.
 
-*-t, \--tray*::
-	Show tray icon. Can't be used together with the *-T* option.
-
-*-T, \--auto-tray*::
-	Show tray icon that automatically hides when there is no action available. Can't be used together with the *-t* option.
-
-*-N, \--no-automount*::
-	Disable automounting new devices.
-
-*-F PROGRAM, \--file-manager=PROGRAM*::
-	Set program to open mounted directories. Default is \'+xdg-open+'. Pass an empty string to disable this feature. This option is deprecated and will probably be replaced by a python commands file.
-
+Unmount options
+---------------
 *-a, \--all*::
-	Mount or unmount all external devices.
+	Unmount all handled devices.
+
+*-d, \--detach*::
+	Detach drive by e.g. powering down its physical port.
+
+*-D, \--no-detach*::
+	Don't detach drive (default).
 
 *-e, \--eject*::
 	Eject media from the drive, e.g CDROM.
 
-*-d, \--detach*::
-	Detach drive by e.g. powering down its physical port.
+*-E, \--no-eject*::
+	Don't eject media (default).
+
+*-f, \--force*::
+	Force removal (recursive unmounting).
+
+*-F, \--no-force*::
+	Don't force removal (default).
+
+*-l, \--lock*::
+	Lock device after unmounting (default).
+
+*-L, \--no-lock*::
+	Don't lock device.
 
 
 Dependencies
@@ -82,10 +136,13 @@ Dependencies
 	backend service required for all operation modes.
 
 *PyGObject*::
-	to run the automount/notification daemon (provides the main loop)
+	Python binding for GTK3+.
 
 *PyYAML*::
 	to read the config file
+
+*docopt*::
+	Pythonic command line arguments parser, that will make you smile
 
 
 Example Usage[[EU]]
@@ -145,9 +202,13 @@ See Also
 --------
 linkman:udisks[1]
 
+http://www.freedesktop.org/wiki/Software/udisks/
+
 https://wiki.gnome.org/action/show/Projects/PyGObject
 
 https://pypi.python.org/pypi/PyYAML
+
+http://docopt.org/
 
 
 API references for development:
