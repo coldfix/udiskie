@@ -148,6 +148,13 @@ class _EntryPoint(object):
             '--use-udisks2': 2}),
     }
 
+    usage_remarks = """
+    Note, that the options in the individual groups are mutually exclusive.
+
+    The config file can be a JSON or preferrably a YAML file. For an
+    example, see the MAN page (or doc/udiskie.8.txt in the repository).
+    """
+
     def __init__(self, argv=None):
         """
         Parse command line options, read config and initialize members.
@@ -214,7 +221,7 @@ class _EntryPoint(object):
     @property
     def usage(self):
         """Get the full usage string."""
-        return inspect.cleandoc(self.__doc__)
+        return inspect.cleandoc(self.__doc__ + self.usage_remarks)
 
     @property
     def name(self):
