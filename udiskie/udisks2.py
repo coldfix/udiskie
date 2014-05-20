@@ -788,10 +788,10 @@ class Daemon(Emitter, UDisks2):
 
     # change interface properties
     def _properties_changed(self,
+                            object_path,
                             interface_name,
                             changed_properties,
-                            invalidated_properties,
-                            object_path):
+                            invalidated_properties):
         """
         Internal method.
 
@@ -851,7 +851,7 @@ class Daemon(Emitter, UDisks2):
             device = self[object_path]
             self.trigger('job_failed', device, action, message)
 
-    def _job_completed(self, success, message, job_name):
+    def _job_completed(self, job_name, success, message):
         """
         Internal method.
 
