@@ -323,7 +323,7 @@ class Daemon(_EntryPoint):
             udisks=daemon)
 
         # notifications (optional):
-        if not options['notify']:
+        if options['notify']:
             import udiskie.notify
             from gi.repository import Notify
             Notify.init('udiskie')
@@ -510,9 +510,9 @@ class Umount(_EntryPoint):
         mounter = self.mounter
         strategy = dict(detach=options['detach'],
                         eject=options['eject'],
-                        force=options['force'],
                         lock=options['lock'])
         if options['<device>']:
+            strategy['force'] = options['force']
             success = True
             for path in options['<device>']:
                 success = mounter.remove(path, **strategy) and success

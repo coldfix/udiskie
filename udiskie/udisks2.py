@@ -14,6 +14,8 @@ from copy import copy, deepcopy
 import logging
 import os.path
 
+from gi.repository import GLib
+
 from udiskie.common import Emitter, samefile
 from udiskie.compat import filter
 from udiskie.dbus import DBusProxy, DBusException, DBusService
@@ -34,7 +36,7 @@ def object_kind(object_path):
 
 def filter_opt(opt):
     """Remove ``None`` values from a dictionary."""
-    return {k: v for k,v in opt.items() if v is not None}
+    return {k: GLib.Variant(*v) for k,v in opt.items() if v[1] is not None}
 
 
 Interface = dict(
@@ -346,7 +348,7 @@ class Device(object):
         return self._assocdrive._I.Drive.method.Eject(
             '(a{sv})',
             filter_opt({
-                'auth.no_user_interaction': auth_no_user_interaction
+                'auth.no_user_interaction': ('b', auth_no_user_interaction),
             })
         )
 
@@ -355,7 +357,7 @@ class Device(object):
         return self._assocdrive._I.Drive.method.PowerOff(
             '(a{sv})',
             filter_opt({
-                'auth.no_user_interaction': auth_no_user_interaction
+                'auth.no_user_interaction': ('b', auth_no_user_interaction),
             })
         )
 
@@ -501,9 +503,9 @@ class Device(object):
         return self._I.Filesystem.method.Mount(
             '(a{sv})',
             filter_opt({
-                'fstype': fstype,
-                'options': ','.join(options or []),
-                'auth.no_user_interaction': auth_no_user_interaction
+                'fstype': ('s', fstype),
+                'options': ('s', ','.join(options or [])),
+                'auth.no_user_interaction': ('b', auth_no_user_interaction),
             })
         )
 
@@ -512,8 +514,8 @@ class Device(object):
         return self._I.Filesystem.method.Unmount(
             '(a{sv})',
             filter_opt({
-                'force': force,
-                'auth.no_user_interaction': auth_no_user_interaction
+                'force': ('b', force),
+                'auth.no_user_interaction': ('b', auth_no_user_interaction),
             })
         )
 
@@ -544,7 +546,7 @@ class Device(object):
             '(sa{sv})',
             password,
             filter_opt({
-                'auth.no_user_interaction': auth_no_user_interaction
+                'auth.no_user_interaction': ('b', auth_no_user_interaction),
             })
         )
         # UDisks2 may not have processed the InterfacesAdded signal yet.
@@ -557,7 +559,7 @@ class Device(object):
         return self._I.Encrypted.method.Lock(
             '(a{sv})',
             filter_opt({
-                'auth.no_user_interaction': auth_no_user_interaction
+                'auth.no_user_interaction': ('b', auth_no_user_interaction),
             })
         )
 
@@ -788,10 +790,10 @@ class Daemon(Emitter, UDisks2):
 
     # change interface properties
     def _properties_changed(self,
+                            object_path,
                             interface_name,
                             changed_properties,
-                            invalidated_properties,
-                            object_path):
+                            invalidated_properties):
         """
         Internal method.
 
@@ -828,9 +830,9 @@ class Daemon(Emitter, UDisks2):
         'eject-media': 'eject', }
 
     _event_mapping = {
-        'filesystem-unmount': 'device_unmount',
-        'encrypted-unlock': 'device_unlock',
-        'encrypted-lock': 'device_lock', }
+        'filesystem-unmount': 'unmount',
+        'encrypted-unlock': 'unlock',
+        'encrypted-lock': 'lock', }
 
     def _job_changed(self, job_name, completed):
         job = self._objects[job_name][Interface['Job']]
@@ -851,7 +853,7 @@ class Daemon(Emitter, UDisks2):
             device = self[object_path]
             self.trigger('job_failed', device, action, message)
 
-    def _job_completed(self, success, message, job_name):
+    def _job_completed(self, job_name, success, message):
         """
         Internal method.
 

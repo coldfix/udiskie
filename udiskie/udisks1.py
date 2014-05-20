@@ -25,7 +25,7 @@ import os.path
 
 from udiskie.common import Emitter, samefile
 from udiskie.compat import filter
-from udiskie.dbus import DBusProxy, DBusService
+from udiskie.dbus import DBusProxy, DBusService, DBusException
 
 
 __all__ = ['Sniffer', 'Daemon']
@@ -41,6 +41,8 @@ class DeviceBase(object):
     """Helper base class for devices."""
 
     Interface = 'org.freedesktop.UDisks.Device'
+
+    Exception = DBusException
 
     # string representation
     def __str__(self):
@@ -378,6 +380,8 @@ class CachedDevice(DeviceBase):
 
     def __getattr__(self, key):
         """Resolve unknown properties and methods via the online device."""
+        if key.startswith('_'):
+            raise AttributeError(key)
         return getattr(self._device, key)
 
     # Overload properties that return Device objects to return CachedDevice
@@ -629,7 +633,7 @@ class Daemon(Emitter, UDisks):
         else:
             # get and delete message, if available:
             message = self._errors[action].pop(object_path, "")
-            self.trigger('job_failed', dev, 'device_' + action, message)
+            self.trigger('job_failed', dev, action, message)
             log = logging.getLogger(__name__)
             log.info('%s operation failed for device: %s' % (job_id, object_path))
 
@@ -661,10 +665,10 @@ class Daemon(Emitter, UDisks):
     # internal state keeping
     def _sync(self):
         """Cache all device states."""
-        self._devices = { dev.object_path: dev for dev in self._sniffer }
+        online_devices = { dev.object_path: dev for dev in self._sniffer }
         self._devices = {
             object_path: CachedDevice(device)
-            for object_path,device in self._devices.items() }
+            for object_path,device in online_devices.items() }
 
     def _invalidate(self, object_path):
         """Flag the device invalid. This removes it from the iteration."""

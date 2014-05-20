@@ -257,10 +257,11 @@ class Mounter(object):
             success = False
         # if these operations work, everything is fine, we can return True:
         if lock and device.is_luks_cleartext:
-            success = self.lock(device.luks_cleartext_slave)
-        if eject and device.is_drive and device.is_ejectable:
+            device = device.luks_cleartext_slave
+            success = self.lock(device)
+        if eject:
             success = self.eject(device)
-        if detach and device.is_drive and device.is_detachable:
+        if detach:
             success = self.detach(device)
         return success
 
@@ -285,7 +286,7 @@ class Mounter(object):
         if force:
             self.remove(drive, force=True)
         self._log.debug(_('ejecting {0}', device))
-        device.eject()
+        drive.eject()
         self._log.info(_('ejected {0}', device))
         return True
 
@@ -309,7 +310,7 @@ class Mounter(object):
         if force:
             self.remove(drive, force=True)
         self._log.debug(_('detaching {0}', device))
-        device.detach()
+        drive.detach()
         self._log.info(_('detached {0}', device))
         return True
 
