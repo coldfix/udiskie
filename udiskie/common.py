@@ -5,10 +5,11 @@ Common DBus utilities.
 import os.path
 
 
-__all__ = ['Emitter',
+__all__ = ['wraps'
+           'Emitter',
            'samefile',
            'setdefault',
-           'wraps']
+           'extend']
 
 
 try:
@@ -102,3 +103,10 @@ def setdefault(self, other):
     """
     for k,v in other.items():
         self.setdefault(k, v)
+
+
+def extend(a, b):
+    """Merge two dicts and return a new dict. Much like subclassing works."""
+    res = a.copy()
+    res.update(b)
+    return res
