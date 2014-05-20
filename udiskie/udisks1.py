@@ -380,6 +380,8 @@ class CachedDevice(DeviceBase):
 
     def __getattr__(self, key):
         """Resolve unknown properties and methods via the online device."""
+        if key.startswith('_'):
+            raise AttributeError(key)
         return getattr(self._device, key)
 
     # Overload properties that return Device objects to return CachedDevice
@@ -663,10 +665,10 @@ class Daemon(Emitter, UDisks):
     # internal state keeping
     def _sync(self):
         """Cache all device states."""
-        self._devices = { dev.object_path: dev for dev in self._sniffer }
+        online_devices = { dev.object_path: dev for dev in self._sniffer }
         self._devices = {
             object_path: CachedDevice(device)
-            for object_path,device in self._devices.items() }
+            for object_path,device in online_devices.items() }
 
     def _invalidate(self, object_path):
         """Flag the device invalid. This removes it from the iteration."""
