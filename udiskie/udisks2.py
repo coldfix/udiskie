@@ -829,16 +829,19 @@ class Daemon(Emitter, UDisks2):
         'power-off-drive': 'detach',
         'eject-media': 'eject', }
 
-    _event_mapping = {
-        'filesystem-unmount': 'unmount',
-        'encrypted-unlock': 'unlock',
-        'encrypted-lock': 'lock', }
+    _event_mapping = {'mount': 'device_mount',
+                      'unmount': 'device_unmount',
+                      'unlock': 'device_unlock',
+                      'lock': 'device_lock',
+                      'eject': 'media_remov',
+                      'detach': 'device_remov'}
 
     def _job_changed(self, job_name, completed):
         job = self._objects[job_name][Interface['Job']]
-        event_name = self._event_mapping.get(job['Operation'])
-        if not event_name:
+        action = self._action_mapping.get(job['Operation'])
+        if not action:
             return
+        event_name = self._event_mapping[action]
         suffix = 'ed' if completed else 'ing'
         for object_path in job['Objects']:
             device = self[object_path]
@@ -846,7 +849,7 @@ class Daemon(Emitter, UDisks2):
 
     def _job_failed(self, job_name, message):
         job = self._objects[job_name][Interface['Job']]
-        action = self._event_mapping.get(job['Operation'])
+        action = self._action_mapping.get(job['Operation'])
         if not action:
             return
         for object_path in job['Objects']:
