@@ -633,7 +633,7 @@ class Daemon(Emitter, UDisks):
         else:
             # get and delete message, if available:
             message = self._errors[action].pop(object_path, "")
-            self.trigger('job_failed', dev, 'device_' + action, message)
+            self.trigger('job_failed', dev, action, message)
             log = logging.getLogger(__name__)
             log.info('%s operation failed for device: %s' % (job_id, object_path))
 

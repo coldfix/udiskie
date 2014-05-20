@@ -830,9 +830,9 @@ class Daemon(Emitter, UDisks2):
         'eject-media': 'eject', }
 
     _event_mapping = {
-        'filesystem-unmount': 'device_unmount',
-        'encrypted-unlock': 'device_unlock',
-        'encrypted-lock': 'device_lock', }
+        'filesystem-unmount': 'unmount',
+        'encrypted-unlock': 'unlock',
+        'encrypted-lock': 'lock', }
 
     def _job_changed(self, job_name, completed):
         job = self._objects[job_name][Interface['Job']]
