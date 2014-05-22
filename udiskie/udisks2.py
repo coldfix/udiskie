@@ -748,9 +748,26 @@ class Daemon(Emitter, UDisks2):
         old_valid = old and bool(getattr(old, property_name))
         new_valid = new and bool(getattr(new, property_name))
         if add_name and new_valid and not old_valid:
-            self.trigger(add_name, new)
+            if not self._has_job(old.object_path, add_name):
+                self.trigger(add_name, new)
         elif del_name and old_valid and not new_valid:
-            self.trigger(del_name, new)
+            if not self._has_job(old.object_path, del_name):
+                self.trigger(del_name, new)
+
+    def _has_job(self, device_path, event_name):
+        job_interface = Interface['Job']
+        for path, interfaces in self._objects.items():
+            try:
+                job = interfaces[job_interface]
+                job_objects = job['Objects']
+                job_operation = job['Operation']
+                job_action = self._action_mapping[job_operation]
+                job_event = self._event_mapping[job_action]
+                if event_name == job_event and device_path in job_objects:
+                    return True
+            except KeyError:
+                pass
+        return False
 
     def _interfaces_removed(self, object_path, interfaces):
         """Internal method."""

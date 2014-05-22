@@ -561,12 +561,30 @@ class Daemon(Emitter, UDisks):
     # events
     def _on_device_changed(self, old_state, new_state):
         """Detect type of event and trigger appropriate event handlers."""
-        d = {}
-        d['media_added'] = new_state.has_media and not old_state.has_media
-        d['media_removed'] = old_state.has_media and not new_state.has_media
-        for event in d:
-            if d[event]:
-                self.trigger(event, new_state)
+        self._detect_toggle('has_media', old_state, new_state,
+                            'media_added', 'media_removed')
+        self._detect_toggle('is_mounted', old_state, new_state,
+                            'device_mounted', 'device_unmounted')
+        self._detect_toggle('is_unlocked', old_state, new_state,
+                            'device_unlocked', 'device_locked')
+
+    def _detect_toggle(self, property_name, old, new, add_name, del_name):
+        old_valid = old and bool(getattr(old, property_name))
+        new_valid = new and bool(getattr(new, property_name))
+        # If we were notified about a started job we don't want to trigger
+        # an event when the device is changed, but when the job is
+        # completed. Otherwise we would show unmount notifications too
+        # early (when it's not yet safe to remove the drive).
+        # On the other hand, if the unmount operation is not issued via
+        # UDisks1, there will be no corresponding job.
+        cached_job = self._jobs.get(old.object_path)
+        action_name = self._event_mapping.get(cached_job)
+        if add_name and new_valid and not old_valid:
+            if add_name != action_name:
+                self.trigger(add_name, new)
+        elif del_name and old_valid and not new_valid:
+            if del_name != action_name:
+                self.trigger(del_name, new)
 
     # UDisks event listeners
     def _device_added(self, object_path):
@@ -612,6 +630,7 @@ class Daemon(Emitter, UDisks):
             return
         # NOTE: The here used heuristic is prone to raise conditions.
         if job_in_progress:
+            # Cache the action name for later use:
             self._jobs[object_path] = action
         else:
             del self._jobs[object_path]
