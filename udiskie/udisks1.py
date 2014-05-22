@@ -478,15 +478,6 @@ class Sniffer(UDisks):
     update = get
 
 
-class Job(object):
-
-    """Job information struct for devices."""
-
-    def __init__(self, job_id, percentage):
-        self.job_id = job_id
-        self.percentage = percentage
-
-
 class Daemon(Emitter, UDisks):
 
     """
@@ -610,7 +601,7 @@ class Daemon(Emitter, UDisks):
         Internal method.
         """
         if not job_in_progress and object_path in self._jobs:
-            job_id = self._jobs[object_path].job_id
+            job_id = self._jobs[object_path]
         try:
             action = self._action_mapping[job_id]
         except KeyError:
@@ -619,7 +610,7 @@ class Daemon(Emitter, UDisks):
         dev = self[object_path]
         # NOTE: The here used heuristic is prone to raise conditions.
         if job_in_progress:
-            self._jobs[object_path] = Job(job_id, job_percentage)
+            self._jobs[object_path] = job_id
         elif self._check_success[job_id](dev):
             self.trigger(event_name, dev)
             del self._jobs[object_path]
