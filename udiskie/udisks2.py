@@ -670,8 +670,6 @@ class Daemon(Emitter, UDisks2):
         - device_changed  / job_failed
     """
 
-    mainloop = True
-
     def __init__(self, proxy=None):
 
         """Initialize object and start listening to UDisks2 events."""

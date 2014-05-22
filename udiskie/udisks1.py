@@ -506,17 +506,13 @@ class Daemon(Emitter, UDisks):
     `disconnect` can be used to add or remove event handlers.
     """
 
-    mainloop = True
-
     def __init__(self, proxy=None):
         """
         Create a Daemon object and start listening to DBus events.
 
         :param common.DBusProxy proxy: proxy to the dbus service object
-        :param udisks1.Sniffer sniffer: sniffer to use
 
-        If neither proxy nor sniffer are given they will be created and
-        dbus will be configured for the gobject mainloop.
+        A default proxy will be created if set to ``None``.
         """
         event_names = ['device_added',
                        'device_removed',
