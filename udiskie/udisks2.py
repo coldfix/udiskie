@@ -685,8 +685,6 @@ class Daemon(Emitter, UDisks2):
                        'device_unlocked',
                        'device_locked',
                        'device_changed',
-                       'object_added',
-                       'object_removed',
                        'job_failed']
         super(Daemon, self).__init__(event_names)
 
@@ -707,8 +705,6 @@ class Daemon(Emitter, UDisks2):
                     None,
                     self._job_completed)
         self._sync()
-
-        self.connect('object_added', self._object_added)
 
     def _sync(self):
         """Synchronize state."""
@@ -745,13 +741,9 @@ class Daemon(Emitter, UDisks2):
         added = object_path not in self._objects
         self._objects[object_path] = interfaces_and_properties
         if added:
-            self.trigger('object_added', object_path)
-
-    def _object_added(self, object_path):
-        """Internal event handler."""
-        kind = object_kind(object_path)
-        if kind in ('device', 'drive'):
-            self.trigger('device_added', self[object_path])
+            kind = object_kind(object_path)
+            if kind in ('device', 'drive'):
+                self.trigger('device_added', self[object_path])
 
     # remove objects / interfaces
     def _detect_toggle(self, property_name, old, new, add_name, del_name):
