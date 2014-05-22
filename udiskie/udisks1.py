@@ -518,18 +518,16 @@ class Daemon(Emitter, UDisks):
         If neither proxy nor sniffer are given they will be created and
         dbus will be configured for the gobject mainloop.
         """
-        event_names = [stem + suffix
-                       for suffix in ('ed', 'ing')
-                       for stem in (
-                           'device_add',
-                           'device_remov',
-                           'device_mount',
-                           'device_unmount',
-                           'media_add',
-                           'media_remov',
-                           'device_unlock',
-                           'device_lock',
-                           'device_chang', )] + ['job_failed']
+        event_names = ['device_added',
+                       'device_removed',
+                       'device_mounted',
+                       'device_unmounted',
+                       'media_added',
+                       'media_removed',
+                       'device_unlocked',
+                       'device_locked',
+                       'device_changed',
+                       'job_failed']
         super(Daemon, self).__init__(event_names)
 
         proxy = proxy or self.connect_service()
@@ -625,10 +623,9 @@ class Daemon(Emitter, UDisks):
         dev = self[object_path]
         # NOTE: The here used heuristic is prone to raise conditions.
         if job_in_progress:
-            self.trigger(event_name + 'ing', dev, job_percentage)
             self._jobs[object_path] = Job(job_id, job_percentage)
         elif self._check_success[job_id](dev):
-            self.trigger(event_name + 'ed', dev)
+            self.trigger(event_name, dev)
             del self._jobs[object_path]
         else:
             # get and delete message, if available:
@@ -646,12 +643,12 @@ class Daemon(Emitter, UDisks):
         'DriveDetach': 'detach',
         'DriveEject': 'eject' }
 
-    _event_mapping = {'mount': 'device_mount',
-                      'unmount': 'device_unmount',
-                      'unlock': 'device_unlock',
-                      'lock': 'device_lock',
-                      'eject': 'media_remov',
-                      'detach': 'device_remov'}
+    _event_mapping = {'mount': 'device_mounted',
+                      'unmount': 'device_unmounted',
+                      'unlock': 'device_unlocked',
+                      'lock': 'device_locked',
+                      'eject': 'media_removed',
+                      'detach': 'device_removed'}
 
     _check_success = {
         'FilesystemMount': lambda dev: dev.is_mounted,

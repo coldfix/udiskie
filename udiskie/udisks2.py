@@ -676,21 +676,18 @@ class Daemon(Emitter, UDisks2):
 
         """Initialize object and start listening to UDisks2 events."""
 
-        event_names = (tuple(stem + suffix
-                             for suffix in ('ed','ing')
-                             for stem in (
-                                 'device_add',
-                                 'device_remov',
-                                 'device_mount',
-                                 'device_unmount',
-                                 'media_add',
-                                 'media_remov',
-                                 'device_unlock',
-                                 'device_lock',
-                                 'device_chang', ))
-                       + ('object_added',
-                          'object_removed',
-                          'job_failed'))
+        event_names = ['device_added',
+                       'device_removed',
+                       'device_mounted',
+                       'device_unmounted',
+                       'media_added',
+                       'media_removed',
+                       'device_unlocked',
+                       'device_locked',
+                       'device_changed',
+                       'object_added',
+                       'object_removed',
+                       'job_failed']
         super(Daemon, self).__init__(event_names)
 
         self._proxy = proxy = proxy or self.connect_service()
@@ -755,8 +752,6 @@ class Daemon(Emitter, UDisks2):
         kind = object_kind(object_path)
         if kind in ('device', 'drive'):
             self.trigger('device_added', self[object_path])
-        elif kind == 'job':
-            self._job_changed(object_path, False)
 
     # remove objects / interfaces
     def _detect_toggle(self, property_name, old, new, add_name, del_name):
@@ -829,32 +824,12 @@ class Daemon(Emitter, UDisks2):
         'power-off-drive': 'detach',
         'eject-media': 'eject', }
 
-    _event_mapping = {'mount': 'device_mount',
-                      'unmount': 'device_unmount',
-                      'unlock': 'device_unlock',
-                      'lock': 'device_lock',
-                      'eject': 'media_remov',
-                      'detach': 'device_remov'}
-
-    def _job_changed(self, job_name, completed):
-        job = self._objects[job_name][Interface['Job']]
-        action = self._action_mapping.get(job['Operation'])
-        if not action:
-            return
-        event_name = self._event_mapping[action]
-        suffix = 'ed' if completed else 'ing'
-        for object_path in job['Objects']:
-            device = self[object_path]
-            self.trigger(event_name + suffix, device)
-
-    def _job_failed(self, job_name, message):
-        job = self._objects[job_name][Interface['Job']]
-        action = self._action_mapping.get(job['Operation'])
-        if not action:
-            return
-        for object_path in job['Objects']:
-            device = self[object_path]
-            self.trigger('job_failed', device, action, message)
+    _event_mapping = {'mount': 'device_mounted',
+                      'unmount': 'device_unmounted',
+                      'unlock': 'device_unlocked',
+                      'lock': 'device_locked',
+                      'eject': 'media_removed',
+                      'detach': 'device_removed'}
 
     def _job_completed(self, job_name, success, message):
         """
@@ -862,7 +837,16 @@ class Daemon(Emitter, UDisks2):
 
         Called when a job of a long running task completes.
         """
+        job = self._objects[job_name][Interface['Job']]
+        action = self._action_mapping.get(job['Operation'])
+        if not action:
+            return
         if success:
-            self._job_changed(job_name, True)
+            event_name = self._event_mapping[action]
+            for object_path in job['Objects']:
+                device = self[object_path]
+                self.trigger(event_name, device)
         else:
-            self._job_failed(job_name, message)
+            for object_path in job['Objects']:
+                device = self[object_path]
+                self.trigger('job_failed', device, action, message)
