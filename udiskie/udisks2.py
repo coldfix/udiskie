@@ -814,12 +814,13 @@ class Daemon(Emitter, UDisks2):
         'power-off-drive': 'detach',
         'eject-media': 'eject', }
 
-    _event_mapping = {'mount': 'device_mounted',
-                      'unmount': 'device_unmounted',
-                      'unlock': 'device_unlocked',
-                      'lock': 'device_locked',
-                      'eject': 'media_removed',
-                      'detach': 'device_removed'}
+    _event_mapping = {
+        'mount': 'device_mounted',
+        'unmount': 'device_unmounted',
+        'unlock': 'device_unlocked',
+        'lock': 'device_locked',
+        'eject': 'media_removed',
+        'detach': 'device_removed'}
 
     def _job_completed(self, job_name, success, message):
         """

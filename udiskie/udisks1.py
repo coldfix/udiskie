@@ -600,26 +600,31 @@ class Daemon(Emitter, UDisks):
 
         Internal method.
         """
-        if not job_in_progress and object_path in self._jobs:
-            job_id = self._jobs[object_path]
         try:
-            action = self._action_mapping[job_id]
+            if job_id:
+                action = self._action_mapping[job_id]
+            else:
+                action = self._jobs[object_path]
         except KeyError:
+            # this can happen
+            # a) at startup, when we only see the completion of a job
+            # b) when we get notified about a job, which we don't handle
             return
-        event_name = self._event_mapping[action]
-        dev = self[object_path]
         # NOTE: The here used heuristic is prone to raise conditions.
         if job_in_progress:
-            self._jobs[object_path] = job_id
-        elif self._check_success[job_id](dev):
-            self.trigger(event_name, dev)
-            del self._jobs[object_path]
+            self._jobs[object_path] = action
         else:
-            # get and delete message, if available:
-            message = self._errors[action].pop(object_path, "")
-            self.trigger('job_failed', dev, action, message)
-            log = logging.getLogger(__name__)
-            log.info('%s operation failed for device: %s' % (job_id, object_path))
+            del self._jobs[object_path]
+            device = self[object_path]
+            if self._check_success[action](device):
+                event = self._event_mapping[action]
+                self.trigger(event, device)
+            else:
+                # get and delete message, if available:
+                message = self._errors[action].pop(object_path, "")
+                self.trigger('job_failed', device, action, message)
+                log = logging.getLogger(__name__)
+                log.info('%s operation failed for device: %s' % (job_id, object_path))
 
     # used internally by _device_job_changed:
     _action_mapping = {
@@ -628,22 +633,23 @@ class Daemon(Emitter, UDisks):
         'LuksUnlock': 'unlock',
         'LuksLock': 'lock',
         'DriveDetach': 'detach',
-        'DriveEject': 'eject' }
+        'DriveEject': 'eject'}
 
-    _event_mapping = {'mount': 'device_mounted',
-                      'unmount': 'device_unmounted',
-                      'unlock': 'device_unlocked',
-                      'lock': 'device_locked',
-                      'eject': 'media_removed',
-                      'detach': 'device_removed'}
+    _event_mapping = {
+        'mount': 'device_mounted',
+        'unmount': 'device_unmounted',
+        'unlock': 'device_unlocked',
+        'lock': 'device_locked',
+        'eject': 'media_removed',
+        'detach': 'device_removed'}
 
     _check_success = {
-        'FilesystemMount': lambda dev: dev.is_mounted,
-        'FilesystemUnmount': lambda dev: not dev or not dev.is_mounted,
-        'LuksUnlock': lambda dev: dev.is_unlocked,
-        'LuksLock': lambda dev: not dev or not dev.is_unlocked,
-        'DriveDetach': lambda dev: not dev,
-        'DriveEject': lambda dev: not dev or not dev.has_media
+        'mount': lambda dev: dev.is_mounted,
+        'unmount': lambda dev: not dev or not dev.is_mounted,
+        'unlock': lambda dev: dev.is_unlocked,
+        'lock': lambda dev: not dev or not dev.is_unlocked,
+        'detach': lambda dev: not dev,
+        'eject': lambda dev: not dev or not dev.has_media
     }
 
     # internal state keeping
