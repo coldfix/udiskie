@@ -478,15 +478,6 @@ class Sniffer(UDisks):
     update = get
 
 
-class Job(object):
-
-    """Job information struct for devices."""
-
-    def __init__(self, job_id, percentage):
-        self.job_id = job_id
-        self.percentage = percentage
-
-
 class Daemon(Emitter, UDisks):
 
     """
@@ -506,30 +497,24 @@ class Daemon(Emitter, UDisks):
     `disconnect` can be used to add or remove event handlers.
     """
 
-    mainloop = True
-
     def __init__(self, proxy=None):
         """
         Create a Daemon object and start listening to DBus events.
 
         :param common.DBusProxy proxy: proxy to the dbus service object
-        :param udisks1.Sniffer sniffer: sniffer to use
 
-        If neither proxy nor sniffer are given they will be created and
-        dbus will be configured for the gobject mainloop.
+        A default proxy will be created if set to ``None``.
         """
-        event_names = [stem + suffix
-                       for suffix in ('ed', 'ing')
-                       for stem in (
-                           'device_add',
-                           'device_remov',
-                           'device_mount',
-                           'device_unmount',
-                           'media_add',
-                           'media_remov',
-                           'device_unlock',
-                           'device_lock',
-                           'device_chang', )] + ['job_failed']
+        event_names = ['device_added',
+                       'device_removed',
+                       'device_mounted',
+                       'device_unmounted',
+                       'media_added',
+                       'media_removed',
+                       'device_unlocked',
+                       'device_locked',
+                       'device_changed',
+                       'job_failed']
         super(Daemon, self).__init__(event_names)
 
         proxy = proxy or self.connect_service()
@@ -576,12 +561,30 @@ class Daemon(Emitter, UDisks):
     # events
     def _on_device_changed(self, old_state, new_state):
         """Detect type of event and trigger appropriate event handlers."""
-        d = {}
-        d['media_added'] = new_state.has_media and not old_state.has_media
-        d['media_removed'] = old_state.has_media and not new_state.has_media
-        for event in d:
-            if d[event]:
-                self.trigger(event, new_state)
+        self._detect_toggle('has_media', old_state, new_state,
+                            'media_added', 'media_removed')
+        self._detect_toggle('is_mounted', old_state, new_state,
+                            'device_mounted', 'device_unmounted')
+        self._detect_toggle('is_unlocked', old_state, new_state,
+                            'device_unlocked', 'device_locked')
+
+    def _detect_toggle(self, property_name, old, new, add_name, del_name):
+        old_valid = old and bool(getattr(old, property_name))
+        new_valid = new and bool(getattr(new, property_name))
+        # If we were notified about a started job we don't want to trigger
+        # an event when the device is changed, but when the job is
+        # completed. Otherwise we would show unmount notifications too
+        # early (when it's not yet safe to remove the drive).
+        # On the other hand, if the unmount operation is not issued via
+        # UDisks1, there will be no corresponding job.
+        cached_job = self._jobs.get(old.object_path)
+        action_name = self._event_mapping.get(cached_job)
+        if add_name and new_valid and not old_valid:
+            if add_name != action_name:
+                self.trigger(add_name, new)
+        elif del_name and old_valid and not new_valid:
+            if del_name != action_name:
+                self.trigger(del_name, new)
 
     # UDisks event listeners
     def _device_added(self, object_path):
@@ -615,27 +618,32 @@ class Daemon(Emitter, UDisks):
 
         Internal method.
         """
-        if not job_in_progress and object_path in self._jobs:
-            job_id = self._jobs[object_path].job_id
         try:
-            action = self._action_mapping[job_id]
+            if job_id:
+                action = self._action_mapping[job_id]
+            else:
+                action = self._jobs[object_path]
         except KeyError:
+            # this can happen
+            # a) at startup, when we only see the completion of a job
+            # b) when we get notified about a job, which we don't handle
             return
-        event_name = self._event_mapping[action]
-        dev = self[object_path]
         # NOTE: The here used heuristic is prone to raise conditions.
         if job_in_progress:
-            self.trigger(event_name + 'ing', dev, job_percentage)
-            self._jobs[object_path] = Job(job_id, job_percentage)
-        elif self._check_success[job_id](dev):
-            self.trigger(event_name + 'ed', dev)
-            del self._jobs[object_path]
+            # Cache the action name for later use:
+            self._jobs[object_path] = action
         else:
-            # get and delete message, if available:
-            message = self._errors[action].pop(object_path, "")
-            self.trigger('job_failed', dev, action, message)
-            log = logging.getLogger(__name__)
-            log.info('%s operation failed for device: %s' % (job_id, object_path))
+            del self._jobs[object_path]
+            device = self[object_path]
+            if self._check_success[action](device):
+                event = self._event_mapping[action]
+                self.trigger(event, device)
+            else:
+                # get and delete message, if available:
+                message = self._errors[action].pop(object_path, "")
+                self.trigger('job_failed', device, action, message)
+                log = logging.getLogger(__name__)
+                log.info('%s operation failed for device: %s' % (job_id, object_path))
 
     # used internally by _device_job_changed:
     _action_mapping = {
@@ -644,22 +652,23 @@ class Daemon(Emitter, UDisks):
         'LuksUnlock': 'unlock',
         'LuksLock': 'lock',
         'DriveDetach': 'detach',
-        'DriveEject': 'eject' }
+        'DriveEject': 'eject'}
 
-    _event_mapping = {'mount': 'device_mount',
-                      'unmount': 'device_unmount',
-                      'unlock': 'device_unlock',
-                      'lock': 'device_lock',
-                      'eject': 'media_remov',
-                      'detach': 'device_remov'}
+    _event_mapping = {
+        'mount': 'device_mounted',
+        'unmount': 'device_unmounted',
+        'unlock': 'device_unlocked',
+        'lock': 'device_locked',
+        'eject': 'media_removed',
+        'detach': 'device_removed'}
 
     _check_success = {
-        'FilesystemMount': lambda dev: dev.is_mounted,
-        'FilesystemUnmount': lambda dev: not dev or not dev.is_mounted,
-        'LuksUnlock': lambda dev: dev.is_unlocked,
-        'LuksLock': lambda dev: not dev or not dev.is_unlocked,
-        'DriveDetach': lambda dev: not dev,
-        'DriveEject': lambda dev: not dev or not dev.has_media
+        'mount': lambda dev: dev.is_mounted,
+        'unmount': lambda dev: not dev or not dev.is_mounted,
+        'unlock': lambda dev: dev.is_unlocked,
+        'lock': lambda dev: not dev or not dev.is_unlocked,
+        'detach': lambda dev: not dev,
+        'eject': lambda dev: not dev or not dev.has_media
     }
 
     # internal state keeping

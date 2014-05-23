@@ -280,8 +280,6 @@ class DBusService(object):
     Abstract base class for UDisksX service wrapper classes.
     """
 
-    mainloop = None
-
     @classmethod
     def connect_service(cls):
         """

@@ -15,6 +15,7 @@ from docopt import docopt, DocoptExit
 
 import udiskie.config
 import udiskie.mount
+from udiskie.common import extend
 
 
 __all__ = ['Daemon', 'Mount', 'Umount']
@@ -59,13 +60,6 @@ def get_backend(clsname, version=None):
         return udisks2()
     else:
         raise ValueError("UDisks version not supported: %s!" % (version,))
-
-
-def extend(a, b):
-    """Merge two dicts and return a new dict. Much like subclassing works."""
-    res = a.copy()
-    res.update(b)
-    return res
 
 
 class Choice(object):

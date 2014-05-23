@@ -670,27 +670,20 @@ class Daemon(Emitter, UDisks2):
         - device_changed  / job_failed
     """
 
-    mainloop = True
-
     def __init__(self, proxy=None):
 
         """Initialize object and start listening to UDisks2 events."""
 
-        event_names = (tuple(stem + suffix
-                             for suffix in ('ed','ing')
-                             for stem in (
-                                 'device_add',
-                                 'device_remov',
-                                 'device_mount',
-                                 'device_unmount',
-                                 'media_add',
-                                 'media_remov',
-                                 'device_unlock',
-                                 'device_lock',
-                                 'device_chang', ))
-                       + ('object_added',
-                          'object_removed',
-                          'job_failed'))
+        event_names = ['device_added',
+                       'device_removed',
+                       'device_mounted',
+                       'device_unmounted',
+                       'media_added',
+                       'media_removed',
+                       'device_unlocked',
+                       'device_locked',
+                       'device_changed',
+                       'job_failed']
         super(Daemon, self).__init__(event_names)
 
         self._proxy = proxy = proxy or self.connect_service()
@@ -710,8 +703,6 @@ class Daemon(Emitter, UDisks2):
                     None,
                     self._job_completed)
         self._sync()
-
-        self.connect('object_added', self._object_added)
 
     def _sync(self):
         """Synchronize state."""
@@ -748,24 +739,41 @@ class Daemon(Emitter, UDisks2):
         added = object_path not in self._objects
         self._objects[object_path] = interfaces_and_properties
         if added:
-            self.trigger('object_added', object_path)
+            kind = object_kind(object_path)
+            if kind in ('device', 'drive'):
+                self.trigger('device_added', self[object_path])
 
-    def _object_added(self, object_path):
-        """Internal event handler."""
-        kind = object_kind(object_path)
-        if kind in ('device', 'drive'):
-            self.trigger('device_added', self[object_path])
-        elif kind == 'job':
-            self._job_changed(object_path, False)
+        if Interface['Block'] in interfaces_and_properties:
+            slave = self[object_path].luks_cleartext_slave
+            if slave:
+                if not self._has_job(slave.object_path, 'device_unlocked'):
+                    self.trigger('device_unlocked', slave)
 
     # remove objects / interfaces
     def _detect_toggle(self, property_name, old, new, add_name, del_name):
         old_valid = old and bool(getattr(old, property_name))
         new_valid = new and bool(getattr(new, property_name))
         if add_name and new_valid and not old_valid:
-            self.trigger(add_name, new)
+            if not self._has_job(old.object_path, add_name):
+                self.trigger(add_name, new)
         elif del_name and old_valid and not new_valid:
-            self.trigger(del_name, new)
+            if not self._has_job(old.object_path, del_name):
+                self.trigger(del_name, new)
+
+    def _has_job(self, device_path, event_name):
+        job_interface = Interface['Job']
+        for path, interfaces in self._objects.items():
+            try:
+                job = interfaces[job_interface]
+                job_objects = job['Objects']
+                job_operation = job['Operation']
+                job_action = self._action_mapping[job_operation]
+                job_event = self._event_mapping[job_action]
+                if event_name == job_event and device_path in job_objects:
+                    return True
+            except KeyError:
+                pass
+        return False
 
     def _interfaces_removed(self, object_path, interfaces):
         """Internal method."""
@@ -780,6 +788,12 @@ class Daemon(Emitter, UDisks2):
                 self.get(object_path, old_state),
                 self.get(object_path, new_state),
                 None, 'media_removed')
+
+        if Interface['Block'] in interfaces:
+            slave = self.get(object_path, old_state).luks_cleartext_slave
+            if slave:
+                if not self._has_job(slave.object_path, 'device_locked'):
+                    self.trigger('device_locked', slave)
 
         if not self._objects[object_path]:
             del self._objects[object_path]
@@ -818,7 +832,10 @@ class Daemon(Emitter, UDisks2):
                 'is_mounted',
                 self.get(object_path, old_state),
                 self.get(object_path, new_state),
-                'device_mounted', None)
+                'device_mounted', 'device_unmounted')
+        # There is no PropertiesChanged for the crypto device when it is
+        # unlocked/locked in UDisks2. Instead, this is handled by the
+        # InterfaceAdded/Removed handlers.
 
     # jobs
     _action_mapping = {
@@ -830,28 +847,21 @@ class Daemon(Emitter, UDisks2):
         'eject-media': 'eject', }
 
     _event_mapping = {
-        'filesystem-unmount': 'unmount',
-        'encrypted-unlock': 'unlock',
-        'encrypted-lock': 'lock', }
+        'mount': 'device_mounted',
+        'unmount': 'device_unmounted',
+        'unlock': 'device_unlocked',
+        'lock': 'device_locked',
+        'eject': 'media_removed',
+        'detach': 'device_removed'}
 
-    def _job_changed(self, job_name, completed):
-        job = self._objects[job_name][Interface['Job']]
-        event_name = self._event_mapping.get(job['Operation'])
-        if not event_name:
-            return
-        suffix = 'ed' if completed else 'ing'
-        for object_path in job['Objects']:
-            device = self[object_path]
-            self.trigger(event_name + suffix, device)
-
-    def _job_failed(self, job_name, message):
-        job = self._objects[job_name][Interface['Job']]
-        action = self._event_mapping.get(job['Operation'])
-        if not action:
-            return
-        for object_path in job['Objects']:
-            device = self[object_path]
-            self.trigger('job_failed', device, action, message)
+    _check_success = {
+        'mount': lambda dev: dev.is_mounted,
+        'unmount': lambda dev: not dev or not dev.is_mounted,
+        'unlock': lambda dev: dev.is_unlocked,
+        'lock': lambda dev: not dev or not dev.is_unlocked,
+        'detach': lambda dev: not dev,
+        'eject': lambda dev: not dev or not dev.has_media
+    }
 
     def _job_completed(self, job_name, success, message):
         """
@@ -859,7 +869,19 @@ class Daemon(Emitter, UDisks2):
 
         Called when a job of a long running task completes.
         """
+        job = self._objects[job_name][Interface['Job']]
+        action = self._action_mapping.get(job['Operation'])
+        if not action:
+            return
+        # We only handle events, which are associated to exactly one object:
+        object_path, = job['Objects']
+        device = self[object_path]
         if success:
-            self._job_changed(job_name, True)
+            # It rarely happens, but sometimes UDisks posts the
+            # Job.Completed event before PropertiesChanged, so we have to
+            # check if the operation has been carried out yet:
+            if self._check_success[action](device):
+                event_name = self._event_mapping[action]
+                self.trigger(event_name, device)
         else:
-            self._job_failed(job_name, message)
+            self.trigger('job_failed', device, action, message)
