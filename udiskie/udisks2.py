@@ -743,6 +743,12 @@ class Daemon(Emitter, UDisks2):
             if kind in ('device', 'drive'):
                 self.trigger('device_added', self[object_path])
 
+        if Interface['Block'] in interfaces_and_properties:
+            slave = self[object_path].luks_cleartext_slave
+            if slave:
+                if not self._has_job(slave.object_path, 'device_unlocked'):
+                    self.trigger('device_unlocked', slave)
+
     # remove objects / interfaces
     def _detect_toggle(self, property_name, old, new, add_name, del_name):
         old_valid = old and bool(getattr(old, property_name))
@@ -783,6 +789,12 @@ class Daemon(Emitter, UDisks2):
                 self.get(object_path, new_state),
                 None, 'media_removed')
 
+        if Interface['Block'] in interfaces:
+            slave = self.get(object_path, old_state).luks_cleartext_slave
+            if slave:
+                if not self._has_job(slave.object_path, 'device_locked'):
+                    self.trigger('device_locked', slave)
+
         if not self._objects[object_path]:
             del self._objects[object_path]
             if object_kind(object_path) in ('device', 'drive'):
@@ -820,7 +832,10 @@ class Daemon(Emitter, UDisks2):
                 'is_mounted',
                 self.get(object_path, old_state),
                 self.get(object_path, new_state),
-                'device_mounted', None)
+                'device_mounted', 'device_unmounted')
+        # There is no PropertiesChanged for the crypto device when it is
+        # unlocked/locked in UDisks2. Instead, this is handled by the
+        # InterfaceAdded/Removed handlers.
 
     # jobs
     _action_mapping = {
