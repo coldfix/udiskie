@@ -6,6 +6,8 @@ import sys
 import logging
 from os import path
 
+import udiskie
+
 # check availability of runtime dependencies
 def check_dependency(package):
     """Issue a warning if the package is not available."""
@@ -47,7 +49,7 @@ class custom_install(install):
 
 setup(
     name='udiskie',
-    version='0.8.0',
+    version=udiskie.__version__,
     description='Removable disk automounter for udisks',
     long_description=long_description,
     author='Byron Clark',

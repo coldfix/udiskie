@@ -7,12 +7,12 @@ setuptools entry points.
 
 import inspect
 import logging
-import pkg_resources
 import sys
 import warnings
 
 from docopt import docopt, DocoptExit
 
+import udiskie
 import udiskie.config
 import udiskie.mount
 from udiskie.common import extend
@@ -206,10 +206,7 @@ class _EntryPoint(object):
     @property
     def version(self):
         """Get the version from setuptools metadata."""
-        try:
-            return pkg_resources.get_distribution('udiskie').version
-        except pkg_resources.DistributionNotFound:
-            return '(unknown version)'
+        return udiskie.__version__
 
     @property
     def usage(self):
