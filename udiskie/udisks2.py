@@ -854,6 +854,15 @@ class Daemon(Emitter, UDisks2):
         'eject': 'media_removed',
         'detach': 'device_removed'}
 
+    _check_success = {
+        'mount': lambda dev: dev.is_mounted,
+        'unmount': lambda dev: not dev or not dev.is_mounted,
+        'unlock': lambda dev: dev.is_unlocked,
+        'lock': lambda dev: not dev or not dev.is_unlocked,
+        'detach': lambda dev: not dev,
+        'eject': lambda dev: not dev or not dev.has_media
+    }
+
     def _job_completed(self, job_name, success, message):
         """
         Internal method.
@@ -864,12 +873,15 @@ class Daemon(Emitter, UDisks2):
         action = self._action_mapping.get(job['Operation'])
         if not action:
             return
+        # We only handle events, which are associated to exactly one object:
+        object_path, = job['Objects']
+        device = self[object_path]
         if success:
-            event_name = self._event_mapping[action]
-            for object_path in job['Objects']:
-                device = self[object_path]
+            # It rarely happens, but sometimes UDisks posts the
+            # Job.Completed event before PropertiesChanged, so we have to
+            # check if the operation has been carried out yet:
+            if self._check_success[action](device):
+                event_name = self._event_mapping[action]
                 self.trigger(event_name, device)
         else:
-            for object_path in job['Objects']:
-                device = self[object_path]
-                self.trigger('job_failed', device, action, message)
+            self.trigger('job_failed', device, action, message)
