@@ -167,7 +167,7 @@ class _EntryPoint(object):
         logging.basicConfig(level=log_level, format=fmt)
         # parse config options
         config_file = OptionalValue('--config')(args)
-        config = udiskie.config.Config.from_file()
+        config = udiskie.config.Config.from_file(config_file)
         options = {}
         options.update(default_opts)
         options.update(config.program_options)
