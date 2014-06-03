@@ -1,8 +1,15 @@
 CHANGELOG
 ---------
 
-1.0.0 (in preparation)
-~~~~~~~~~~~~~~~~~~~~~~
+1.0.1
+~~~~~
+
+- fix crash when calling udiskie without having udisks1 installed
+  (regression)
+
+
+1.0.0
+~~~~~
 
 - port to PyGObject, removing dependencies on pygtk, zenity, dbus-python,
   python-notify
