@@ -49,10 +49,9 @@ def get_backend(clsname, version=None):
         try:
             return udisks1()
         except DBusException:
-            msg = sys.exc_info()[1].get_dbus_message()
             log = logging.getLogger(__name__)
-            log.warning('Failed to connect UDisks1 dbus service: %s.\n'
-                        'Falling back to UDisks2 [experimental].' % (msg,))
+            log.warning('Failed to connect UDisks1 dbus service.\n'
+                        'Falling back to UDisks2 [experimental].')
             return udisks2()
     elif version == 1:
         return udisks1()
