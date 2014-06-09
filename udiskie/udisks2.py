@@ -635,6 +635,8 @@ class Sniffer(UDisks2):
         :param common.DBusProxy proxy: proxy to udisks object
         """
         self._proxy = proxy or self.connect_service()
+        # Make sure the proxy object is loaded and usable:
+        self._proxy.method.GetManagedObjects()
 
     # instantiation of device objects
     def paths(self):

@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+1.0.2
+~~~~~
+
+- fix crash when calling udiskie mount/unmount utilites without udisks1
+  installed
+
+
 1.0.1
 ~~~~~
 
