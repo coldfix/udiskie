@@ -55,47 +55,36 @@ downloaded and installed from PyPI:
 Permissions
 -----------
 
-*udiskie* requires permission for the following PolicyKit_ actions:
-
-.. _PolicyKit: http://www.freedesktop.org/wiki/Software/PolicyKit
-
-- ``org.freedesktop.udisks.filesystem-mount`` for mounting and unmounting
-- ``org.freedesktop.udisks.luks-unlock`` to unlock LUKS devices
-- ``org.freedesktop.udisks.drive-eject`` to eject drives
-- ``org.freedesktop.udisks.drive-detach`` to detach drives
-
-These are usually granted when using a desktop environment. If your login
-session is not properly activated you may need to customize your PolicyKit
-settings. Create the file
-``/etc/polkit-1/localauthority/50-local.d/10-udiskie.pkla`` with the
+*udiskie* requires permission for some PolicyKit_ actions which are usually
+granted when using a desktop environment. If your login session is not
+properly activated you may need to customize your PolicyKit settings.
+Create the file ``/etc/polkit-1/rules.d/50-udiskie.rules`` with the
 following contents:
 
-.. code-block:: cfg
+.. code-block:: javascript
 
-    [udiskie]
-    Identity=unix-group:storage
-    Action=org.freedesktop.udisks.filesystem-mount;org.freedesktop.udisks.luks-unlock;org.freedesktop.udisks.drive-eject;org.freedesktop.udisks.drive-detach
-    ResultAny=yes
+    polkit.addRule(function(action, subject) {
+      var permit = [
+        // only required for udisks1:
+        "org.freedesktop.udisks.filesystem-mount",
+        "org.freedesktop.udisks.luks-unlock",
+        "org.freedesktop.udisks.drive-eject",
+        "org.freedesktop.udisks.drive-detach",
+        // only required for udisks2:
+        "org.freedesktop.udisks2.filesystem-mount",
+        "org.freedesktop.udisks2.encrypted-unlock",
+        "org.freedesktop.udisks2.eject-media",
+        "org.freedesktop.udisks2.power-off-drive"
+      ];
+      if (subject.isInGroup("storage") && permit.indexOf(action.id) != -1) {
+        return polkit.Result.YES;
+      }
+    });
 
-This configuration allows all members of the *storage* group to run udiskie.
+This configuration allows all members of the *storage* group to run
+udiskie.
 
-Alternatively, change the setting for ``allow_inactive`` to *yes* in the
-file ``/usr/share/polkit-1/actions/org.freedesktop.udisks.policy``:
-
-.. code-block:: xml
-
-    <action id="org.freedesktop.udisks.filesystem-mount">
-        ...
-        <allow_inactive>yes</allow_inactive>
-        ...
-    </action>
-
-    ...
-
-Do this for all relevant actions.
-
-Note that UDisks2 uses another set of permissions, see
-``/usr/share/polkit-1/actions/org.freedesktop.udisks2.policy``.
+.. _PolicyKit: http://www.freedesktop.org/wiki/Software/PolicyKit
 
 
 GTK icons
