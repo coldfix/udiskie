@@ -21,9 +21,10 @@ def _device_method(fn):
             device = self.udisks.find(device_or_path)
             if device:
                 self._log.debug(_('found device owning "{0}": "{1}"',
-                                device_or_path, device))
+                                  device_or_path, device))
             else:
-                self._log.error(_('no device found owning "{0}"', device_or_path))
+                self._log.error(_('no device found owning "{0}"',
+                                  device_or_path))
                 return False
         else:
             device = device_or_path
@@ -32,7 +33,7 @@ def _device_method(fn):
         except device.Exception:
             err = sys.exc_info()[1]
             self._log.error(_('failed to {0} {1}: {2}',
-                            fn.__name__, device, err.message))
+                              fn.__name__, device, err.message))
             self._set_error(device, fn.__name__, err.message)
             return False
     return wrapper

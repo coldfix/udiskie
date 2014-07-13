@@ -19,6 +19,7 @@ from gi.repository import GLib
 from udiskie.common import Emitter, samefile
 from udiskie.compat import filter
 from udiskie.dbus import DBusProxy, DBusException, DBusService
+from udiskie.locale import _
 
 __all__ = ['Sniffer', 'Daemon']
 
@@ -214,7 +215,8 @@ class NullProxy(object):
     @property
     def method(self):
         """Access object methods dynamically via DBus."""
-        raise RuntimeError("Interface '%s' not available for %s" % (self._name, self.object_path))
+        raise RuntimeError(_("Interface {0!r} not available for {1}",
+                             self._name, self.object_path))
 
 
 #----------------------------------------
@@ -612,7 +614,7 @@ class UDisks2(DBusService):
             if device.is_file(path):
                 return device
         logger = logging.getLogger(__name__)
-        logger.warn('Device not found: %s' % path)
+        logger.warn(_('Device not found: {0}', path))
         return None
 
 
@@ -732,7 +734,7 @@ class Daemon(Emitter, UDisks2):
                         self._proxy.method.GetManagedObjects()[object_path])
 
     def trigger(self, event, device, *args):
-        self._log.debug("+++ %s: %s" % (event, device))
+        self._log.debug(_("+++ {0}: {1}", event, device))
         super(Daemon, self).trigger(event, device, *args)
 
     # add objects / interfaces

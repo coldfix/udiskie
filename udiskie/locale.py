@@ -9,4 +9,7 @@ def _(msg, *args, **kwargs):
     Future versions of this function may translate the message to language
     defined in the current locale.
     """
-    return msg.format(*args, **kwargs)
+    if args or kwargs:
+        return msg.format(*args, **kwargs)
+    else:
+        return msg

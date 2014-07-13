@@ -6,6 +6,7 @@ import logging
 import sys
 
 from udiskie.dbus import DBusException
+from udiskie.locale import _
 
 
 __all__ = ['Notify']
@@ -55,12 +56,12 @@ class Notify(object):
         """
         label = device.id_label
         mount_path = device.mount_paths[0]
-        browse_action = ('browse', 'Browse directory',
+        browse_action = ('browse', _('Browse directory'),
                          self._mounter.browse, device)
         self._show_notification(
             'device_mounted',
-            'Device mounted',
-            '%s mounted on %s' % (label, mount_path),
+            _('Device mounted'),
+            _('{0.id_label} mounted on {0.mount_paths[0]}', device),
             'drive-removable-media',
             self._mounter._browser and browse_action)
 
@@ -73,8 +74,8 @@ class Notify(object):
         label = device.id_label
         self._show_notification(
             'device_unmounted',
-            'Device unmounted',
-            '%s unmounted' % (label,),
+            _('Device unmounted'),
+            _('{0.id_label} unmounted', device),
             'drive-removable-media')
 
     def device_locked(self, device):
@@ -86,8 +87,8 @@ class Notify(object):
         device_file = device.device_presentation
         self._show_notification(
             'device_locked',
-            'Device locked',
-            '%s locked' % (device_file,),
+            _('Device locked'),
+            _('{0.device_presentation} locked', device),
             'drive-removable-media')
 
     def device_unlocked(self, device):
@@ -99,8 +100,8 @@ class Notify(object):
         device_file = device.device_presentation
         self._show_notification(
             'device_unlocked',
-            'Device unlocked',
-            '%s unlocked' % (device_file,),
+            _('Device unlocked'),
+            _('{0.device_presentation} unlocked', device),
             'drive-removable-media')
 
     def device_added(self, device):
@@ -113,8 +114,8 @@ class Notify(object):
         if (device.is_drive or device.is_toplevel) and device_file:
             self._show_notification(
                 'device_added',
-                'Device added',
-                'device appeared on %s' % (device_file,),
+                _('Device added'),
+                _('device appeared on {0.device_presentation}', device),
                 'drive-removable-media')
 
     def device_removed(self, device):
@@ -127,8 +128,8 @@ class Notify(object):
         if (device.is_drive or device.is_toplevel) and device_file:
             self._show_notification(
                 'device_removed',
-                'Device removed',
-                'device disappeared on %s' % (device_file,),
+                _('Device removed'),
+                _('device disappeared on {0.device_presentation}', device),
                 'drive-removable-media')
 
     def job_failed(self, device, action, message):
@@ -139,18 +140,18 @@ class Notify(object):
         """
         device_file = device.device_presentation or device.object_path
         if message:
-            text = 'failed to %s %s:\n%s' % (action, device_file, message)
+            text = _('failed to {0} {1}:\n{2}', action, device_file, message)
         else:
-            text = 'failed to %s device %s.' % (action, device_file,)
+            text = _('failed to {0} device {1}.', action, device_file)
         try:
             retry = getattr(self._mounter, action)
         except AttributeError:
             retry_action = None
         else:
-            retry_action = ('retry', 'Retry', retry, device)
+            retry_action = ('retry', _('Retry'), retry, device)
         self._show_notification(
             'job_failed',
-            'Job failed', text,
+            _('Job failed'), text,
             'drive-removable-media',
             retry_action)
 

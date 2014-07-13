@@ -26,6 +26,7 @@ import os.path
 from udiskie.common import Emitter, samefile
 from udiskie.compat import filter
 from udiskie.dbus import DBusProxy, DBusService, DBusException
+from udiskie.locale import _
 
 
 __all__ = ['Sniffer', 'Daemon']
@@ -443,7 +444,7 @@ class UDisks(DBusService):
             if device.is_file(path):
                 return device
         logger = logging.getLogger(__name__)
-        logger.warn('Device not found: %s' % path)
+        logger.warn(_('Device not found: {0}', path))
         return None
 
 
@@ -645,7 +646,7 @@ class Daemon(Emitter, UDisks):
                 message = self._errors[action].pop(object_path, "")
                 self.trigger('job_failed', device, action, message)
                 log = logging.getLogger(__name__)
-                log.info('%s operation failed for device: %s' % (job_id, object_path))
+                log.info(_('{0} operation failed for device: {1}', job_id, object_path))
 
     # used internally by _device_job_changed:
     _action_mapping = {
