@@ -59,15 +59,8 @@ class Notify(object):
             '%s mounted on %s' % (label, mount_path),
             'drive-removable-media')
         if self._mounter._browser:
-            # Show a 'Browse directory' button in mount notifications.
-            # Note, this only works with some libnotify services.
-            def on_browse(notification, action):
-                self._mounter.browse(device)
-            notification.add_action('browse', "Browse directory", on_browse)
-            # Need to store a reference (see above) only if there is a
-            # signal connected:
-            notification.connect('closed', self._notifications.remove)
-            self._notifications.append(notification)
+            self._add_action(notification, 'browse', 'Browse directory',
+                             self._mounter.browse, device)
         notification.show()
 
     def device_unmounted(self, device):
@@ -156,15 +149,7 @@ class Notify(object):
         except AttributeError:
             pass
         else:
-            # Show a 'Retry' button in mount notifications.
-            # Note, this only works with some libnotify services.
-            def on_retry(notification, action):
-                retry(device)
-            notification.add_action('retry', "Retry", on_retry)
-            # Need to store a reference (see above) only if there is a
-            # signal connected:
-            notification.connect('closed', self._notifications.remove)
-            self._notifications.append(notification)
+            self._add_action(notification, 'retry', 'Retry', retry, device)
         notification.show()
 
     def _notification(self, event, summary, message, icon):
@@ -185,6 +170,20 @@ class Notify(object):
         if timeout != -1:
             notification.set_timeout(int(timeout * 1000))
         return notification
+
+    def _add_action(self, notification, action, label, callback, *args):
+        """
+        Show an action button button in mount notifications.
+
+        Note, this only works with some libnotify services.
+        """
+        def on_action_click(notification, action):
+            callback(*args)
+        notification.add_action(action, label, on_action_click)
+        # Need to store a reference (see __init__) only if there is a
+        # signal connected:
+        notification.connect('closed', self._notifications.remove)
+        self._notifications.append(notification)
 
     def _enabled(self, event):
         """
