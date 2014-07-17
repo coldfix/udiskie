@@ -13,12 +13,11 @@ mount and unmount operations.
 Usage
 -----
 
-Start the automount and notification daemon:
+Start the automount and notification daemon and show a system tray icon:
 
 .. code-block:: bash
 
-    # the optional tray icon requires PyGTK
-    udiskie --tray  
+    udiskie --tray
 
 Mount or unlock a specific device manually:
 
@@ -31,6 +30,8 @@ Unmount or remove a specific device manually:
 .. code-block:: bash
 
     udiskie-umount /media/<device-name>
+    # or with udisks2
+    udiskie-umount -2 /run/media/<user>/<device>
 
 See the man page for further instructions
 
@@ -41,11 +42,13 @@ Dependencies
 Unfortunately, *udiskie* has dependencies that can not be automatically
 downloaded and installed from PyPI:
 
+- setuptools_
 - UDisks_ (either UDisks1 or UDisks2 is fine)
 - PyGObject_ (GTK3+)
 - PyYAML_ (builds from PyPI)
 - docopt_ (builds from PyPI)
 
+.. _setuptools: https://pypi.python.org/pypi/setuptools/
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
 .. _PyGObject: https://wiki.gnome.org/action/show/Projects/PyGObject
 .. _PyYAML: https://pypi.python.org/pypi/PyYAML
@@ -55,7 +58,7 @@ downloaded and installed from PyPI:
 Permissions
 -----------
 
-*udiskie* requires permission for some PolicyKit_ actions which are usually
+*udiskie* requires permission for some polkit_ actions which are usually
 granted when using a desktop environment. If your login session is not
 properly activated you may need to customize your PolicyKit settings.
 Create the file ``/etc/polkit-1/rules.d/50-udiskie.rules`` with the
@@ -84,7 +87,7 @@ following contents:
 This configuration allows all members of the *storage* group to run
 udiskie.
 
-.. _PolicyKit: http://www.freedesktop.org/wiki/Software/PolicyKit
+.. _polkit: http://www.freedesktop.org/wiki/Software/polkit/
 
 
 GTK icons

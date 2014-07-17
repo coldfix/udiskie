@@ -2,6 +2,12 @@
 Notification utility.
 """
 
+import logging
+import sys
+
+from udiskie.dbus import DBusException
+
+
 __all__ = ['Notify']
 
 
@@ -29,11 +35,7 @@ class Notify(object):
         self._mounter = mounter
         self._timeout = timeout or {}
         self._default = self._timeout.get('timeout', -1)
-        # pynotify does not store hard references to the notification
-        # objects. When a signal is received and the notification does not
-        # exist anymore, no handller will be called. Therefore, we need to
-        # prevent these notifications from being destroyed by storing
-        # references (note, notify2 doesn't need this):
+        self._log = logging.getLogger(__name__)
         self._notifications = []
         # Subscribe all enabled events to the daemon:
         udisks = mounter.udisks
@@ -53,22 +55,14 @@ class Notify(object):
         """
         label = device.id_label
         mount_path = device.mount_paths[0]
-        notification = self._notification(
+        browse_action = ('browse', 'Browse directory',
+                         self._mounter.browse, device)
+        self._show_notification(
             'device_mounted',
             'Device mounted',
             '%s mounted on %s' % (label, mount_path),
-            'drive-removable-media')
-        if self._mounter._browser:
-            # Show a 'Browse directory' button in mount notifications.
-            # Note, this only works with some libnotify services.
-            def on_browse(notification, action):
-                self._mounter.browse(device)
-            notification.add_action('browse', "Browse directory", on_browse)
-            # Need to store a reference (see above) only if there is a
-            # signal connected:
-            notification.connect('closed', self._notifications.remove)
-            self._notifications.append(notification)
-        notification.show()
+            'drive-removable-media',
+            self._mounter._browser and browse_action)
 
     def device_unmounted(self, device):
         """
@@ -77,11 +71,11 @@ class Notify(object):
         :param device: device object
         """
         label = device.id_label
-        self._notification(
+        self._show_notification(
             'device_unmounted',
             'Device unmounted',
             '%s unmounted' % (label,),
-            'drive-removable-media').show()
+            'drive-removable-media')
 
     def device_locked(self, device):
         """
@@ -90,11 +84,11 @@ class Notify(object):
         :param device: device object
         """
         device_file = device.device_presentation
-        self._notification(
+        self._show_notification(
             'device_locked',
             'Device locked',
             '%s locked' % (device_file,),
-            'drive-removable-media').show()
+            'drive-removable-media')
 
     def device_unlocked(self, device):
         """
@@ -103,11 +97,11 @@ class Notify(object):
         :param device: device object
         """
         device_file = device.device_presentation
-        self._notification(
+        self._show_notification(
             'device_unlocked',
             'Device unlocked',
             '%s unlocked' % (device_file,),
-            'drive-removable-media').show()
+            'drive-removable-media')
 
     def device_added(self, device):
         """
@@ -117,11 +111,11 @@ class Notify(object):
         """
         device_file = device.device_presentation
         if (device.is_drive or device.is_toplevel) and device_file:
-            self._notification(
+            self._show_notification(
                 'device_added',
                 'Device added',
                 'device appeared on %s' % (device_file,),
-                'drive-removable-media').show()
+                'drive-removable-media')
 
     def device_removed(self, device):
         """
@@ -131,11 +125,11 @@ class Notify(object):
         """
         device_file = device.device_presentation
         if (device.is_drive or device.is_toplevel) and device_file:
-            self._notification(
+            self._show_notification(
                 'device_removed',
                 'Device removed',
                 'device disappeared on %s' % (device_file,),
-                'drive-removable-media').show()
+                'drive-removable-media')
 
     def job_failed(self, device, action, message):
         """
@@ -148,43 +142,64 @@ class Notify(object):
             text = 'failed to %s %s:\n%s' % (action, device_file, message)
         else:
             text = 'failed to %s device %s.' % (action, device_file,)
-        notification = self._notification('job_failed',
-                                          'Job failed', text,
-                                          'drive-removable-media')
         try:
             retry = getattr(self._mounter, action)
         except AttributeError:
-            pass
+            retry_action = None
         else:
-            # Show a 'Retry' button in mount notifications.
-            # Note, this only works with some libnotify services.
-            def on_retry(notification, action):
-                retry(device)
-            notification.add_action('retry', "Retry", on_retry)
-            # Need to store a reference (see above) only if there is a
-            # signal connected:
-            notification.connect('closed', self._notifications.remove)
-            self._notifications.append(notification)
-        notification.show()
+            retry_action = ('retry', 'Retry', retry, device)
+        self._show_notification(
+            'job_failed',
+            'Job failed', text,
+            'drive-removable-media',
+            retry_action)
 
-    def _notification(self, event, summary, message, icon):
+    def _show_notification(self,
+                           event, summary, message, icon,
+                           action=None):
         """
-        Create a notification object.
+        Show a notification.
 
         :param str event: event name
         :param str summary: notification title
         :param str message: notification body
         :param str icon: icon name
-        :returns: notification object
-
-        This is just a small convenience method to get the timeouts
-        correct everywhere.
+        :param dict action: parameters to :meth:`_add_action`
         """
         notification = self._notify(summary, message, icon)
         timeout = self._get_timeout(event)
         if timeout != -1:
             notification.set_timeout(int(timeout * 1000))
-        return notification
+        if action:
+            self._add_action(notification, *action)
+        try:
+            notification.show()
+        except DBusException:
+            # Catch and log the exception. Starting udiskie with notifications
+            # enabled while not having a notification service installed is a
+            # mistake too easy to be made, but it shoud not render the rest of
+            # udiskie's logic useless by raising an exception before the
+            # automount handler gets invoked.
+            exc = sys.exc_info()[1]
+            self._log.error("Failed to show notification: {0}"
+                            .format(exc.message))
+
+    def _add_action(self, notification, action, label, callback, *args):
+        """
+        Show an action button button in mount notifications.
+
+        Note, this only works with some libnotify services.
+        """
+        def on_action_click(notification, action):
+            callback(*args)
+        notification.add_action(action, label, on_action_click)
+        # pynotify does not store hard references to the notification
+        # objects. When a signal is received and the notification does not
+        # exist anymore, no handller will be called. Therefore, we need to
+        # prevent these notifications from being destroyed by storing
+        # references (note, notify2 doesn't need this):
+        notification.connect('closed', self._notifications.remove)
+        self._notifications.append(notification)
 
     def _enabled(self, event):
         """
