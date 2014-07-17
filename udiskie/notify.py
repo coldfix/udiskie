@@ -36,11 +36,6 @@ class Notify(object):
         self._timeout = timeout or {}
         self._default = self._timeout.get('timeout', -1)
         self._log = logging.getLogger(__name__)
-        # pynotify does not store hard references to the notification
-        # objects. When a signal is received and the notification does not
-        # exist anymore, no handller will be called. Therefore, we need to
-        # prevent these notifications from being destroyed by storing
-        # references (note, notify2 doesn't need this):
         self._notifications = []
         # Subscribe all enabled events to the daemon:
         udisks = mounter.udisks
@@ -198,8 +193,11 @@ class Notify(object):
         def on_action_click(notification, action):
             callback(*args)
         notification.add_action(action, label, on_action_click)
-        # Need to store a reference (see __init__) only if there is a
-        # signal connected:
+        # pynotify does not store hard references to the notification
+        # objects. When a signal is received and the notification does not
+        # exist anymore, no handller will be called. Therefore, we need to
+        # prevent these notifications from being destroyed by storing
+        # references (note, notify2 doesn't need this):
         notification.connect('closed', self._notifications.remove)
         self._notifications.append(notification)
 
