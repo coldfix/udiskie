@@ -2,6 +2,12 @@
 Notification utility.
 """
 
+import logging
+import sys
+
+from udiskie.dbus import DBusException
+
+
 __all__ = ['Notify']
 
 
@@ -29,6 +35,7 @@ class Notify(object):
         self._mounter = mounter
         self._timeout = timeout or {}
         self._default = self._timeout.get('timeout', -1)
+        self._log = logging.getLogger(__name__)
         # pynotify does not store hard references to the notification
         # objects. When a signal is received and the notification does not
         # exist anymore, no handller will be called. Therefore, we need to
@@ -53,15 +60,14 @@ class Notify(object):
         """
         label = device.id_label
         mount_path = device.mount_paths[0]
-        notification = self._notification(
+        browse_action = ('browse', 'Browse directory',
+                         self._mounter.browse, device)
+        self._show_notification(
             'device_mounted',
             'Device mounted',
             '%s mounted on %s' % (label, mount_path),
-            'drive-removable-media')
-        if self._mounter._browser:
-            self._add_action(notification, 'browse', 'Browse directory',
-                             self._mounter.browse, device)
-        notification.show()
+            'drive-removable-media',
+            self._mounter._browser and browse_action)
 
     def device_unmounted(self, device):
         """
@@ -70,11 +76,11 @@ class Notify(object):
         :param device: device object
         """
         label = device.id_label
-        self._notification(
+        self._show_notification(
             'device_unmounted',
             'Device unmounted',
             '%s unmounted' % (label,),
-            'drive-removable-media').show()
+            'drive-removable-media')
 
     def device_locked(self, device):
         """
@@ -83,11 +89,11 @@ class Notify(object):
         :param device: device object
         """
         device_file = device.device_presentation
-        self._notification(
+        self._show_notification(
             'device_locked',
             'Device locked',
             '%s locked' % (device_file,),
-            'drive-removable-media').show()
+            'drive-removable-media')
 
     def device_unlocked(self, device):
         """
@@ -96,11 +102,11 @@ class Notify(object):
         :param device: device object
         """
         device_file = device.device_presentation
-        self._notification(
+        self._show_notification(
             'device_unlocked',
             'Device unlocked',
             '%s unlocked' % (device_file,),
-            'drive-removable-media').show()
+            'drive-removable-media')
 
     def device_added(self, device):
         """
@@ -110,11 +116,11 @@ class Notify(object):
         """
         device_file = device.device_presentation
         if (device.is_drive or device.is_toplevel) and device_file:
-            self._notification(
+            self._show_notification(
                 'device_added',
                 'Device added',
                 'device appeared on %s' % (device_file,),
-                'drive-removable-media').show()
+                'drive-removable-media')
 
     def device_removed(self, device):
         """
@@ -124,11 +130,11 @@ class Notify(object):
         """
         device_file = device.device_presentation
         if (device.is_drive or device.is_toplevel) and device_file:
-            self._notification(
+            self._show_notification(
                 'device_removed',
                 'Device removed',
                 'device disappeared on %s' % (device_file,),
-                'drive-removable-media').show()
+                'drive-removable-media')
 
     def job_failed(self, device, action, message):
         """
@@ -141,18 +147,42 @@ class Notify(object):
             text = 'failed to %s %s:\n%s' % (action, device_file, message)
         else:
             text = 'failed to %s device %s.' % (action, device_file,)
-        notification = self._notification('job_failed',
-                                          'Job failed', text,
-                                          'drive-removable-media')
         try:
             retry = getattr(self._mounter, action)
         except AttributeError:
-            pass
+            retry_action = None
         else:
-            self._add_action(notification, 'retry', 'Retry', retry, device)
-        notification.show()
+            retry_action = ('retry', 'Retry', retry, device)
+        self._show_notification(
+            'job_failed',
+            'Job failed', text,
+            'drive-removable-media',
+            retry_action)
 
-    def _notification(self, event, summary, message, icon):
+    def _show_notification(self,
+                           event, summary, message, icon,
+                           action=None):
+        """
+        Show a notification.
+
+        :param str event: event name
+        :param str summary: notification title
+        :param str message: notification body
+        :param str icon: icon name
+        :param dict action: parameters to :meth:`_add_action`
+        """
+        try:
+            notification = self._create_notification(event, summary,
+                                                     message, icon)
+            if action:
+                self._add_action(notification, *action)
+            notification.show()
+        except DBusException:
+            exc = sys.exc_info()[1]
+            self._log.error("Failed to show notification: {0}"
+                            .format(exc.message))
+
+    def _create_notification(self, event, summary, message, icon):
         """
         Create a notification object.
 
