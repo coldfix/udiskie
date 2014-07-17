@@ -1,6 +1,12 @@
 CHANGELOG
 ---------
 
+1.0.3
+~~~~~
+
+- handle exception if no notification service is installed
+
+
 1.0.2
 ~~~~~
 
