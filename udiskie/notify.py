@@ -171,11 +171,13 @@ class Notify(object):
         :param str icon: icon name
         :param dict action: parameters to :meth:`_add_action`
         """
+        notification = self._notify(summary, message, icon)
+        timeout = self._get_timeout(event)
+        if timeout != -1:
+            notification.set_timeout(int(timeout * 1000))
+        if action:
+            self._add_action(notification, *action)
         try:
-            notification = self._create_notification(event, summary,
-                                                     message, icon)
-            if action:
-                self._add_action(notification, *action)
             notification.show()
         except DBusException:
             # Catch and log the exception. Starting udiskie with notifications
@@ -186,25 +188,6 @@ class Notify(object):
             exc = sys.exc_info()[1]
             self._log.error("Failed to show notification: {0}"
                             .format(exc.message))
-
-    def _create_notification(self, event, summary, message, icon):
-        """
-        Create a notification object.
-
-        :param str event: event name
-        :param str summary: notification title
-        :param str message: notification body
-        :param str icon: icon name
-        :returns: notification object
-
-        This is just a small convenience method to get the timeouts
-        correct everywhere.
-        """
-        notification = self._notify(summary, message, icon)
-        timeout = self._get_timeout(event)
-        if timeout != -1:
-            notification.set_timeout(int(timeout * 1000))
-        return notification
 
     def _add_action(self, notification, action, label, callback, *args):
         """
