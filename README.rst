@@ -40,8 +40,7 @@ Installation
 ------------
 
 If not installing *udiskie* via your distribution's repositories, you should
-use pip which (in contrast to plain ``python setup.py install``) handles data
-files properly:
+use pip:
 
 .. code-block:: bash
 
@@ -53,18 +52,14 @@ files properly:
 
 Before doing this, however, take care to install all needed dependencies:
 
-
-Dependencies
-------------
-
 Some of *udiskie*'s dependencies are best installed from your distribution's
 package repositories. This is a complete list of all dependencies:
 
 - setuptools_
 - UDisks_ (either UDisks1 or UDisks2 is fine)
 - PyGObject_ (GTK3+)
-- PyYAML_ (may be installed using pip)
-- docopt_ (may be installed using pip)
+- PyYAML_ (can automatically be installed by pip)
+- docopt_ (can automatically be installed by pip)
 - gettext_ (optional)
 - a notification daemon (optional)
 
