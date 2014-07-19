@@ -60,27 +60,27 @@ Permissions
 
 *udiskie* requires permission for some polkit_ actions which are usually
 granted when using a desktop environment. If your login session is not
-properly activated you may need to customize your PolicyKit settings.
-Create the file ``/etc/polkit-1/rules.d/50-udiskie.rules`` with the
-following contents:
+properly activated you may need to customize your polkit settings. Create the
+file ``/etc/polkit-1/rules.d/50-udiskie.rules`` with the following contents:
 
 .. code-block:: javascript
 
     polkit.addRule(function(action, subject) {
-      var permit = [
+      var YES = polkit.Result.YES;
+      var permission = {
         // only required for udisks1:
-        "org.freedesktop.udisks.filesystem-mount",
-        "org.freedesktop.udisks.luks-unlock",
-        "org.freedesktop.udisks.drive-eject",
-        "org.freedesktop.udisks.drive-detach",
+        "org.freedesktop.udisks.filesystem-mount": YES,
+        "org.freedesktop.udisks.luks-unlock": YES,
+        "org.freedesktop.udisks.drive-eject": YES,
+        "org.freedesktop.udisks.drive-detach": YES,
         // only required for udisks2:
-        "org.freedesktop.udisks2.filesystem-mount",
-        "org.freedesktop.udisks2.encrypted-unlock",
-        "org.freedesktop.udisks2.eject-media",
-        "org.freedesktop.udisks2.power-off-drive"
-      ];
-      if (subject.isInGroup("storage") && permit.indexOf(action.id) != -1) {
-        return polkit.Result.YES;
+        "org.freedesktop.udisks2.filesystem-mount": YES,
+        "org.freedesktop.udisks2.encrypted-unlock": YES,
+        "org.freedesktop.udisks2.eject-media": YES,
+        "org.freedesktop.udisks2.power-off-drive": YES
+      };
+      if (subject.isInGroup("storage")) {
+        return permission[action.id];
       }
     });
 
