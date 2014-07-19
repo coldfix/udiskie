@@ -1,5 +1,6 @@
 # encoding: utf-8
 from setuptools import setup, Command
+from distutils.command.install import install as orig_install
 from distutils.command.install_data import install_data as orig_install_data
 from distutils.command.build import build as orig_build
 
@@ -85,32 +86,43 @@ class build_mo(Command):
             logging.warn(sys.exc_info()[1])
 
 
-class install_data(orig_install_data):
+# NOTE: we use the install command from *distutils* rather than the one from
+# *setuptools*. This means that we do NOT get dependencies installed. On the
+# other hand, setuptools fails to invoke the build commands properly before
+# trying to install and it puts the data files in the egg directory (we want
+# them in `sys.prefix` or similar).
+# NOTE: since `install.run` from setuptools behaves differently dependending
+# on from where it was called, subclassing the setuptools command is actually
+# equivalent here (and does NOT provide automatic dependency installation
+# either!!!). Though, subclassing distutils makes it more transparent:
+class install(orig_install):
 
-    """
-    Custom install command used to update the gtk icon cache.
-    """
+    """Custom install command used to update the gtk icon cache."""
 
     def run(self):
         """
-        Run the command: install files and then update gtk icon cache.
+        Perform old-style (distutils) install, then update GTK icon cache.
 
-        Extends ``distutils.command.install_data.install_data.run``.
+        Extends ``distutils.command.install.install.run``.
         """
-        # add .mo files if they were successfully created in the build step
-        self.data_files += [
-            (path.join(mo_install_prefix, lang, 'LC_MESSAGES'),
-             [path.join(mo_build_prefix, lang, 'LC_MESSAGES', 'udiskie.mo')])
-            for lang in listdir(mo_build_prefix)
-        ]
-        # install files
-        orig_install_data.run(self)
-        # update icon cache
+        orig_install.run(self)
         try:
             call(['gtk-update-icon-cache', theme_base])
         except OSError:
             # ignore failures since the tray icon is an optional component:
             logging.warn(sys.exc_info()[1])
+
+
+class install_data(orig_install_data):
+
+    def run(self):
+        """Add built translation files and then install data files."""
+        self.data_files += [
+            (path.join(mo_install_prefix, lang, 'LC_MESSAGES'),
+             [path.join(mo_build_prefix, lang, 'LC_MESSAGES', 'udiskie.mo')])
+            for lang in listdir(mo_build_prefix)
+        ]
+        orig_install_data.run(self)
 
 
 setup(
@@ -125,6 +137,7 @@ setup(
     url='https://github.com/coldfix/udiskie',
     license='MIT',
     cmdclass={
+        'install': install,
         'install_data': install_data,
         'build': build,
         'build_mo': build_mo,
