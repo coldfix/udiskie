@@ -267,7 +267,9 @@ class DBusBus(object):
             object_path,
             None,
             Gio.DBusSignalFlags.NONE,
-            callback)
+            callback,
+            None,
+        )
 
     def disconnect(self, subscription_id):
         """
