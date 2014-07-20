@@ -10,6 +10,8 @@ import sys
 
 from gi.repository import Gtk
 
+from udiskie.locale import _
+
 
 __all__ = ['password', 'browser']
 
@@ -23,7 +25,7 @@ def require_Gtk():
     # if we attempt to create any GUI elements with no X server running the
     # program will just crash, so let's make a way to catch this case:
     if not Gtk.init_check()[0]:
-        raise RuntimeError("X server not connected!")
+        raise RuntimeError(_("X server not connected!"))
 
 
 dialog_definition = r"""
@@ -104,7 +106,7 @@ def password_dialog(title, message):
 
 def get_password_gui(device):
     """Get the password to unlock a device from GUI."""
-    text = 'Enter password for {0.device_presentation}: '.format(device)
+    text = _('Enter password for {0.device_presentation}: ', device)
     try:
         return password_dialog('udiskie', text)
     except RuntimeError:
@@ -113,7 +115,7 @@ def get_password_gui(device):
 
 def get_password_tty(device):
     """Get the password to unlock a device from terminal."""
-    text = 'Enter password for {0.device_presentation}: '.format(device)
+    text = _('Enter password for {0.device_presentation}: ', device)
     try:
         return getpass.getpass(text)
     except EOFError:
@@ -159,9 +161,9 @@ def browser(browser_name='xdg-open'):
         # Why not raise an exception? -I think it is more convenient (for
         # end users) to have a reasonable default, without enforcing it.
         logging.getLogger(__name__).warn(
-            "Can't find file browser: '%s'. "
-            "You may want to change the value for the '-b' option."
-            % (browser_name,))
+            _("Can't find file browser: {0!r}. "
+              "You may want to change the value for the '-b' option.",
+              browser_name))
         return None
     def browse(path):
         return subprocess.Popen([executable, path])

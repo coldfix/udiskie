@@ -36,23 +36,39 @@ Unmount or remove a specific device manually:
 See the man page for further instructions
 
 
-Dependencies
+Installation
 ------------
 
-Unfortunately, *udiskie* has dependencies that can not be automatically
-downloaded and installed from PyPI:
+If not installing *udiskie* via your distribution's repositories, you should
+use pip:
+
+.. code-block:: bash
+
+    # from PyPI:
+    pip install udiskie
+
+    # from a local checkout:
+    pip install .
+
+Before doing this, however, take care to install all needed dependencies:
+
+Some of *udiskie*'s dependencies are best installed from your distribution's
+package repositories. This is a complete list of all dependencies:
 
 - setuptools_
 - UDisks_ (either UDisks1 or UDisks2 is fine)
 - PyGObject_ (GTK3+)
-- PyYAML_ (builds from PyPI)
-- docopt_ (builds from PyPI)
+- PyYAML_ (can automatically be installed by pip)
+- docopt_ (can automatically be installed by pip)
+- gettext_ (optional)
+- a notification daemon (optional)
 
 .. _setuptools: https://pypi.python.org/pypi/setuptools/
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
 .. _PyGObject: https://wiki.gnome.org/action/show/Projects/PyGObject
 .. _PyYAML: https://pypi.python.org/pypi/PyYAML
 .. _docopt: http://docopt.org/
+.. _gettext: http://www.gnu.org/software/gettext/
 
 
 Permissions

@@ -10,6 +10,7 @@ import os
 import sys
 
 from udiskie.compat import basestring
+from udiskie.locale import _
 
 
 __all__ = ['DeviceFilter',
@@ -68,15 +69,16 @@ class DeviceFilter(object):
         # the use of keys() makes deletion inside the loop safe:
         for k in self._match.keys():
             if k not in self.VALID_PARAMETERS:
-                self._log.warn('Unknown matching attribute: {!r}'.format(k))
+                self._log.warn(_('Unknown matching attribute: {!r}', k))
                 del self._match[k]
         self._value = value
-        self._log.debug('%s created' % self)
+        self._log.debug(_('{0} created', self))
 
     def __str__(self):
-        return ('{}(match={!r}, value={!r})'
-                .format(self.__class__.__name__,
-                        self._match, self._value))
+        return _('{0}(match={1!r}, value={2!r})',
+                 self.__class__.__name__,
+                 self._match,
+                 self._value)
 
     def match(self, device):
         """
@@ -96,7 +98,7 @@ class DeviceFilter(object):
         If :meth:`match` is False for the device, the return value of this
         method is undefined.
         """
-        self._log.debug('%s used for %s' % (self, device.object_path))
+        self._log.debug(_('{0} used for {1}', self, device.object_path))
         return self._value
 
 

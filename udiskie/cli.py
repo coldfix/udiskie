@@ -16,6 +16,7 @@ import udiskie
 import udiskie.config
 import udiskie.mount
 from udiskie.common import extend
+from udiskie.locale import _
 
 
 __all__ = ['Daemon', 'Mount', 'Umount']
@@ -50,15 +51,15 @@ def get_backend(clsname, version=None):
             return udisks1()
         except DBusException:
             log = logging.getLogger(__name__)
-            log.warning('Failed to connect UDisks1 dbus service.\n'
-                        'Falling back to UDisks2 [experimental].')
+            log.warning(_('Failed to connect UDisks1 dbus service..\n'
+                          'Falling back to UDisks2 [experimental].'))
             return udisks2()
     elif version == 1:
         return udisks1()
     elif version == 2:
         return udisks2()
     else:
-        raise ValueError("UDisks version not supported: %s!" % (version,))
+        raise ValueError(_("UDisks version not supported: {0}!", version))
 
 
 class Choice(object):
@@ -72,8 +73,8 @@ class Choice(object):
     def _check(self, args):
         """Exit in case of multiple exclusive arguments."""
         if sum(bool(args[arg]) for arg in self._mapping) > 1:
-            raise DocoptExit('These options are mutually exclusive: '
-                             + ', '.join(self._mapping))
+            raise DocoptExit(_('These options are mutually exclusive: {0}',
+                               ', '.join(self._mapping)))
 
     def __call__(self, args):
         """Get the option value from the parsed arguments."""
@@ -140,12 +141,12 @@ class _EntryPoint(object):
             '--use-udisks2': 2}),
     }
 
-    usage_remarks = """
+    usage_remarks = _("""
     Note, that the options in the individual groups are mutually exclusive.
 
     The config file can be a JSON or preferrably a YAML file. For an
     example, see the MAN page (or doc/udiskie.8.txt in the repository).
-    """
+    """)
 
     def __init__(self, argv=None):
         """
@@ -160,9 +161,9 @@ class _EntryPoint(object):
         # initialize logging configuration:
         log_level = program_opts.get('log_level', default_opts['log_level'])
         if log_level <= logging.DEBUG:
-            fmt = '%(levelname)s [%(asctime)s] %(name)s: %(message)s'
+            fmt = _('%(levelname)s [%(asctime)s] %(name)s: %(message)s')
         else:
-            fmt = '%(message)s'
+            fmt = _('%(message)s')
         logging.basicConfig(level=log_level, format=fmt)
         # parse config options
         config_file = OptionalValue('--config')(args)

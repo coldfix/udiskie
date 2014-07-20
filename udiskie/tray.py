@@ -9,6 +9,7 @@ from itertools import chain
 from gi.repository import Gtk
 
 from udiskie.common import setdefault
+from udiskie.locale import _
 
 
 __all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
@@ -39,14 +40,14 @@ class UdiskieMenu(object):
         'quit': Gtk.STOCK_QUIT, }
 
     _menu_labels = {
-        'browse': 'Browse %s',
-        'mount': 'Mount %s',
-        'unmount': 'Unmount %s',
-        'unlock': 'Unlock %s',
-        'lock': 'Lock %s',
-        'eject': 'Eject %s',
-        'detach': 'Unpower %s',
-        'quit': 'Quit', }
+        'browse': _('Browse {0}'),
+        'mount': _('Mount {0}'),
+        'unmount': _('Unmount {0}'),
+        'unlock': _('Unlock {0}'),
+        'lock': _('Lock {0}'),
+        'eject': _('Eject {0}'),
+        'detach': _('Unpower {0}'),
+        'quit': _('Quit'), }
 
     def __init__(self, mounter, actions={}):
         """
@@ -142,7 +143,7 @@ class UdiskieMenu(object):
                         icon=None,
                         onclick=self._branchmenu(node.groups)))
                 else:
-                    raise ValueError("Invalid node!")
+                    raise ValueError(_("Invalid node!"))
         return menu
 
     def _menuitem(self, label, icon, onclick):
@@ -185,7 +186,7 @@ class UdiskieMenu(object):
         :rtype: Gtk.MenuItem
         """
         return self._menuitem(
-            self._menu_labels[action] % tuple(feed),
+            self._menu_labels[action].format(*feed),
             self._get_icon(action),
             lambda _: self._actions[action](*bind))
 
@@ -318,7 +319,7 @@ class TrayIcon(object):
         """Return a new Gtk.StatusIcon."""
         statusicon = Gtk.StatusIcon()
         statusicon.set_from_stock(Gtk.STOCK_CDROM)
-        statusicon.set_tooltip_text("udiskie")
+        statusicon.set_tooltip_text(_("udiskie"))
         return statusicon
 
     @property
