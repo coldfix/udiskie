@@ -191,9 +191,16 @@ class Notify(object):
 
         Note, this only works with some libnotify services.
         """
-        def on_action_click(notification, action):
+        def on_action_click(notification, action, *user_data):
             callback(*args)
-        notification.add_action(action, label, on_action_click)
+        try:
+            # this is the correct signature for Notify-0.7, the last argument
+            # being 'user_data':
+            notification.add_action(action, label, on_action_click, None)
+        except TypeError:
+            # this is the signature for some older version, I don't know what
+            # the last argument is for.
+            notification.add_action(action, label, on_action_click, None, None)
         # pynotify does not store hard references to the notification
         # objects. When a signal is received and the notification does not
         # exist anymore, no handller will be called. Therefore, we need to

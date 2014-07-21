@@ -24,7 +24,7 @@ def require_Gtk():
     """
     # if we attempt to create any GUI elements with no X server running the
     # program will just crash, so let's make a way to catch this case:
-    if not Gtk.init_check()[0]:
+    if not Gtk.init_check(None)[0]:
         raise RuntimeError(_("X server not connected!"))
 
 

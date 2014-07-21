@@ -143,7 +143,9 @@ class DBusObject(object):
             info=None,
             name=self.bus_name,
             object_path=self.object_path,
-            interface_name=name)
+            interface_name=name,
+            cancellable=None,
+        )
 
     def get_interface(self, name):
         """
@@ -265,7 +267,9 @@ class DBusBus(object):
             object_path,
             None,
             Gio.DBusSignalFlags.NONE,
-            callback)
+            callback,
+            None,
+        )
 
     def disconnect(self, subscription_id):
         """
@@ -295,4 +299,6 @@ class DBusService(object):
             info=None,
             name=cls.BusName,
             object_path=cls.ObjectPath,
-            interface_name=cls.Interface))
+            interface_name=cls.Interface,
+            cancellable=None,
+        ))

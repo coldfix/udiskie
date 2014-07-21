@@ -1,6 +1,12 @@
 CHANGELOG
 ---------
 
+1.0.4
+~~~~~
+
+- compatibility with older version of pygobject (e.g. in Slackware 14.1)
+
+
 1.0.3
 ~~~~~
 
