@@ -192,7 +192,7 @@ class Notify(object):
         """
         def on_action_click(notification, action):
             callback(*args)
-        notification.add_action(action, label, on_action_click)
+        notification.add_action(action, label, on_action_click, None)
         # pynotify does not store hard references to the notification
         # objects. When a signal is received and the notification does not
         # exist anymore, no handller will be called. Therefore, we need to
