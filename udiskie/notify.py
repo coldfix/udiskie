@@ -190,7 +190,7 @@ class Notify(object):
 
         Note, this only works with some libnotify services.
         """
-        def on_action_click(notification, action):
+        def on_action_click(notification, action, *user_data):
             callback(*args)
         try:
             # this is the correct signature for Notify-0.7, the last argument
