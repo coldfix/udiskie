@@ -2,16 +2,16 @@
 # Traducciones al español para el paquete PACKAGE.
 # Copyright (C) 2014 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# Alejandro <alex@um.es>, 2014.
+# Alejandro <alejandro.perez.mendez@gmail.com>, 2014.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: alejandro.perez.mendez@gmail.com\n"
 "POT-Creation-Date: 2014-07-19 18:17+0200\n"
 "PO-Revision-Date: 2014-07-23 18:43+0100\n"
 "Last-Translator: Alejandro Pérez <alejandro.perez.mendez@gmail.com>\n"
-"Language-Team: Spanish\n"
+"Language-Team: alejandro.perez.mendez@gmail.com\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -74,10 +74,10 @@ msgid ""
 "    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
 msgstr ""
 "\n"
-"    Note, that the options in the individual groups are mutually exclusive.\n"
+"    Nótese que las opciones de los grupos individuales son excluyentes.\n"
 "\n"
-"    The config file can be a JSON or preferrably a YAML file. For an\n"
-"    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
+"    El fichero de configuración puede ser un fichero JSON o YAML (preferiblemente).\n"
+"    Para un ejemplo, refiérase a la pagína del manual (o doc/udiskie.8.txt in the repository).\n"
 
 #: ../udiskie/cli.py:164
 #, python-format
