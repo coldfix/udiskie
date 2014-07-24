@@ -1,19 +1,14 @@
-# English translations for PACKAGE package.
-# Copyright (C) 2014 THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-#  <t_glaessle@gmx.de>, 2014.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
+"Project-Id-Version: udiskie\n"
+"Report-Msgid-Bugs-To: t_glaessle@gmx.de\n"
 "POT-Creation-Date: 2014-07-19 18:17+0200\n"
 "PO-Revision-Date: 2014-07-17 19:27+0200\n"
-"Last-Translator:  <t_glaessle@gmx.de>\n"
-"Language-Team: English\n"
+"Last-Translator: Thomas Gläßle <t_glaessle@gmx.de>\n"
+"Language-Team: English t_glaesle@gmx.de\n"
 "Language: en_US\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ASCII\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
