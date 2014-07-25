@@ -26,15 +26,21 @@ class Icons(object):
     """Encapsulates the responsibility to load icons."""
 
     _icon_names = {
-        'media': 'media-optical',
-        'browse': 'document-open',
-        'mount': 'udiskie-mount',
-        'unmount': 'udiskie-unmount',
-        'unlock': 'udiskie-unlock',
-        'lock': 'udiskie-lock',
-        'eject': 'udiskie-eject',
-        'detach': 'udiskie-detach',
-        'quit': 'application-exit', }
+        'media': ['media-optical'],
+        'browse': ['document-open'],
+        'mount': ['udiskie-mount'],
+        'unmount': ['udiskie-unmount'],
+        'unlock': ['udiskie-unlock'],
+        'lock': ['udiskie-lock'],
+        'eject': ['udiskie-eject'],
+        'detach': ['udiskie-detach'],
+        'quit': ['application-exit'],
+    }
+
+    def __init__(self, theme=None):
+        """Init member variables."""
+        self._theme = theme or Gtk.IconTheme.get_default()
+        self._cache = {}
 
     def get_icon(self, icon_id, size):
         """
@@ -45,19 +51,28 @@ class Icons(object):
         :returns: the loaded icon
         :rtype: Gtk.Image
         """
-        return Gtk.Image.new_from_icon_name(self.get_icon_name(icon_id, size),
-                                            size)
+        return Gtk.Image.new_from_pixbuf(self.get_pixbuf(icon_id, size))
 
-    def get_icon_name(self, icon_id, size):
+    def get_pixbuf(self, icon_id, size):
         """
         Lookup the GTK icon name corresponding to the specified internal id.
 
         :param str icon_id: udiskie internal icon id
         :param GtkIconSize size: requested size
-        :returns: an icon name
-        :rtype: str
+        :returns: the loaded icon
+        :rtype: GdkPixbuf.Pixbuf
         """
-        return self._icon_names[icon_id]
+        try:
+            return self._cache[icon_id]
+        except KeyError:
+            Flags = Gtk.IconLookupFlags
+            icon_info = self._theme.choose_icon(
+                self._icon_names[icon_id],
+                size,
+                Flags.USE_BUILTIN | Flags.GENERIC_FALLBACK,
+            )
+            pixbuf = self._cache[icon_id] = icon_info.load_icon()
+            return pixbuf
 
 
 class UdiskieMenu(object):
@@ -190,11 +205,8 @@ class UdiskieMenu(object):
         if icon is None:
             item = Gtk.MenuItem()
         else:
-            try:
-                item = Gtk.ImageMenuItem(stock_id=icon)
-            except TypeError:
-                item = Gtk.ImageMenuItem()
-                item.set_image(icon)
+            item = Gtk.ImageMenuItem()
+            item.set_image(icon)
             # I don't really care for the "show icons only for nouns, not
             # for verbs" policy:
             item.set_always_show_image(True)
@@ -216,9 +228,10 @@ class UdiskieMenu(object):
         :returns: the menu item object
         :rtype: Gtk.MenuItem
         """
+        size = Gtk.IconSize.lookup(Gtk.IconSize.MENU)[1]
         return self._menuitem(
             self._menu_labels[action].format(*feed),
-            self._icons.get_icon(action, Gtk.IconSize.MENU),
+            self._icons.get_icon(action, size),
             lambda _: self._actions[action](*bind))
 
     def _device_node(self, device):
@@ -338,8 +351,8 @@ class TrayIcon(object):
     def _create_statusicon(self):
         """Return a new Gtk.StatusIcon."""
         statusicon = Gtk.StatusIcon()
-        icon_name = self._icons.get_icon_name('media', statusicon.get_size())
-        statusicon.set_from_icon_name(icon_name)
+        pixbuf = self._icons.get_pixbuf('media', statusicon.get_size())
+        statusicon.set_from_pixbuf(pixbuf)
         statusicon.set_tooltip_text(_("udiskie"))
         return statusicon
 
