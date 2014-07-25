@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+1.1.0
+~~~~~
+
+- implemented internationalization
+- added spanish translation
+- allow to choose icons from a configurable list
+
+
 1.0.4
 ~~~~~
 
