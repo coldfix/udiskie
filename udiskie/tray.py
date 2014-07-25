@@ -21,13 +21,9 @@ Action = namedtuple('Action', ['label', 'device', 'method'])
 Branch = namedtuple('Branch', ['label', 'groups'])
 
 
-class UdiskieMenu(object):
+class Icons(object):
 
-    """
-    Builder for udiskie menus.
-
-    Objects of this class generate action menus when being called.
-    """
+    """Encapsulates the responsibility to load icons."""
 
     _menu_icons = {
         'browse': 'document-open',
@@ -39,6 +35,26 @@ class UdiskieMenu(object):
         'detach': 'udiskie-detach',
         'quit': 'application-exit', }
 
+    def get_icon(self, name):
+        """
+        Load menu icons dynamically.
+
+        :param str name: name of the menu item
+        :returns: the loaded icon
+        :rtype: Gtk.Image
+        """
+        return Gtk.Image.new_from_icon_name(self._menu_icons[name],
+                                            Gtk.IconSize.MENU)
+
+
+class UdiskieMenu(object):
+
+    """
+    Builder for udiskie menus.
+
+    Objects of this class generate action menus when being called.
+    """
+
     _menu_labels = {
         'browse': _('Browse {0}'),
         'mount': _('Mount {0}'),
@@ -49,11 +65,12 @@ class UdiskieMenu(object):
         'detach': _('Unpower {0}'),
         'quit': _('Quit'), }
 
-    def __init__(self, mounter, actions={}):
+    def __init__(self, mounter, icons, actions={}):
         """
         Initialize a new menu maker.
 
         :param object mounter: mount operation provider
+        :param Icons icons: icon provider
         :param dict actions: actions for menu items
         :returns: a new menu maker
         :rtype: cls
@@ -73,6 +90,7 @@ class UdiskieMenu(object):
         NOTE: If using a main loop other than ``Gtk.main`` the 'quit' action
         must be customized.
         """
+        self._icons = icons
         self._mounter = mounter
         setdefault(actions, {
             'browse': mounter.browse,
@@ -187,7 +205,7 @@ class UdiskieMenu(object):
         """
         return self._menuitem(
             self._menu_labels[action].format(*feed),
-            self._get_icon(action),
+            self._icons.get_icon(action),
             lambda _: self._actions[action](*bind))
 
     def _device_node(self, device):
@@ -239,17 +257,6 @@ class UdiskieMenu(object):
                 [Action(node.label, node.device, method)
                  for method in node.methods],
             ])
-
-    def _get_icon(self, name):
-        """
-        Load menu icons dynamically.
-
-        :param str name: name of the menu item
-        :returns: the loaded icon
-        :rtype: Gtk.Image
-        """
-        return Gtk.Image.new_from_icon_name(self._menu_icons[name],
-                                            Gtk.IconSize.MENU)
 
 
 class SmartUdiskieMenu(UdiskieMenu):
