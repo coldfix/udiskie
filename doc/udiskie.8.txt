@@ -196,6 +196,17 @@ notifications:
   device_unlocked: -1       # Use the libnotify default timeout
   device_locked: -1
   job_failed: -1
+
+icon_names:                 # customize tray/menu icons:
+  media: [drive-removable-media, media-optical]
+  browse: [document-open, folder-open],
+  mount: [udiskie-mount],
+  unmount: [udiskie-unmount],
+  unlock: [udiskie-unlock],
+  lock: [udiskie-lock],
+  eject: [udiskie-eject, media-eject],
+  detach: [udiskie-detach],
+  quit: [application-exit],
 ----------------------------------------------------------------------
 
 See Also
