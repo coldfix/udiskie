@@ -329,7 +329,7 @@ class Daemon(_EntryPoint):
                             'auto': udiskie.tray.AutoTray}
             if options['tray'] not in tray_classes:
                 raise ValueError("Invalid tray: %s" % (options['tray'],))
-            icons = udiskie.tray.Icons()
+            icons = udiskie.tray.Icons(config.icon_names)
             menu_maker = udiskie.tray.SmartUdiskieMenu(
                 mounter,
                 icons,

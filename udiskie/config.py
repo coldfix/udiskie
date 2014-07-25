@@ -227,10 +227,14 @@ class Config(object):
     @property
     def program_options(self):
         """Get the program options dictionary from the config file."""
-        config_options = self._data.get('program_options', {}).copy()
-        return config_options
+        return self._data.get('program_options', {}).copy()
 
     @property
     def notifications(self):
         """Get the notification timeouts dictionary from the config file."""
-        return self._data.get('notifications', {})
+        return self._data.get('notifications', {}).copy()
+
+    @property
+    def icon_names(self):
+        """Get the icon names dictionary from the config file."""
+        return self._data.get('icon_names', {}).copy()

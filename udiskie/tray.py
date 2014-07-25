@@ -10,6 +10,7 @@ from gi.repository import Gtk
 from gi.repository import Gio
 
 from udiskie.common import setdefault
+from udiskie.compat import basestring
 from udiskie.locale import _
 
 
@@ -43,6 +44,15 @@ class Icons(object):
         'detach': ['udiskie-detach'],
         'quit': ['application-exit'],
     }
+
+    def __init__(self, icon_names={}):
+        """Merge ``icon_names`` into default icon names."""
+        _icon_names = icon_names.copy()
+        setdefault(_icon_names, self.__class__._icon_names)
+        self._icon_names = _icon_names
+        for k,v in _icon_names.items():
+            if isinstance(v, basestring):
+                self._icon_names[k] = [v]
 
     def get_icon(self, icon_id, size):
         """
@@ -112,7 +122,8 @@ class UdiskieMenu(object):
         """
         self._icons = icons
         self._mounter = mounter
-        setdefault(actions, {
+        _actions = actions.copy()
+        setdefault(_actions, {
             'browse': mounter.browse,
             'mount': mounter.mount,
             'unmount': mounter.unmount,
@@ -121,7 +132,7 @@ class UdiskieMenu(object):
             'eject': partial(mounter.eject, force=True),
             'detach': partial(mounter.detach, force=True),
             'quit': Gtk.main_quit, })
-        self._actions = actions
+        self._actions = _actions
 
     def __call__(self):
         """
