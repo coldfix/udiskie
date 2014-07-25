@@ -335,7 +335,7 @@ class Daemon(_EntryPoint):
                 icons,
                 {'quit': mainloop.quit})
             TrayIcon = tray_classes[options['tray']]
-            statusicon = TrayIcon(menu_maker)
+            statusicon = TrayIcon(menu_maker, icons)
         else:
             statusicon = None
 

@@ -25,7 +25,8 @@ class Icons(object):
 
     """Encapsulates the responsibility to load icons."""
 
-    _menu_icons = {
+    _icon_names = {
+        'media': 'media-optical',
         'browse': 'document-open',
         'mount': 'udiskie-mount',
         'unmount': 'udiskie-unmount',
@@ -35,16 +36,28 @@ class Icons(object):
         'detach': 'udiskie-detach',
         'quit': 'application-exit', }
 
-    def get_icon(self, name):
+    def get_icon(self, icon_id, size):
         """
-        Load menu icons dynamically.
+        Load icon dynamically.
 
-        :param str name: name of the menu item
+        :param str icon_id: udiskie internal icon id
+        :param GtkIconSize size: requested size
         :returns: the loaded icon
         :rtype: Gtk.Image
         """
-        return Gtk.Image.new_from_icon_name(self._menu_icons[name],
-                                            Gtk.IconSize.MENU)
+        return Gtk.Image.new_from_icon_name(self.get_icon_name(icon_id, size),
+                                            size)
+
+    def get_icon_name(self, icon_id, size):
+        """
+        Lookup the GTK icon name corresponding to the specified internal id.
+
+        :param str icon_id: udiskie internal icon id
+        :param GtkIconSize size: requested size
+        :returns: an icon name
+        :rtype: str
+        """
+        return self._icon_names[icon_id]
 
 
 class UdiskieMenu(object):
@@ -205,7 +218,7 @@ class UdiskieMenu(object):
         """
         return self._menuitem(
             self._menu_labels[action].format(*feed),
-            self._icons.get_icon(action),
+            self._icons.get_icon(action, Gtk.IconSize.MENU),
             lambda _: self._actions[action](*bind))
 
     def _device_node(self, device):
@@ -308,24 +321,25 @@ class TrayIcon(object):
 
     """Default TrayIcon class."""
 
-    def __init__(self, menumaker, statusicon=None):
+    def __init__(self, menumaker, icons, statusicon=None):
         """
         Create and show a simple Gtk.StatusIcon.
 
         :param UdiskieMenu menumaker: menu factory
         :param Gtk.StatusIcon statusicon: status icon
         """
+        self._icons = icons
         self._icon = statusicon or self._create_statusicon()
         self._menu = menumaker
         self._conn_left = None
         self._conn_right = None
         self.show()
 
-    @classmethod
     def _create_statusicon(self):
         """Return a new Gtk.StatusIcon."""
         statusicon = Gtk.StatusIcon()
-        statusicon.set_from_icon_name('media-optical')
+        icon_name = self._icons.get_icon_name('media', statusicon.get_size())
+        statusicon.set_from_icon_name(icon_name)
         statusicon.set_tooltip_text(_("udiskie"))
         return statusicon
 
@@ -401,7 +415,7 @@ class AutoTray(TrayIcon):
     if there is no action available.
     """
 
-    def __init__(self, menumaker):
+    def __init__(self, menumaker, icons):
         """
         Create and automatically set visibility of a new status icon.
 
@@ -411,6 +425,7 @@ class AutoTray(TrayIcon):
         # icon may need to be hidden at initialization time. When creating a
         # Gtk.StatusIcon, it will initially be visible, creating a minor
         # nuisance.
+        self._icons = icons
         self._icon = None
         self._menu = menumaker
         self._conn_left = None
