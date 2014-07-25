@@ -137,7 +137,7 @@ setup(
     maintainer='Thomas Gläßle',
     maintainer_email='t_glaessle@gmx.de',
     url='https://github.com/coldfix/udiskie',
-    license='GPLv2',
+    license='MIT',
     cmdclass={
         'install': install,
         'install_data': install_data,
@@ -178,7 +178,7 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
-        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+        'License :: OSI Approved :: MIT License',
         'Topic :: Desktop Environment',
         'Topic :: Software Development',
         'Topic :: System :: Filesystems',
