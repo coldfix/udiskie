@@ -7,6 +7,7 @@ from functools import partial
 from itertools import chain
 
 from gi.repository import Gtk
+from gi.repository import Gio
 
 from udiskie.common import setdefault
 from udiskie.locale import _
@@ -37,11 +38,6 @@ class Icons(object):
         'quit': ['application-exit'],
     }
 
-    def __init__(self, theme=None):
-        """Init member variables."""
-        self._theme = theme or Gtk.IconTheme.get_default()
-        self._cache = {}
-
     def get_icon(self, icon_id, size):
         """
         Load icon dynamically.
@@ -51,28 +47,18 @@ class Icons(object):
         :returns: the loaded icon
         :rtype: Gtk.Image
         """
-        return Gtk.Image.new_from_pixbuf(self.get_pixbuf(icon_id, size))
+        return Gtk.Image.new_from_gicon(self.get_gicon(icon_id), size)
 
-    def get_pixbuf(self, icon_id, size):
+    def get_gicon(self, icon_id):
         """
         Lookup the GTK icon name corresponding to the specified internal id.
 
         :param str icon_id: udiskie internal icon id
         :param GtkIconSize size: requested size
         :returns: the loaded icon
-        :rtype: GdkPixbuf.Pixbuf
+        :rtype: Gio.Icon
         """
-        try:
-            return self._cache[icon_id]
-        except KeyError:
-            Flags = Gtk.IconLookupFlags
-            icon_info = self._theme.choose_icon(
-                self._icon_names[icon_id],
-                size,
-                Flags.USE_BUILTIN | Flags.GENERIC_FALLBACK,
-            )
-            pixbuf = self._cache[icon_id] = icon_info.load_icon()
-            return pixbuf
+        return Gio.ThemedIcon.new_from_names(self._icon_names[icon_id])
 
 
 class UdiskieMenu(object):
@@ -228,10 +214,9 @@ class UdiskieMenu(object):
         :returns: the menu item object
         :rtype: Gtk.MenuItem
         """
-        size = Gtk.IconSize.lookup(Gtk.IconSize.MENU)[1]
         return self._menuitem(
             self._menu_labels[action].format(*feed),
-            self._icons.get_icon(action, size),
+            self._icons.get_icon(action, Gtk.IconSize.MENU),
             lambda _: self._actions[action](*bind))
 
     def _device_node(self, device):
@@ -351,8 +336,7 @@ class TrayIcon(object):
     def _create_statusicon(self):
         """Return a new Gtk.StatusIcon."""
         statusicon = Gtk.StatusIcon()
-        pixbuf = self._icons.get_pixbuf('media', statusicon.get_size())
-        statusicon.set_from_pixbuf(pixbuf)
+        statusicon.set_from_gicon(self._icons.get_gicon('media'))
         statusicon.set_tooltip_text(_("udiskie"))
         return statusicon
 
