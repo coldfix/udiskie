@@ -30,14 +30,14 @@ class UdiskieMenu(object):
     """
 
     _menu_icons = {
-        'browse': Gtk.STOCK_OPEN,
+        'browse': 'document-open',
         'mount': 'udiskie-mount',
         'unmount': 'udiskie-unmount',
         'unlock': 'udiskie-unlock',
         'lock': 'udiskie-lock',
         'eject': 'udiskie-eject',
         'detach': 'udiskie-detach',
-        'quit': Gtk.STOCK_QUIT, }
+        'quit': 'application-exit', }
 
     _menu_labels = {
         'browse': _('Browse {0}'),
@@ -318,7 +318,7 @@ class TrayIcon(object):
     def _create_statusicon(self):
         """Return a new Gtk.StatusIcon."""
         statusicon = Gtk.StatusIcon()
-        statusicon.set_from_stock(Gtk.STOCK_CDROM)
+        statusicon.set_from_icon_name('media-optical')
         statusicon.set_tooltip_text(_("udiskie"))
         return statusicon
 
