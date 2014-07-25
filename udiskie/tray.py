@@ -27,13 +27,19 @@ class Icons(object):
     """Encapsulates the responsibility to load icons."""
 
     _icon_names = {
-        'media': ['media-optical'],
-        'browse': ['document-open'],
+        'media': [
+            'drive-removable-media-usb-pendrive',
+            'drive-removable-media-usb',
+            'drive-removable-media',
+            'media-optical',
+            'media-flash',
+        ],
+        'browse': ['document-open', 'folder-open'],
         'mount': ['udiskie-mount'],
         'unmount': ['udiskie-unmount'],
         'unlock': ['udiskie-unlock'],
         'lock': ['udiskie-lock'],
-        'eject': ['udiskie-eject'],
+        'eject': ['udiskie-eject', 'media-eject'],
         'detach': ['udiskie-detach'],
         'quit': ['application-exit'],
     }
