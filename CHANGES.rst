@@ -1,6 +1,12 @@
 CHANGELOG
 ---------
 
+1.1.1
+~~~~~
+
+- fix careless error in man page
+
+
 1.1.0
 ~~~~~
 

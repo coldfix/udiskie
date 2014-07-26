@@ -221,6 +221,8 @@ https://pypi.python.org/pypi/PyYAML
 
 http://docopt.org/
 
+http://www.gnu.org/software/gettext/
+
 
 API references for development:
 
