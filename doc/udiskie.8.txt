@@ -199,14 +199,14 @@ notifications:
 
 icon_names:                 # customize tray/menu icons:
   media: [drive-removable-media, media-optical]
-  browse: [document-open, folder-open],
-  mount: [udiskie-mount],
-  unmount: [udiskie-unmount],
-  unlock: [udiskie-unlock],
-  lock: [udiskie-lock],
-  eject: [udiskie-eject, media-eject],
-  detach: [udiskie-detach],
-  quit: [application-exit],
+  browse: [document-open, folder-open]
+  mount: [udiskie-mount]
+  unmount: [udiskie-unmount]
+  unlock: [udiskie-unlock]
+  lock: [udiskie-lock]
+  eject: [udiskie-eject, media-eject]
+  detach: [udiskie-detach]
+  quit: [application-exit]
 ----------------------------------------------------------------------
 
 See Also
