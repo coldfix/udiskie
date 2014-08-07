@@ -208,7 +208,7 @@ class OnlineDevice(DeviceBase):
         for filename in self._proxy.property.DeviceFileById:
             parts = filename.split('/')
             if parts[-2] == 'by-id':
-                return 'by-id-' + parts[-1]
+                return parts[-1]
         return ''
 
     @property
