@@ -52,20 +52,31 @@ use pip:
 
 Before doing this, however, take care to install all needed dependencies:
 
-Some of *udiskie*'s dependencies are best installed from your distribution's
-package repositories. This is a complete list of all dependencies:
-
 - setuptools_
 - UDisks_ (either UDisks1 or UDisks2 is fine)
 - PyGObject_ (GTK3+)
 - PyYAML_ (can automatically be installed by pip)
 - docopt_ (can automatically be installed by pip)
 - gettext_ (optional)
-- a notification daemon (optional)
+- libnotify and a notification daemon (optional)
+
+Access to system resources is implemented using PyGObject_. Therefore, some
+typelibs need to be installed in `/usr/lib/girepository-1.0/`. For this,
+you have to enable introspection when building the corresponding packages.
+*udiskie* is tested with the following versions:
+
+- Gio-2.0
+- GLib-2.0
+- GObject-2.0
+- Gtk-2.0
+- Notify-0.7
+
+Some of these dependencies are best installed from your distribution's
+package repositories.
 
 .. _setuptools: https://pypi.python.org/pypi/setuptools/
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
-.. _PyGObject: https://wiki.gnome.org/action/show/Projects/PyGObject
+.. _PyGObject: https://wiki.gnome.org/PyGObject
 .. _PyYAML: https://pypi.python.org/pypi/PyYAML
 .. _docopt: http://docopt.org/
 .. _gettext: http://www.gnu.org/software/gettext/
