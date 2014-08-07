@@ -223,6 +223,10 @@ http://docopt.org/
 
 http://www.gnu.org/software/gettext/
 
+http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
+
+http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
+
 
 API references for development:
 
