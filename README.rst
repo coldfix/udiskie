@@ -61,7 +61,7 @@ Before doing this, however, take care to install all needed dependencies:
 - libnotify and a notification daemon (optional)
 
 Access to system resources is implemented using PyGObject_. Therefore, some
-typelibs need to be installed in `/usr/lib/girepository-1.0/`. For this,
+typelibs need to be installed in ``/usr/lib/girepository-1.0/``. For this,
 you have to enable introspection when building the corresponding packages.
 *udiskie* is tested with the following versions:
 
