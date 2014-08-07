@@ -198,6 +198,20 @@ class OnlineDevice(DeviceBase):
         return self._proxy.property.DevicePresentationHide
 
     @property
+    def device_id(self):
+        """
+        Return a unique and persistent identifier for the device.
+
+        This is the basename (last path component) of the symlink in
+        `/dev/disk/by-id/`.
+        """
+        for filename in self._proxy.property.DeviceFileById:
+            parts = filename.split('/')
+            if parts[-2] == 'by-id':
+                return 'by-id-' + parts[-1]
+        return ''
+
+    @property
     def id_type(self):
         """"
         Return IdType property.
