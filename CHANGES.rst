@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+1.1.2
+~~~~~
+
+- add key ``device_id`` for matching devices rather than only file systems
+- improve documentation regarding dependencies
+
+
 1.1.1
 ~~~~~
 
