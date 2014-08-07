@@ -42,6 +42,7 @@ class DeviceFilter(object):
         'has_media',
         'device_file',
         'device_presentation',
+        'device_id',
         'id_usage',
         'is_crypto',
         'is_ignored',

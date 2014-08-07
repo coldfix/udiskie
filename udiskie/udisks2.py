@@ -399,6 +399,24 @@ class Device(object):
         return self._I.Block.property.HintIgnore
 
     @property
+    def device_id(self):
+        """
+        Return a unique and persistent identifier for the device.
+
+        This is the basename (last path component) of the symlink in
+        `/dev/disk/by-id/`.
+        """
+        if self.is_block:
+            for filename in self._I.Block.property.Symlinks:
+                parts = decode(filename).split('/')
+                print(parts)
+                if parts[-2] == 'by-id':
+                    return parts[-1]
+        elif self.is_drive:
+            return decode(self._assocdrive._I.Drive.property.Id)
+        return ''
+
+    @property
     def id_type(self):
         """"
         Return IdType property.
