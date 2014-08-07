@@ -409,7 +409,6 @@ class Device(object):
         if self.is_block:
             for filename in self._I.Block.property.Symlinks:
                 parts = decode(filename).split('/')
-                print(parts)
                 if parts[-2] == 'by-id':
                     return parts[-1]
         elif self.is_drive:
