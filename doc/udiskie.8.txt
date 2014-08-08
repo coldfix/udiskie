@@ -197,7 +197,8 @@ notifications:
   device_locked: -1
   job_failed: -1
 
-icon_names:                 # customize tray/menu icons:
+# customize tray/menu icons, the first existing icon is used
+icon_names:
   media: [drive-removable-media, media-optical]
   browse: [document-open, folder-open]
   mount: [udiskie-mount]
