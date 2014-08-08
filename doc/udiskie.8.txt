@@ -133,13 +133,13 @@ Dependencies
 ------------
 
 *UDisks1* or *UDisks2*::
-	backend service required for all operation modes.
+	Backend service required for all operation modes.
 
 *PyGObject*::
 	Python binding for GTK3+.
 
 *PyYAML*::
-	to read the config file
+	To read the config file
 
 *docopt*::
 	Pythonic command line arguments parser, that will make you smile
@@ -188,12 +188,12 @@ ignore_device:              # the first matching entry is used:
   ignore: false             # never ignore this device
 
 notifications:
-  timeout: 1.5              # Default timeout in seconds
+  timeout: 1.5              # default timeout in seconds
   device_mounted: 5         # overwrite
   device_unmounted: false   # disable
   device_added: false
   device_removed: false
-  device_unlocked: -1       # Use the libnotify default timeout
+  device_unlocked: -1       # use the libnotify default timeout
   device_locked: -1
   job_failed: -1
 
