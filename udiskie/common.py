@@ -5,11 +5,13 @@ Common DBus utilities.
 import os.path
 
 
-__all__ = ['wraps'
-           'Emitter',
-           'samefile',
-           'setdefault',
-           'extend']
+__all__ = [
+    'wraps',
+    'Emitter',
+    'samefile',
+    'setdefault',
+    'extend',
+]
 
 
 try:

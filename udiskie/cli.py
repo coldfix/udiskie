@@ -19,7 +19,11 @@ from udiskie.common import extend
 from udiskie.locale import _
 
 
-__all__ = ['Daemon', 'Mount', 'Umount']
+__all__ = [
+    'Daemon',
+    'Mount',
+    'Umount',
+]
 
 
 warnings.filterwarnings("ignore", ".*could not open display.*", Warning)

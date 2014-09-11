@@ -865,7 +865,8 @@ class Daemon(Emitter, UDisks2):
         'encrypted-unlock': 'unlock',
         'encrypted-lock': 'lock',
         'power-off-drive': 'detach',
-        'eject-media': 'eject', }
+        'eject-media': 'eject',
+    }
 
     _event_mapping = {
         'mount': 'device_mounted',
@@ -873,7 +874,8 @@ class Daemon(Emitter, UDisks2):
         'unlock': 'device_unlocked',
         'lock': 'device_locked',
         'eject': 'media_removed',
-        'detach': 'device_removed'}
+        'detach': 'device_removed',
+    }
 
     _check_success = {
         'mount': lambda dev: dev.is_mounted,
@@ -881,7 +883,7 @@ class Daemon(Emitter, UDisks2):
         'unlock': lambda dev: dev.is_unlocked,
         'lock': lambda dev: not dev or not dev.is_unlocked,
         'detach': lambda dev: not dev,
-        'eject': lambda dev: not dev or not dev.has_media
+        'eject': lambda dev: not dev or not dev.has_media,
     }
 
     def _job_completed(self, job_name, success, message):

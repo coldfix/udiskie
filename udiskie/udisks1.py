@@ -669,7 +669,8 @@ class Daemon(Emitter, UDisks):
         'LuksUnlock': 'unlock',
         'LuksLock': 'lock',
         'DriveDetach': 'detach',
-        'DriveEject': 'eject'}
+        'DriveEject': 'eject',
+    }
 
     _event_mapping = {
         'mount': 'device_mounted',
@@ -677,7 +678,8 @@ class Daemon(Emitter, UDisks):
         'unlock': 'device_unlocked',
         'lock': 'device_locked',
         'eject': 'media_removed',
-        'detach': 'device_removed'}
+        'detach': 'device_removed',
+    }
 
     _check_success = {
         'mount': lambda dev: dev.is_mounted,
@@ -685,7 +687,7 @@ class Daemon(Emitter, UDisks):
         'unlock': lambda dev: dev.is_unlocked,
         'lock': lambda dev: not dev or not dev.is_unlocked,
         'detach': lambda dev: not dev,
-        'eject': lambda dev: not dev or not dev.has_media
+        'eject': lambda dev: not dev or not dev.has_media,
     }
 
     # internal state keeping
