@@ -216,27 +216,6 @@ linkman:udisks[1]
 
 http://www.freedesktop.org/wiki/Software/udisks/
 
-https://wiki.gnome.org/action/show/Projects/PyGObject
-
-https://pypi.python.org/pypi/PyYAML
-
-http://docopt.org/
-
-http://www.gnu.org/software/gettext/
-
-http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
-
-http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
-
-
-API references for development:
-
-http://udisks.freedesktop.org/docs/1.0.5/
-
-http://udisks.freedesktop.org/docs/latest/
-
-http://lazka.github.io/pgi-docs/index.html
-
 
 Contact
 -------
