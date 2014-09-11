@@ -379,9 +379,10 @@ class TrayIcon(object):
 
     def _show(self):
         """Show the tray icon."""
-        self._icon.set_visible(True)
-        self._conn_left = self._icon.connect("activate", self._left_click_event)
-        self._conn_right = self._icon.connect("popup-menu", self._right_click_event)
+        widget = self._icon
+        widget.set_visible(True)
+        self._conn_left = widget.connect("activate", self._activate)
+        self._conn_right = widget.connect("popup-menu", self._popup_menu)
 
     def _hide(self):
         """Hide the tray icon."""
@@ -395,20 +396,11 @@ class TrayIcon(object):
         """Create the context menu."""
         return self._menu()
 
-    def _left_click_event(self, icon):
+    def _activate(self, icon):
         """Handle a left click event (show the menu)."""
-        m = self.create_context_menu()
-        m.show_all()
-        m.popup(parent_menu_shell=None,
-                parent_menu_item=None,
-                func=icon.position_menu,
-                data=icon,
-                button=0,
-                activate_time=Gtk.get_current_event_time())
-        # need to store reference or menu will be destroyed before showing:
-        self._m = m
+        self._popup_menu(icon, button=0, time=Gtk.get_current_event_time())
 
-    def _right_click_event(self, icon, button, time):
+    def _popup_menu(self, icon, button, time):
         """Handle a right click event (show the menu)."""
         m = self.create_context_menu()
         m.show_all()
