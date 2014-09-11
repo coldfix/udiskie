@@ -39,25 +39,21 @@ def get_backend(clsname, version=None):
     If ``version`` has a false truth value, try to connect to UDisks1 and
     fall back to UDisks2 if not available.
     """
-    def udisks1():
-        import udiskie.udisks1
-        return getattr(udiskie.udisks1, clsname)()
-    def udisks2():
-        import udiskie.udisks2
-        return getattr(udiskie.udisks2, clsname)()
     if not version:
         from udiskie.dbus import DBusException
         try:
-            return udisks1()
+            return get_backend(clsname, 1)
         except DBusException:
             log = logging.getLogger(__name__)
             log.warning(_('Failed to connect UDisks1 dbus service..\n'
                           'Falling back to UDisks2 [experimental].'))
-            return udisks2()
+            return get_backend(clsname, 2)
     elif version == 1:
-        return udisks1()
+        import udiskie.udisks1
+        return getattr(udiskie.udisks1, clsname)()
     elif version == 2:
-        return udisks2()
+        import udiskie.udisks2
+        return getattr(udiskie.udisks2, clsname)()
     else:
         raise ValueError(_("UDisks version not supported: {0}!", version))
 

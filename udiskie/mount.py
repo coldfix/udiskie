@@ -39,6 +39,15 @@ def _device_method(fn):
     return wrapper
 
 
+def _is_parent_of(parent, child):
+    """Check whether the first device is the parent of the second device."""
+    if child.is_partition:
+        return child.partition_slave == parent
+    if child.is_toplevel:
+        return child.drive == parent and child != parent
+    return False
+
+
 class Mounter(object):
 
     """
@@ -249,10 +258,13 @@ class Mounter(object):
             success = self.lock(device)
         elif force and (device.is_partition_table or device.is_drive):
             success = True
-            for dev in self.get_all_handleable():
-                if ((dev.is_partition and dev.partition_slave == device) or
-                    (dev.is_toplevel and dev.drive == device and dev != device)):
-                    success = self.remove(dev, force=True, detach=detach, eject=eject, lock=lock) and success
+            for child in self.get_all_handleable():
+                if _is_parent_of(device, child):
+                    success = self.remove(child,
+                                          force=True,
+                                          detach=detach,
+                                          eject=eject,
+                                          lock=lock) and success
         else:
             self._log.info(_('not removing {0}: unhandled device', device))
             success = False

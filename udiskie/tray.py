@@ -236,29 +236,31 @@ class UdiskieMenu(object):
             self._icons.get_icon(action, Gtk.IconSize.MENU),
             lambda _: self._actions[action](*bind))
 
+    def _get_device_methods(self, device):
+        """Return an iterable over all available methods the device has."""
+        if device.is_filesystem:
+            if device.is_mounted:
+                yield 'browse'
+                yield 'unmount'
+            else:
+                yield 'mount'
+        elif device.is_crypto:
+            if device.is_unlocked:
+                yield 'lock'
+            else:
+                yield 'unlock'
+        if device.is_ejectable and device.has_media:
+            yield 'eject'
+        if device.is_detachable:
+            yield 'detach'
+
     def _device_node(self, device):
         """Create an empty menu node for the specified device."""
         label = device.id_label or device.device_presentation
         # determine available methods
-        methods = []
-        def append(method):
-            if self._actions[method]:
-                methods.append(method)
-        if device.is_filesystem:
-            if device.is_mounted:
-                append('browse')
-                append('unmount')
-            else:
-                append('mount')
-        elif device.is_crypto:
-            if device.is_unlocked:
-                append('lock')
-            else:
-                append('unlock')
-        if device.is_ejectable and device.has_media:
-            append('eject')
-        if device.is_detachable:
-            append('detach')
+        methods = [method
+                   for method in self._get_device_methods(device)
+                   if self._actions[method]]
         # find the root device:
         if device.is_partition:
             root = device.partition_slave.object_path
