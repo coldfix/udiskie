@@ -12,13 +12,12 @@ udisks1 module.
 
 from copy import copy, deepcopy
 import logging
-import os.path
 
 from gi.repository import GLib
 
 from udiskie.common import Emitter, samefile
 from udiskie.compat import filter
-from udiskie.dbus import DBusProxy, DBusException, DBusService
+from udiskie.dbus import DBusException, DBusService
 from udiskie.locale import _
 
 __all__ = ['Sniffer', 'Daemon']
@@ -37,35 +36,36 @@ def object_kind(object_path):
 
 def filter_opt(opt):
     """Remove ``None`` values from a dictionary."""
-    return {k: GLib.Variant(*v) for k,v in opt.items() if v[1] is not None}
+    return {k: GLib.Variant(*v) for k, v in opt.items() if v[1] is not None}
 
 
-Interface = dict(
-    Manager        = 'org.freedesktop.UDisks2.Manager',
-    Drive          = 'org.freedesktop.UDisks2.Drive',
-    DriveAta       = 'org.freedesktop.UDisks2.Drive.Ata',
-    MDRaid         = 'org.freedesktop.UDisks2.MDRaid',
-    Block          = 'org.freedesktop.UDisks2.Block',
-    Partition      = 'org.freedesktop.UDisks2.Partition',
-    PartitionTable = 'org.freedesktop.UDisks2.PartitionTable',
-    Filesystem     = 'org.freedesktop.UDisks2.Filesystem',
-    Swapspace      = 'org.freedesktop.UDisks2.Swapspace',
-    Encrypted      = 'org.freedesktop.UDisks2.Encrypted',
-    Loop           = 'org.freedesktop.UDisks2.Loop',
-    Job            = 'org.freedesktop.UDisks2.Job',
-    ObjectManager  = 'org.freedesktop.DBus.ObjectManager',
-    Properties     = 'org.freedesktop.DBus.Properties',
-)
+Interface = {
+    'Manager':          'org.freedesktop.UDisks2.Manager',
+    'Drive':            'org.freedesktop.UDisks2.Drive',
+    'DriveAta':         'org.freedesktop.UDisks2.Drive.Ata',
+    'MDRaid':           'org.freedesktop.UDisks2.MDRaid',
+    'Block':            'org.freedesktop.UDisks2.Block',
+    'Partition':        'org.freedesktop.UDisks2.Partition',
+    'PartitionTable':   'org.freedesktop.UDisks2.PartitionTable',
+    'Filesystem':       'org.freedesktop.UDisks2.Filesystem',
+    'Swapspace':        'org.freedesktop.UDisks2.Swapspace',
+    'Encrypted':        'org.freedesktop.UDisks2.Encrypted',
+    'Loop':             'org.freedesktop.UDisks2.Loop',
+    'Job':              'org.freedesktop.UDisks2.Job',
+    'ObjectManager':    'org.freedesktop.DBus.ObjectManager',
+    'Properties':       'org.freedesktop.DBus.Properties',
+}
 
 
-#----------------------------------------
+# ----------------------------------------
 # byte array to string conversion
-#----------------------------------------
+# ----------------------------------------
 
 try:
     unicode
 except NameError:
     unicode = str
+
 
 def decode(ay):
     """Convert data from DBus queries to strings."""
@@ -75,8 +75,10 @@ def decode(ay):
         return ay
     elif isinstance(ay, bytes):
         return ay.decode('utf-8')
-    else: # dbus.Array([dbus.Byte]) or any similar sequence type:
+    else:
+        # dbus.Array([dbus.Byte]) or any similar sequence type:
         return bytearray(ay).rstrip(bytearray((0,))).decode('utf-8')
+
 
 def encode(s):
     """Convert data from DBus queries to strings."""
@@ -88,9 +90,9 @@ def encode(s):
         return s
 
 
-#----------------------------------------
+# ----------------------------------------
 # Internal helper classes
-#----------------------------------------
+# ----------------------------------------
 
 class AttrDictView(object):
 
@@ -219,9 +221,9 @@ class NullProxy(object):
                              self._name, self.object_path))
 
 
-#----------------------------------------
+# ----------------------------------------
 # Device wrapper
-#----------------------------------------
+# ----------------------------------------
 
 class Device(object):
 
@@ -309,9 +311,9 @@ class Device(object):
         """Check if the device is a LUKS container."""
         return bool(self._I.Encrypted)
 
-    #----------------------------------------
+    # ----------------------------------------
     # Drive
-    #----------------------------------------
+    # ----------------------------------------
 
     # Drive properties
     @property
@@ -363,9 +365,9 @@ class Device(object):
             })
         )
 
-    #----------------------------------------
+    # ----------------------------------------
     # Block
-    #----------------------------------------
+    # ----------------------------------------
 
     # Block properties
     @property
@@ -450,15 +452,19 @@ class Device(object):
     @property
     def is_external(self):
         """Check if the device is external."""
+        # NOTE: Checking for equality HintSystem==False returns False if the
+        # property is resolved to a None value (interface not available).
+        if self._I.Block.property.HintSystem == False:
+            return True
         # NOTE: udisks2 seems to guess incorrectly in some cases. This
         # leads to HintSystem=True for unlocked devices. In order to show
         # the device anyway, it needs to be recursively checked if any
         # parent device is recognized as external.
-        # NOTE: Checking for equality HintSystem==False returns False if the
-        # property is resolved to a None value (interface not available).
-        return (self._I.Block.property.HintSystem  == False or
-                (self.is_luks_cleartext and self.luks_cleartext_slave.is_external) or
-                (self.is_partition and self.partition_slave.is_external))
+        if self.is_luks_cleartext and self.luks_cleartext_slave.is_external:
+            return True
+        if self.is_partition and self.partition_slave.is_external:
+            return True
+        return False
 
     @property
     def is_systeminternal(self):
@@ -484,13 +490,15 @@ class Device(object):
         """
         drive = self.drive
         for device in self._udisks:
-            if not device.is_drive and device.is_toplevel and device.drive == drive:
+            if device.is_drive:
+                continue
+            if device.is_toplevel and device.drive == drive:
                 return device
         return None
 
-    #----------------------------------------
+    # ----------------------------------------
     # Partition
-    #----------------------------------------
+    # ----------------------------------------
 
     # Partition properties
     @property
@@ -498,9 +506,9 @@ class Device(object):
         """Get the partition slave (container)."""
         return self._udisks[self._I.Partition.property.Table]
 
-    #----------------------------------------
+    # ----------------------------------------
     # Filesystem
-    #----------------------------------------
+    # ----------------------------------------
 
     # Filesystem properties
     @property
@@ -538,9 +546,9 @@ class Device(object):
             })
         )
 
-    #----------------------------------------
+    # ----------------------------------------
     # Encrypted
-    #----------------------------------------
+    # ----------------------------------------
 
     # Encrypted properties
     @property
@@ -582,9 +590,9 @@ class Device(object):
             })
         )
 
-    #----------------------------------------
+    # ----------------------------------------
     # derived properties
-    #----------------------------------------
+    # ----------------------------------------
 
     @property
     def in_use(self):
@@ -598,9 +606,9 @@ class Device(object):
         return False
 
 
-#----------------------------------------
+# ----------------------------------------
 # UDisks2 service wrapper
-#----------------------------------------
+# ----------------------------------------
 
 class UDisks2(DBusService):
 
@@ -662,9 +670,9 @@ class Sniffer(UDisks2):
         return self._proxy.method.GetManagedObjects().keys()
 
     def _is_valid_object_path(self, object_path):
-        return (object_path and
-                object_path.startswith(self.ObjectPath) and
-                object_kind(object_path))
+        return (object_path
+                and object_path.startswith(self.ObjectPath)
+                and object_kind(object_path))
 
     def get(self, object_path):
         """Create a Device instance from object path."""
@@ -838,7 +846,7 @@ class Daemon(Emitter, UDisks2):
         old_state = deepcopy(self._objects[object_path])
         for property_name in invalidated_properties:
             del self._objects[object_path][interface_name][property_name]
-        for key,value in changed_properties.items():
+        for key, value in changed_properties.items():
             self._objects[object_path][interface_name][key] = value
         new_state = self._objects[object_path]
         # detect changes and trigger events:

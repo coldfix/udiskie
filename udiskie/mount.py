@@ -338,9 +338,9 @@ class Mounter(object):
         """
         success = True
         for device in self.get_all_handleable():
-            if (device.is_filesystem or
-                device.is_crypto or
-                recursive and device.is_partition_table):
+            if (device.is_filesystem
+                    or device.is_crypto
+                    or (recursive and device.is_partition_table)):
                 success = self.add(device, recursive=recursive) and success
         return success
 
@@ -355,13 +355,13 @@ class Mounter(object):
         :rtype: bool
         """
         success = True
+        remove_args = dict(force=True, detach=detach, eject=eject, lock=lock)
         for device in self.get_all_handleable():
-            if (device.is_filesystem or 
-                device.is_crypto or
-                device.is_partition_table or
-                device.is_drive):
-                success = self.remove(device, force=True, detach=detach,
-                                      eject=eject, lock=lock) and success
+            if (device.is_filesystem
+                    or device.is_crypto
+                    or device.is_partition_table
+                    or device.is_drive):
+                success = self.remove(device, **remove_args) and success
         return success
 
     def mount_all(self):

@@ -54,8 +54,6 @@ class Notify(object):
 
         :param device: device object
         """
-        label = device.id_label
-        mount_path = device.mount_paths[0]
         browse_action = ('browse', _('Browse directory'),
                          self._mounter.browse, device)
         self._show_notification(
@@ -71,7 +69,6 @@ class Notify(object):
 
         :param device: device object
         """
-        label = device.id_label
         self._show_notification(
             'device_unmounted',
             _('Device unmounted'),
@@ -84,7 +81,6 @@ class Notify(object):
 
         :param device: device object
         """
-        device_file = device.device_presentation
         self._show_notification(
             'device_locked',
             _('Device locked'),
@@ -97,7 +93,6 @@ class Notify(object):
 
         :param device: device object
         """
-        device_file = device.device_presentation
         self._show_notification(
             'device_unlocked',
             _('Device unlocked'),

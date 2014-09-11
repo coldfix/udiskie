@@ -7,7 +7,6 @@ setuptools entry points.
 
 import inspect
 import logging
-import sys
 import warnings
 
 from docopt import docopt, DocoptExit
@@ -318,9 +317,9 @@ class Daemon(_EntryPoint):
             import udiskie.notify
             from gi.repository import Notify
             Notify.init('udiskie')
-            notify = udiskie.notify.Notify(Notify.Notification.new,
-                                           mounter=mounter,
-                                           timeout=config.notifications)
+            udiskie.notify.Notify(Notify.Notification.new,
+                                  mounter=mounter,
+                                  timeout=config.notifications)
 
         # tray icon (optional):
         if options['tray']:

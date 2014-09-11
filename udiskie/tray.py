@@ -50,7 +50,7 @@ class Icons(object):
         _icon_names = icon_names.copy()
         setdefault(_icon_names, self.__class__._icon_names)
         self._icon_names = _icon_names
-        for k,v in _icon_names.items():
+        for k, v in _icon_names.items():
             if isinstance(v, basestring):
                 self._icon_names[k] = [v]
 
@@ -309,8 +309,9 @@ class SmartUdiskieMenu(UdiskieMenu):
         :param list outer_methods: mix-in methods of root device
         :param str presentation: node label
         """
-        if not presentation or (node.device.is_mounted or
-                                not node.device.is_luks_cleartext):
+        if (not presentation
+                or node.device.is_mounted
+                or not node.device.is_luks_cleartext):
             presentation = node.label
         if node.branches:
             return chain.from_iterable(
