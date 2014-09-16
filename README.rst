@@ -165,7 +165,7 @@ Further resources:
 
 - `UDisks1 API`_
 - `UDisks2 API`_
-- `PyGObject APIs`
+- `PyGObject APIs`_
 - `Icon naming`_
 - `Icon lookup`_
 
