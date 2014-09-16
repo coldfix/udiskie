@@ -50,7 +50,7 @@ class Icons(object):
         _icon_names = icon_names.copy()
         setdefault(_icon_names, self.__class__._icon_names)
         self._icon_names = _icon_names
-        for k,v in _icon_names.items():
+        for k, v in _icon_names.items():
             if isinstance(v, basestring):
                 self._icon_names[k] = [v]
 
@@ -236,29 +236,31 @@ class UdiskieMenu(object):
             self._icons.get_icon(action, Gtk.IconSize.MENU),
             lambda _: self._actions[action](*bind))
 
+    def _get_device_methods(self, device):
+        """Return an iterable over all available methods the device has."""
+        if device.is_filesystem:
+            if device.is_mounted:
+                yield 'browse'
+                yield 'unmount'
+            else:
+                yield 'mount'
+        elif device.is_crypto:
+            if device.is_unlocked:
+                yield 'lock'
+            else:
+                yield 'unlock'
+        if device.is_ejectable and device.has_media:
+            yield 'eject'
+        if device.is_detachable:
+            yield 'detach'
+
     def _device_node(self, device):
         """Create an empty menu node for the specified device."""
         label = device.id_label or device.device_presentation
         # determine available methods
-        methods = []
-        def append(method):
-            if self._actions[method]:
-                methods.append(method)
-        if device.is_filesystem:
-            if device.is_mounted:
-                append('browse')
-                append('unmount')
-            else:
-                append('mount')
-        elif device.is_crypto:
-            if device.is_unlocked:
-                append('lock')
-            else:
-                append('unlock')
-        if device.is_ejectable and device.has_media:
-            append('eject')
-        if device.is_detachable:
-            append('detach')
+        methods = [method
+                   for method in self._get_device_methods(device)
+                   if self._actions[method]]
         # find the root device:
         if device.is_partition:
             root = device.partition_slave.object_path
@@ -307,8 +309,9 @@ class SmartUdiskieMenu(UdiskieMenu):
         :param list outer_methods: mix-in methods of root device
         :param str presentation: node label
         """
-        if not presentation or (node.device.is_mounted or
-                                not node.device.is_luks_cleartext):
+        if (not presentation
+                or node.device.is_mounted
+                or not node.device.is_luks_cleartext):
             presentation = node.label
         if node.branches:
             return chain.from_iterable(
@@ -377,9 +380,10 @@ class TrayIcon(object):
 
     def _show(self):
         """Show the tray icon."""
-        self._icon.set_visible(True)
-        self._conn_left = self._icon.connect("activate", self._left_click_event)
-        self._conn_right = self._icon.connect("popup-menu", self._right_click_event)
+        widget = self._icon
+        widget.set_visible(True)
+        self._conn_left = widget.connect("activate", self._activate)
+        self._conn_right = widget.connect("popup-menu", self._popup_menu)
 
     def _hide(self):
         """Hide the tray icon."""
@@ -393,20 +397,11 @@ class TrayIcon(object):
         """Create the context menu."""
         return self._menu()
 
-    def _left_click_event(self, icon):
+    def _activate(self, icon):
         """Handle a left click event (show the menu)."""
-        m = self.create_context_menu()
-        m.show_all()
-        m.popup(parent_menu_shell=None,
-                parent_menu_item=None,
-                func=icon.position_menu,
-                data=icon,
-                button=0,
-                activate_time=Gtk.get_current_event_time())
-        # need to store reference or menu will be destroyed before showing:
-        self._m = m
+        self._popup_menu(icon, button=0, time=Gtk.get_current_event_time())
 
-    def _right_click_event(self, icon, button, time):
+    def _popup_menu(self, icon, button, time):
         """Handle a right click event (show the menu)."""
         m = self.create_context_menu()
         m.show_all()

@@ -5,11 +5,13 @@ Common DBus utilities.
 import os.path
 
 
-__all__ = ['wraps'
-           'Emitter',
-           'samefile',
-           'setdefault',
-           'extend']
+__all__ = [
+    'wraps',
+    'Emitter',
+    'samefile',
+    'setdefault',
+    'extend',
+]
 
 
 try:
@@ -101,7 +103,7 @@ def setdefault(self, other):
     :param dict self: updated dict
     :param dict other: default values to be inserted
     """
-    for k,v in other.items():
+    for k, v in other.items():
         self.setdefault(k, v)
 
 

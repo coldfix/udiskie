@@ -25,7 +25,7 @@ import os.path
 
 from udiskie.common import Emitter, samefile
 from udiskie.compat import filter
-from udiskie.dbus import DBusProxy, DBusService, DBusException
+from udiskie.dbus import DBusService, DBusException
 from udiskie.locale import _
 
 
@@ -34,7 +34,7 @@ __all__ = ['Sniffer', 'Daemon']
 
 def filter_opt(opt):
     """Remove ``None`` values from a dictionary."""
-    return [k for k,v in opt.items() if v]
+    return [k for k, v in opt.items() if v]
 
 
 class DeviceBase(object):
@@ -132,9 +132,9 @@ class OnlineDevice(DeviceBase):
         """Check if the device is a LUKS container."""
         return self._proxy.property.DeviceIsLuks
 
-    #----------------------------------------
+    # ----------------------------------------
     # Drive
-    #----------------------------------------
+    # ----------------------------------------
 
     # Drive properties
     is_toplevel = is_drive
@@ -142,12 +142,16 @@ class OnlineDevice(DeviceBase):
     @property
     def is_detachable(self):
         """Check if the drive that owns this device can be detached."""
-        return self._proxy.property.DriveCanDetach if self.is_drive else None
+        if not self.is_drive:
+            return None
+        return self._proxy.property.DriveCanDetach
 
     @property
     def is_ejectable(self):
         """Check if the drive that owns this device can be ejected."""
-        return self._proxy.property.DriveIsMediaEjectable if self.is_drive else None
+        if not self.is_drive:
+            return None
+        return self._proxy.property.DriveIsMediaEjectable
 
     @property
     def has_media(self):
@@ -165,9 +169,9 @@ class OnlineDevice(DeviceBase):
         """Detach the device by e.g. powering down the physical port."""
         return self._proxy.method.DriveDetach('(as)', [])
 
-    #----------------------------------------
+    # ----------------------------------------
     # Block
-    #----------------------------------------
+    # ----------------------------------------
 
     # Block properties
     @property
@@ -236,7 +240,9 @@ class OnlineDevice(DeviceBase):
     @property
     def luks_cleartext_slave(self):
         """Get luks crypto device."""
-        return self.udisks[self._proxy.property.LuksCleartextSlave] if self.is_luks_cleartext else None
+        if not self.is_luks_cleartext:
+            return None
+        return self.udisks[self._proxy.property.LuksCleartextSlave]
 
     @property
     def is_luks_cleartext(self):
@@ -269,19 +275,21 @@ class OnlineDevice(DeviceBase):
 
     root = drive
 
-    #----------------------------------------
+    # ----------------------------------------
     # Partition
-    #----------------------------------------
+    # ----------------------------------------
 
     # Partition properties
     @property
     def partition_slave(self):
         """Get the partition slave (container)."""
-        return self.udisks[self._proxy.property.PartitionSlave] if self.is_partition else None
+        if not self.is_partition:
+            return None
+        return self.udisks[self._proxy.property.PartitionSlave]
 
-    #----------------------------------------
+    # ----------------------------------------
     # Filesystem
-    #----------------------------------------
+    # ----------------------------------------
 
     # Filesystem properties
     @property
@@ -317,20 +325,24 @@ class OnlineDevice(DeviceBase):
             '(as)',
             filter_opt({'force': force}))
 
-    #----------------------------------------
+    # ----------------------------------------
     # Encrypted
-    #----------------------------------------
+    # ----------------------------------------
 
     # Encrypted properties
     @property
     def luks_cleartext_holder(self):
         """Get unlocked luks cleartext device."""
-        return self.udisks[self._proxy.property.LuksHolder] if self.is_luks else None
+        if not self.is_luks:
+            return None
+        return self.udisks[self._proxy.property.LuksHolder]
 
     @property
     def is_unlocked(self):
         """Check if device is already unlocked."""
-        return self.luks_cleartext_holder if self.is_luks else None
+        if not self.is_luks:
+            return None
+        return self.luks_cleartext_holder
 
     # Encrypted methods
     def unlock(self, password):
@@ -345,9 +357,9 @@ class OnlineDevice(DeviceBase):
         """Lock Luks device."""
         return self._proxy.method.LuksLock('(as)', [])
 
-    #----------------------------------------
+    # ----------------------------------------
     # derived properties
-    #----------------------------------------
+    # ----------------------------------------
 
     @property
     def in_use(self):
@@ -363,7 +375,7 @@ class OnlineDevice(DeviceBase):
 
 def _CachedDeviceProperty(method):
     """Cache object path and return the current known CachedDevice state."""
-    key = '_'+method.__name__
+    key = '_' + method.__name__
     def get(self):
         return self._daemon[getattr(self, key, None)]
     def set(self, device):
@@ -386,7 +398,7 @@ class CachedDevice(DeviceBase):
         self._daemon = device.udisks
         def isproperty(obj):
             return isinstance(obj, property)
-        for key,val in getmembers(device.__class__, isproperty):
+        for key, val in getmembers(device.__class__, isproperty):
             try:
                 setattr(self, key, getattr(device, key))
             except device.Exception:
@@ -555,7 +567,7 @@ class Daemon(Emitter, UDisks):
     def paths(self):
         """Iterate over all valid cached devices."""
         return (object_path
-                for object_path,device in self._devices.items()
+                for object_path, device in self._devices.items()
                 if device)
 
     def get(self, object_path):
@@ -660,7 +672,8 @@ class Daemon(Emitter, UDisks):
                 message = self._errors[action].pop(object_path, "")
                 self.trigger('job_failed', device, action, message)
                 log = logging.getLogger(__name__)
-                log.info(_('{0} operation failed for device: {1}', job_id, object_path))
+                log.info(_('{0} operation failed for device: {1}',
+                           job_id, object_path))
 
     # used internally by _device_job_changed:
     _action_mapping = {
@@ -669,7 +682,8 @@ class Daemon(Emitter, UDisks):
         'LuksUnlock': 'unlock',
         'LuksLock': 'lock',
         'DriveDetach': 'detach',
-        'DriveEject': 'eject'}
+        'DriveEject': 'eject',
+    }
 
     _event_mapping = {
         'mount': 'device_mounted',
@@ -677,7 +691,8 @@ class Daemon(Emitter, UDisks):
         'unlock': 'device_unlocked',
         'lock': 'device_locked',
         'eject': 'media_removed',
-        'detach': 'device_removed'}
+        'detach': 'device_removed',
+    }
 
     _check_success = {
         'mount': lambda dev: dev.is_mounted,
@@ -685,16 +700,17 @@ class Daemon(Emitter, UDisks):
         'unlock': lambda dev: dev.is_unlocked,
         'lock': lambda dev: not dev or not dev.is_unlocked,
         'detach': lambda dev: not dev,
-        'eject': lambda dev: not dev or not dev.has_media
+        'eject': lambda dev: not dev or not dev.has_media,
     }
 
     # internal state keeping
     def _sync(self):
         """Cache all device states."""
-        online_devices = { dev.object_path: dev for dev in self._sniffer }
+        online_devices = {dev.object_path: dev for dev in self._sniffer}
         self._devices = {
             object_path: CachedDevice(device)
-            for object_path,device in online_devices.items() }
+            for object_path, device in online_devices.items()
+        }
 
     def _invalidate(self, object_path):
         """Flag the device invalid. This removes it from the iteration."""

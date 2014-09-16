@@ -124,22 +124,26 @@ def get_password_tty(device):
 
 
 def password(hint_gui):
+
     """
     Create a password prompt function.
 
     :param bool hint_gui: whether a GUI input dialog should be preferred
     """
+
     def gui():
         try:
             require_Gtk()
             return get_password_gui
         except RuntimeError:
             return None
+
     def tty():
         if sys.stdin.isatty():
             return get_password_tty
         else:
             return None
+
     if hint_gui:
         return gui() or tty()
     else:
@@ -147,6 +151,7 @@ def password(hint_gui):
 
 
 def browser(browser_name='xdg-open'):
+
     """
     Create a browse-directory function.
 
@@ -154,6 +159,7 @@ def browser(browser_name='xdg-open'):
     :returns: one-parameter open function
     :rtype: callable
     """
+
     if not browser_name:
         return None
     executable = find_executable(browser_name)
@@ -165,6 +171,8 @@ def browser(browser_name='xdg-open'):
               "You may want to change the value for the '-b' option.",
               browser_name))
         return None
+
     def browse(path):
         return subprocess.Popen([executable, path])
+
     return browse

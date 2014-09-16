@@ -5,7 +5,7 @@ I18n utilities.
 import gettext
 
 
-__all__ = ['MessageFilter', '_']
+__all__ = ['_']
 
 
 class Translator(object):

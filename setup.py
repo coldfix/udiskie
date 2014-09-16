@@ -12,6 +12,7 @@ from glob import glob
 
 import udiskie
 
+
 # check availability of runtime dependencies
 def check_dependency(package):
     """Issue a warning if the package is not available."""
@@ -69,7 +70,8 @@ class build_mo(Command):
     def run(self):
         for po_filename in glob(path.join(po_source_folder, '*.po')):
             lang = path.splitext(path.split(po_filename)[1])[0]
-            mo_filename = path.join(mo_build_prefix, lang, 'LC_MESSAGES', 'udiskie.mo')
+            mo_filename = path.join(mo_build_prefix, lang,
+                                    'LC_MESSAGES', 'udiskie.mo')
             self.mkpath(path.dirname(mo_filename))
             self.make_file(
                 po_filename,
