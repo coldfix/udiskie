@@ -129,22 +129,6 @@ Unmount options
 	Don't lock device.
 
 
-Dependencies
-------------
-
-*UDisks1* or *UDisks2*::
-	Backend service required for all operation modes.
-
-*PyGObject*::
-	Python binding for GTK3+.
-
-*PyYAML*::
-	To read the config file
-
-*docopt*::
-	Pythonic command line arguments parser, that will make you smile
-
-
 Example Usage[[EU]]
 -------------------
 Start *udiskie* in '~/.xinitrc':
