@@ -7,7 +7,7 @@ udiskie(8)
 
 Name
 ----
-udiskie - automatic disk mounting service using UDisks
+udiskie - automounter for removable media
 
 
 Synopsis
@@ -21,7 +21,7 @@ Synopsis
 
 Description
 -----------
-*udiskie* uses UDisks to automatically mount removable media, such as CDs and flash drives. It will mount the media in a new directory under '/media' or '/run/media', using the device name if available. It is lightweight and runs as a daemon.
+*udiskie* is a python front-end for UDisks. Its main purpose is automatically mounting removable media, such as CDs or flash drives. It has optional mount notifications, a GTK tray icon and user level CLIs for manual mount and unmount operations. The media will be mounted in a new directory under '/media' or '/run/media/USER/', using the device name if possible.
 
 
 Common options
@@ -45,7 +45,7 @@ Common options
 	Use UDisks1 as DBus backend.
 
 *-2, \--use-udisks2*::
-	Use UDisks2 as DBus backend (experimental).
+	Use UDisks2 as DBus backend.
 
 *-c FILE, \--config=FILE*::
     Specify config file.
@@ -150,9 +150,11 @@ Mount '/dev/sdb1':
 
 Configuration
 -------------
-The file 'config.yml' in '$XDG_CONFIG_HOME/udiskie' or '~/.config/udiskie' can be used to configure defaults for some command line parameters and customize ignore-rules for devices. The following example demonstrates the usage of the configuration file:
+The file '.config/udiskie/config.yml' can be used to configure defaults for command line parameters and customize further settings. The actual path may differ depending on '$XDG_CONFIG_HOME'. The file format is YAML, see http://en.wikipedia.org/wiki/YAML. If you don't want to install PyYAML, it is possible to use an equivalent JSON file with the name 'config.json' instead.
 
 ----------------------------------------------------------------------
+# This is an example (nonsense) configuration file for udiskie.
+
 program_options:
   udisks_version: 2         # 1, 2
   tray: auto                # auto, true, false
@@ -193,6 +195,10 @@ icon_names:
   detach: [udiskie-detach]
   quit: [application-exit]
 ----------------------------------------------------------------------
+
+All keys are optional. Reasonable defaults are used if you leave them
+unspecified.
+
 
 See Also
 --------

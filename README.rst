@@ -4,10 +4,11 @@ udiskie
 
 |Version| |Downloads| |License|
 
-*udiskie* is a simple daemon that uses UDisks_ to automatically mount
-removable storage devices. This daemon comes with optional mount
-notifications and GTK tray icon. It also provides a user level CLI for
-mount and unmount operations.
+*udiskie* is a python front-end for UDisks. Its main purpose is
+automatically mounting removable media, such as CDs or flash drives. It has
+optional mount notifications, a GTK tray icon and user level CLIs for manual
+mount and unmount operations. The media will be mounted in a new directory
+under ``/media`` or ``/run/media/USER/``, using the device name if possible.
 
 
 Usage
@@ -71,7 +72,7 @@ you have to enable introspection when building the corresponding packages.
 - Gtk-2.0
 - Notify-0.7
 
-Some of these dependencies are best installed from your distribution's
+Most of these dependencies are best installed from your distribution's
 package repositories.
 
 .. _setuptools: https://pypi.python.org/pypi/setuptools/
@@ -95,12 +96,12 @@ file ``/etc/polkit-1/rules.d/50-udiskie.rules`` with the following contents:
     polkit.addRule(function(action, subject) {
       var YES = polkit.Result.YES;
       var permission = {
-        // only required for udisks1:
+        // required for udisks1:
         "org.freedesktop.udisks.filesystem-mount": YES,
         "org.freedesktop.udisks.luks-unlock": YES,
         "org.freedesktop.udisks.drive-eject": YES,
         "org.freedesktop.udisks.drive-detach": YES,
-        // only required for udisks2:
+        // required for udisks2:
         "org.freedesktop.udisks2.filesystem-mount": YES,
         "org.freedesktop.udisks2.encrypted-unlock": YES,
         "org.freedesktop.udisks2.eject-media": YES,
