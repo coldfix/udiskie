@@ -40,41 +40,60 @@ See the man page for further instructions
 Installation
 ------------
 
-If not installing *udiskie* via your distribution's repositories, you should
-use pip:
+0. benefit from others' work
 
-.. code-block:: bash
+   - *udiskie* may be in your distribution's official repositories
+   - check out the wiki_ for guidance
 
-    # from PyPI:
-    pip install udiskie
+   If neither of this helps, here are some general hints:
 
-    # from a local checkout:
-    pip install .
+1. install dependencies:
 
-Before doing this, however, take care to install all needed dependencies:
+   Required:
 
-- setuptools_
-- UDisks_ (either UDisks1 or UDisks2 is fine)
-- PyGObject_ (GTK3+)
-- PyYAML_ (can automatically be installed by pip)
-- docopt_ (can automatically be installed by pip)
-- gettext_ (optional)
-- libnotify and a notification daemon (optional)
+   - setuptools_
+   - PyGObject_
+   - UDisks_ (UDisks1 or UDisks2)
+   - GTK2 or GTK3 (+introspection)
+   - docopt_ (can automatically be installed by pip)
 
-Access to system resources is implemented using PyGObject_. Therefore, some
-typelibs need to be installed in ``/usr/lib/girepository-1.0/``. For this,
-you have to enable introspection when building the corresponding packages.
-*udiskie* is tested with the following versions:
+   Optional:
 
-- Gio-2.0
-- GLib-2.0
-- GObject-2.0
-- Gtk-2.0
-- Notify-0.7
+   - libnotify (+introspection)
+   - the notification daemon of your choice
+   - gettext_ to build translation files (during setup step)
+   - PyYAML_ for config file (can automatically be installed by pip)
 
-Most of these dependencies are best installed from your distribution's
-package repositories.
+   Access to system resources is mediated using PyGObject_, which is why some
+   packages need to be built with *+introspection*. Check the contents of the
+   folder ``/usr/lib/girepository-1.0/`` (or similar). There should be the
+   following typelibs:
 
+   - Gio-2.0
+   - GLib-2.0
+   - GObject-2.0
+   - Gtk-3.0
+   - Notify-0.7
+
+   If you installed the above dependencies, but some of the typelibs are
+   missing they might be distributed in separate packages. Note that the
+   version numbers just indicate what udiskie is tested with, but it may
+   work with other versions as well.
+
+2. use pip to download and install *udiskie* itself:
+
+   .. code-block:: bash
+
+       # from PyPI:
+       pip install udiskie
+
+       # from a local checkout:
+       pip install .
+
+3. go back to the wiki_ and edit. ;)
+
+
+.. _wiki: https://github.com/coldfix/udiskie/wiki
 .. _setuptools: https://pypi.python.org/pypi/setuptools/
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
 .. _PyGObject: https://wiki.gnome.org/Projects/PyGObject
