@@ -4,7 +4,7 @@ udiskie
 
 |Version| |Downloads| |License|
 
-*udiskie* is a python front-end for UDisks. Its main purpose is
+*udiskie* is a front-end for UDisks written in python. Its main purpose is
 automatically mounting removable media, such as CDs or flash drives. It has
 optional mount notifications, a GTK tray icon and user level CLIs for manual
 mount and unmount operations. The media will be mounted in a new directory
