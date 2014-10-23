@@ -123,7 +123,7 @@ class OfflineProxy(object):
         """
         Initialize wrapper.
 
-        :param DBusObject proxy: for dynamic property/method lookup
+        :param dbus.ObjectProxy proxy: for dynamic property/method lookup
         :param dict data: for static property lookup
         """
         self.property = AttrDictView(data)
@@ -176,7 +176,7 @@ class OnlineInterfaceService(object):
         """
         Store DBus proxy.
 
-        :param DBusObject object: DBus object for online access
+        :param dbus.ObjectProxy object: DBus object for online access
         """
         self._proxy = proxy
         properties = proxy.get_interface(Interface['Properties'])
@@ -674,7 +674,7 @@ class Sniffer(UDisks2):
         Initialize an instance with the given DBus proxy object.
 
         :param dbus.Bus bus: connection to system bus
-        :param common.DBusProxy proxy: proxy to udisks object
+        :param dbus.InterfaceProxy proxy: proxy to udisks object
         """
         self._proxy = proxy or self.connect_service()
         # Make sure the proxy object is loaded and usable:

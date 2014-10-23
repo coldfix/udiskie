@@ -8,10 +8,10 @@ from gi.repository import Gio
 from gi.repository import GLib
 
 
-__all__ = ['DBusProperties',
-           'DBusProxy',
-           'DBusObject',
-           'DBusBus',
+__all__ = ['PropertiesProxy',
+           'InterfaceProxy',
+           'ObjectProxy',
+           'BusProxy',
            'DBusService',
            'DBusException']
 
@@ -19,39 +19,34 @@ __all__ = ['DBusProperties',
 DBusException = GLib.GError
 
 
-class DBusProperties(object):
+class PropertiesProxy(object):
 
     """
-    Dbus property map abstraction.
-
-    Wraps properties of a DBus interface on a DBus object as attributes.
-
-    :ivar Gio.DBusProxy __proxy: proxy for the DBus.Properties interface
-    :ivar str __interface: inspected interface name
+    Resolve attribute accesses by querying properties of a DBus object.
     """
 
-    def __init__(self, object, name):
+    def __init__(self, dbus_object, interface_name):
         """
-        Initialize a proxy object with standard DBus property interface.
+        Initialize from a ObjectProxy and interface name.
 
-        :param Gio.DBusObject object: accessed object
-        :param str name: interface name
+        :param ObjectProxy dbus_object:
+        :param str interface_name:
         """
-        self.__proxy = object._get_interface(
-            'org.freedesktop.DBus.Properties')
-        self.__interface = name
+        properties_interface = 'org.freedesktop.DBus.Properties'
+        self.__proxy = dbus_object._get_interface(properties_interface)
+        self.__interface = interface_name
 
-    def __getattr__(self, key):
+    def __getattr__(self, property_name):
         """
         Retrieve the property via the DBus proxy.
 
-        :param str key: name of the dbus property
+        :param str property_name: name of the dbus property
         :returns: the property value
         """
-        return self.__proxy.Get('(ss)', self.__interface, key)
+        return self.__proxy.Get('(ss)', self.__interface, property_name)
 
 
-class DBusProxy(object):
+class InterfaceProxy(object):
 
     """
     DBus proxy object for a specific interface.
@@ -60,7 +55,7 @@ class DBusProxy(object):
     interface on a DBus object.
 
     :ivar str object_path: object path of the DBus object
-    :ivar DBusProperties property: attribute access to DBus properties
+    :ivar PropertiesProxy property: attribute access to DBus properties
     :ivar Gio.DBusProxy method: attribute access to DBus methods
     :ivar Gio.DBusProxy _proxy: underlying proxy object
     """
@@ -76,8 +71,8 @@ class DBusProxy(object):
         """
         self._proxy = proxy
         self.object_path = proxy.get_object_path()
-        self.property = DBusProperties(self.object,
-                                       proxy.get_interface_name())
+        self.property = PropertiesProxy(self.object,
+                                        proxy.get_interface_name())
         self.method = proxy
 
     @property
@@ -85,12 +80,12 @@ class DBusProxy(object):
         """
         Get a proxy for the underlying object.
 
-        :rtype: DBusObject
+        :rtype: ObjectProxy
         """
         proxy = self._proxy
-        return DBusObject(proxy.get_connection(),
-                          proxy.get_name(),
-                          proxy.get_object_path())
+        return ObjectProxy(proxy.get_connection(),
+                           proxy.get_name(),
+                           proxy.get_object_path())
 
     def connect(self, event, handler):
         """
@@ -105,7 +100,7 @@ class DBusProxy(object):
         return self.object.connect(interface, event, handler)
 
 
-class DBusObject(object):
+class ObjectProxy(object):
 
     """
     Simple proxy class for a DBus object.
@@ -153,18 +148,18 @@ class DBusObject(object):
 
         :param str name: interface name
         :returns: a proxy object for the other interface
-        :rtype: DBusProxy
+        :rtype: InterfaceProxy
         """
-        return DBusProxy(self._get_interface(name))
+        return InterfaceProxy(self._get_interface(name))
 
     @property
     def bus(self):
         """
         Get a proxy object for the underlying bus.
 
-        :rtype: DBusBus
+        :rtype: BusProxy
         """
-        return DBusBus(self.connection, self.bus_name)
+        return BusProxy(self.connection, self.bus_name)
 
     def connect(self, interface, event, handler):
         """
@@ -216,7 +211,7 @@ class DBusCallbackWithObjectPath(object):
         return self._handler(object_path, *parameters.unpack())
 
 
-class DBusBus(object):
+class BusProxy(object):
 
     """
     Simple proxy class for a connected bus.
@@ -243,9 +238,9 @@ class DBusBus(object):
 
         :param str object_path: object path
         :returns: a simple representative for the object
-        :rtype: DBusObject
+        :rtype: ObjectProxy
         """
-        return DBusObject(self.connection, self.bus_name, object_path)
+        return ObjectProxy(self.connection, self.bus_name, object_path)
 
     def connect(self, interface, event, object_path, handler):
         """
@@ -290,10 +285,10 @@ class DBusService(object):
         Connect to the service object on DBus.
 
         :returns: new proxy object for the service
-        :rtype: DBusProxy
+        :rtype: InterfaceProxy
         :raises BusException: if unable to connect to service.
         """
-        return DBusProxy(Gio.DBusProxy.new_for_bus_sync(
+        return InterfaceProxy(Gio.DBusProxy.new_for_bus_sync(
             Gio.BusType.SYSTEM,
             Gio.DBusProxyFlags.NONE,
             info=None,

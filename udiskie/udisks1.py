@@ -86,7 +86,7 @@ class OnlineDevice(DeviceBase):
         """
         Initialize an instance with the given DBus proxy object.
 
-        :param DBusObject object:
+        :param dbus.ObjectProxy object:
         """
         self._proxy = object.get_interface(self.Interface)
         self.object_path = object.object_path
@@ -502,7 +502,7 @@ class Sniffer(UDisks):
         """
         Initialize an instance with the given DBus proxy object.
 
-        :param common.DBusProxy proxy: proxy to udisks object
+        :param dbus.InterfaceProxy proxy: proxy to udisks object
         """
         self._proxy = proxy or self.connect_service()
         # Make sure the proxy object is loaded and usable:
@@ -542,7 +542,7 @@ class Daemon(Emitter, UDisks):
         """
         Create a Daemon object and start listening to DBus events.
 
-        :param common.DBusProxy proxy: proxy to the dbus service object
+        :param dbus.InterfaceProxy proxy: proxy to the dbus service object
 
         A default proxy will be created if set to ``None``.
         """
