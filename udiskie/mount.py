@@ -17,6 +17,12 @@ __all__ = ['Mounter']
 
 
 def _device_method(fn):
+    """
+    Decorator for Mounter methods taking a Device as their first argument.
+
+    Enables to pass the path name as first argument and does some common error
+    handling (logging).
+    """
     @wraps(fn)
     def wrapper(self, device_or_path, *args, **kwargs):
         if isinstance(device_or_path, basestring):

@@ -123,7 +123,7 @@ class DBusObject(object):
         :ivar str bus_name:
         :ivar str object_path:
 
-        This performs IO at all.
+        This performs no IO at all.
         """
         self.connection = connection
         self.bus_name = bus_name
