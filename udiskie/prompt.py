@@ -35,7 +35,7 @@ dialog_definition = r"""
     <property name="window_position">center</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkBox">
+      <object class="GtkBox" id="entry_box">
         <property name="spacing">6</property>
         <property name="border_width">6</property>
         <child>
@@ -50,7 +50,7 @@ dialog_definition = r"""
           </object>
         </child>
         <child internal-child="action_area">
-          <object class="GtkButtonBox">
+          <object class="GtkButtonBox" id="action_box">
             <child>
               <object class="GtkButton" id="cancel_button">
                 <property name="label">gtk-cancel</property>
@@ -89,7 +89,8 @@ def password_dialog(title, message):
     :raises RuntimeError: if Gtk can not be properly initialized
     """
     require_Gtk()
-    builder = Gtk.Builder.new_from_string(dialog_definition, -1)
+    builder = Gtk.Builder.new()
+    builder.add_from_string (dialog_definition)
     dialog = builder.get_object('entry_dialog')
     label = builder.get_object('message')
     entry = builder.get_object('entry')
