@@ -54,7 +54,7 @@ Installation
    - setuptools_
    - PyGObject_
    - UDisks_ (UDisks1 or UDisks2)
-   - GTK2 or GTK3 (+introspection)
+   - GTK3 (+introspection). GTK2 also works if not using the tray icon.
    - docopt_ (can automatically be installed by pip)
 
    Optional:
