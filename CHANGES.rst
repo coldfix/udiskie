@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+1.1.3
+~~~~~
+
+- fix password prompt for GTK2 (tray is still broken for GTK2)
+- fix minor documentation issues
+
+
 1.1.2
 ~~~~~
 
