@@ -3,6 +3,7 @@ from setuptools import setup, Command
 from setuptools.command.install import install as orig_install
 from distutils.command.install_data import install_data as orig_install_data
 from distutils.command.build import build as orig_build
+from distutils.util import convert_path
 
 from subprocess import call
 import sys
@@ -38,6 +39,16 @@ try:
     long_description += '\n' + open('CHANGES.rst').read()
 except IOError:
     pass
+
+
+def exec_file(path):
+    """Execute a python file and return the `globals` dictionary."""
+    namespace = {}
+    with open(convert_path(path)) as f:
+        exec(f.read(), namespace, namespace)
+    return namespace
+
+metadata = exec_file('udiskie/__init__.py')
 
 
 # language files
@@ -131,7 +142,7 @@ class install_data(orig_install_data):
 
 setup(
     name='udiskie',
-    version=udiskie.__version__,
+    version=metadata['__version__'],
     description='Removable disk automounter for udisks',
     long_description=long_description,
     author='Byron Clark',
