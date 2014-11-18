@@ -3,6 +3,7 @@ from setuptools import setup, Command
 from setuptools.command.install import install as orig_install
 from distutils.command.install_data import install_data as orig_install_data
 from distutils.command.build import build as orig_build
+from distutils.util import convert_path
 
 from subprocess import call
 import sys
@@ -38,6 +39,16 @@ try:
     long_description += '\n' + open('CHANGES.rst').read()
 except IOError:
     pass
+
+
+def exec_file(path):
+    """Execute a python file and return the `globals` dictionary."""
+    namespace = {}
+    with open(convert_path(path)) as f:
+        exec(f.read(), namespace, namespace)
+    return namespace
+
+metadata = exec_file('udiskie/__init__.py')
 
 
 # language files
@@ -131,15 +142,15 @@ class install_data(orig_install_data):
 
 setup(
     name='udiskie',
-    version=udiskie.__version__,
-    description='Removable disk automounter for udisks',
+    version=metadata['__version__'],
+    description=metadata['__summary__'],
     long_description=long_description,
-    author='Byron Clark',
-    author_email='byron@theclarkfamily.name',
-    maintainer='Thomas Gläßle',
-    maintainer_email='t_glaessle@gmx.de',
-    url='https://github.com/coldfix/udiskie',
-    license='MIT',
+    author=metadata['__author__'],
+    author_email=metadata['__author_email__'],
+    maintainer=metadata['__maintainer__'],
+    maintainer_email=metadata['__maintainer_email__'],
+    url=metadata['__uri__'],
+    license=metadata['__license__'],
     cmdclass={
         'install': install,
         'install_data': install_data,
