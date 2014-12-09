@@ -45,12 +45,12 @@ def get_backend(clsname, version=None):
     if not version:
         from udiskie.dbus import DBusException
         try:
-            return get_backend(clsname, 1)
+            return get_backend(clsname, 2)
         except DBusException:
             log = logging.getLogger(__name__)
-            log.warning(_('Failed to connect UDisks1 dbus service..\n'
-                          'Falling back to UDisks2 [experimental].'))
-            return get_backend(clsname, 2)
+            log.warning(_('Failed to connect UDisks2 dbus service..\n'
+                          'Falling back to UDisks1.'))
+            return get_backend(clsname, 1)
     elif version == 1:
         import udiskie.udisks1
         return getattr(udiskie.udisks1, clsname)()

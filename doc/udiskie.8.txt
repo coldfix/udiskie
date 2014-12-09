@@ -39,7 +39,7 @@ Common options
 	Quiet output.
 
 *-0, \--udisks-auto*::
-	Auto discover UDisks version (default).
+	Auto discover UDisks version (default). Prefers UDisks2 if both are available.
 
 *-1, \--use-udisks1*::
 	Use UDisks1 as DBus backend.
