@@ -359,11 +359,10 @@ class OnlineDevice(DeviceBase):
     # Encrypted methods
     def unlock(self, password):
         """Unlock Luks device."""
-        return self.udisks.update(
-            self._proxy.method.LuksUnlock(
-                '(sas)',
-                password,
-                []))
+        return self._proxy.method.LuksUnlock(
+            '(sas)',
+            password,
+            [])
 
     def lock(self):
         """Lock Luks device."""

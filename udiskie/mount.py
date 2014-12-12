@@ -5,8 +5,8 @@ Mount utilities.
 from collections import namedtuple
 from functools import partial
 import logging
-import sys
 
+from udiskie.async import Coroutine, Return
 from udiskie.common import wraps, setdefault
 from udiskie.compat import filter, basestring
 from udiskie.config import IgnoreDevice, FilterMatcher
@@ -14,6 +14,15 @@ from udiskie.locale import _
 
 
 __all__ = ['Mounter']
+
+
+# TODO: add / remove / XXX_all should make proper use of the asynchronous
+# execution.
+
+
+@Coroutine.from_generator_function
+def _False():
+    yield Return(False)
 
 
 def _device_method(fn):
@@ -33,17 +42,12 @@ def _device_method(fn):
             else:
                 self._log.error(_('no device found owning "{0}"',
                                   device_or_path))
-                return False
+                return _False()
         else:
             device = device_or_path
-        try:
-            return fn(self, device, *args, **kwargs)
-        except device.Exception:
-            err = sys.exc_info()[1]
-            self._log.error(_('failed to {0} {1}: {2}',
-                              fn.__name__, device, err.message))
-            self._set_error(device, fn.__name__, err.message)
-            return False
+        async = Coroutine(fn(self, device, *args, **kwargs))
+        async.errbacks.append(partial(self._error, fn, device))
+        return async
     return wrapper
 
 
@@ -103,6 +107,11 @@ class Mounter(object):
         except AttributeError:
             self._set_error = lambda device, action, message: None
 
+    def _error(self, fn, device, err):
+        self._log.error(_('failed to {0} {1}: {2}',
+                          fn.__name__, device, err.message))
+        self._set_error(device, fn.__name__, err.message)
+
     @_device_method
     def browse(self, device):
         """
@@ -114,14 +123,14 @@ class Mounter(object):
         """
         if not device.is_mounted:
             self._log.error(_("not browsing {0}: not mounted", device))
-            return False
+            yield Return(False)
         if not self._browser:
             self._log.error(_("not browsing {0}: no program", device))
-            return False
+            yield Return(False)
         self._log.debug(_('opening {0} on {0.mount_paths[0]}', device))
         self._browser(device.mount_paths[0])
         self._log.info(_('opened {0} on {0.mount_paths[0]}', device))
-        return True
+        yield Return(True)
 
     # mount/unmount
     @_device_method
@@ -135,17 +144,17 @@ class Mounter(object):
         """
         if not self.is_handleable(device) or not device.is_filesystem:
             self._log.warn(_('not mounting {0}: unhandled device', device))
-            return False
+            yield Return(False)
         if device.is_mounted:
             self._log.info(_('not mounting {0}: already mounted', device))
-            return True
+            yield Return(True)
         fstype = str(device.id_type)
         options = self._mount_options(device)
         kwargs = dict(fstype=fstype, options=options)
         self._log.debug(_('mounting {0} with {1}', device, kwargs))
-        mount_path = device.mount(**kwargs)
+        mount_path = yield device.mount(**kwargs)
         self._log.info(_('mounted {0} on {1}', device, mount_path))
-        return True
+        yield Return(True)
 
     @_device_method
     def unmount(self, device):
@@ -158,14 +167,14 @@ class Mounter(object):
         """
         if not self.is_handleable(device) or not device.is_filesystem:
             self._log.warn(_('not unmounting {0}: unhandled device', device))
-            return False
+            yield Return(False)
         if not device.is_mounted:
             self._log.info(_('not unmounting {0}: not mounted', device))
-            return True
+            yield Return(True)
         self._log.debug(_('unmounting {0}', device))
-        device.unmount()
+        yield device.unmount()
         self._log.info(_('unmounted {0}', device))
-        return True
+        yield Return(True)
 
     # unlock/lock (LUKS)
     @_device_method
@@ -179,21 +188,21 @@ class Mounter(object):
         """
         if not self.is_handleable(device) or not device.is_crypto:
             self._log.warn(_('not unlocking {0}: unhandled device', device))
-            return False
+            yield Return(False)
         if device.is_unlocked:
             self._log.info(_('not unlocking {0}: already unlocked', device))
-            return True
+            yield Return(True)
         if not self._prompt:
             self._log.error(_('not unlocking {0}: no password prompt', device))
-            return False
+            yield Return(False)
         password = self._prompt(device)
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))
-            return False
+            yield Return(False)
         self._log.debug(_('unlocking {0}', device))
-        device.unlock(password)
+        yield device.unlock(password)
         self._log.info(_('unlocked {0}', device))
-        return True
+        yield Return(True)
 
     @_device_method
     def lock(self, device):
@@ -206,14 +215,14 @@ class Mounter(object):
         """
         if not self.is_handleable(device) or not device.is_crypto:
             self._log.warn(_('not locking {0}: unhandled device', device))
-            return False
+            yield Return(False)
         if not device.is_unlocked:
             self._log.info(_('not locking {0}: not unlocked', device))
-            return True
+            yield Return(True)
         self._log.debug(_('locking {0}', device))
-        device.lock()
+        yield device.lock()
         self._log.info(_('locked {0}', device))
-        return True
+        yield Return(True)
 
     # add/remove (unlock/lock or mount/unmount)
     @_device_method
@@ -227,22 +236,23 @@ class Mounter(object):
         :rtype: bool
         """
         if device.is_filesystem:
-            success = self.mount(device)
+            success = yield self.mount(device)
         elif device.is_crypto:
-            success = self.unlock(device)
+            success = yield self.unlock(device)
             if success and recursive:
                 # TODO: update device
-                success = self.add(device.luks_cleartext_holder,
-                                   recursive=True)
+                success = yield self.add(
+                    device.luks_cleartext_holder,
+                    recursive=True)
         elif recursive and device.is_partition_table:
             success = True
             for dev in self.get_all_handleable():
                 if dev.is_partition and dev.partition_slave == device:
-                    success = self.add(dev, recursive=True) and success
+                    success = yield self.add(dev, recursive=True) and success
         else:
             self._log.info(_('not adding {0}: unhandled device', device))
-            return False
-        return success
+            yield Return(False)
+        yield Return(success)
 
     @_device_method
     def remove(self, device, force=False, detach=False, eject=False,
@@ -259,32 +269,33 @@ class Mounter(object):
         :rtype: bool
         """
         if device.is_filesystem:
-            success = self.unmount(device)
+            success = yield self.unmount(device)
         elif device.is_crypto:
             if force and device.is_unlocked:
-                self.remove(device.luks_cleartext_holder, force=True)
-            success = self.lock(device)
+                yield self.remove(device.luks_cleartext_holder, force=True)
+            success = yield self.lock(device)
         elif force and (device.is_partition_table or device.is_drive):
             success = True
             for child in self.get_all_handleable():
                 if _is_parent_of(device, child):
-                    success = self.remove(child,
-                                          force=True,
-                                          detach=detach,
-                                          eject=eject,
-                                          lock=lock) and success
+                    success = yield self.remove(
+                        child,
+                        force=True,
+                        detach=detach,
+                        eject=eject,
+                        lock=lock) and success
         else:
             self._log.info(_('not removing {0}: unhandled device', device))
             success = False
         # if these operations work, everything is fine, we can return True:
         if lock and device.is_luks_cleartext:
             device = device.luks_cleartext_slave
-            success = self.lock(device)
+            success = yield self.lock(device)
         if eject:
-            success = self.eject(device)
+            success = yield self.eject(device)
         if detach:
-            success = self.detach(device)
-        return success
+            success = yield self.detach(device)
+        yield Return(success)
 
     # eject/detach device
     @_device_method
@@ -299,17 +310,17 @@ class Mounter(object):
         """
         if not self.is_handleable(device):
             self._log.warn(_('not ejecting {0}: unhandled device'))
-            return False
+            yield Return(False)
         drive = device.drive
         if not (drive.is_drive and drive.is_ejectable):
             self._log.warn(_('not ejecting {0}: drive not ejectable', drive))
-            return False
+            yield Return(False)
         if force:
-            self.remove(drive, force=True)
+            yield self.remove(drive, force=True)
         self._log.debug(_('ejecting {0}', device))
-        drive.eject()
+        yield drive.eject()
         self._log.info(_('ejected {0}', device))
-        return True
+        yield Return(True)
 
     @_device_method
     def detach(self, device, force=False):
@@ -323,19 +334,20 @@ class Mounter(object):
         """
         if not self.is_handleable(device):
             self._log.warn(_('not detaching {0}: unhandled device'))
-            return False
+            yield Return(False)
         drive = device.root
         if not drive.is_detachable:
             self._log.warn(_('not detaching {0}: drive not detachable', drive))
-            return False
+            yield Return(False)
         if force:
             self.remove(drive, force=True)
         self._log.debug(_('detaching {0}', device))
-        drive.detach()
+        yield drive.detach()
         self._log.info(_('detached {0}', device))
-        return True
+        yield Return(True)
 
     # mount_all/unmount_all
+    @Coroutine.from_generator_function
     def add_all(self, recursive=False):
         """
         Add all handleable devices that available at start.
@@ -349,9 +361,10 @@ class Mounter(object):
             if (device.is_filesystem
                     or device.is_crypto
                     or (recursive and device.is_partition_table)):
-                success = self.add(device, recursive=recursive) and success
-        return success
+                success = yield self.add(device, recursive=recursive) and success
+        yield Return(success)
 
+    @Coroutine.from_generator_function
     def remove_all(self, detach=False, eject=False, lock=False):
         """
         Remove all filesystems handleable by udiskie.
@@ -369,9 +382,10 @@ class Mounter(object):
                     or device.is_crypto
                     or device.is_partition_table
                     or device.is_drive):
-                success = self.remove(device, **remove_args) and success
-        return success
+                success = yield self.remove(device, **remove_args) and success
+        yield Return(success)
 
+    @Coroutine.from_generator_function
     def mount_all(self):
         """
         Mount handleable devices that are already present.
@@ -381,9 +395,10 @@ class Mounter(object):
         """
         success = True
         for device in self.get_all_handleable():
-            success = self.mount(device) and success
-        return success
+            success = yield self.mount(device) and success
+        yield Return(success)
 
+    @Coroutine.from_generator_function
     def unmount_all(self):
         """
         Unmount all filesystems handleable by udiskie.
@@ -393,9 +408,10 @@ class Mounter(object):
         """
         success = True
         for device in self.get_all_handleable():
-            success = self.unmount(device) and success
-        return success
+            success = yield self.unmount(device) and success
+        yield Return(success)
 
+    @Coroutine.from_generator_function
     def eject_all(self, force=True):
         """
         Eject all ejectable devices.
@@ -407,9 +423,10 @@ class Mounter(object):
         success = True
         for device in self.get_all_handleable():
             if device.is_drive and device.is_ejectable:
-                success = self.eject(device, force=force) and success
-        return success
+                success = yield self.eject(device, force=force) and success
+        yield Return(success)
 
+    @Coroutine.from_generator_function
     def detach_all(self, force=True):
         """
         Detach all detachable devices.
@@ -421,12 +438,12 @@ class Mounter(object):
         success = True
         for device in self.get_all_handleable():
             if device.is_drive and device.is_detachable:
-                success = self.detach(device, force=force) and success
-        return success
+                success = yield self.detach(device, force=force) and success
+        yield Return(success)
 
     # iterate devices
-    @_device_method
     def is_handleable(self, device):
+        # TODO: handle pathes in first argument
         """
         Check whether this device should be handled by udiskie.
 

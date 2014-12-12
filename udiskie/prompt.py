@@ -8,6 +8,7 @@ import logging
 import subprocess
 import sys
 
+from udiskie.async import Async, Coroutine, Return
 from udiskie.locale import _
 from udiskie.compat import basestring
 
@@ -95,6 +96,21 @@ dialog_definition = r"""
 """
 
 
+class Dialog(Async):
+
+    def __init__(self, dialog):
+        self._dialog = dialog
+
+    def start(self):
+        self._dialog.connect("response", self._result_handler)
+        self._dialog.show()
+
+    def _result_handler(self, dialog, response):
+        self.callback(response)
+        dialog.destroy()
+
+
+@Coroutine.from_generator_function
 def password_dialog(title, message):
     """
     Show a Gtk password dialog.
@@ -114,7 +130,7 @@ def password_dialog(title, message):
     dialog.set_title(title)
     label.set_label(message)
     dialog.show_all()
-    response = dialog.run()
+    response = yield Dialog(dialog)
     dialog.hide()
     if response == Gtk.ResponseType.OK:
         return entry.get_text()
@@ -133,6 +149,7 @@ def get_password_gui(device):
 
 def get_password_tty(device):
     """Get the password to unlock a device from terminal."""
+    # TODO: make this an Async
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
         return getpass.getpass(text)

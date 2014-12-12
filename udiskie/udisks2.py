@@ -19,6 +19,7 @@ from udiskie.common import Emitter, samefile
 from udiskie.compat import filter
 from udiskie.dbus import DBusException, DBusService
 from udiskie.locale import _
+from udiskie.async import Coroutine
 
 __all__ = ['Daemon']
 
@@ -552,19 +553,16 @@ class Device(object):
         return bool(self.luks_cleartext_holder)
 
     # Encrypted methods
+    @Coroutine.from_generator_function
     def unlock(self, password, auth_no_user_interaction=None):
         """Unlock Luks device."""
-        object_path = self._I.Encrypted.method.Unlock(
+        return self._I.Encrypted.method.Unlock(
             '(sa{sv})',
             password,
             filter_opt({
                 'auth.no_user_interaction': ('b', auth_no_user_interaction),
             })
         )
-        # UDisks2 may not have processed the InterfacesAdded signal yet.
-        # Therefore it is necessary to query the interface data directly
-        # from the DBus service:
-        return self._udisks.update(object_path)
 
     def lock(self, auth_no_user_interaction=None):
         """Lock Luks device."""
@@ -679,7 +677,10 @@ class Daemon(Emitter, UDisks2):
 
     def _sync(self):
         """Synchronize state."""
-        self._objects = self._proxy.method.GetManagedObjects()
+        def update_objects(objects):
+            self._objects = objects
+        update = self._proxy.method.GetManagedObjects()
+        update.callbacks.append(update_objects)
 
     # UDisks2 interface
     def paths(self):
@@ -697,10 +698,6 @@ class Daemon(Emitter, UDisks2):
             self._proxy.object.bus.get_object(object_path),
             interfaces_and_properties)
         return Device(self, object_path, interface_service)
-
-    def update(self, object_path):
-        return self.get(object_path,
-                        self._proxy.method.GetManagedObjects()[object_path])
 
     def trigger(self, event, device, *args):
         self._log.debug(_("+++ {0}: {1}", event, device))

@@ -185,6 +185,9 @@ class _EntryPoint(object):
         options.update(default_opts)
         options.update(config.program_options)
         options.update(program_opts)
+        # create main loop
+        self.mainloop = GLib.MainLoop()
+        self.udisks = get_backend(options['udisks_version'])
         # initialize instance variables
         self.config = config
         self.options = options
@@ -320,8 +323,6 @@ class Daemon(_EntryPoint):
 
         import udiskie.prompt
 
-        mainloop = GLib.MainLoop()
-        daemon = get_backend(options['udisks_version'])
         prompt = udiskie.prompt.password(options['password_prompt'])
         browser = udiskie.prompt.browser(options['file_manager'])
         mounter = udiskie.mount.Mounter(
@@ -329,7 +330,7 @@ class Daemon(_EntryPoint):
             ignore_device=config.ignore_device,
             prompt=prompt,
             browser=browser,
-            udisks=daemon)
+            udisks=self.udisks)
 
         if options['notify'] and not module_available('gi.repository.Notify', '0.7'):
             libnotify_not_available = _(
@@ -369,7 +370,7 @@ class Daemon(_EntryPoint):
                 mounter,
                 icons,
                 actions,
-                quit_action=mainloop.quit)
+                quit_action=self.mainloop.quit)
             TrayIcon = tray_classes[options['tray']]
             statusicon = TrayIcon(menu_maker, icons)
         else:
@@ -381,7 +382,6 @@ class Daemon(_EntryPoint):
             udiskie.automount.AutoMounter(mounter)
 
         # Note: mounter and statusicon are saved so these are kept alive:
-        self.mainloop = mainloop
         self.mounter = mounter
         self.statusicon = statusicon
 
@@ -459,7 +459,7 @@ class Mount(_EntryPoint):
             mount_options=mount_options,
             ignore_device=config.ignore_device,
             prompt=prompt,
-            udisks=get_backend(options['udisks_version']))
+            udisks=self.udisks)
 
     def run(self):
         """Implements _EntryPoint.run."""
@@ -536,8 +536,7 @@ class Umount(_EntryPoint):
 
     def _init(self, config, options):
         """Implements _EntryPoint._init."""
-        self.mounter = udiskie.mount.Mounter(
-            udisks=get_backend(options['udisks_version']))
+        self.mounter = udiskie.mount.Mounter(self.udisks)
 
     def run(self):
         """Implements _EntryPoint.run."""
