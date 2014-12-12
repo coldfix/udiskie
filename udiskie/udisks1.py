@@ -486,39 +486,6 @@ class UDisks(DBusService):
         return None
 
 
-class Sniffer(UDisks):
-
-    """
-    UDisks DBus service wrapper.
-
-    This is a wrapper for the DBus API of the UDisks service at
-    'org.freedesktop.UDisks'. Access to properties and device states is
-    completely online, meaning the properties are requested from dbus as
-    they are accessed in the python object.
-    """
-
-    # Construction
-    def __init__(self, proxy=None):
-        """
-        Initialize an instance with the given DBus proxy object.
-
-        :param dbus.InterfaceProxy proxy: proxy to udisks object
-        """
-        self._proxy = proxy or self.connect_service()
-        # Make sure the proxy object is loaded and usable:
-        self._proxy.property.DaemonVersion
-
-    def paths(self):
-        return self._proxy.method.EnumerateDevices()
-
-    def get(self, object_path):
-        """Create a Device instance from object path."""
-        return OnlineDevice(
-            self,
-            self._proxy.object.bus.get_object(object_path))
-    update = get
-
-
 class Daemon(Emitter, UDisks):
 
     """
@@ -559,9 +526,10 @@ class Daemon(Emitter, UDisks):
         super(Daemon, self).__init__(event_names)
 
         proxy = proxy or self.connect_service()
-        sniffer = Sniffer(proxy)
+        # Make sure the proxy object is loaded and usable:
+        proxy.property.DaemonVersion
 
-        self._sniffer = sniffer
+        self._proxy = proxy
         self._jobs = {}
         self._devices = {}
         self._errors = {'mount': {}, 'unmount': {},
@@ -587,7 +555,9 @@ class Daemon(Emitter, UDisks):
         return self._devices.get(object_path)
 
     def update(self, object_path):
-        device = self._sniffer.get(object_path)
+        device = OnlineDevice(
+            self,
+            self._proxy.object.bus.get_object(object_path))
         cached = CachedDevice(device)
         if cached or object_path not in self._devices:
             self._devices[object_path] = cached
@@ -718,7 +688,11 @@ class Daemon(Emitter, UDisks):
     # internal state keeping
     def _sync(self):
         """Cache all device states."""
-        online_devices = {dev.object_path: dev for dev in self._sniffer}
+        devices = [
+            OnlineDevice(self, self._proxy.object.bus.get_object(object_path))
+            for object_path in self._proxy.method.EnumerateDevices()
+        ]
+        online_devices = {dev.object_path: dev for dev in devices}
         self._devices = {
             object_path: CachedDevice(device)
             for object_path, device in online_devices.items()

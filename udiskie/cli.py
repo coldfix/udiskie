@@ -34,11 +34,10 @@ warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
 warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
 
-def get_backend(clsname, version=None):
+def get_backend(version=None):
     """
     Return UDisks service.
 
-    :param str clsname: requested service object
     :param int version: requested UDisks backend version
     :returns: UDisks service wrapper object
     :raises dbus.DBusException: if unable to connect to UDisks dbus service.
@@ -50,18 +49,18 @@ def get_backend(clsname, version=None):
     if not version:
         from udiskie.dbus import DBusException
         try:
-            return get_backend(clsname, 2)
+            return get_backend(2)
         except DBusException:
             log = logging.getLogger(__name__)
             log.warning(_('Failed to connect UDisks2 dbus service..\n'
                           'Falling back to UDisks1.'))
-            return get_backend(clsname, 1)
+            return get_backend(1)
     elif version == 1:
         import udiskie.udisks1
-        return getattr(udiskie.udisks1, clsname)()
+        return udiskie.udisks1.Daemon()
     elif version == 2:
         import udiskie.udisks2
-        return getattr(udiskie.udisks2, clsname)()
+        return udiskie.udisks2.Daemon()
     else:
         raise ValueError(_("UDisks version not supported: {0}!", version))
 
@@ -322,7 +321,7 @@ class Daemon(_EntryPoint):
         import udiskie.prompt
 
         mainloop = GLib.MainLoop()
-        daemon = get_backend('Daemon', options['udisks_version'])
+        daemon = get_backend(options['udisks_version'])
         prompt = udiskie.prompt.password(options['password_prompt'])
         browser = udiskie.prompt.browser(options['file_manager'])
         mounter = udiskie.mount.Mounter(
@@ -460,7 +459,7 @@ class Mount(_EntryPoint):
             mount_options=mount_options,
             ignore_device=config.ignore_device,
             prompt=prompt,
-            udisks=get_backend('Sniffer', options['udisks_version']))
+            udisks=get_backend(options['udisks_version']))
 
     def run(self):
         """Implements _EntryPoint.run."""
@@ -538,7 +537,7 @@ class Umount(_EntryPoint):
     def _init(self, config, options):
         """Implements _EntryPoint._init."""
         self.mounter = udiskie.mount.Mounter(
-            udisks=get_backend('Sniffer', options['udisks_version']))
+            udisks=get_backend(options['udisks_version']))
 
     def run(self):
         """Implements _EntryPoint.run."""

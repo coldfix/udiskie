@@ -20,7 +20,7 @@ from udiskie.compat import filter
 from udiskie.dbus import DBusException, DBusService
 from udiskie.locale import _
 
-__all__ = ['Sniffer', 'Daemon']
+__all__ = ['Daemon']
 
 
 def object_kind(object_path):
@@ -161,36 +161,6 @@ class OfflineInterfaceService(object):
                                 self._data[interface])
         except:
             return NullProxy(key, self._proxy.object_path)
-
-
-class OnlineInterfaceService(object):
-
-    """
-    Provide online attribute access to multiple interfaces on a DBus object.
-
-    Both method and property access is performed dynamically via the given
-    DBus proxy object.
-    """
-
-    def __init__(self, proxy):
-        """
-        Store DBus proxy.
-
-        :param dbus.ObjectProxy object: DBus object for online access
-        """
-        self._proxy = proxy
-        properties = proxy.get_interface(Interface['Properties'])
-        self._check = properties.method.GetAll
-
-    def __getattr__(self, key):
-        """Return a wrapper for the requested interface."""
-        try:
-            self._check('(s)', Interface[key])
-            return self._proxy.get_interface(Interface[key])
-        except DBusException:
-            return NullProxy(key, self._proxy.object_path)
-
-    # TODO: need reliable and fast __nonzero__ check
 
 
 class NoneServer(object):
@@ -656,47 +626,6 @@ class UDisks2(DBusService):
         logger = logging.getLogger(__name__)
         logger.warn(_('Device not found: {0}', path))
         return None
-
-
-class Sniffer(UDisks2):
-    """
-    UDisks2 DBus service wrapper.
-
-    This is a wrapper for the DBus API of the UDisks2 service at
-    'org.freedesktop.UDisks2'. Access to properties and device states is
-    completely online, meaning the properties are requested from dbus as
-    they are accessed in the python object.
-    """
-
-    # Construction
-    def __init__(self, proxy=None):
-        """
-        Initialize an instance with the given DBus proxy object.
-
-        :param dbus.Bus bus: connection to system bus
-        :param dbus.InterfaceProxy proxy: proxy to udisks object
-        """
-        self._proxy = proxy or self.connect_service()
-        # Make sure the proxy object is loaded and usable:
-        self._proxy.method.GetManagedObjects()
-
-    # instantiation of device objects
-    def paths(self):
-        return self._proxy.method.GetManagedObjects().keys()
-
-    def _is_valid_object_path(self, object_path):
-        return (object_path
-                and object_path.startswith(self.ObjectPath)
-                and object_kind(object_path))
-
-    def get(self, object_path):
-        """Create a Device instance from object path."""
-        if not self._is_valid_object_path(object_path):
-            return None
-        return Device(self, object_path, OnlineInterfaceService(
-            self._proxy.object.bus.get_object(object_path)))
-
-    update = get
 
 
 class Daemon(Emitter, UDisks2):
