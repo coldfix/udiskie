@@ -7,6 +7,8 @@ from __future__ import absolute_import
 from gi.repository import Gio
 from gi.repository import GLib
 
+from udiskie.async import Async
+
 
 __all__ = ['PropertiesProxy',
            'InterfaceProxy',
@@ -17,6 +19,95 @@ __all__ = ['PropertiesProxy',
 
 
 DBusException = GLib.GError
+
+
+class DBusCall(Async):
+
+    """
+    Asynchronously call a DBus method.
+    """
+
+    def __init__(self,
+                 proxy,
+                 method_name,
+                 signature,
+                 args,
+                 flags=0,
+                 timeout_msec=-1):
+        """
+        Asynchronously call the specified method on a DBus proxy object.
+
+        :param Gio.DBusProxy proxy:
+        :param str method_name:
+        :param str signature:
+        :param tuple args:
+        :param int flags:
+        :param int timeout_msec:
+        """
+        self._proxy = proxy
+        self._method_name = method_name
+        self._parameters = GLib.Variant(signature, tuple(args))
+        self._flags = flags
+        self._timeout_msec = timeout_msec
+        self._cancellable = None
+        self._user_data = None
+        self._proxy.call(
+            self._method_name,
+            self._parameters,
+            self._flags,
+            self._timeout_msec,
+            self._cancellable,
+            self._callback,
+            self._user_data)
+
+    def _callback(self, proxy, result, user_data):
+        """
+        Handle call result.
+
+        :param Gio.DBusProxy proxy:
+        :param Gio.AsyncResult result:
+        :param user_data: unused
+        """
+        try:
+            value = proxy.call_finish(result)
+        except:
+            self.errback(sys.exc_info()[1])
+        else:
+            self.callback(*value.unpack())
+
+
+class MethodProxy(object):
+
+    """
+    DBus proxy object for asynchronously calling a specified method.
+    """
+
+    def __init__(self, proxy_object, method_name):
+        """Initialize from a `Gio.DBusProxy` and a method name."""
+        self.__proxy_object = proxy_object
+        self.__method_name = method_name
+
+    def __call__(self, signature='()', *args):
+        """Asynchronously call the method, returns an `Async`."""
+        return DBusCall(self.__proxy_object,
+                        self.__method_name,
+                        signature,
+                        args)
+
+
+class MethodsProxy(object):
+
+    """
+    DBus proxy object for calling methods on a specific interface.
+    """
+
+    def __init__(self, proxy_object):
+        """Initialize from a `Gio.DBusProxy`."""
+        self.__proxy_object = proxy_object
+
+    def __getattr__(self, method_name):
+        """Return a `MethodProxy` as attribute."""
+        return MethodProxy(self.__proxy_object, method_name)
 
 
 class PropertiesProxy(object):
@@ -73,7 +164,7 @@ class InterfaceProxy(object):
         self.object_path = proxy.get_object_path()
         self.property = PropertiesProxy(self.object,
                                         proxy.get_interface_name())
-        self.method = proxy
+        self.method = MethodsProxy(proxy)
 
     @property
     def object(self):
