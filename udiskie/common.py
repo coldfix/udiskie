@@ -11,6 +11,7 @@ __all__ = [
     'samefile',
     'setdefault',
     'extend',
+    'cachedproperty',
 ]
 
 
@@ -112,3 +113,17 @@ def extend(a, b):
     res = a.copy()
     res.update(b)
     return res
+
+
+def cachedproperty(func):
+    """A memoize decorator for class properties."""
+    key = '_' + func.__name__
+    @wraps(func)
+    def get(self):
+        try:
+            return getattr(self, key)
+        except AttributeError:
+            val = func(self)
+            setattr(self, key, val)
+            return val
+    return property(get)
