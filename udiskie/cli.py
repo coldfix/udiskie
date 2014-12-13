@@ -11,6 +11,8 @@ import warnings
 
 from docopt import docopt, DocoptExit
 
+from gi.repository import GLib
+
 import udiskie
 import udiskie.config
 import udiskie.mount
@@ -299,10 +301,9 @@ class Daemon(_EntryPoint):
 
         """Implements _EntryPoint._init."""
 
-        from gi.repository import GObject
         import udiskie.prompt
 
-        mainloop = GObject.MainLoop()
+        mainloop = GLib.MainLoop()
         daemon = get_backend('Daemon', options['udisks_version'])
         browser = udiskie.prompt.browser(options['file_manager'])
         mounter = udiskie.mount.Mounter(
