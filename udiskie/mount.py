@@ -8,7 +8,7 @@ import logging
 
 from udiskie.async import AsyncList, Coroutine, Return
 from udiskie.common import wraps, setdefault
-from udiskie.compat import filter, basestring
+from udiskie.compat import basestring
 from udiskie.config import IgnoreDevice, FilterMatcher
 from udiskie.locale import _
 

@@ -16,7 +16,6 @@ import logging
 from gi.repository import GLib
 
 from udiskie.common import Emitter, samefile, AttrDictView
-from udiskie.compat import filter
 from udiskie.dbus import DBusException, DBusService
 from udiskie.locale import _
 from udiskie.async import Coroutine, Return

@@ -29,7 +29,6 @@ from gi.repository import Gio
 
 from udiskie.async import AsyncList, Coroutine, Return
 from udiskie.common import Emitter, samefile, AttrDictView
-from udiskie.compat import filter
 from udiskie.dbus import DBusService, DBusException
 from udiskie.locale import _
 
