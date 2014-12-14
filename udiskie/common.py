@@ -127,3 +127,21 @@ def cachedproperty(func):
             setattr(self, key, val)
             return val
     return property(get)
+
+
+# ----------------------------------------
+# udisks.Device helper classes
+# ----------------------------------------
+
+class AttrDictView(object):
+
+    """Provide attribute access view to a dictionary."""
+
+    def __init__(self, data):
+        self.__data = data
+
+    def __getattr__(self, key):
+        try:
+            return self.__data[key]
+        except KeyError:
+            raise AttributeError

@@ -57,6 +57,7 @@ class Async(object):
     def _finish(self, callbacks, *args):
         """Set finished state and invoke specified callbacks [internal]."""
         if self.done:
+            # TODO: more output
             raise RuntimeError("Async already finished!")
         self.done = True
         # TODO: handle Async callbacks:
@@ -196,6 +197,8 @@ class Coroutine(Async):
         # TODO: cancellable tasks (generator.close() -> GeneratorExit)?
         run_soon(self._interact, next, self._generator)
 
+    # TODO: shorten stack traces by inlining _recv / _interact ?
+
     def _recv(self, thing):
         """
         Handle a value received from (yielded by) the generator.
@@ -208,7 +211,9 @@ class Coroutine(Async):
             thing.errbacks.append(self._throw)
         elif isinstance(thing, Return):
             self._generator.close()
-            self.callback(*thing.values)
+            # self.callback(*thing.values)
+            # to shorten stack trace use instead:
+            run_soon(self.callback, *thing.values)
         else:
             # the protocol is easy to do wrong, therefore we better do not
             # silently ignore any errors!

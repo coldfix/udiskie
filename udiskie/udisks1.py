@@ -23,7 +23,12 @@ from inspect import getmembers
 import logging
 import os.path
 
-from udiskie.common import Emitter, samefile
+import sys
+
+from gi.repository import Gio
+
+from udiskie.async import AsyncList, Coroutine, Return
+from udiskie.common import Emitter, samefile, AttrDictView
 from udiskie.compat import filter
 from udiskie.dbus import DBusService, DBusException
 from udiskie.locale import _
@@ -37,7 +42,14 @@ def filter_opt(opt):
     return [k for k, v in opt.items() if v]
 
 
-class DeviceBase(object):
+class DeviceProxy(object):
+
+    def __init__(self, dbus_proxy, properties):
+        self.method = dbus_proxy.method
+        self.property = AttrDictView(properties)
+
+
+class Device(object):
 
     """Helper base class for devices."""
 
@@ -68,34 +80,22 @@ class DeviceBase(object):
         return samefile(path, self.device_file) or any(
             samefile(path, mp) for mp in self.mount_paths)
 
-
-class OnlineDevice(DeviceBase):
-
-    """
-    Online wrapper for org.freedesktop.UDisks.Device DBus API proxy objects.
-
-    Resolves both property access and method calls dynamically to the DBus
-    object.
-
-    This is the main class used to retrieve (and then possibly cache) device
-    properties from the DBus backend.
-    """
-
     # construction
-    def __init__(self, udisks, object):
+    def __init__(self, udisks, method_proxy, properties):
         """
         Initialize an instance with the given DBus proxy object.
 
         :param dbus.ObjectProxy object:
         """
-        self._proxy = object.get_interface(self.Interface)
-        self.object_path = object.object_path
+        self._proxy = DeviceProxy(method_proxy, properties)
+        self.object_path = method_proxy.object_path
         self.udisks = udisks
 
     # availability of interfaces
     @property
     def is_valid(self):
         """Check if there is a valid DBus object for this object path."""
+        # TODO
         try:
             self._proxy.property.DeviceFile
             return True
@@ -384,75 +384,6 @@ class OnlineDevice(DeviceBase):
         return False
 
 
-def _CachedDeviceProperty(method):
-    """Cache object path and return the current known CachedDevice state."""
-    key = '_' + method.__name__
-    def get(self):
-        return self._daemon[getattr(self, key, None)]
-    def set(self, device):
-        setattr(self, key, getattr(device, 'object_path', None))
-    return property(get, set, doc=method.__doc__)
-
-
-class CachedDevice(DeviceBase):
-
-    """
-    Cached device state.
-
-    Properties are cached at creation time. Methods will be invoked
-    dynamically via the associated DBus object.
-    """
-
-    def __init__(self, device):
-        """Cache all properties of the online device."""
-        self._device = device
-        self._daemon = device.udisks
-        def isproperty(obj):
-            return isinstance(obj, property)
-        for key, val in getmembers(device.__class__, isproperty):
-            try:
-                setattr(self, key, getattr(device, key))
-            except device.Exception:
-                setattr(self, key, None)
-        self.is_valid = device.is_valid
-
-    def __getattr__(self, key):
-        """Resolve unknown properties and methods via the online device."""
-        if key.startswith('_'):
-            raise AttributeError(key)
-        return getattr(self._device, key)
-
-    # Overload properties that return Device objects to return CachedDevice
-    # instances instead. NOTE: the setters are implemented such that the
-    # returned devices will be cached at the time the property is accessed
-    # rather than at the time the current object was instanciated.
-    # FIXME: should it be different?
-
-    @_CachedDeviceProperty
-    def luks_cleartext_slave(self):
-        """Get luks crypto device."""
-        pass
-
-    @_CachedDeviceProperty
-    def drive(self):
-        """Get the drive."""
-        pass
-
-    @_CachedDeviceProperty
-    def partition_slave(self):
-        """Get the partition slave (container)."""
-        pass
-
-    @_CachedDeviceProperty
-    def luks_cleartext_holder(self):
-        """Get unlocked luks cleartext device."""
-        pass
-
-    def unlock(self, password, options=[]):
-        """Unlock Luks device."""
-        return CachedDevice(self._device.unlock(password))
-
-
 class UDisks(DBusService):
 
     """
@@ -524,13 +455,13 @@ class Daemon(Emitter, UDisks):
                        'job_failed']
         super(Daemon, self).__init__(event_names)
 
-        proxy = proxy or self.connect_service()
-        # Make sure the proxy object is loaded and usable:
-        proxy.property.DaemonVersion
+        proxy = proxy
 
         self._proxy = proxy
         self._jobs = {}
         self._devices = {}
+        self._property_proxy = {}
+        self._interface_proxy = {}
         self._errors = {'mount': {}, 'unmount': {},
                         'unlock': {}, 'lock': {},
                         'eject': {}, 'detach': {}}
@@ -540,7 +471,14 @@ class Daemon(Emitter, UDisks):
         proxy.connect('DeviceRemoved', self._device_removed)
         proxy.connect('DeviceChanged', self._device_changed)
         proxy.connect('DeviceJobChanged', self._device_job_changed)
-        self._sync()
+
+    @classmethod
+    @Coroutine.from_generator_function
+    def create(cls):
+        proxy = yield cls.connect_service()
+        udisks = cls(proxy)
+        yield udisks._sync()
+        yield Return(udisks)
 
     # Sniffer overrides
     def paths(self):
@@ -553,16 +491,35 @@ class Daemon(Emitter, UDisks):
         """Return the current cached state of the device."""
         return self._devices.get(object_path)
 
+    @Coroutine.from_generator_function
     def update(self, object_path):
-        device = OnlineDevice(
-            self,
-            self._proxy.object.bus.get_object(object_path))
-        cached = CachedDevice(device)
-        if cached or object_path not in self._devices:
-            self._devices[object_path] = cached
+        if (object_path in self._property_proxy
+                and object_path in self._interface_proxy):
+            prop_prox = self._property_proxy[object_path]
+            itfc_prox = self._interface_proxy[object_path]
         else:
+            obj = self._proxy.object.bus.get_object(object_path)
+            tasks = [
+                obj.get_interface('org.freedesktop.DBus.Properties'),
+                obj.get_interface(Device.Interface),
+            ]
+            proxies = yield AsyncList(tasks)
+            prop_prox = proxies[0][1][0]
+            itfc_prox = proxies[1][1][0]
+            self._property_proxy[object_path] = prop_prox
+            self._interface_proxy[object_path] = itfc_prox
+
+        try:
+            properties = yield prop_prox.method.GetAll('(s)',
+                                                       Device.Interface)
+        except DBusException:
             self._invalidate(object_path)
-        return cached
+            # TODO: return something useful (NullDevice)
+        else:
+            device = Device(self, itfc_prox, properties)
+            self._devices[object_path] = device
+            yield Return(device)
+
 
     # special methods
     def set_error(self, device, action, message):
@@ -597,9 +554,10 @@ class Daemon(Emitter, UDisks):
                 self.trigger(del_name, new)
 
     # UDisks event listeners
+    @Coroutine.from_generator_function
     def _device_added(self, object_path):
         """Internal method."""
-        new_state = self.update(object_path)
+        new_state = yield self.update(object_path)
         self.trigger('device_added', new_state)
 
     def _device_removed(self, object_path):
@@ -608,10 +566,11 @@ class Daemon(Emitter, UDisks):
         self._invalidate(object_path)
         self.trigger('device_removed', old_state)
 
+    @Coroutine.from_generator_function
     def _device_changed(self, object_path):
         """Internal method."""
         old_state = self[object_path]
-        new_state = self.update(object_path)
+        new_state = yield self.update(object_path)
         self.trigger('device_changed', old_state, new_state)
 
     # NOTE: it seems the UDisks1 documentation for DeviceJobChanged is
@@ -685,17 +644,12 @@ class Daemon(Emitter, UDisks):
     }
 
     # internal state keeping
+    @Coroutine.from_generator_function
     def _sync(self):
         """Cache all device states."""
-        devices = [
-            OnlineDevice(self, self._proxy.object.bus.get_object(object_path))
-            for object_path in self._proxy.method.EnumerateDevices()
-        ]
-        online_devices = {dev.object_path: dev for dev in devices}
-        self._devices = {
-            object_path: CachedDevice(device)
-            for object_path, device in online_devices.items()
-        }
+        object_pathes = yield self._proxy.method.EnumerateDevices()
+        yield AsyncList(map(self.update, object_pathes))
+        yield Return()
 
     def _invalidate(self, object_path):
         """Flag the device invalid. This removes it from the iteration."""

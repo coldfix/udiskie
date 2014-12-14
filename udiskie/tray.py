@@ -7,6 +7,7 @@ require_version('Gtk', '3.0')
 from gi.repository import Gio
 from gi.repository import Gtk
 
+from udiskie.async import Async
 from udiskie.common import setdefault
 from udiskie.compat import basestring
 from udiskie.locale import _
@@ -271,6 +272,12 @@ class TrayIcon(object):
         self._conn_left = None
         self._conn_right = None
         self.show()
+        self.task = Async()
+        menumaker._quit_action = self.destroy
+
+    def destroy(self):
+        self.hide()
+        self.task.callback()
 
     def _create_statusicon(self):
         """Return a new Gtk.StatusIcon."""

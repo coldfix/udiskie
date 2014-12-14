@@ -6,7 +6,7 @@ from collections import namedtuple
 from functools import partial
 import logging
 
-from udiskie.async import Coroutine, Return
+from udiskie.async import AsyncList, Coroutine, Return
 from udiskie.common import wraps, setdefault
 from udiskie.compat import filter, basestring
 from udiskie.config import IgnoreDevice, FilterMatcher
@@ -245,10 +245,12 @@ class Mounter(object):
                     device.luks_cleartext_holder,
                     recursive=True)
         elif recursive and device.is_partition_table:
-            success = True
+            tasks = []
             for dev in self.get_all_handleable():
                 if dev.is_partition and dev.partition_slave == device:
-                    success = yield self.add(dev, recursive=True) and success
+                    tasks.append(self.add(dev, recursive=True))
+            # TODO: AND results
+            success = yield AsyncList(tasks)
         else:
             self._log.info(_('not adding {0}: unhandled device', device))
             yield Return(False)
@@ -275,15 +277,17 @@ class Mounter(object):
                 yield self.remove(device.luks_cleartext_holder, force=True)
             success = yield self.lock(device)
         elif force and (device.is_partition_table or device.is_drive):
-            success = True
+            tasks = []
             for child in self.get_all_handleable():
                 if _is_parent_of(device, child):
-                    success = yield self.remove(
+                    tasks.append(self.remove(
                         child,
                         force=True,
                         detach=detach,
                         eject=eject,
-                        lock=lock) and success
+                        lock=lock))
+            # TODO: AND results
+            success = yield AsyncList(tasks)
         else:
             self._log.info(_('not removing {0}: unhandled device', device))
             success = False
@@ -347,7 +351,6 @@ class Mounter(object):
         yield Return(True)
 
     # mount_all/unmount_all
-    @Coroutine.from_generator_function
     def add_all(self, recursive=False):
         """
         Add all handleable devices that available at start.
@@ -356,15 +359,15 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
-        success = True
+        tasks = []
         for device in self.get_all_handleable():
             if (device.is_filesystem
                     or device.is_crypto
                     or (recursive and device.is_partition_table)):
-                success = yield self.add(device, recursive=recursive) and success
-        yield Return(success)
+                tasks.append(self.add(device, recursive=recursive))
+        # TODO: AND results
+        return AsyncList(tasks)
 
-    @Coroutine.from_generator_function
     def remove_all(self, detach=False, eject=False, lock=False):
         """
         Remove all filesystems handleable by udiskie.
@@ -375,17 +378,17 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
-        success = True
+        tasks = []
         remove_args = dict(force=True, detach=detach, eject=eject, lock=lock)
         for device in self.get_all_handleable():
             if (device.is_filesystem
                     or device.is_crypto
                     or device.is_partition_table
                     or device.is_drive):
-                success = yield self.remove(device, **remove_args) and success
-        yield Return(success)
+                tasks.append(self.remove(device, **remove_args))
+        # TODO: AND results
+        return AsyncList(tasks)
 
-    @Coroutine.from_generator_function
     def mount_all(self):
         """
         Mount handleable devices that are already present.
@@ -393,12 +396,12 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
-        success = True
+        tasks = []
         for device in self.get_all_handleable():
-            success = yield self.mount(device) and success
-        yield Return(success)
+            tasks.append(self.mount(device))
+        # TODO: AND results
+        return AsyncList(tasks)
 
-    @Coroutine.from_generator_function
     def unmount_all(self):
         """
         Unmount all filesystems handleable by udiskie.
@@ -406,12 +409,14 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
-        success = True
+        tasks = []
+        # TODO: unmount leaf devices first
+        # OR:   recursively unmount root devices
         for device in self.get_all_handleable():
-            success = yield self.unmount(device) and success
-        yield Return(success)
+            tasks.append(self.unmount(device))
+        # TODO: AND results
+        return AsyncList(tasks)
 
-    @Coroutine.from_generator_function
     def eject_all(self, force=True):
         """
         Eject all ejectable devices.
@@ -420,13 +425,13 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
-        success = True
+        tasks = []
         for device in self.get_all_handleable():
             if device.is_drive and device.is_ejectable:
-                success = yield self.eject(device, force=force) and success
-        yield Return(success)
+                tasks.append(self.eject(device, force=force))
+        # TODO: AND results
+        return AsyncList(tasks)
 
-    @Coroutine.from_generator_function
     def detach_all(self, force=True):
         """
         Detach all detachable devices.
@@ -435,11 +440,12 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
-        success = True
+        tasks = []
         for device in self.get_all_handleable():
             if device.is_drive and device.is_detachable:
-                success = yield self.detach(device, force=force) and success
-        yield Return(success)
+                tasks.append(self.detach(device, force=force))
+        # TODO: AND results
+        return AsyncList(tasks)
 
     # iterate devices
     def is_handleable(self, device):

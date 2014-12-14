@@ -15,11 +15,11 @@ import logging
 
 from gi.repository import GLib
 
-from udiskie.common import Emitter, samefile
+from udiskie.common import Emitter, samefile, AttrDictView
 from udiskie.compat import filter
 from udiskie.dbus import DBusException, DBusService
 from udiskie.locale import _
-from udiskie.async import Coroutine
+from udiskie.async import Coroutine, Return
 
 __all__ = ['Daemon']
 
@@ -94,20 +94,6 @@ def encode(s):
 # ----------------------------------------
 # Internal helper classes
 # ----------------------------------------
-
-class AttrDictView(object):
-
-    """Provide attribute access view to a dictionary."""
-
-    def __init__(self, data):
-        self.__data = data
-
-    def __getattr__(self, key):
-        try:
-            return self.__data[key]
-        except KeyError:
-            raise AttributeError
-
 
 class OfflineProxy(object):
 
@@ -657,7 +643,7 @@ class Daemon(Emitter, UDisks2):
                        'job_failed']
         super(Daemon, self).__init__(event_names)
 
-        self._proxy = proxy = proxy or self.connect_service()
+        self._proxy = proxy = proxy
         self._log = logging.getLogger(__name__)
         self._objects = {}
 
@@ -673,7 +659,6 @@ class Daemon(Emitter, UDisks2):
                     'Completed',
                     None,
                     self._job_completed)
-        self._sync()
 
     def _sync(self):
         """Synchronize state."""
@@ -681,6 +666,15 @@ class Daemon(Emitter, UDisks2):
             self._objects = objects
         update = self._proxy.method.GetManagedObjects()
         update.callbacks.append(update_objects)
+        return update
+
+    @classmethod
+    @Coroutine.from_generator_function
+    def create(cls):
+        proxy = yield cls.connect_service()
+        udisks = cls(proxy)
+        yield udisks._sync()
+        yield Return(udisks)
 
     # UDisks2 interface
     def paths(self):
