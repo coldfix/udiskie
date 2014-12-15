@@ -106,11 +106,11 @@ class MethodsProxy(object):
         return MethodProxy(self.__proxy_object, method_name)
 
 
-class PropertiesProxy(object):
+class PropertyCache(object):
 
-    """
-    Resolve attribute accesses by querying properties of a DBus object.
-    """
+    """Grants access to properties of a DBus object as keys."""
+
+    PropertiesInterface = 'org.freedesktop.DBus.Properties'
 
     def __init__(self, dbus_object, interface_name):
         """
@@ -119,18 +119,15 @@ class PropertiesProxy(object):
         :param ObjectProxy dbus_object:
         :param str interface_name:
         """
-        properties_interface = 'org.freedesktop.DBus.Properties'
-        self.__proxy = dbus_object._get_interface(properties_interface)
-        self.__interface = interface_name
+        self._proxy = dbus_object.get_interface(PropertiesInterface)
+        self._interface = interface_name
 
-    def __getattr__(self, property_name):
-        """
-        Retrieve the property via the DBus proxy.
+    @Coroutine.from_generator_function
+    def sync(self):
+        self.cache = yield self._proxy.method.GetAll('(s)', self._interface)
 
-        :param str property_name: name of the dbus property
-        :returns: the property value
-        """
-        return self.__proxy.Get('(ss)', self.__interface, property_name)
+    def __getitem__(self, name):
+        return self.cache[name]
 
 
 class InterfaceProxy(object):
