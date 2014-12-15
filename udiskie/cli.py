@@ -472,29 +472,28 @@ class Mount(_EntryPoint):
 
         import udiskie.prompt
 
+        config = self.config
         options = self.options
-        mounter = self.mounter
 
         if options['options']:
             opts = [o.strip() for o in options['options'].split(',')]
             mount_options = lambda dev: opts
         else:
             mount_options = config.mount_options
+
         prompt = udiskie.prompt.password(options['password_prompt'])
-        self.mounter = udiskie.mount.Mounter(
+        mounter = udiskie.mount.Mounter(
             mount_options=mount_options,
             ignore_device=config.ignore_device,
             prompt=prompt,
             udisks=self.udisks)
 
         recursive = options['recursive']
-        # only mount the desired devices
         if options['<device>']:
             tasks = [mounter.add(path, recursive=recursive)
                      for path in options['<device>']]
-            # TODO: AND result
+            # TODO: AND results
             return AsyncList(tasks)
-        # mount all present devices
         else:
             return mounter.add_all(recursive=recursive)
 
@@ -556,14 +555,12 @@ class Umount(_EntryPoint):
         '<device>': Value('DEVICE'),
     })
 
-    def _init(self, config, options):
+    def _init(self):
 
         """Implements _EntryPoint._init."""
 
         options = self.options
-        mounter = self.mounter
-
-        self.mounter = udiskie.mount.Mounter(self.udisks)
+        mounter = udiskie.mount.Mounter(self.udisks)
 
         strategy = dict(detach=options['detach'],
                         eject=options['eject'],
@@ -572,7 +569,7 @@ class Umount(_EntryPoint):
             strategy['force'] = options['force']
             tasks = [mounter.remove(path, **strategy)
                      for path in options['<device>']]
-            # TODO: AND result
+            # TODO: AND results
             return AsyncList(tasks)
         else:
             return mounter.remove_all(**strategy)
