@@ -19,13 +19,8 @@ guarantee the accessibilityy of device properties in between operations.
 """
 
 from copy import copy
-from inspect import getmembers
 import logging
 import os.path
-
-import sys
-
-from gi.repository import Gio
 
 from udiskie.async import AsyncList, Coroutine, Return
 from udiskie.common import Emitter, samefile, AttrDictView
