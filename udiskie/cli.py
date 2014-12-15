@@ -188,14 +188,10 @@ class _EntryPoint(object):
         options.update(default_opts)
         options.update(config.program_options)
         options.update(program_opts)
-        # create main loop
-        self.mainloop = GLib.MainLoop()
-        deferred_udisks = get_backend(options['udisks_version'])
-        deferred_udisks.callbacks.append(self._udisks_started)
-        deferred_udisks.errbacks.append(self._error_exit)
         # initialize instance variables
         self.config = config
         self.options = options
+        self.exit_status = 0
 
     def program_options(self, args):
         """
@@ -254,25 +250,24 @@ class _EntryPoint(object):
         :returns: exit code
         :rtype: int
         """
+        self.mainloop = GLib.MainLoop()
+        self._start_async_tasks()
         try:
-            return self.mainloop.run()
+            self.mainloop.run()
+            return self.exit_status
         except KeyboardInterrupt:
             return 1
 
-    def _udisks_started(self, udisks):
-        self.udisks = udisks
-        app_task = self._init()
-        app_task.callbacks.append(self._normal_exit)
-        app_task.errbacks.append(self._error_exit)
-
-    def _normal_exit(self, *args):
+    @Coroutine.from_generator_function
+    def _start_async_tasks(self):
+        """Start asynchronous operations."""
+        try:
+            self.udisks = yield get_backend(self.options['udisks_version'])
+            yield self._init()
+        except:
+            self.exit_status = 1
+            udiskie.common.show_traceback()
         self.mainloop.quit()
-
-    def _error_exit(self, error):
-        # TODO: set exit status
-        self.mainloop.quit()
-        # TODO: rather show old traceback
-        raise error
 
 
 class Daemon(_EntryPoint):
