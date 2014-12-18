@@ -648,6 +648,6 @@ class Daemon(Emitter, UDisks):
     def _invalidate(self, object_path):
         """Flag the device invalid. This removes it from the iteration."""
         if object_path in self._devices:
-            update = copy(self._devices[object_path])
-            update.is_valid = False
-            self._devices[object_path] = update
+            del self._devices[object_path]
+            del self._property_proxy[object_path]
+            del self._interface_proxy[object_path]
