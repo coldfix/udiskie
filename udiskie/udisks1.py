@@ -378,10 +378,23 @@ class Device(object):
         return False
 
 
-class UDisks(DBusService):
+class Daemon(Emitter, DBusService):
 
     """
-    Base class for UDisks service wrappers.
+    UDisks listener daemon.
+
+    Listens to UDisks events. When a change occurs this class detects what
+    has changed and triggers an appropriate event. Valid events are:
+
+        - device_added    / device_removed
+        - device_unlocked / device_locked
+        - device_mounted  / device_unmounted
+        - media_added     / media_removed
+        - device_changed  / job_failed
+
+    A very primitive mechanism that gets along without external
+    dependencies is used for event dispatching. The methods `connect` and
+    `disconnect` can be used to add or remove event handlers.
     """
 
     BusName = 'org.freedesktop.UDisks'
@@ -408,26 +421,6 @@ class UDisks(DBusService):
         logger = logging.getLogger(__name__)
         logger.warn(_('Device not found: {0}', path))
         return None
-
-
-class Daemon(Emitter, UDisks):
-
-    """
-    UDisks listener daemon.
-
-    Listens to UDisks events. When a change occurs this class detects what
-    has changed and triggers an appropriate event. Valid events are:
-
-        - device_added    / device_removed
-        - device_unlocked / device_locked
-        - device_mounted  / device_unmounted
-        - media_added     / media_removed
-        - device_changed  / job_failed
-
-    A very primitive mechanism that gets along without external
-    dependencies is used for event dispatching. The methods `connect` and
-    `disconnect` can be used to add or remove event handlers.
-    """
 
     def __init__(self, proxy=None):
         """

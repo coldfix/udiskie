@@ -578,10 +578,19 @@ class Device(object):
 # UDisks2 service wrapper
 # ----------------------------------------
 
-class UDisks2(DBusService):
+class Daemon(Emitter, DBusService):
 
     """
-    Base class for UDisks2 service wrappers.
+    Listen to state changes to provide automatic synchronization.
+
+    Listens to UDisks2 events. When a change occurs this class detects what
+    has changed and triggers an appropriate event. Valid events are:
+
+        - device_added    / device_removed
+        - device_unlocked / device_locked
+        - device_mounted  / device_unmounted
+        - media_added     / media_removed
+        - device_changed  / job_failed
     """
 
     BusName = 'org.freedesktop.UDisks2'
@@ -609,22 +618,6 @@ class UDisks2(DBusService):
         logger = logging.getLogger(__name__)
         logger.warn(_('Device not found: {0}', path))
         return None
-
-
-class Daemon(Emitter, UDisks2):
-
-    """
-    Listen to state changes to provide automatic synchronization.
-
-    Listens to UDisks2 events. When a change occurs this class detects what
-    has changed and triggers an appropriate event. Valid events are:
-
-        - device_added    / device_removed
-        - device_unlocked / device_locked
-        - device_mounted  / device_unmounted
-        - media_added     / media_removed
-        - device_changed  / job_failed
-    """
 
     def __init__(self, proxy=None):
 
