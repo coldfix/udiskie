@@ -24,7 +24,7 @@ import os.path
 
 from udiskie.async import AsyncList, Coroutine, Return
 from udiskie.common import Emitter, samefile, AttrDictView
-from udiskie.dbus import DBusService, DBusException
+from udiskie.dbus import connect_service, DBusException
 from udiskie.locale import _
 
 
@@ -378,7 +378,7 @@ class Device(object):
         return False
 
 
-class Daemon(Emitter, DBusService):
+class Daemon(Emitter):
 
     """
     UDisks listener daemon.
@@ -462,7 +462,7 @@ class Daemon(Emitter, DBusService):
     @classmethod
     @Coroutine.from_generator_function
     def create(cls):
-        proxy = yield cls.connect_service()
+        proxy = yield connect_service(cls)
         udisks = cls(proxy)
         yield udisks._sync()
         yield Return(udisks)

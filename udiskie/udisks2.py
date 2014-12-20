@@ -16,7 +16,7 @@ import logging
 from gi.repository import GLib
 
 from udiskie.common import Emitter, samefile, AttrDictView
-from udiskie.dbus import DBusException, DBusService
+from udiskie.dbus import DBusException, connect_service
 from udiskie.locale import _
 from udiskie.async import Coroutine, Return
 
@@ -578,7 +578,7 @@ class Device(object):
 # UDisks2 service wrapper
 # ----------------------------------------
 
-class Daemon(Emitter, DBusService):
+class Daemon(Emitter):
 
     """
     Listen to state changes to provide automatic synchronization.
@@ -663,7 +663,7 @@ class Daemon(Emitter, DBusService):
     @classmethod
     @Coroutine.from_generator_function
     def create(cls):
-        proxy = yield cls.connect_service()
+        proxy = yield connect_service(cls)
         udisks = cls(proxy)
         yield udisks._sync()
         yield Return(udisks)

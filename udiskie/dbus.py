@@ -16,7 +16,7 @@ __all__ = ['PropertiesProxy',
            'InterfaceProxy',
            'ObjectProxy',
            'BusProxy',
-           'DBusService',
+           'connect_service',
            'DBusException']
 
 
@@ -450,28 +450,22 @@ class DBusProxyNewForBus(Async):
             else:
                 self.callback(value)
 
-class DBusService(object):
 
+@Coroutine.from_generator_function
+def connect_service(cls):
     """
-    Abstract base class for UDisksX service wrapper classes.
+    Connect to the service object on DBus.
+
+    :returns: new proxy object for the service
+    :rtype: InterfaceProxy
+    :raises BusException: if unable to connect to service.
     """
-
-    @classmethod
-    @Coroutine.from_generator_function
-    def connect_service(cls):
-        """
-        Connect to the service object on DBus.
-
-        :returns: new proxy object for the service
-        :rtype: InterfaceProxy
-        :raises BusException: if unable to connect to service.
-        """
-        proxy = yield DBusProxyNewForBus(
-            Gio.BusType.SYSTEM,
-            Gio.DBusProxyFlags.NONE,
-            info=None,
-            name=cls.BusName,
-            object_path=cls.ObjectPath,
-            interface_name=cls.Interface,
-        )
-        yield Return(InterfaceProxy(proxy))
+    proxy = yield DBusProxyNewForBus(
+        Gio.BusType.SYSTEM,
+        Gio.DBusProxyFlags.NONE,
+        info=None,
+        name=cls.BusName,
+        object_path=cls.ObjectPath,
+        interface_name=cls.Interface,
+    )
+    yield Return(InterfaceProxy(proxy))
