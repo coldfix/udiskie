@@ -49,8 +49,6 @@ class Device(object):
 
     Interface = 'org.freedesktop.UDisks.Device'
 
-    Exception = DBusException
-
     # string representation
     def __str__(self):
         """Display as object path."""
@@ -93,7 +91,7 @@ class Device(object):
         try:
             self._proxy.property.DeviceFile
             return True
-        except self.Exception:
+        except DBusException:
             return False
 
     @property

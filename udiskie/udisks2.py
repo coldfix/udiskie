@@ -193,8 +193,6 @@ class Device(object):
     This class is intended to be used only internally.
     """
 
-    Exception = DBusException
-
     def __init__(self, udisks, object_path, interface_service):
         """
         Initialize an instance with the given DBus proxy object.
