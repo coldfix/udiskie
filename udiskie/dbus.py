@@ -12,12 +12,14 @@ from gi.repository import GLib
 from udiskie.async import Async, Coroutine, Return
 
 
-__all__ = ['PropertiesProxy',
-           'InterfaceProxy',
-           'ObjectProxy',
-           'BusProxy',
-           'connect_service',
-           'DBusException']
+__all__ = [
+    'InterfaceProxy',
+    'PropertiesProxy',
+    'ObjectProxy',
+    'BusProxy',
+    'connect_service',
+    'DBusException',
+]
 
 
 DBusException = GLib.GError
@@ -72,64 +74,6 @@ class DBusCall(Async):
             self.callback(*value.unpack())
 
 
-class MethodProxy(object):
-
-    """
-    DBus proxy object for asynchronously calling a specified method.
-    """
-
-    def __init__(self, proxy_object, method_name):
-        """Initialize from a `Gio.DBusProxy` and a method name."""
-        self.__proxy_object = proxy_object
-        self.__method_name = method_name
-
-    def __call__(self, signature='()', *args):
-        """Asynchronously call the method, returns an `Async`."""
-        return DBusCall(self.__proxy_object,
-                        self.__method_name,
-                        signature,
-                        args)
-
-
-class MethodsProxy(object):
-
-    """
-    DBus proxy object for calling methods on a specific interface.
-    """
-
-    def __init__(self, proxy_object):
-        """Initialize from a `Gio.DBusProxy`."""
-        self.__proxy_object = proxy_object
-
-    def __getattr__(self, method_name):
-        """Return a `MethodProxy` as attribute."""
-        return MethodProxy(self.__proxy_object, method_name)
-
-
-class PropertyCache(object):
-
-    """Grants access to properties of a DBus object as keys."""
-
-    PropertiesInterface = 'org.freedesktop.DBus.Properties'
-
-    def __init__(self, dbus_object, interface_name):
-        """
-        Initialize from a ObjectProxy and interface name.
-
-        :param ObjectProxy dbus_object:
-        :param str interface_name:
-        """
-        self._proxy = dbus_object.get_interface(PropertiesInterface)
-        self._interface = interface_name
-
-    @Coroutine.from_generator_function
-    def sync(self):
-        self.cache = yield self._proxy.method.GetAll('(s)', self._interface)
-
-    def __getitem__(self, name):
-        return self.cache[name]
-
-
 class InterfaceProxy(object):
 
     """
@@ -155,7 +99,6 @@ class InterfaceProxy(object):
         """
         self._proxy = proxy
         self.object_path = proxy.get_object_path()
-        self.method = MethodsProxy(proxy)
 
     @property
     def object(self):
@@ -180,6 +123,22 @@ class InterfaceProxy(object):
         """
         interface = self._proxy.get_interface_name()
         return self.object.connect(interface, event, handler)
+
+    def call(self, method_name, signature='()', *args):
+        return DBusCall(self._proxy, method_name, signature, args)
+
+
+class PropertiesProxy(InterfaceProxy):
+
+    Interface = 'org.freedesktop.DBus.Properties'
+
+    def __init__(self, proxy, interface_name=None):
+        super(PropertiesProxy, self).__init__(proxy)
+        self.interface_name = interface_name
+
+    def GetAll(self, interface_name=None):
+        return self.call('GetAll', '(s)',
+                         interface_name or self.interface_name)
 
 
 class ObjectProxy(object):
@@ -235,6 +194,11 @@ class ObjectProxy(object):
         proxy = yield self._get_interface(name)
         yield Return(InterfaceProxy(proxy))
 
+    @Coroutine.from_generator_function
+    def get_property_interface(self, interface_name=None):
+        proxy = yield self._get_interface(PropertiesProxy.Interface)
+        yield Return(PropertiesProxy(proxy, interface_name))
+
     @property
     def bus(self):
         """
@@ -256,6 +220,12 @@ class ObjectProxy(object):
         """
         object_path = self.object_path
         return self.bus.connect(interface, event, object_path, handler)
+
+    @Coroutine.from_generator_function
+    def call(self, interface_name, method_name, signature='()', *args):
+        proxy = yield self.get_interface(interface_name)
+        result = yield proxy.call(method_name, signature, *args)
+        yield Return(result)
 
 
 class DBusCallback(object):
