@@ -175,7 +175,8 @@ class ObjectProxy(object):
         """
         return DBusProxyNew(
             self.connection,
-            Gio.DBusProxyFlags.NONE,
+            Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES |
+            Gio.DBusProxyFlags.DO_NOT_CONNECT_SIGNALS,
             info=None,
             name=self.bus_name,
             object_path=self.object_path,
@@ -432,7 +433,8 @@ def connect_service(cls):
     """
     proxy = yield DBusProxyNewForBus(
         Gio.BusType.SYSTEM,
-        Gio.DBusProxyFlags.NONE,
+        Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES |
+        Gio.DBusProxyFlags.DO_NOT_CONNECT_SIGNALS,
         info=None,
         name=cls.BusName,
         object_path=cls.ObjectPath,
