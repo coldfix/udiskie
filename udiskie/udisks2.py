@@ -11,6 +11,7 @@ udisks1 module.
 """
 
 from copy import copy, deepcopy
+from functools import partial
 import logging
 
 from gi.repository import GLib
@@ -24,6 +25,11 @@ __all__ = ['Daemon']
 
 
 def object_kind(object_path):
+    """
+    Parse the kind of object from an UDisks2 object path.
+
+    Example: /org/freedesktop/UDisks2/block_devices/sdb1 => device
+    """
     try:
         return {
             'block_devices': 'device',
@@ -94,87 +100,61 @@ def encode(s):
 # Internal helper classes
 # ----------------------------------------
 
-class OfflineProxy(object):
+class MethodsProxy(object):
 
-    """
-    Provide offline attribute access to a single interface on a DBus object.
+    """Provide methods as attributes for one interface of a DBus object."""
 
-    Object properties are accessed statically via table lookup.
+    def __init__(self, object_proxy, interface_name):
+        """Initialize from (ObjectProxy, str)."""
+        self._object_proxy = object_proxy
+        self._interface_name = interface_name
 
-    This access method is to be preferred over the dynamic property lookup
-    in many cases as it is immune to a number of race conditions.
-    """
-
-    def __init__(self, proxy, interface, data):
-        """
-        Initialize wrapper.
-
-        :param dbus.ObjectProxy proxy: for dynamic property/method lookup
-        :param dict data: for static property lookup
-        """
-        self.property = AttrDictView(data)
-        self._proxy = proxy
-        self._interface = interface
-
-    @property
-    def method(self):
-        return self._proxy.get_interface(self._interface).method
+    def __getattr__(self, name):
+        """Get a proxy for the specified method on this interface."""
+        return partial(self._object_proxy.call, self._interface_name, name)
 
 
-class OfflineInterfaceService(object):
+class MethodHub(object):
 
-    """
-    Provide offline attribute access to multiple interfaces on a DBus object.
+    """Provide MethodsProxies for queried interfaces of a DBus object."""
 
-    Method access is performed dynamically via the given DBus proxy object.
-    """
-
-    def __init__(self, proxy, data):
-        """
-        Store DBus proxy and static property values.
-
-        :param dbus.proxies.ProxyObject proxy: DBus object for method access
-        :param dict data: interface and their properties a{sa{sv}}
-        """
-        self._proxy = proxy
-        self._data = data
+    def __init__(self, object_proxy):
+        """Initialize from (ObjectProxy)."""
+        self._object_proxy = object_proxy
 
     def __getattr__(self, key):
-        """Return a wrapper for the requested interface."""
+        """Return a MethodsProxy for the requested interface."""
+        return MethodsProxy(self._object_proxy, Interface[key])
+
+
+class PropertyHub(object):
+
+    """Provide attribute accessors for queried interfaces of a DBus object."""
+
+    def __init__(self, interfaces_and_properties):
+        """Initialize from (dict)."""
+        self._interfaces_and_properties = interfaces_and_properties
+
+    def __getattr__(self, key):
+        """Return an AttrDictView for properties on the requested interface."""
         interface = Interface[key]
         try:
-            return OfflineProxy(self._proxy, interface,
-                                self._data[interface])
-        except:
-            return NullProxy(key, self._proxy.object_path)
+            return AttrDictView(self._interfaces_and_properties[interface])
+        except KeyError:
+            return PropertiesNotAvailable()
 
 
-class NoneServer(object):
+class PropertiesNotAvailable(object):
 
-    """Yield None when asked for any attribute."""
-
-    def __getattr__(self, key):
-        return None
-
-
-class NullProxy(object):
-
-    """Interface not available."""
-
-    def __init__(self, name, object_path):
-        self.object_path = object_path
-        self._name = name
-        self.property = NoneServer()
+    """Null class for properties of an unavailable interface."""
 
     def __nonzero__(self):      # python2
         return False
     __bool__ = __nonzero__      # python3
 
-    @property
-    def method(self):
-        """Access object methods dynamically via DBus."""
-        raise RuntimeError(_("Interface {0!r} not available for {1}",
-                             self._name, self.object_path))
+    def __getattr__(self, key):
+        """Return None when asked for any attribute."""
+        return None
 
 
 # ----------------------------------------
@@ -184,26 +164,19 @@ class NullProxy(object):
 class Device(object):
 
     """
-    Wrapper class for DBus API objects representing devices.
+    Proxy class for UDisks2 devices.
 
-    Properties can be resolved dynamically through DBus or via table lookup
-    by providing an appropriate interface_service in the constructor. See
-    ``OfflineInterfaceService``.
-
-    This class is intended to be used only internally.
+    Properties are read from the cached values retrieved by the Daemon class.
+    Methods are executed asynchronously, and hence return Asyncs instead of
+    returning the result directly.
     """
 
-    def __init__(self, udisks, object_path, interface_service):
-        """
-        Initialize an instance with the given DBus proxy object.
-
-        :param UDisks2 udisks: used to create other Device instances
-        :param str object_path: object path of the device
-        :param InterfaceService interface_service: used to access DBus API
-        """
-        self._udisks = udisks
+    def __init__(self, daemon, object_path, property_hub, method_hub):
+        """Initialize from (Daemon, str, PropertyHub, MethodHub)."""
+        self._daemon = daemon
         self.object_path = object_path
-        self._I = interface_service
+        self._P = property_hub
+        self._M = method_hub
 
     def __str__(self):
         """Show as object_path."""
@@ -217,10 +190,6 @@ class Device(object):
         """Comparison by object_path."""
         return not (self == other)
 
-    def __nonzero__(self):      # python2
-        return self.is_valid
-    __bool__ = __nonzero__      # python3
-
     def is_file(self, path):
         """Comparison by mount and device file path."""
         return samefile(path, self.device_file) or any(
@@ -228,24 +197,19 @@ class Device(object):
 
     # availability of interfaces
     @property
-    def is_valid(self):
-        """Check if any interface is available for this object path."""
-        return bool(self._I)
-
-    @property
     def is_drive(self):
         """Check if the device is a drive."""
-        return bool(self._I.Drive)
+        return bool(self._P.Drive)
 
     @property
     def is_block(self):
         """Check if the device is a block device."""
-        return bool(self._I.Block)
+        return bool(self._P.Block)
 
     @property
     def is_partition_table(self):
         """Check if the device is a partition table."""
-        return bool(self._I.PartitionTable)
+        return bool(self._P.PartitionTable)
 
     @property
     def is_partition(self):
@@ -253,17 +217,17 @@ class Device(object):
         # Sometimes udisks2 empties the Partition interface before removing
         # the device. In this case, we want to report .is_partition=False, so
         # properties like .partition_slave will not be used.
-        return bool(self._I.Partition and self.partition_slave)
+        return bool(self._P.Partition and self.partition_slave)
 
     @property
     def is_filesystem(self):
         """Check if the device is a filesystem."""
-        return bool(self._I.Filesystem)
+        return bool(self._P.Filesystem)
 
     @property
     def is_luks(self):
         """Check if the device is a LUKS container."""
-        return bool(self._I.Encrypted)
+        return bool(self._P.Encrypted)
 
     # ----------------------------------------
     # Drive
@@ -288,22 +252,22 @@ class Device(object):
     @property
     def is_detachable(self):
         """Check if the drive that owns this device can be detached."""
-        return bool(self._assocdrive._I.Drive.property.CanPowerOff)
+        return bool(self._assocdrive._P.Drive.CanPowerOff)
 
     @property
     def is_ejectable(self):
         """Check if the drive that owns this device can be ejected."""
-        return bool(self._assocdrive._I.Drive.property.Ejectable)
+        return bool(self._assocdrive._P.Drive.Ejectable)
 
     @property
     def has_media(self):
         """Check if there is media available in the drive."""
-        return bool(self._assocdrive._I.Drive.property.MediaAvailable)
+        return bool(self._assocdrive._P.Drive.MediaAvailable)
 
     # Drive methods
     def eject(self, auth_no_user_interaction=None):
         """Eject media from the device."""
-        return self._assocdrive._I.Drive.method.Eject(
+        return self._assocdrive._M.Drive.Eject(
             '(a{sv})',
             filter_opt({
                 'auth.no_user_interaction': ('b', auth_no_user_interaction),
@@ -312,7 +276,7 @@ class Device(object):
 
     def detach(self, auth_no_user_interaction=None):
         """Detach the device by e.g. powering down the physical port."""
-        return self._assocdrive._I.Drive.method.PowerOff(
+        return self._assocdrive._M.Drive.PowerOff(
             '(a{sv})',
             filter_opt({
                 'auth.no_user_interaction': ('b', auth_no_user_interaction),
@@ -327,22 +291,22 @@ class Device(object):
     @property
     def device_file(self):
         """The filesystem path of the device block file."""
-        return decode(self._I.Block.property.Device)
+        return decode(self._P.Block.Device)
 
     @property
     def device_presentation(self):
         """The device file path to present to the user."""
-        return decode(self._I.Block.property.PreferredDevice)
+        return decode(self._P.Block.PreferredDevice)
 
     @property
     def device_size(self):
         """The size of the device in bytes."""
-        return self._I.Block.property.Size
+        return self._P.Block.Size
 
     @property
     def id_usage(self):
         """Device usage class, for example 'filesystem' or 'crypto'."""
-        return decode(self._I.Block.property.IdUsage)
+        return decode(self._P.Block.IdUsage)
 
     @property
     def is_crypto(self):
@@ -352,7 +316,7 @@ class Device(object):
     @property
     def is_ignored(self):
         """Check if the device should be ignored."""
-        return self._I.Block.property.HintIgnore
+        return self._P.Block.HintIgnore
 
     @property
     def device_id(self):
@@ -363,12 +327,12 @@ class Device(object):
         `/dev/disk/by-id/`.
         """
         if self.is_block:
-            for filename in self._I.Block.property.Symlinks:
+            for filename in self._P.Block.Symlinks:
                 parts = decode(filename).split('/')
                 if parts[-2] == 'by-id':
                     return parts[-1]
         elif self.is_drive:
-            return decode(self._assocdrive._I.Drive.property.Id)
+            return decode(self._assocdrive._P.Drive.Id)
         return ''
 
     @property
@@ -381,22 +345,22 @@ class Device(object):
         IdUsage     'filesystem'    'crypto'
         IdType      'ext4'          'crypto_LUKS'
         """
-        return decode(self._I.Block.property.IdType)
+        return decode(self._P.Block.IdType)
 
     @property
     def id_label(self):
         """Label of the device if available."""
-        return decode(self._I.Block.property.IdLabel)
+        return decode(self._P.Block.IdLabel)
 
     @property
     def id_uuid(self):
         """Device UUID."""
-        return decode(self._I.Block.property.IdUUID)
+        return decode(self._P.Block.IdUUID)
 
     @property
     def luks_cleartext_slave(self):
         """Get wrapper to the LUKS crypto device."""
-        return self._udisks[self._I.Block.property.CryptoBackingDevice]
+        return self._daemon[self._P.Block.CryptoBackingDevice]
 
     @property
     def is_luks_cleartext(self):
@@ -408,7 +372,7 @@ class Device(object):
         """Check if the device is external."""
         # NOTE: Checking for equality HintSystem==False returns False if the
         # property is resolved to a None value (interface not available).
-        if self._I.Block.property.HintSystem == False:
+        if self._P.Block.HintSystem == False:
             return True
         # NOTE: udisks2 seems to guess incorrectly in some cases. This
         # leads to HintSystem=True for unlocked devices. In order to show
@@ -434,7 +398,7 @@ class Device(object):
         if cleartext:
             return cleartext.drive
         if self.is_block:
-            return self._udisks[self._I.Block.property.Drive]
+            return self._daemon[self._P.Block.Drive]
         return None
 
     @property
@@ -443,7 +407,7 @@ class Device(object):
         Get the top level block device in the ancestry of this device.
         """
         drive = self.drive
-        for device in self._udisks:
+        for device in self._daemon:
             if device.is_drive:
                 continue
             if device.is_toplevel and device.drive == drive:
@@ -453,17 +417,17 @@ class Device(object):
     @property
     def should_automount(self):
         """Check if the device should be automounted."""
-        return bool(self._I.Block.property.HintAuto)
+        return bool(self._P.Block.HintAuto)
 
     @property
     def icon_name(self):
         """Return the recommended device icon name."""
-        return self._I.Block.property.HintIconName or 'drive-removable-media'
+        return self._P.Block.HintIconName or 'drive-removable-media'
 
     @property
     def symbolic_icon_name(self):
         """Return the recommended device symbolic icon name."""
-        return self._I.Block.property.HintSymbolicIconName or 'drive-removable-media'
+        return self._P.Block.HintSymbolicIconName or 'drive-removable-media'
 
     # ----------------------------------------
     # Partition
@@ -473,7 +437,7 @@ class Device(object):
     @property
     def partition_slave(self):
         """Get the partition slave (container)."""
-        return self._udisks[self._I.Partition.property.Table]
+        return self._daemon[self._P.Partition.Table]
 
     # ----------------------------------------
     # Filesystem
@@ -483,12 +447,12 @@ class Device(object):
     @property
     def is_mounted(self):
         """Check if the device is mounted."""
-        return bool(self._I.Filesystem.property.MountPoints)
+        return bool(self._P.Filesystem.MountPoints)
 
     @property
     def mount_paths(self):
         """Return list of active mount paths."""
-        return list(map(decode, self._I.Filesystem.property.MountPoints or ()))
+        return list(map(decode, self._P.Filesystem.MountPoints or ()))
 
     # Filesystem methods
     def mount(self,
@@ -496,7 +460,7 @@ class Device(object):
               options=None,
               auth_no_user_interaction=None):
         """Mount filesystem."""
-        return self._I.Filesystem.method.Mount(
+        return self._M.Filesystem.Mount(
             '(a{sv})',
             filter_opt({
                 'fstype': ('s', fstype),
@@ -507,7 +471,7 @@ class Device(object):
 
     def unmount(self, force=None, auth_no_user_interaction=None):
         """Unmount filesystem."""
-        return self._I.Filesystem.method.Unmount(
+        return self._M.Filesystem.Unmount(
             '(a{sv})',
             filter_opt({
                 'force': ('b', force),
@@ -525,7 +489,7 @@ class Device(object):
         """Get wrapper to the unlocked luks cleartext device."""
         if not self.is_luks:
             return None
-        for device in self._udisks:
+        for device in self._daemon:
             if device.luks_cleartext_slave == self:
                 return device
         return None
@@ -536,10 +500,9 @@ class Device(object):
         return bool(self.luks_cleartext_holder)
 
     # Encrypted methods
-    @Coroutine.from_generator_function
     def unlock(self, password, auth_no_user_interaction=None):
         """Unlock Luks device."""
-        return self._I.Encrypted.method.Unlock(
+        return self._M.Encrypted.Unlock(
             '(sa{sv})',
             password,
             filter_opt({
@@ -549,7 +512,7 @@ class Device(object):
 
     def lock(self, auth_no_user_interaction=None):
         """Lock Luks device."""
-        return self._I.Encrypted.method.Lock(
+        return self._M.Encrypted.Lock(
             '(a{sv})',
             filter_opt({
                 'auth.no_user_interaction': ('b', auth_no_user_interaction),
@@ -566,7 +529,7 @@ class Device(object):
         if self.is_mounted or self.is_unlocked:
             return True
         if self.is_partition_table:
-            for device in self._udisks:
+            for device in self._daemon:
                 if device.partition_slave == self and device.in_use:
                     return True
         return False
@@ -597,8 +560,8 @@ class Daemon(Emitter):
 
     def __iter__(self):
         """Iterate over all devices."""
-        return filter(None, (self[path] for path in self.paths()
-                             if object_kind(path) in ('device', 'drive')))
+        return (self[path] for path in self.paths()
+                if object_kind(path) in ('device', 'drive'))
 
     def __getitem__(self, object_path):
         return self.get(object_path)
@@ -654,7 +617,7 @@ class Daemon(Emitter):
         """Synchronize state."""
         def update_objects(objects):
             self._objects = objects
-        update = self._proxy.method.GetManagedObjects()
+        update = self._proxy.call('GetManagedObjects', '()')
         update.callbacks.append(update_objects)
         return update
 
@@ -662,9 +625,9 @@ class Daemon(Emitter):
     @Coroutine.from_generator_function
     def create(cls):
         proxy = yield connect_service(cls)
-        udisks = cls(proxy)
-        yield udisks._sync()
-        yield Return(udisks)
+        daemon = cls(proxy)
+        yield daemon._sync()
+        yield Return(daemon)
 
     # UDisks2 interface
     def paths(self):
@@ -678,10 +641,10 @@ class Daemon(Emitter):
             interfaces_and_properties = self._objects.get(object_path)
             if not interfaces_and_properties:
                 return None
-        interface_service = OfflineInterfaceService(
-            self._proxy.object.bus.get_object(object_path),
-            interfaces_and_properties)
-        return Device(self, object_path, interface_service)
+        property_hub = PropertyHub(interfaces_and_properties)
+        method_hub = MethodHub(
+            self._proxy.object.bus.get_object(object_path))
+        return Device(self, object_path, property_hub, method_hub)
 
     def trigger(self, event, device, *args):
         self._log.debug(_("+++ {0}: {1}", event, device))
