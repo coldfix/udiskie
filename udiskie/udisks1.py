@@ -19,6 +19,7 @@ guarantee the accessibilityy of device properties in between operations.
 """
 
 from copy import copy
+from functools import partial
 import logging
 import os.path
 
@@ -36,11 +37,18 @@ def filter_opt(opt):
     return [k for k, v in opt.items() if v]
 
 
-class DeviceProxy(object):
+class MethodsProxy(object):
 
-    def __init__(self, dbus_proxy, properties):
-        self.method = dbus_proxy.method
-        self.property = AttrDictView(properties)
+    """Provide methods as attributes for one interface of a DBus object."""
+
+    def __init__(self, object_proxy, interface_name):
+        """Initialize from (ObjectProxy, str)."""
+        self._object_proxy = object_proxy
+        self._interface_name = interface_name
+
+    def __getattr__(self, name):
+        """Get a proxy for the specified method on this interface."""
+        return partial(self._object_proxy.call, self._interface_name, name)
 
 
 class Device(object):
@@ -62,42 +70,28 @@ class Device(object):
         """Comparison by object path."""
         return not (self == other)
 
-    def __nonzero__(self):      # python2
-        """Check device validity."""
-        return self.is_valid
-    __bool__ = __nonzero__      # python3
-
     def is_file(self, path):
         """Comparison by mount and device file path."""
         return samefile(path, self.device_file) or any(
             samefile(path, mp) for mp in self.mount_paths)
 
     # construction
-    def __init__(self, udisks, method_proxy, properties):
+    def __init__(self, daemon, object_path, property_proxy, method_proxy):
         """
         Initialize an instance with the given DBus proxy object.
 
         :param dbus.ObjectProxy object:
         """
-        self._proxy = DeviceProxy(method_proxy, properties)
-        self.object_path = method_proxy.object_path
-        self.udisks = udisks
+        self._daemon = daemon
+        self.object_path = object_path
+        self._P = property_proxy
+        self._M = method_proxy
 
     # availability of interfaces
     @property
-    def is_valid(self):
-        """Check if there is a valid DBus object for this object path."""
-        # TODO
-        try:
-            self._proxy.property.DeviceFile
-            return True
-        except DBusException:
-            return False
-
-    @property
     def is_drive(self):
         """Check if the device is a drive."""
-        return self._proxy.property.DeviceIsDrive
+        return self._P.DeviceIsDrive
 
     @property
     def is_block(self):
@@ -107,12 +101,12 @@ class Device(object):
     @property
     def is_partition_table(self):
         """Check if the device is a partition table."""
-        return self._proxy.property.DeviceIsPartitionTable
+        return self._P.DeviceIsPartitionTable
 
     @property
     def is_partition(self):
         """Check if the device has a partition slave."""
-        return self._proxy.property.DeviceIsPartition
+        return self._P.DeviceIsPartition
 
     @property
     def is_filesystem(self):
@@ -122,7 +116,7 @@ class Device(object):
     @property
     def is_luks(self):
         """Check if the device is a LUKS container."""
-        return self._proxy.property.DeviceIsLuks
+        return self._P.DeviceIsLuks
 
     # ----------------------------------------
     # Drive
@@ -136,30 +130,30 @@ class Device(object):
         """Check if the drive that owns this device can be detached."""
         if not self.is_drive:
             return None
-        return self._proxy.property.DriveCanDetach
+        return self._P.DriveCanDetach
 
     @property
     def is_ejectable(self):
         """Check if the drive that owns this device can be ejected."""
         if not self.is_drive:
             return None
-        return self._proxy.property.DriveIsMediaEjectable
+        return self._P.DriveIsMediaEjectable
 
     @property
     def has_media(self):
         """Check if there is media available in the drive."""
-        return self._proxy.property.DeviceIsMediaAvailable
+        return self._P.DeviceIsMediaAvailable
 
     # Drive methods
     def eject(self, unmount=False):
         """Eject media from the device."""
-        return self._proxy.method.DriveEject(
+        return self._M.DriveEject(
             '(as)',
             filter_opt({'unmount': unmount}))
 
     def detach(self):
         """Detach the device by e.g. powering down the physical port."""
-        return self._proxy.method.DriveDetach('(as)', [])
+        return self._M.DriveDetach('(as)', [])
 
     # ----------------------------------------
     # Block
@@ -169,19 +163,19 @@ class Device(object):
     @property
     def device_file(self):
         """The filesystem path of the device block file."""
-        return os.path.normpath(self._proxy.property.DeviceFile)
+        return os.path.normpath(self._P.DeviceFile)
 
     @property
     def device_presentation(self):
         """The device file path to present to the user."""
-        return self._proxy.property.DeviceFilePresentation
+        return self._P.DeviceFilePresentation
 
     # TODO: device_size missing
 
     @property
     def id_usage(self):
         """Device usage class, for example 'filesystem' or 'crypto'."""
-        return self._proxy.property.IdUsage
+        return self._P.IdUsage
 
     @property
     def is_crypto(self):
@@ -191,7 +185,7 @@ class Device(object):
     @property
     def is_ignored(self):
         """Check if the device should be ignored."""
-        return self._proxy.property.DevicePresentationHide
+        return self._P.DevicePresentationHide
 
     @property
     def device_id(self):
@@ -201,7 +195,7 @@ class Device(object):
         This is the basename (last path component) of the symlink in
         `/dev/disk/by-id/`.
         """
-        for filename in self._proxy.property.DeviceFileById:
+        for filename in self._P.DeviceFileById:
             parts = filename.split('/')
             if parts[-2] == 'by-id':
                 return parts[-1]
@@ -217,29 +211,29 @@ class Device(object):
         IdUsage     'filesystem'    'crypto'
         IdType      'ext4'          'crypto_LUKS'
         """
-        return self._proxy.property.IdType
+        return self._P.IdType
 
     @property
     def id_label(self):
         """Label of the device if available."""
-        return self._proxy.property.IdLabel
+        return self._P.IdLabel
 
     @property
     def id_uuid(self):
         """Device UUID."""
-        return self._proxy.property.IdUuid
+        return self._P.IdUuid
 
     @property
     def luks_cleartext_slave(self):
         """Get luks crypto device."""
         if not self.is_luks_cleartext:
             return None
-        return self.udisks[self._proxy.property.LuksCleartextSlave]
+        return self._daemon[self._P.LuksCleartextSlave]
 
     @property
     def is_luks_cleartext(self):
         """Check whether this is a luks cleartext device."""
-        return self._proxy.property.DeviceIsLuksCleartext
+        return self._P.DeviceIsLuksCleartext
 
     @property
     def is_external(self):
@@ -249,7 +243,7 @@ class Device(object):
     @property
     def is_systeminternal(self):
         """Check if the device is internal."""
-        return self._proxy.property.DeviceIsSystemInternal
+        return self._P.DeviceIsSystemInternal
 
     @property
     def drive(self):
@@ -270,12 +264,12 @@ class Device(object):
     @property
     def should_automount(self):
         """Check if the device should be automounted."""
-        return self._proxy.property.DeviceAutomountHint != 'never'
+        return self._P.DeviceAutomountHint != 'never'
 
     @property
     def icon_name(self):
         """Return the recommended device icon name."""
-        return self._proxy.property.DevicePresentationIconName or 'drive-removable-media'
+        return self._P.DevicePresentationIconName or 'drive-removable-media'
 
     symbolic_icon_name = icon_name
 
@@ -289,7 +283,7 @@ class Device(object):
         """Get the partition slave (container)."""
         if not self.is_partition:
             return None
-        return self.udisks[self._proxy.property.PartitionSlave]
+        return self._daemon[self._P.PartitionSlave]
 
     # ----------------------------------------
     # Filesystem
@@ -299,14 +293,14 @@ class Device(object):
     @property
     def is_mounted(self):
         """Check if the device is mounted."""
-        return self._proxy.property.DeviceIsMounted
+        return self._P.DeviceIsMounted
 
     @property
     def mount_paths(self):
         """Return list of active mount paths."""
         if not self.is_mounted:
             return []
-        raw_paths = self._proxy.property.DeviceMountPaths
+        raw_paths = self._P.DeviceMountPaths
         return [os.path.normpath(path) for path in raw_paths]
 
     # Filesystem methods
@@ -318,14 +312,14 @@ class Device(object):
         options = (options or []) + filter_opt({
             'auth_no_user_interaction': auth_no_user_interaction
         })
-        return self._proxy.method.FilesystemMount(
+        return self._M.FilesystemMount(
             '(sas)',
             fstype or self.id_type,
             options)
 
     def unmount(self, force=False):
         """Unmount filesystem."""
-        return self._proxy.method.FilesystemUnmount(
+        return self._M.FilesystemUnmount(
             '(as)',
             filter_opt({'force': force}))
 
@@ -339,7 +333,7 @@ class Device(object):
         """Get unlocked luks cleartext device."""
         if not self.is_luks:
             return None
-        return self.udisks[self._proxy.property.LuksHolder]
+        return self._daemon[self._P.LuksHolder]
 
     @property
     def is_unlocked(self):
@@ -351,14 +345,14 @@ class Device(object):
     # Encrypted methods
     def unlock(self, password):
         """Unlock Luks device."""
-        return self._proxy.method.LuksUnlock(
+        return self._M.LuksUnlock(
             '(sas)',
             password,
             [])
 
     def lock(self):
         """Lock Luks device."""
-        return self._proxy.method.LuksLock('(as)', [])
+        return self._M.LuksLock('(as)', [])
 
     # ----------------------------------------
     # derived properties
@@ -370,7 +364,7 @@ class Device(object):
         if self.is_mounted or self.is_unlocked:
             return True
         if self.is_partition_table:
-            for device in self.udisks:
+            for device in self._daemon:
                 if device.partition_slave == self and device.in_use:
                     return True
         return False
@@ -401,7 +395,7 @@ class Daemon(Emitter):
 
     def __iter__(self):
         """Iterate over all devices."""
-        return filter(None, map(self.get, self.paths()))
+        return (self[object_path] for object_path in self.paths())
 
     def __getitem__(self, object_path):
         return self.get(object_path)
@@ -446,7 +440,6 @@ class Daemon(Emitter):
         self._jobs = {}
         self._devices = {}
         self._property_proxy = {}
-        self._interface_proxy = {}
         self._errors = {'mount': {}, 'unmount': {},
                         'unlock': {}, 'lock': {},
                         'eject': {}, 'detach': {}}
@@ -478,30 +471,22 @@ class Daemon(Emitter):
 
     @Coroutine.from_generator_function
     def update(self, object_path):
-        if (object_path in self._property_proxy
-                and object_path in self._interface_proxy):
+        obj = self._proxy.object.bus.get_object(object_path)
+        try:
             prop_prox = self._property_proxy[object_path]
-            itfc_prox = self._interface_proxy[object_path]
-        else:
-            obj = self._proxy.object.bus.get_object(object_path)
-            tasks = [
-                obj.get_interface('org.freedesktop.DBus.Properties'),
-                obj.get_interface(Device.Interface),
-            ]
-            proxies = yield AsyncList(tasks)
-            prop_prox = proxies[0][1][0]
-            itfc_prox = proxies[1][1][0]
+        except KeyError:
+            prop_prox = yield obj.get_property_interface(Device.Interface)
             self._property_proxy[object_path] = prop_prox
-            self._interface_proxy[object_path] = itfc_prox
 
         try:
-            properties = yield prop_prox.method.GetAll('(s)',
-                                                       Device.Interface)
+            properties = yield prop_prox.GetAll()
         except DBusException:
             self._invalidate(object_path)
-            # TODO: return something useful (NullDevice)
+            # TODO: return something useful? (NullDevice)
         else:
-            device = Device(self, itfc_prox, properties)
+            itfc_prox = MethodsProxy(obj, Device.Interface)
+            device = Device(self, object_path,
+                            AttrDictView(properties), itfc_prox)
             self._devices[object_path] = device
             yield Return(device)
 
@@ -632,7 +617,7 @@ class Daemon(Emitter):
     @Coroutine.from_generator_function
     def _sync(self):
         """Cache all device states."""
-        object_pathes = yield self._proxy.method.EnumerateDevices()
+        object_pathes = yield self._proxy.call('EnumerateDevices', '()')
         yield AsyncList(map(self.update, object_pathes))
         yield Return()
 
@@ -641,4 +626,3 @@ class Daemon(Emitter):
         if object_path in self._devices:
             del self._devices[object_path]
             del self._property_proxy[object_path]
-            del self._interface_proxy[object_path]
