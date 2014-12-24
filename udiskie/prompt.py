@@ -100,8 +100,6 @@ class Dialog(Async):
 
     def __init__(self, dialog):
         self._dialog = dialog
-
-    def start(self):
         self._dialog.connect("response", self._result_handler)
         self._dialog.show()
 
@@ -133,9 +131,9 @@ def password_dialog(title, message):
     response = yield Dialog(dialog)
     dialog.hide()
     if response == Gtk.ResponseType.OK:
-        return entry.get_text()
+        yield Return(entry.get_text())
     else:
-        return None
+        yield Return(None)
 
 
 def get_password_gui(device):

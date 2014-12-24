@@ -195,7 +195,7 @@ class Mounter(object):
         if not self._prompt:
             self._log.error(_('not unlocking {0}: no password prompt', device))
             yield Return(False)
-        password = self._prompt(device)
+        password = yield self._prompt(device)
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))
             yield Return(False)
@@ -344,7 +344,7 @@ class Mounter(object):
             self._log.warn(_('not detaching {0}: drive not detachable', drive))
             yield Return(False)
         if force:
-            self.remove(drive, force=True)
+            yield self.remove(drive, force=True)
         self._log.debug(_('detaching {0}', device))
         yield drive.detach()
         self._log.info(_('detached {0}', device))
