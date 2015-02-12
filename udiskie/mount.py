@@ -381,6 +381,8 @@ class Mounter(object):
         tasks = []
         remove_args = dict(force=True, detach=detach, eject=eject, lock=lock)
         for device in self.get_all_handleable():
+            if device.parent_object_path != '/':
+                continue
             if (device.is_filesystem
                     or device.is_crypto
                     or device.is_partition_table

@@ -534,6 +534,12 @@ class Device(object):
                     return True
         return False
 
+    @property
+    def parent_object_path(self):
+        return (self._P.Partition.Table
+                or self._P.Block.CryptoBackingDevice
+                or '/')
+
 
 # ----------------------------------------
 # UDisks2 service wrapper

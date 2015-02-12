@@ -369,6 +369,15 @@ class Device(object):
                     return True
         return False
 
+    @property
+    def parent_object_path(self):
+        if self.is_partition:
+            return self._P.PartitionSlave
+        elif self.is_luks_cleartext:
+            return self._P.LuksCleartextSlave
+        else:
+            return '/'
+
 
 class Daemon(Emitter):
 
