@@ -11,6 +11,28 @@ mount and unmount operations. The media will be mounted in a new directory
 under ``/media`` or ``/run/media/USER/``, using the device name if possible.
 
 
+Project pages
+-------------
+
+The `source code`_ is hosted on github.
+
+Check out the `wiki`_ for installation instructions and general questions.
+Feel free to edit.
+
+You can use the github `issue tracker`_ to report any issues you encounter,
+ask general questions or suggest new features.
+
+There is also a public `mailing list`_ if you prefer email.
+
+The `latest release`_ can be downloaded from PyPI.
+
+.. _source code: https://github.com/coldfix/udiskie
+.. _wiki: https://github.com/coldfix/udiskie/wiki
+.. _issue tracker: https://github.com/coldfix/udiskie/issues
+.. _mailing list: https://lists.sourceforge.net/lists/listinfo/udiskie-users
+.. _latest release: https://pypi.python.org/pypi/udiskie/
+
+
 Usage
 -----
 
@@ -207,23 +229,12 @@ Further resources:
 .. _`Icon lookup`: http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
 
 
-Contact
--------
-
-You can use the `github issues`_ to report any issues you encounter, ask
-general questions or suggest new features. There is also a public `mailing
-list`_ on sourceforge if you prefer email.
-
-.. _`github issues`: https://github.com/coldfix/udiskie/issues
-.. _`mailing list`: https://lists.sourceforge.net/lists/listinfo/udiskie-users
-
-
 .. |Version| image:: https://pypip.in/v/udiskie/badge.svg
    :target: https://pypi.python.org/pypi/udiskie/
    :alt: Latest Version
 
 .. |Downloads| image:: https://pypip.in/d/udiskie/badge.svg
-   :target: https://pypi.python.org/pypi/udiskie/
+   :target: https://pypi.python.org/pypi/udiskie#downloads
    :alt: Downloads
 
 .. |License| image:: https://pypip.in/license/udiskie/badge.svg
