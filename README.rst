@@ -218,14 +218,14 @@ list`_ on sourceforge if you prefer email.
 .. _`mailing list`: https://lists.sourceforge.net/lists/listinfo/udiskie-users
 
 
-.. |Version| image:: https://pypip.in/v/udiskie/badge.png
+.. |Version| image:: https://pypip.in/v/udiskie/badge.svg
    :target: https://pypi.python.org/pypi/udiskie/
    :alt: Latest Version
 
-.. |Downloads| image:: https://pypip.in/d/udiskie/badge.png
+.. |Downloads| image:: https://pypip.in/d/udiskie/badge.svg
    :target: https://pypi.python.org/pypi/udiskie/
    :alt: Downloads
 
-.. |License| image:: https://pypip.in/license/udiskie/badge.png
+.. |License| image:: https://pypip.in/license/udiskie/badge.svg
    :target: https://pypi.python.org/pypi/udiskie/
    :alt: License
