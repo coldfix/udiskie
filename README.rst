@@ -227,5 +227,5 @@ list`_ on sourceforge if you prefer email.
    :alt: Downloads
 
 .. |License| image:: https://pypip.in/license/udiskie/badge.svg
-   :target: https://pypi.python.org/pypi/udiskie/
+   :target: https://github.com/coldfix/udiskie/blob/master/COPYING
    :alt: License
