@@ -29,7 +29,7 @@ The `latest release`_ can be downloaded from PyPI.
 .. _source code: https://github.com/coldfix/udiskie
 .. _wiki: https://github.com/coldfix/udiskie/wiki
 .. _issue tracker: https://github.com/coldfix/udiskie/issues
-.. _mailing list: https://lists.sourceforge.net/lists/listinfo/udiskie-users
+.. _mailing list: http://lists.coldfix.de/mailman/listinfo/udiskie
 .. _latest release: https://pypi.python.org/pypi/udiskie/
 
 
