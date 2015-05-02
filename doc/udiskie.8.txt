@@ -54,6 +54,17 @@ Common options
 	Don't use any config file.
 
 
+Shared Mount and Daemon options
+-------------------------------
+
+*-p COMMAND, \--password-prompt=COMMAND*::
+	Password retrieval command. The string is formatted with a Device object
+	as its first argument.
+
+*-P, \--no-password-prompt*::
+	Disable unlocking of LUKS devices.
+
+
 Daemon options
 --------------
 *-a, \--automount*::
@@ -161,6 +172,7 @@ program_options:
   automount: false
   notify: true
   file_manager: xdg-open
+  password_prompt: builtin:gui
 
 mount_options:              # the first matching entry is used:
 - id_type: vfat             # match file system type
