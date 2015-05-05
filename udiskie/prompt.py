@@ -11,6 +11,7 @@ import sys
 from gi.repository import Gtk
 
 from udiskie.locale import _
+from udiskie.compat import basestring
 
 
 __all__ = ['password', 'browser']
@@ -124,7 +125,26 @@ def get_password_tty(device):
         return None
 
 
-def password(hint_gui):
+class DeviceCommand(object):
+
+    def __init__(self, argv):
+        self.argv = argv
+
+    def __call__(self, device):
+        if isinstance(self.argv, basestring):
+            argv = self.argv.format(device)
+            shell = True
+        else:
+            argv = [arg.format(device) for arg in self.argv]
+            shell = False
+        try:
+            blob = subprocess.check_output(argv, shell=shell)
+        except subprocess.CalledProcessError:
+            return None
+        return blob.decode('utf-8').rstrip('\n')
+
+
+def password(password_command):
 
     """
     Create a password prompt function.
@@ -145,10 +165,14 @@ def password(hint_gui):
         else:
             return None
 
-    if hint_gui:
+    if password_command == 'builtin:gui':
         return gui() or tty()
-    else:
+    elif password_command == 'builtin:tty':
         return tty() or gui()
+    elif password_command:
+        return DeviceCommand(password_command)
+    else:
+        return None
 
 
 def browser(browser_name='xdg-open'):

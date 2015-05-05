@@ -273,6 +273,9 @@ class Daemon(_EntryPoint):
         -s, --smart-tray                        Auto hide tray icon
         -T, --no-tray                           Disable tray icon
 
+        -p COMMAND, --password-prompt COMMAND   Command for password retrieval
+        -P, --no-password-prompt                Disable unlocking
+
     Deprecated options:
         -f PROGRAM, --file-manager PROGRAM      Set program for browsing
         -F, --no-file-manager                   Disable browsing
@@ -284,7 +287,8 @@ class Daemon(_EntryPoint):
         'automount': True,
         'notify': True,
         'tray': False,
-        'file_manager': 'xdg-open'
+        'file_manager': 'xdg-open',
+        'password_prompt': 'builtin:gui',
     })
 
     option_rules = extend(_EntryPoint.option_rules, {
@@ -295,6 +299,7 @@ class Daemon(_EntryPoint):
             '--no-tray': False,
             '--smart-tray': 'auto'}),
         'file_manager': OptionalValue('--file-manager'),
+        'password_prompt': OptionalValue('--password-prompt'),
     })
 
     def _init(self, config, options):
@@ -305,11 +310,12 @@ class Daemon(_EntryPoint):
 
         mainloop = GLib.MainLoop()
         daemon = get_backend('Daemon', options['udisks_version'])
+        prompt = udiskie.prompt.password(options['password_prompt'])
         browser = udiskie.prompt.browser(options['file_manager'])
         mounter = udiskie.mount.Mounter(
             mount_options=config.mount_options,
             ignore_device=config.ignore_device,
-            prompt=udiskie.prompt.password(True),
+            prompt=prompt,
             browser=browser,
             udisks=daemon)
 
@@ -389,6 +395,9 @@ class Mount(_EntryPoint):
         -R, --no-recursive                      Disable recursive mounting
 
         -o OPTIONS, --options OPTIONS           Mount option list
+
+        -p COMMAND, --password-prompt COMMAND   Command for password retrieval
+        -P, --no-password-prompt                Disable unlocking
     """
 
     name = 'udiskie-mount'
@@ -397,12 +406,14 @@ class Mount(_EntryPoint):
         'recursive': False,
         'options': None,
         '<device>': None,
+        'password_prompt': 'builtin:tty',
     })
 
     option_rules = extend(_EntryPoint.option_rules, {
         'recursive': Switch('recursive'),
         'options': Value('--options'),
         '<device>': Value('DEVICE'),
+        'password_prompt': OptionalValue('--password-prompt'),
     })
 
     def _init(self, config, options):
@@ -413,10 +424,11 @@ class Mount(_EntryPoint):
             mount_options = lambda dev: opts
         else:
             mount_options = config.mount_options
+        prompt = udiskie.prompt.password(options['password_prompt'])
         self.mounter = udiskie.mount.Mounter(
             mount_options=mount_options,
             ignore_device=config.ignore_device,
-            prompt=udiskie.prompt.password(False),
+            prompt=prompt,
             udisks=get_backend('Sniffer', options['udisks_version']))
 
     def run(self):
