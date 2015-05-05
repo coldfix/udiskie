@@ -167,49 +167,134 @@ The file '.config/udiskie/config.yml' can be used to configure defaults for comm
 # This is an example (nonsense) configuration file for udiskie.
 
 program_options:
-  udisks_version: 2         # 1, 2
-  tray: auto                # auto, true, false
-  automount: false
-  notify: true
-  file_manager: xdg-open
-  password_prompt: builtin:gui
+  # Configure defaults for command line options
 
-mount_options:              # the first matching entry is used:
+  udisks_version:   2       # [int] Specify the version of udisks
+                            # to be used. Set to 0 to use automatic
+                            # discovery.
+
+  tray:             auto    # [bool] Enable the tray icon. "auto"
+                            # means auto-hide the tray icon when
+                            # there are no handled devices.
+
+  automount:        false   # [bool] Enable automatic mounting.
+
+  notify:           true    # [bool] Enable notifications.
+
+
+  file_manager:     xdg-open
+    # [string] Set program to open directories. It will be invoked
+    # with the folder path as its # command line first argument.
+
+  password_prompt: ["gnome-keyring-query", "get", "{.id_uuid}"]
+    # [string|list] Set command to retrieve passwords. If specified
+    # as a list it defines the ARGV array for the program call. If
+    # specified as a string, it will be expanded in a shell-like
+    # manner. Each string will be formatted using str.format with a
+    # Device object as the first argument. For a list of device
+    # attributes, see below. The two special string values
+    # "builtin:gui" and "builtin:tty" signify to use udiskie's
+    # builtin password prompt.
+
+
+mount_options:
+  # List of mount option rules. Only the first matching entry is
+  # used. Each item can match any combination of device attributes
+  # (see below). Additionally, it must define an 'options' list. An
+  # item without any device attributes serves as a catch-all rule.
+
 - id_type: vfat             # match file system type
   options: ro               # list of mount options
 - id_uuid: 9d53-13ba        # match by device UUID
   options: [noexec, nodev]  # mount options can be given as list
 
-ignore_device:              # the first matching entry is used:
-- id_uuid: abcd-ef01        # ignore this device
+
+ignore_device:
+  # Customize udiskie's ignore rules. This config entry has the
+  # same structure as *mount_options*, the only difference being
+  # that the action is defined by the 'ignore' field which is a
+  # boolean defaulting to true. The rules defined here are simply
+  # prepended to the builtin ignore rules, so that it is possible
+  # to completely overwrite the defaults by specifying a catch-all
+  # rule.
+
+- id_uuid:     abcd-ef01    # ignore this device
 - device_file: /dev/dm-5
-  ignore: false             # never ignore this device
+  ignore:      false        # never ignore this device
 
 notifications:
-  timeout: 1.5              # default timeout in seconds
-  device_mounted: 5         # overwrite
-  device_unmounted: false   # disable
-  device_added: false
-  device_removed: false
-  device_unlocked: -1       # use the libnotify default timeout
-  device_locked: -1
-  job_failed: -1
+  # Customize which notifications are shown for how long. Possible
+  # values are:
+  #   positive number         timeout in seconds
+  #   false                   disable
+  #   -1                      use the libnotify default timeout
 
-# customize tray/menu icons, the first existing icon is used
+  timeout:          1.5     # set the default for all notifications
+
+  # Specify only if you want to overwrite the the default:
+  device_mounted:   5       # mount notification
+  device_unmounted: false   # unmount notification
+  device_added:     false   # device has appeared
+  device_removed:   false   # device has disappeared
+  device_unlocked:  -1      # encrypted device was unlocked
+  device_locked:    -1      # encrypted device was locked
+  job_failed:       -1      # mount/unlock/.. has failed
+
 icon_names:
-  media: [drive-removable-media, media-optical]
-  browse: [document-open, folder-open]
-  mount: [udiskie-mount]
+  # Customize the icon set used by the tray widget. Each entry
+  # specifies a list of icon names. The first installed icon from
+  # that list will be used.
+
+  media:   [drive-removable-media, media-optical]
+  browse:  [document-open, folder-open]
+  mount:   [udiskie-mount]
   unmount: [udiskie-unmount]
-  unlock: [udiskie-unlock]
-  lock: [udiskie-lock]
-  eject: [udiskie-eject, media-eject]
-  detach: [udiskie-detach]
-  quit: [application-exit]
+  unlock:  [udiskie-unlock]
+  lock:    [udiskie-lock]
+  eject:   [udiskie-eject, media-eject]
+  detach:  [udiskie-detach]
+  quit:    [application-exit]
 ----------------------------------------------------------------------
 
 All keys are optional. Reasonable defaults are used if you leave them
 unspecified.
+
+
+Device attributes
+-----------------
+
+Some of the config entries make use of Device attributes. The following list
+of attributes is currently availabe, but there is no guarantee that they will
+remain available:
+
+    Attribute               Hint/Example
+
+    is_drive
+    is_block
+    is_partition_table
+    is_partition
+    is_filesystem
+    is_luks
+    is_toplevel
+    is_detachable
+    is_ejectable
+    has_media
+    device_file             block device path, e.g. "/dev/sdb1"
+    device_presentation     display string, e.g. "/dev/sdb1"
+    device_id               unique, persistent device identifer
+    id_usage                E.g. "filesystem" or "crypto"
+    is_crypto
+    is_ignored
+    id_type                 E.g. "ext4" or "crypto_LUKS"
+    id_label                device label
+    id_uuid                 device UUID
+    is_luks_cleartext
+    is_external             udisks flag HintSystem=false
+    is_systeminternal       udisks flag HintSystem=true
+    is_mounted
+    mount_paths             list of mount paths
+    is_unlocked
+    in_use                  device or any of its children mounted
 
 
 See Also
