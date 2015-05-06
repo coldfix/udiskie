@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 __title__ = 'udiskie'
-__version__ = '1.1.3'
+__version__ = '1.2.0'
 
 __summary__ = 'Removable disk automounter for udisks'
 __uri__ = 'https://github.com/coldfix/udiskie'

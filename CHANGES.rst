@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+1.2.0
+~~~~~
+
+- use UDisks2 by default
+- add --password-prompt command line argument and config file entry
+
+
 1.1.3
 ~~~~~
 
