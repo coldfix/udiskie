@@ -229,14 +229,14 @@ Further resources:
 .. _`Icon lookup`: http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
 
 
-.. |Version| image:: https://pypip.in/v/udiskie/badge.svg
+.. |Version| image:: http://coldfix.de:8080/v/udiskie/badge.svg
    :target: https://pypi.python.org/pypi/udiskie/
    :alt: Latest Version
 
-.. |Downloads| image:: https://pypip.in/d/udiskie/badge.svg
+.. |Downloads| image:: http://coldfix.de:8080/d/udiskie/badge.svg
    :target: https://pypi.python.org/pypi/udiskie#downloads
    :alt: Downloads
 
-.. |License| image:: https://pypip.in/license/udiskie/badge.svg
+.. |License| image:: http://coldfix.de:8080/license/udiskie/badge.svg
    :target: https://github.com/coldfix/udiskie/blob/master/COPYING
    :alt: License
