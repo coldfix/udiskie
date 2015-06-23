@@ -44,7 +44,7 @@ except IOError:
 def exec_file(path):
     """Execute a python file and return the `globals` dictionary."""
     namespace = {}
-    with open(convert_path(path)) as f:
+    with open(convert_path(path), 'rb') as f:
         exec(f.read(), namespace, namespace)
     return namespace
 
