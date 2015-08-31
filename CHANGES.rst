@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+1.2.1
+~~~~~
+
+- fix unicode issue in setup script
+- update license/copyright notices
+
+
 1.2.0
 ~~~~~
 
