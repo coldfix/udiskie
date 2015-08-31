@@ -2,10 +2,12 @@
 Mount utilities.
 """
 
+from collections import namedtuple
+from functools import partial
 import logging
 import sys
 
-from udiskie.common import wraps
+from udiskie.common import wraps, setdefault
 from udiskie.compat import filter, basestring
 from udiskie.config import IgnoreDevice, FilterMatcher
 from udiskie.locale import _
@@ -442,3 +444,86 @@ class Mounter(object):
         race conditions inside udiskie.
         """
         return filter(self.is_handleable, self.udisks)
+
+
+# data structs containing the menu hierarchy:
+Device = namedtuple('Device', ['root', 'branches', 'device', 'label', 'methods'])
+Action = namedtuple('Action', ['method', 'device', 'label', 'action'])
+Branch = namedtuple('Branch', ['label', 'groups'])
+
+
+class DeviceActions(object):
+
+    _labels = {
+        'browse': _('Browse {0}'),
+        'mount': _('Mount {0}'),
+        'unmount': _('Unmount {0}'),
+        'unlock': _('Unlock {0}'),
+        'lock': _('Lock {0}'),
+        'eject': _('Eject {0}'),
+        'detach': _('Unpower {0}'),
+    }
+
+    def __init__(self, mounter, actions={}):
+        self._mounter = mounter
+        self._actions = _actions = actions.copy()
+        setdefault(_actions, {
+            'browse': mounter.browse,
+            'mount': mounter.mount,
+            'unmount': mounter.unmount,
+            'unlock': mounter.unlock,
+            'lock': partial(mounter.remove, force=True),
+            'eject': partial(mounter.eject, force=True),
+            'detach': partial(mounter.detach, force=True),
+        })
+
+    def detect(self):
+        """
+        Detect all currently known devices.
+
+        :returns: root of device hierarchy
+        :rtype: Device
+        """
+        root = Device(None, [], None, "", [])
+        device_nodes = dict(map(self._device_node,
+                                self._mounter.get_all_handleable()))
+        # insert child devices as branches into their roots:
+        for object_path, node in device_nodes.items():
+            device_nodes.get(node.root, root).branches.append(node)
+        return root
+
+    def _get_device_methods(self, device):
+        """Return an iterable over all available methods the device has."""
+        if device.is_filesystem:
+            if device.is_mounted:
+                yield 'browse'
+                yield 'unmount'
+            else:
+                yield 'mount'
+        elif device.is_crypto:
+            if device.is_unlocked:
+                yield 'lock'
+            else:
+                yield 'unlock'
+        if device.is_ejectable and device.has_media:
+            yield 'eject'
+        if device.is_detachable:
+            yield 'detach'
+
+    def _device_node(self, device):
+        """Create an empty menu node for the specified device."""
+        label = device.id_label or device.device_presentation
+        # determine available methods
+        methods = [Action(method, device,
+                          self._labels[method].format(label),
+                          partial(self._actions[method], device))
+                   for method in self._get_device_methods(device)]
+        # find the root device:
+        if device.is_partition:
+            root = device.partition_slave.object_path
+        elif device.is_luks_cleartext:
+            root = device.luks_cleartext_slave.object_path
+        else:
+            root = None
+        # in this first step leave branches empty
+        return device.object_path, Device(root, [], device, label, methods)

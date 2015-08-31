@@ -336,10 +336,12 @@ class Daemon(_EntryPoint):
             if options['tray'] not in tray_classes:
                 raise ValueError("Invalid tray: %s" % (options['tray'],))
             icons = udiskie.tray.Icons(config.icon_names)
+            actions = udiskie.mount.DeviceActions(mounter)
             menu_maker = udiskie.tray.SmartUdiskieMenu(
                 mounter,
                 icons,
-                {'quit': mainloop.quit})
+                actions,
+                quit_action=mainloop.quit)
             TrayIcon = tray_classes[options['tray']]
             statusicon = TrayIcon(menu_maker, icons)
         else:
