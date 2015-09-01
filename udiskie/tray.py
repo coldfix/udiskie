@@ -2,8 +2,6 @@
 Tray icon for udiskie.
 """
 
-from itertools import chain
-
 from gi.repository import Gtk
 from gi.repository import Gio
 
@@ -230,38 +228,28 @@ class SmartUdiskieMenu(UdiskieMenu):
                        action.action)
                 for action in node.methods]
 
-    def _leaves_group(self, node, outer_methods, presentation):
-        """
-        Create groups for the specified node.
-
-        :param Device node: device
-        :param list outer_methods: mix-in methods of root device
-        :param str presentation: node label
-        """
+    def _collapse_device(self, node, presentation=""):
+        """Collapse device hierarchy into a flat folder."""
         if (not presentation
                 or node.device.is_mounted
                 or not node.device.is_luks_cleartext):
             presentation = node.label
-        if node.branches:
-            return chain.from_iterable(
-                self._leaves_group(
-                    branch,
-                    self._actions_group(node, presentation) + outer_methods,
-                    presentation)
-                for branch in node.branches)
-        elif len(node.methods) + len(outer_methods) > 0:
-            return Branch(
-                label=presentation,
-                groups=[list(chain(self._actions_group(node, presentation),
-                                   outer_methods))]),
-        else:
-            return ()
+        groups = [group
+                  for branch in node.branches
+                  for group in self._collapse_device(branch, presentation)
+                  if group]
+        groups.append(self._actions_group(node, presentation))
+        return groups
 
     def _prepare_menu(self, node):
         """Overrides UdiskieMenu._prepare_menu."""
         return Branch(
             label=node.label,
-            groups=[list(self._leaves_group(node, [], ""))])
+            groups=[
+                [Branch(branch.label, self._collapse_device(branch))
+                 for branch in node.branches
+                 if branch.methods or branch.branches],
+            ])
 
 
 class TrayIcon(object):
