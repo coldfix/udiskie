@@ -477,10 +477,11 @@ class DeviceActions(object):
             'detach': partial(mounter.detach, force=True),
         })
 
-    def detect(self):
+    def detect(self, root_device=''):
         """
         Detect all currently known devices.
 
+        :param str root_device: object path of root device to return
         :returns: root of device hierarchy
         :rtype: Device
         """
@@ -490,7 +491,9 @@ class DeviceActions(object):
         # insert child devices as branches into their roots:
         for object_path, node in device_nodes.items():
             device_nodes.get(node.root, root).branches.append(node)
-        return root
+        if not root_device:
+            return root
+        return device_nodes[root_device]
 
     def _get_device_methods(self, device):
         """Return an iterable over all available methods the device has."""
