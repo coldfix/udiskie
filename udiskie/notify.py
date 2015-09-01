@@ -5,6 +5,8 @@ Notification utility.
 import logging
 import sys
 
+from gi.repository import GLib
+
 from udiskie.mount import DeviceActions
 from udiskie.dbus import DBusException
 from udiskie.locale import _
@@ -107,6 +109,11 @@ class Notify(object):
 
         :param device: device object
         """
+        # wait for partitions etc to be reported to udiskie, otherwise we
+        # can't discover the actions
+        GLib.timeout_add(500, self._device_added, device)
+
+    def _device_added(self, device):
         device_file = device.device_presentation
         if (device.is_drive or device.is_toplevel) and device_file:
             node_tree = self._actions.detect(device.object_path)
