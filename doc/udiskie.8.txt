@@ -240,6 +240,16 @@ notifications:
   device_locked:    -1      # encrypted device was locked
   job_failed:       -1      # mount/unlock/.. has failed
 
+notification_actions:
+  # Define which actions should be shown on notifications. Note that there
+  # are currently only a limited set of actions available for each
+  # notification. Events that are not explicitly specified show the default
+  # set of actions. Specify an empty list if you don't want to see any
+  # notification for the specified event:
+
+  device_mounted:   [browse]
+  device_added:     [mount]
+
 icon_names:
   # Customize the icon set used by the tray widget. Each entry
   # specifies a list of icon names. The first installed icon from

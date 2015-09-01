@@ -27,7 +27,7 @@ class Notify(object):
     notification services.
     """
 
-    def __init__(self, notify, mounter, timeout=None):
+    def __init__(self, notify, mounter, timeout=None, aconfig=None):
         """
         Initialize notifier and connect to service.
 
@@ -39,6 +39,7 @@ class Notify(object):
         self._mounter = mounter
         self._actions = DeviceActions(mounter)
         self._timeout = timeout or {}
+        self._aconfig = aconfig or {}
         self._default = self._timeout.get('timeout', -1)
         self._log = logging.getLogger(__name__)
         self._notifications = []
@@ -109,9 +110,12 @@ class Notify(object):
 
         :param device: device object
         """
-        # wait for partitions etc to be reported to udiskie, otherwise we
-        # can't discover the actions
-        GLib.timeout_add(500, self._device_added, device)
+        if self._has_actions('device_added'):
+            # wait for partitions etc to be reported to udiskie, otherwise we
+            # can't discover the actions
+            GLib.timeout_add(500, self._device_added, device)
+        else:
+            self._device_added(device)
 
     def _device_added(self, device):
         device_file = device.device_presentation
@@ -192,7 +196,8 @@ class Notify(object):
         if timeout != -1:
             notification.set_timeout(int(timeout * 1000))
         for action in actions:
-            self._add_action(notification, *action)
+            if self._action_enabled(event, action[0]):
+                self._add_action(notification, *action)
         try:
             notification.show()
         except DBusException:
@@ -248,3 +253,25 @@ class Notify(object):
         :rtype: int, float or NoneType
         """
         return self._timeout.get(event, self._default)
+
+    def _action_enabled(self, event, action):
+        """
+        Check if an action for a notification is enabled.
+
+        :param str event: event name
+        :param str action: action name
+        :rtype: bool
+        """
+        event_actions = self._aconfig.get(event)
+        if event_actions is None:
+            return True
+        if event_actions is False:
+            return False
+        return action in event_actions
+
+    def _has_actions(self, event):
+        """
+        Check if a notification type has any enabled actions.
+        """
+        event_actions = self._aconfig.get(event)
+        return event_actions is None or bool(event_actions)

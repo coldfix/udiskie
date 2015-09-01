@@ -239,3 +239,8 @@ class Config(object):
     def icon_names(self):
         """Get the icon names dictionary from the config file."""
         return self._data.get('icon_names', {}).copy()
+
+    @property
+    def notification_actions(self):
+        """Get the notification actions dictionary from the config file."""
+        return self._data.get('notification_actions', {}).copy()

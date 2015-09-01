@@ -326,7 +326,8 @@ class Daemon(_EntryPoint):
             Notify.init('udiskie')
             udiskie.notify.Notify(Notify.Notification.new,
                                   mounter=mounter,
-                                  timeout=config.notifications)
+                                  timeout=config.notifications,
+                                  aconfig=config.notification_actions)
 
         # tray icon (optional):
         if options['tray']:
