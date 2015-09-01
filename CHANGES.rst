@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+1.3.0
+~~~~~
+
+- add actions to "Device added" notification
+- allow to configure which actions should be added to notifications
+
+
 1.2.1
 ~~~~~
 
