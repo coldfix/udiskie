@@ -324,9 +324,15 @@ class Daemon(_EntryPoint):
             import udiskie.notify
             from gi.repository import Notify
             Notify.init('udiskie')
+            aconfig = config.notification_actions
+            if options['automount']:
+                aconfig.setdefault('device_added', [])
+            else:
+                aconfig.setdefault('device_added', ['mount'])
             udiskie.notify.Notify(Notify.Notification.new,
                                   mounter=mounter,
-                                  timeout=config.notifications)
+                                  timeout=config.notifications,
+                                  aconfig=aconfig)
 
         # tray icon (optional):
         if options['tray']:
@@ -336,10 +342,12 @@ class Daemon(_EntryPoint):
             if options['tray'] not in tray_classes:
                 raise ValueError("Invalid tray: %s" % (options['tray'],))
             icons = udiskie.tray.Icons(config.icon_names)
+            actions = udiskie.mount.DeviceActions(mounter)
             menu_maker = udiskie.tray.SmartUdiskieMenu(
                 mounter,
                 icons,
-                {'quit': mainloop.quit})
+                actions,
+                quit_action=mainloop.quit)
             TrayIcon = tray_classes[options['tray']]
             statusicon = TrayIcon(menu_maker, icons)
         else:

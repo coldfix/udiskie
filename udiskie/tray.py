@@ -2,25 +2,16 @@
 Tray icon for udiskie.
 """
 
-from collections import namedtuple
-from functools import partial
-from itertools import chain
-
 from gi.repository import Gtk
 from gi.repository import Gio
 
 from udiskie.common import setdefault
 from udiskie.compat import basestring
 from udiskie.locale import _
+from udiskie.mount import Device, Action, Branch
 
 
 __all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
-
-
-# data structs containing the menu hierarchy:
-Node = namedtuple('Node', ['root', 'branches', 'device', 'label', 'methods'])
-Action = namedtuple('Action', ['label', 'device', 'method'])
-Branch = namedtuple('Branch', ['label', 'groups'])
 
 
 class Icons(object):
@@ -85,27 +76,19 @@ class UdiskieMenu(object):
     Objects of this class generate action menus when being called.
     """
 
-    _menu_labels = {
-        'browse': _('Browse {0}'),
-        'mount': _('Mount {0}'),
-        'unmount': _('Unmount {0}'),
-        'unlock': _('Unlock {0}'),
-        'lock': _('Lock {0}'),
-        'eject': _('Eject {0}'),
-        'detach': _('Unpower {0}'),
-        'quit': _('Quit'), }
+    _quit_label = _('Quit')
 
-    def __init__(self, mounter, icons, actions={}):
+    def __init__(self, mounter, icons, actions, quit_action=None):
         """
         Initialize a new menu maker.
 
         :param object mounter: mount operation provider
         :param Icons icons: icon provider
-        :param dict actions: actions for menu items
+        :param DeviceActions actions: device actions discovery
         :returns: a new menu maker
         :rtype: cls
 
-        Required keys for the ``_menu_labels``, ``_menu_icons`` and
+        Required keys for the ``_labels``, ``_menu_icons`` and
         ``actions`` dictionaries are:
 
             - browse    Open mount location
@@ -122,17 +105,8 @@ class UdiskieMenu(object):
         """
         self._icons = icons
         self._mounter = mounter
-        _actions = actions.copy()
-        setdefault(_actions, {
-            'browse': mounter.browse,
-            'mount': mounter.mount,
-            'unmount': mounter.unmount,
-            'unlock': mounter.unlock,
-            'lock': partial(mounter.remove, force=True),
-            'eject': partial(mounter.eject, force=True),
-            'detach': partial(mounter.detach, force=True),
-            'quit': Gtk.main_quit, })
-        self._actions = _actions
+        self._actions = actions
+        self._quit_action = quit_action
 
     def __call__(self):
         """
@@ -144,10 +118,14 @@ class UdiskieMenu(object):
         # create actions items
         menu = self._branchmenu(self._prepare_menu(self.detect()).groups)
         # append menu item for closing the application
-        if self._actions.get('quit'):
+        if self._quit_action:
             if len(menu) > 0:
                 menu.append(Gtk.SeparatorMenuItem())
-            menu.append(self._actionitem('quit'))
+            menu.append(self._menuitem(
+                self._quit_label,
+                self._icons.get_icon('quit', Gtk.IconSize.MENU),
+                lambda _: self._quit_action()
+            ))
         return menu
 
     def detect(self):
@@ -155,15 +133,9 @@ class UdiskieMenu(object):
         Detect all currently known devices.
 
         :returns: root of device hierarchy
-        :rtype: Node
+        :rtype: Device
         """
-        root = Node(None, [], None, "", [])
-        device_nodes = dict(map(self._device_node,
-                                self._mounter.get_all_handleable()))
-        # insert child devices as branches into their roots:
-        for object_path, node in device_nodes.items():
-            device_nodes.get(node.root, root).branches.append(node)
-        return root
+        return self._actions.detect()
 
     def _branchmenu(self, groups):
         """
@@ -173,6 +145,8 @@ class UdiskieMenu(object):
         :returns: a new menu object holding all groups of the node
         :rtype: Gtk.Menu
         """
+        def make_action_callback(node):
+            return lambda _: node.action()
         menu = Gtk.Menu()
         separate = False
         for group in groups:
@@ -182,10 +156,10 @@ class UdiskieMenu(object):
                 separate = True
             for node in group:
                 if isinstance(node, Action):
-                    menu.append(self._actionitem(
-                        node.method,
-                        feed=[node.label],
-                        bind=[node.device]))
+                    menu.append(self._menuitem(
+                        node.label,
+                        self._icons.get_icon(node.method, Gtk.IconSize.MENU),
+                        make_action_callback(node)))
                 elif isinstance(node, Branch):
                     menu.append(self._menuitem(
                         node.label,
@@ -221,61 +195,11 @@ class UdiskieMenu(object):
             item.connect('activate', onclick)
         return item
 
-    def _actionitem(self, action, feed=(), bind=()):
-        """
-        Create a menu item for the specified action.
-
-        :param str action: name of the action
-        :param tuple feed: parameters for the label text
-        :param tuple bind: parameters for the onclick handler
-        :returns: the menu item object
-        :rtype: Gtk.MenuItem
-        """
-        return self._menuitem(
-            self._menu_labels[action].format(*feed),
-            self._icons.get_icon(action, Gtk.IconSize.MENU),
-            lambda _: self._actions[action](*bind))
-
-    def _get_device_methods(self, device):
-        """Return an iterable over all available methods the device has."""
-        if device.is_filesystem:
-            if device.is_mounted:
-                yield 'browse'
-                yield 'unmount'
-            else:
-                yield 'mount'
-        elif device.is_crypto:
-            if device.is_unlocked:
-                yield 'lock'
-            else:
-                yield 'unlock'
-        if device.is_ejectable and device.has_media:
-            yield 'eject'
-        if device.is_detachable:
-            yield 'detach'
-
-    def _device_node(self, device):
-        """Create an empty menu node for the specified device."""
-        label = device.id_label or device.device_presentation
-        # determine available methods
-        methods = [method
-                   for method in self._get_device_methods(device)
-                   if self._actions[method]]
-        # find the root device:
-        if device.is_partition:
-            root = device.partition_slave.object_path
-        elif device.is_luks_cleartext:
-            root = device.luks_cleartext_slave.object_path
-        else:
-            root = None
-        # in this first step leave branches empty
-        return device.object_path, Node(root, [], device, label, methods)
-
     def _prepare_menu(self, node):
         """
         Prepare the menu hierarchy from the given device tree.
 
-        :param Node node: root node of device hierarchy
+        :param Device node: root node of device hierarchy
         :returns: menu hierarchy
         :rtype: Branch
         """
@@ -283,9 +207,9 @@ class UdiskieMenu(object):
             label=node.label,
             groups=[
                 [self._prepare_menu(branch)
-                 for branch in node.branches],
-                [Action(node.label, node.device, method)
-                 for method in node.methods],
+                 for branch in node.branches
+                 if branch.methods or branch.branches],
+                node.methods,
             ])
 
 
@@ -295,44 +219,37 @@ class SmartUdiskieMenu(UdiskieMenu):
         """
         Create the actions group for the specified device node.
 
-        :param Node node: device
+        :param Device node: device
         :param str presentation: node label
         """
-        return [Action(presentation, node.device, method)
-                for method in node.methods]
+        return [Action(action.method,
+                       action.device,
+                       self._actions._labels[action.method].format(presentation),
+                       action.action)
+                for action in node.methods]
 
-    def _leaves_group(self, node, outer_methods, presentation):
-        """
-        Create groups for the specified node.
-
-        :param Node node: device
-        :param list outer_methods: mix-in methods of root device
-        :param str presentation: node label
-        """
+    def _collapse_device(self, node, presentation=""):
+        """Collapse device hierarchy into a flat folder."""
         if (not presentation
                 or node.device.is_mounted
                 or not node.device.is_luks_cleartext):
             presentation = node.label
-        if node.branches:
-            return chain.from_iterable(
-                self._leaves_group(
-                    branch,
-                    self._actions_group(node, presentation) + outer_methods,
-                    presentation)
-                for branch in node.branches)
-        elif len(node.methods) + len(outer_methods) > 0:
-            return Branch(
-                label=presentation,
-                groups=[list(chain(self._actions_group(node, presentation),
-                                   outer_methods))]),
-        else:
-            return ()
+        groups = [group
+                  for branch in node.branches
+                  for group in self._collapse_device(branch, presentation)
+                  if group]
+        groups.append(self._actions_group(node, presentation))
+        return groups
 
     def _prepare_menu(self, node):
         """Overrides UdiskieMenu._prepare_menu."""
         return Branch(
             label=node.label,
-            groups=[list(self._leaves_group(node, [], ""))])
+            groups=[
+                [Branch(branch.label, self._collapse_device(branch))
+                 for branch in node.branches
+                 if branch.methods or branch.branches],
+            ])
 
 
 class TrayIcon(object):
@@ -440,7 +357,7 @@ class AutoTray(TrayIcon):
         self._conn_left = None
         self._conn_right = None
         # Okay, the following is BAD:
-        menumaker._actions['quit'] = None
+        menumaker._quit_action = None
         menumaker._mounter.udisks.connect_all(self)
         self.show(self.has_menu())
 

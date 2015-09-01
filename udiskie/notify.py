@@ -5,6 +5,9 @@ Notification utility.
 import logging
 import sys
 
+from gi.repository import GLib
+
+from udiskie.mount import DeviceActions
 from udiskie.dbus import DBusException
 from udiskie.locale import _
 
@@ -24,7 +27,7 @@ class Notify(object):
     notification services.
     """
 
-    def __init__(self, notify, mounter, timeout=None):
+    def __init__(self, notify, mounter, timeout=None, aconfig=None):
         """
         Initialize notifier and connect to service.
 
@@ -34,7 +37,9 @@ class Notify(object):
         """
         self._notify = notify
         self._mounter = mounter
+        self._actions = DeviceActions(mounter)
         self._timeout = timeout or {}
+        self._aconfig = aconfig or {}
         self._default = self._timeout.get('timeout', -1)
         self._log = logging.getLogger(__name__)
         self._notifications = []
@@ -105,13 +110,37 @@ class Notify(object):
 
         :param device: device object
         """
+        if self._has_actions('device_added'):
+            # wait for partitions etc to be reported to udiskie, otherwise we
+            # can't discover the actions
+            GLib.timeout_add(500, self._device_added, device)
+        else:
+            self._device_added(device)
+
+    def _device_added(self, device):
         device_file = device.device_presentation
         if (device.is_drive or device.is_toplevel) and device_file:
+            node_tree = self._actions.detect(device.object_path)
+            flat_actions = self._flatten_node(node_tree)
+            actions = [
+                (action.method,
+                 action.label.format(action.device.id_label or action.device.device_presentation),
+                 action.action)
+                for action in flat_actions
+            ]
             self._show_notification(
                 'device_added',
                 _('Device added'),
                 _('device appeared on {0.device_presentation}', device),
-                'drive-removable-media')
+                'drive-removable-media',
+                *actions)
+
+    def _flatten_node(self, node):
+        actions = [action
+                   for branch in node.branches
+                   for action in self._flatten_node(branch)]
+        actions += node.methods
+        return actions
 
     def device_removed(self, device):
         """
@@ -152,7 +181,7 @@ class Notify(object):
 
     def _show_notification(self,
                            event, summary, message, icon,
-                           action=None):
+                           *actions):
         """
         Show a notification.
 
@@ -166,8 +195,9 @@ class Notify(object):
         timeout = self._get_timeout(event)
         if timeout != -1:
             notification.set_timeout(int(timeout * 1000))
-        if action:
-            self._add_action(notification, *action)
+        for action in actions:
+            if self._action_enabled(event, action[0]):
+                self._add_action(notification, *action)
         try:
             notification.show()
         except DBusException:
@@ -223,3 +253,25 @@ class Notify(object):
         :rtype: int, float or NoneType
         """
         return self._timeout.get(event, self._default)
+
+    def _action_enabled(self, event, action):
+        """
+        Check if an action for a notification is enabled.
+
+        :param str event: event name
+        :param str action: action name
+        :rtype: bool
+        """
+        event_actions = self._aconfig.get(event)
+        if event_actions is None:
+            return True
+        if event_actions is False:
+            return False
+        return action in event_actions
+
+    def _has_actions(self, event):
+        """
+        Check if a notification type has any enabled actions.
+        """
+        event_actions = self._aconfig.get(event)
+        return event_actions is None or bool(event_actions)
