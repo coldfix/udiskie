@@ -324,10 +324,15 @@ class Daemon(_EntryPoint):
             import udiskie.notify
             from gi.repository import Notify
             Notify.init('udiskie')
+            aconfig = config.notification_actions
+            if options['automount']:
+                aconfig.setdefault('device_added', [])
+            else:
+                aconfig.setdefault('device_added', ['mount'])
             udiskie.notify.Notify(Notify.Notification.new,
                                   mounter=mounter,
                                   timeout=config.notifications,
-                                  aconfig=config.notification_actions)
+                                  aconfig=aconfig)
 
         # tray icon (optional):
         if options['tray']:
