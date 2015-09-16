@@ -79,6 +79,18 @@ dialog_definition = r"""
 """
 
 
+def _fix_tiling_window_managers(dialog):
+    # Tiling window managers seem to require the WM_TRANSIENT_FOR property be
+    # set on dialogs. In fact, Gtk also warns about this problem. To fix this,
+    # create a window, show it (so that it gets mapped), hide it again (it
+    # should not be shown), and then set it as the transient parent for the
+    # dialog. This silences Gtk and helps tiling window managers figure out
+    # what is going on properly.
+    dummy_window = Gtk.Window()
+    dummy_window.present()
+    dummy_window.hide()
+    dialog.set_transient_for(dummy_window)
+
 def password_dialog(title, message):
     """
     Show a Gtk password dialog.
@@ -97,6 +109,7 @@ def password_dialog(title, message):
     entry = builder.get_object('entry')
     dialog.set_title(title)
     label.set_label(message)
+    _fix_tiling_window_managers(dialog)
     dialog.show_all()
     response = dialog.run()
     dialog.hide()
