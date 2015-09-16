@@ -56,6 +56,7 @@ class DeviceFilter(object):
         'mount_paths',
         'is_unlocked',
         'in_use',
+        'should_automount',
     ]
 
     def __init__(self, match, value):
