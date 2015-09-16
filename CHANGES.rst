@@ -1,6 +1,11 @@
 CHANGELOG
 ---------
 
+next
+~~~~
+
+- use icon hints from udev settings in notifications
+
 1.3.0
 ~~~~~
 
