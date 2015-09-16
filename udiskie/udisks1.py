@@ -275,6 +275,13 @@ class OnlineDevice(DeviceBase):
 
     root = drive
 
+    @property
+    def icon_name(self):
+        """Return the recommended device icon name."""
+        return self._proxy.property.DevicePresentationIconName or 'drive-removable-media'
+
+    symbolic_icon_name = icon_name
+
     # ----------------------------------------
     # Partition
     # ----------------------------------------

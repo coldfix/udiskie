@@ -496,6 +496,16 @@ class Device(object):
                 return device
         return None
 
+    @property
+    def icon_name(self):
+        """Return the recommended device icon name."""
+        return self._I.Block.property.HintIconName or 'drive-removable-media'
+
+    @property
+    def symbolic_icon_name(self):
+        """Return the recommended device symbolic icon name."""
+        return self._I.Block.property.HintSymbolicIconName or 'drive-removable-media'
+
     # ----------------------------------------
     # Partition
     # ----------------------------------------
