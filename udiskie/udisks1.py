@@ -276,6 +276,11 @@ class OnlineDevice(DeviceBase):
     root = drive
 
     @property
+    def should_automount(self):
+        """Check if the device should be automounted."""
+        return self._proxy.property.DeviceAutomountHint != 'never'
+
+    @property
     def icon_name(self):
         """Return the recommended device icon name."""
         return self._proxy.property.DevicePresentationIconName or 'drive-removable-media'

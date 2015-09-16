@@ -497,6 +497,11 @@ class Device(object):
         return None
 
     @property
+    def should_automount(self):
+        """Check if the device should be automounted."""
+        return bool(self._I.Block.property.HintAuto)
+
+    @property
     def icon_name(self):
         """Return the recommended device icon name."""
         return self._I.Block.property.HintIconName or 'drive-removable-media'
