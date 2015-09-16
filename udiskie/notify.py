@@ -65,7 +65,7 @@ class Notify(object):
             'device_mounted',
             _('Device mounted'),
             _('{0.id_label} mounted on {0.mount_paths[0]}', device),
-            'drive-removable-media',
+            device.icon_name,
             self._mounter._browser and browse_action)
 
     def device_unmounted(self, device):
@@ -78,7 +78,7 @@ class Notify(object):
             'device_unmounted',
             _('Device unmounted'),
             _('{0.id_label} unmounted', device),
-            'drive-removable-media')
+            device.icon_name)
 
     def device_locked(self, device):
         """
@@ -90,7 +90,7 @@ class Notify(object):
             'device_locked',
             _('Device locked'),
             _('{0.device_presentation} locked', device),
-            'drive-removable-media')
+            device.icon_name)
 
     def device_unlocked(self, device):
         """
@@ -102,7 +102,7 @@ class Notify(object):
             'device_unlocked',
             _('Device unlocked'),
             _('{0.device_presentation} unlocked', device),
-            'drive-removable-media')
+            device.icon_name)
 
     def device_added(self, device):
         """
@@ -132,7 +132,7 @@ class Notify(object):
                 'device_added',
                 _('Device added'),
                 _('device appeared on {0.device_presentation}', device),
-                'drive-removable-media',
+                device.icon_name,
                 *actions)
 
     def _flatten_node(self, node):
@@ -154,7 +154,7 @@ class Notify(object):
                 'device_removed',
                 _('Device removed'),
                 _('device disappeared on {0.device_presentation}', device),
-                'drive-removable-media')
+                device.icon_name)
 
     def job_failed(self, device, action, message):
         """
@@ -176,7 +176,7 @@ class Notify(object):
         self._show_notification(
             'job_failed',
             _('Job failed'), text,
-            'drive-removable-media',
+            device.icon_name,
             retry_action)
 
     def _show_notification(self,

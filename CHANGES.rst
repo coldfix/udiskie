@@ -1,6 +1,12 @@
 CHANGELOG
 ---------
 
+next
+~~~~
+
+- use icon hints from udev settings in notifications
+- respect the automount flag for devices
+
 1.3.0
 ~~~~~
 
