@@ -320,19 +320,23 @@ class Daemon(_EntryPoint):
             udisks=daemon)
 
         # notifications (optional):
-        if options['notify']:
-            import udiskie.notify
-            from gi.repository import Notify
-            Notify.init('udiskie')
-            aconfig = config.notification_actions
-            if options['automount']:
-                aconfig.setdefault('device_added', [])
-            else:
-                aconfig.setdefault('device_added', ['mount'])
-            udiskie.notify.Notify(Notify.Notification.new,
-                                  mounter=mounter,
-                                  timeout=config.notifications,
-                                  aconfig=aconfig)
+        try:
+          if options['notify']:
+              import udiskie.notify
+              from gi.repository import Notify
+              Notify.init('udiskie')
+              aconfig = config.notification_actions
+              if options['automount']:
+                  aconfig.setdefault('device_added', [])
+              else:
+                  aconfig.setdefault('device_added', ['mount'])
+              udiskie.notify.Notify(Notify.Notification.new,
+                                    mounter=mounter,
+                                    timeout=config.notifications,
+                                    aconfig=aconfig)
+        # Fail gracefully if the gi.repository.Notify is not available
+        except ImportError:
+          logging.warning("Notify typelib not available, disabling notifications.")
 
         # tray icon (optional):
         if options['tray']:
