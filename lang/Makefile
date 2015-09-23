@@ -1,5 +1,5 @@
 
-all: en_US.po
+all: en_US.po es_ES.po
 
 %.po: udiskie.pot
 	if [ -f $@ ]; then \
