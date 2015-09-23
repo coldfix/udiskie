@@ -63,6 +63,15 @@ def get_backend(clsname, version=None):
         raise ValueError(_("UDisks version not supported: {0}!", version))
 
 
+def module_available(name):
+    """Check if the module is importable."""
+    try:
+        __import__(name)
+        return True
+    except ImportError:
+        return False
+
+
 class Choice(object):
 
     """Mapping of command line arguments to option values."""
@@ -318,6 +327,16 @@ class Daemon(_EntryPoint):
             prompt=prompt,
             browser=browser,
             udisks=daemon)
+
+        if options['notify'] and not module_available('gi.repository.Notify'):
+            libnotify_not_available = _(
+                "Typelib for 'libnotify' is not available. Possible causes include:"
+                "\n\t- libnotify is not installed"
+                "\n\t- the typelib is provided by a separate package"
+                "\n\t- libnotify was built with introspection disabled"
+                "\n\nStarting udiskie without notifications.")
+            logging.getLogger(__name__).error(libnotify_not_available)
+            options['notify'] = False
 
         # notifications (optional):
         if options['notify']:

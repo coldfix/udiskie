@@ -6,6 +6,8 @@ next
 
 - use icon hints from udev settings in notifications
 - respect the automount flag for devices
+- don't fail if libnotify is not available
+
 
 1.3.0
 ~~~~~
