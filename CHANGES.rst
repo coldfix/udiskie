@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+1.3.2
+~~~~~
+
+- revert "respect the automount flag for devices"
+- make dependency on Gtk optional
+
+
 1.3.1
 ~~~~~
 
