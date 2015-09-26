@@ -85,7 +85,6 @@ class Mounter(object):
         self._ignore_device = ignore_device or FilterMatcher([], False)
         self._ignore_device._filters += [
             IgnoreDevice({'is_block': False, 'ignore': True}),
-            IgnoreDevice({'should_automount': False, 'ignore': True}),
             IgnoreDevice({'is_external': False, 'ignore': True}),
             IgnoreDevice({'is_ignored': True, 'ignore': True})]
         self._prompt = prompt
