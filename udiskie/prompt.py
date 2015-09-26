@@ -8,8 +8,6 @@ import logging
 import subprocess
 import sys
 
-from gi.repository import Gtk
-
 from udiskie.locale import _
 from udiskie.compat import basestring
 
@@ -23,10 +21,12 @@ def require_Gtk():
 
     :raises RuntimeError: if Gtk can not be properly initialized
     """
+    from gi.repository import Gtk
     # if we attempt to create any GUI elements with no X server running the
     # program will just crash, so let's make a way to catch this case:
     if not Gtk.init_check(None)[0]:
         raise RuntimeError(_("X server not connected!"))
+    return Gtk
 
 
 dialog_definition = r"""
@@ -89,7 +89,7 @@ def password_dialog(title, message):
     :rtype: str
     :raises RuntimeError: if Gtk can not be properly initialized
     """
-    require_Gtk()
+    Gtk = require_Gtk()
     builder = Gtk.Builder.new()
     builder.add_from_string (dialog_definition)
     dialog = builder.get_object('entry_dialog')
@@ -156,7 +156,7 @@ def password(password_command):
         try:
             require_Gtk()
             return get_password_gui
-        except RuntimeError:
+        except (RuntimeError, ImportError):
             return None
 
     def tty():

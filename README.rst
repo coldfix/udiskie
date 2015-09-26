@@ -76,11 +76,12 @@ Installation
    - setuptools_
    - PyGObject_
    - UDisks_ (UDisks1 or UDisks2)
-   - GTK3 (+introspection). GTK2 also works if not using the tray icon.
    - docopt_ (can automatically be installed by pip)
 
    Optional:
 
+   - GTK3 (+introspection) for tray icon and password prompt. GTK2 also works
+     if not using the tray icon.
    - libnotify (+introspection)
    - the notification daemon of your choice
    - gettext_ to build translation files (during setup step)
