@@ -15,21 +15,30 @@ import udiskie
 
 
 # check availability of runtime dependencies
-def check_dependency(package):
+def check_dependency(package, version):
     """Issue a warning if the package is not available."""
     try:
+        import gi
+        gi.require_version(package.rsplit('.')[-1], version)
         __import__(package)
     except ImportError:
+        # caused by either of the imports, probably the first
+        logging.warn("\n\t".join(["Missing runtime dependencies:",
+                                  str(sys.exc_info()[1])]))
+    except ValueError:
+        # caused by the gi.require_version() statement
         logging.warn("\n\t".join(["Missing runtime dependencies:",
                                   str(sys.exc_info()[1])]))
     except RuntimeError:
+        # caused by the final __import__() statement
         logging.warn("\n\t".join(["Bad runtime dependency:",
                                   str(sys.exc_info()[1])]))
 
-check_dependency('gi.repository.DBus')
-check_dependency('gi.repository.GLib')
-check_dependency('gi.repository.Gtk')
-check_dependency('gi.repository.Notify')
+
+check_dependency('gi.repository.Gio', '2.0')
+check_dependency('gi.repository.GLib', '2.0')
+check_dependency('gi.repository.Gtk', '3.0')
+check_dependency('gi.repository.Notify', '0.7')
 
 
 # read long_description from README.rst

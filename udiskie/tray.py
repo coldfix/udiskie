@@ -2,8 +2,10 @@
 Tray icon for udiskie.
 """
 
-from gi.repository import Gtk
+from gi import require_version
+require_version('Gtk', '3.0')
 from gi.repository import Gio
+from gi.repository import Gtk
 
 from udiskie.common import setdefault
 from udiskie.compat import basestring

@@ -94,14 +94,11 @@ Installation
 
    - Gio-2.0
    - GLib-2.0
-   - GObject-2.0
    - Gtk-3.0
    - Notify-0.7
 
    If you installed the above dependencies, but some of the typelibs are
-   missing they might be distributed in separate packages. Note that the
-   version numbers just indicate what udiskie is tested with, but it may
-   work with other versions as well.
+   missing they might be distributed in separate packages.
 
 2. use pip to download and install *udiskie* itself:
 

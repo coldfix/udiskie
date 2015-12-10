@@ -15,12 +15,28 @@ from udiskie.compat import basestring
 __all__ = ['password', 'browser']
 
 
+def _require_version(package, version):
+    import gi
+    try:
+        gi.require_version('Gtk', '3.0')
+        return True
+    except ValueError:
+        return False
+
+
 def require_Gtk():
     """
     Make sure Gtk is properly initialized.
 
     :raises RuntimeError: if Gtk can not be properly initialized
     """
+    if not _require_version('Gtk', '3.0'):
+        if _require_version('Gtk', '2.0'):
+            logging.getLogger(__name__).warn(
+                _("Missing runtime dependency GTK 3. Falling back to GTK 2 "
+                  "for password prompt"))
+        else:
+            raise RuntimeError('Module gi.repository.Gtk not available!')
     from gi.repository import Gtk
     # if we attempt to create any GUI elements with no X server running the
     # program will just crash, so let's make a way to catch this case:

@@ -11,6 +11,9 @@ import warnings
 
 from docopt import docopt, DocoptExit
 
+from gi import require_version
+require_version('Gio', '2.0')
+require_version('GLib', '2.0')
 from gi.repository import GLib
 
 import udiskie
@@ -63,8 +66,9 @@ def get_backend(clsname, version=None):
         raise ValueError(_("UDisks version not supported: {0}!", version))
 
 
-def module_available(name):
+def module_available(name, version):
     """Check if the module is importable."""
+    require_version(name.rsplit('.', 1)[-1], version)
     try:
         __import__(name)
         return True
@@ -328,7 +332,7 @@ class Daemon(_EntryPoint):
             browser=browser,
             udisks=daemon)
 
-        if options['notify'] and not module_available('gi.repository.Notify'):
+        if options['notify'] and not module_available('gi.repository.Notify', '0.7'):
             libnotify_not_available = _(
                 "Typelib for 'libnotify' is not available. Possible causes include:"
                 "\n\t- libnotify is not installed"
