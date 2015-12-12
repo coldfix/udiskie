@@ -8,7 +8,7 @@ import logging
 import subprocess
 import sys
 
-from udiskie.async import Async, Coroutine, Return
+from udiskie.async_ import Async, Coroutine, Return
 from udiskie.locale import _
 from udiskie.compat import basestring
 

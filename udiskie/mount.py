@@ -6,7 +6,7 @@ from collections import namedtuple
 from functools import partial
 import logging
 
-from udiskie.async import AsyncList, Coroutine, Return
+from udiskie.async_ import AsyncList, Coroutine, Return
 from udiskie.common import wraps, setdefault
 from udiskie.compat import basestring
 from udiskie.config import IgnoreDevice, FilterMatcher
@@ -45,9 +45,9 @@ def _device_method(fn):
                 return _False()
         else:
             device = device_or_path
-        async = Coroutine(fn(self, device, *args, **kwargs))
-        async.errbacks.append(partial(self._error, fn, device))
-        return async
+        async_ = Coroutine(fn(self, device, *args, **kwargs))
+        async_.errbacks.append(partial(self._error, fn, device))
+        return async_
     return wrapper
 
 

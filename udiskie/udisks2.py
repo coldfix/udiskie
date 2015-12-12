@@ -19,7 +19,7 @@ from gi.repository import GLib
 from udiskie.common import Emitter, samefile, AttrDictView
 from udiskie.dbus import DBusException, connect_service
 from udiskie.locale import _
-from udiskie.async import Coroutine, Return
+from udiskie.async_ import Coroutine, Return
 
 __all__ = ['Daemon']
 

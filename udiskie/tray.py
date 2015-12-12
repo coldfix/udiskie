@@ -7,7 +7,7 @@ require_version('Gtk', '3.0')
 from gi.repository import Gio
 from gi.repository import Gtk
 
-from udiskie.async import Async
+from udiskie.async_ import Async
 from udiskie.common import setdefault
 from udiskie.compat import basestring
 from udiskie.locale import _

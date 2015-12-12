@@ -23,7 +23,7 @@ from functools import partial
 import logging
 import os.path
 
-from udiskie.async import AsyncList, Coroutine, Return
+from udiskie.async_ import AsyncList, Coroutine, Return
 from udiskie.common import Emitter, samefile, AttrDictView
 from udiskie.dbus import connect_service, DBusException
 from udiskie.locale import _

@@ -9,7 +9,7 @@ import sys
 from gi.repository import Gio
 from gi.repository import GLib
 
-from udiskie.async import Async, Coroutine, Return
+from udiskie.async_ import Async, Coroutine, Return
 
 
 __all__ = [

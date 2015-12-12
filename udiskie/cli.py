@@ -19,7 +19,7 @@ from gi.repository import GLib
 import udiskie
 import udiskie.config
 import udiskie.mount
-from udiskie.async import AsyncList, Coroutine, Return
+from udiskie.async_ import AsyncList, Coroutine, Return
 from udiskie.common import extend
 from udiskie.locale import _
 
