@@ -86,6 +86,7 @@ Installation
    - the notification daemon of your choice
    - gettext_ to build translation files (during setup step)
    - PyYAML_ for config file (can automatically be installed by pip)
+   - python-keyutils_ 0.3 to cache passwords
 
    Access to system resources is mediated using PyGObject_, which is why some
    packages need to be built with *+introspection*. Check the contents of the
@@ -118,6 +119,7 @@ Installation
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
 .. _PyGObject: https://wiki.gnome.org/Projects/PyGObject
 .. _PyYAML: https://pypi.python.org/pypi/PyYAML
+.. _python-keyutils: https://pypi.python.org/pypi/keyutils/0.3
 .. _docopt: http://docopt.org/
 .. _gettext: http://www.gnu.org/software/gettext/
 
