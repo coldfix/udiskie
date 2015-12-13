@@ -7,10 +7,11 @@ require_version('Gtk', '3.0')
 from gi.repository import Gio
 from gi.repository import Gtk
 
+from udiskie.async_ import Async
 from udiskie.common import setdefault
 from udiskie.compat import basestring
 from udiskie.locale import _
-from udiskie.mount import Device, Action, Branch
+from udiskie.mount import Action, Branch
 
 
 __all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
@@ -224,9 +225,10 @@ class SmartUdiskieMenu(UdiskieMenu):
         :param Device node: device
         :param str presentation: node label
         """
+        labels = self._actions._labels
         return [Action(action.method,
                        action.device,
-                       self._actions._labels[action.method].format(presentation),
+                       labels[action.method].format(presentation),
                        action.action)
                 for action in node.methods]
 
@@ -271,6 +273,12 @@ class TrayIcon(object):
         self._conn_left = None
         self._conn_right = None
         self.show()
+        self.task = Async()
+        menumaker._quit_action = self.destroy
+
+    def destroy(self):
+        self.hide()
+        self.task.callback()
 
     def _create_statusicon(self):
         """Return a new Gtk.StatusIcon."""

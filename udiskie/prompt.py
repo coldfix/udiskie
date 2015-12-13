@@ -5,9 +5,11 @@ User prompt utility.
 from distutils.spawn import find_executable
 import getpass
 import logging
+import shlex
 import subprocess
 import sys
 
+from udiskie.async_ import Async, Coroutine, Return, Subprocess
 from udiskie.locale import _
 from udiskie.compat import basestring
 
@@ -95,6 +97,19 @@ dialog_definition = r"""
 """
 
 
+class Dialog(Async):
+
+    def __init__(self, dialog):
+        self._dialog = dialog
+        self._dialog.connect("response", self._result_handler)
+        self._dialog.show()
+
+    def _result_handler(self, dialog, response):
+        self.callback(response)
+        dialog.destroy()
+
+
+@Coroutine.from_generator_function
 def password_dialog(title, message):
     """
     Show a Gtk password dialog.
@@ -107,19 +122,19 @@ def password_dialog(title, message):
     """
     Gtk = require_Gtk()
     builder = Gtk.Builder.new()
-    builder.add_from_string (dialog_definition)
+    builder.add_from_string(dialog_definition)
     dialog = builder.get_object('entry_dialog')
     label = builder.get_object('message')
     entry = builder.get_object('entry')
     dialog.set_title(title)
     label.set_label(message)
     dialog.show_all()
-    response = dialog.run()
+    response = yield Dialog(dialog)
     dialog.hide()
     if response == Gtk.ResponseType.OK:
-        return entry.get_text()
+        yield Return(entry.get_text())
     else:
-        return None
+        yield Return(None)
 
 
 def get_password_gui(device):
@@ -133,31 +148,41 @@ def get_password_gui(device):
 
 def get_password_tty(device):
     """Get the password to unlock a device from terminal."""
+    # TODO: make this a TRUE async
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
-        return getpass.getpass(text)
+        yield Return(getpass.getpass(text))
     except EOFError:
         print("")
-        return None
+        yield Return(None)
 
 
 class DeviceCommand(object):
 
-    def __init__(self, argv):
-        self.argv = argv
+    """
+    Launcher that starts user-defined password prompts. The command can be
+    specified in terms of a command line template.
+    """
 
-    def __call__(self, device):
-        if isinstance(self.argv, basestring):
-            argv = self.argv.format(device)
-            shell = True
+    def __init__(self, argv):
+        """Create the launcher object from the command line template."""
+        if isinstance(argv, basestring):
+            self.argv = shlex.split(argv)
         else:
-            argv = [arg.format(device) for arg in self.argv]
-            shell = False
+            self.argv = argv
+
+    @Coroutine.from_generator_function
+    def __call__(self, device):
+        """
+        Invoke the subprocess to ask the user to enter a password for unlocking
+        the specified device.
+        """
+        argv = [arg.format(device) for arg in self.argv]
         try:
-            blob = subprocess.check_output(argv, shell=shell)
+            stdout = yield Subprocess(argv)
         except subprocess.CalledProcessError:
-            return None
-        return blob.decode('utf-8').rstrip('\n')
+            yield Return(None)
+        yield Return(stdout.rstrip('\n'))
 
 
 def password(password_command):

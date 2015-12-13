@@ -3,6 +3,7 @@ Common DBus utilities.
 """
 
 import os.path
+import traceback
 
 
 __all__ = [
@@ -11,6 +12,8 @@ __all__ = [
     'samefile',
     'setdefault',
     'extend',
+    'cachedproperty',
+    'show_traceback',
 ]
 
 
@@ -112,3 +115,49 @@ def extend(a, b):
     res = a.copy()
     res.update(b)
     return res
+
+
+def cachedproperty(func):
+    """A memoize decorator for class properties."""
+    key = '_' + func.__name__
+    @wraps(func)
+    def get(self):
+        try:
+            return getattr(self, key)
+        except AttributeError:
+            val = func(self)
+            setattr(self, key, val)
+            return val
+    return property(get)
+
+
+# ----------------------------------------
+# udisks.Device helper classes
+# ----------------------------------------
+
+class AttrDictView(object):
+
+    """Provide attribute access view to a dictionary."""
+
+    def __init__(self, data):
+        self.__data = data
+
+    def __getattr__(self, key):
+        try:
+            return self.__data[key]
+        except KeyError:
+            raise AttributeError
+
+
+def show_traceback(*exc_info):
+    """
+    Print traceback of current exception.
+
+    This prints the stack trace only up to the current level. In contrast, if
+    the exception passes upwards to the main loop, all levels in between need
+    to be shown.
+    """
+    if exc_info:
+        traceback.print_exception(*exc_info)
+    else:
+        traceback.print_exc()

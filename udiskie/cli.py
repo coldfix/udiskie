@@ -7,7 +7,6 @@ setuptools entry points.
 
 import inspect
 import logging
-import warnings
 
 from docopt import docopt, DocoptExit
 
@@ -19,6 +18,7 @@ from gi.repository import GLib
 import udiskie
 import udiskie.config
 import udiskie.mount
+from udiskie.async_ import AsyncList, Coroutine, Return, RunForever
 from udiskie.common import extend
 from udiskie.locale import _
 
@@ -30,15 +30,11 @@ __all__ = [
 ]
 
 
-warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
-warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
-
-
-def get_backend(clsname, version=None):
+@Coroutine.from_generator_function
+def get_backend(version=None):
     """
     Return UDisks service.
 
-    :param str clsname: requested service object
     :param int version: requested UDisks backend version
     :returns: UDisks service wrapper object
     :raises dbus.DBusException: if unable to connect to UDisks dbus service.
@@ -50,20 +46,21 @@ def get_backend(clsname, version=None):
     if not version:
         from udiskie.dbus import DBusException
         try:
-            return get_backend(clsname, 2)
+            daemon = yield get_backend(2)
         except DBusException:
             log = logging.getLogger(__name__)
             log.warning(_('Failed to connect UDisks2 dbus service..\n'
                           'Falling back to UDisks1.'))
-            return get_backend(clsname, 1)
+            daemon = yield get_backend(1)
     elif version == 1:
         import udiskie.udisks1
-        return getattr(udiskie.udisks1, clsname)()
+        daemon = yield udiskie.udisks1.Daemon.create()
     elif version == 2:
         import udiskie.udisks2
-        return getattr(udiskie.udisks2, clsname)()
+        daemon = yield udiskie.udisks2.Daemon.create()
     else:
         raise ValueError(_("UDisks version not supported: {0}!", version))
+    yield Return(daemon)
 
 
 def module_available(name, version):
@@ -189,7 +186,7 @@ class _EntryPoint(object):
         # initialize instance variables
         self.config = config
         self.options = options
-        self._init(config, options)
+        self.exit_status = 0
 
     def program_options(self, args):
         """
@@ -232,24 +229,40 @@ class _EntryPoint(object):
         """Get the name of the CLI utility."""
         raise NotImplementedError()
 
-    def _init(self, config, options):
+    def _init(self):
         """
         Fully initialize Daemon object.
 
-        :param Config config: configuration object
-        :param options: program options
+        :returns: the main application task
+        :rtype: Async
         """
         raise NotImplementedError()
 
     def run(self):
         """
-        Run main program logic.
+        Run the main loop.
 
-        :param options: program options
         :returns: exit code
         :rtype: int
         """
-        raise NotImplementedError()
+        self.mainloop = GLib.MainLoop()
+        self._start_async_tasks()
+        try:
+            self.mainloop.run()
+            return self.exit_status
+        except KeyboardInterrupt:
+            return 1
+
+    @Coroutine.from_generator_function
+    def _start_async_tasks(self):
+        """Start asynchronous operations."""
+        try:
+            self.udisks = yield get_backend(self.options['udisks_version'])
+            yield self._init()
+        except Exception:
+            self.exit_status = 1
+            udiskie.common.show_traceback()
+        self.mainloop.quit()
 
 
 class Daemon(_EntryPoint):
@@ -315,14 +328,15 @@ class Daemon(_EntryPoint):
         'password_prompt': OptionalValue('--password-prompt'),
     })
 
-    def _init(self, config, options):
+    def _init(self):
 
         """Implements _EntryPoint._init."""
 
         import udiskie.prompt
 
-        mainloop = GLib.MainLoop()
-        daemon = get_backend('Daemon', options['udisks_version'])
+        config = self.config
+        options = self.options
+
         prompt = udiskie.prompt.password(options['password_prompt'])
         browser = udiskie.prompt.browser(options['file_manager'])
         mounter = udiskie.mount.Mounter(
@@ -330,7 +344,7 @@ class Daemon(_EntryPoint):
             ignore_device=config.ignore_device,
             prompt=prompt,
             browser=browser,
-            udisks=daemon)
+            udisks=self.udisks)
 
         if options['notify'] and not module_available('gi.repository.Notify', '0.7'):
             libnotify_not_available = _(
@@ -341,6 +355,8 @@ class Daemon(_EntryPoint):
                 "\n\nStarting udiskie without notifications.")
             logging.getLogger(__name__).error(libnotify_not_available)
             options['notify'] = False
+
+        tasks = []
 
         # notifications (optional):
         if options['notify']:
@@ -370,30 +386,25 @@ class Daemon(_EntryPoint):
                 mounter,
                 icons,
                 actions,
-                quit_action=mainloop.quit)
+                quit_action=self.mainloop.quit)
             TrayIcon = tray_classes[options['tray']]
             statusicon = TrayIcon(menu_maker, icons)
+            tasks.append(statusicon.task)
         else:
             statusicon = None
+            tasks.append(RunForever)
 
         # automounter
         if options['automount']:
             import udiskie.automount
             udiskie.automount.AutoMounter(mounter)
+            tasks.append(mounter.add_all())
 
         # Note: mounter and statusicon are saved so these are kept alive:
-        self.mainloop = mainloop
         self.mounter = mounter
         self.statusicon = statusicon
 
-    def run(self):
-        """Implements _EntryPoint.run."""
-        if self.options['automount']:
-            self.mounter.add_all()
-        try:
-            return self.mainloop.run()
-        except KeyboardInterrupt:
-            return 0
+        return AsyncList(tasks)
 
 
 class Mount(_EntryPoint):
@@ -447,35 +458,36 @@ class Mount(_EntryPoint):
         'password_prompt': OptionalValue('--password-prompt'),
     })
 
-    def _init(self, config, options):
+    def _init(self):
+
         """Implements _EntryPoint._init."""
+
         import udiskie.prompt
+
+        config = self.config
+        options = self.options
+
         if options['options']:
             opts = [o.strip() for o in options['options'].split(',')]
             mount_options = lambda dev: opts
         else:
             mount_options = config.mount_options
+
         prompt = udiskie.prompt.password(options['password_prompt'])
-        self.mounter = udiskie.mount.Mounter(
+        mounter = udiskie.mount.Mounter(
             mount_options=mount_options,
             ignore_device=config.ignore_device,
             prompt=prompt,
-            udisks=get_backend('Sniffer', options['udisks_version']))
+            udisks=self.udisks)
 
-    def run(self):
-        """Implements _EntryPoint.run."""
-        options = self.options
-        mounter = self.mounter
         recursive = options['recursive']
-        # only mount the desired devices
         if options['<device>']:
-            success = True
-            for path in options['<device>']:
-                success = success and mounter.add(path, recursive=recursive)
-        # mount all present devices
+            tasks = [mounter.add(path, recursive=recursive)
+                     for path in options['<device>']]
+            # TODO: AND results
+            return AsyncList(tasks)
         else:
-            success = mounter.add_all(recursive=recursive)
-        return 0 if success else 1
+            return mounter.add_all(recursive=recursive)
 
 
 class Umount(_EntryPoint):
@@ -535,23 +547,21 @@ class Umount(_EntryPoint):
         '<device>': Value('DEVICE'),
     })
 
-    def _init(self, config, options):
-        """Implements _EntryPoint._init."""
-        self.mounter = udiskie.mount.Mounter(
-            udisks=get_backend('Sniffer', options['udisks_version']))
+    def _init(self):
 
-    def run(self):
-        """Implements _EntryPoint.run."""
+        """Implements _EntryPoint._init."""
+
         options = self.options
-        mounter = self.mounter
+        mounter = udiskie.mount.Mounter(self.udisks)
+
         strategy = dict(detach=options['detach'],
                         eject=options['eject'],
                         lock=options['lock'])
         if options['<device>']:
             strategy['force'] = options['force']
-            success = True
-            for path in options['<device>']:
-                success = mounter.remove(path, **strategy) and success
+            tasks = [mounter.remove(path, **strategy)
+                     for path in options['<device>']]
+            # TODO: AND results
+            return AsyncList(tasks)
         else:
-            success = mounter.remove_all(**strategy)
-        return 0 if success else 1
+            return mounter.remove_all(**strategy)
