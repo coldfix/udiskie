@@ -147,13 +147,13 @@ def get_password_gui(device):
 
 def get_password_tty(device):
     """Get the password to unlock a device from terminal."""
-    # TODO: make this an Async
+    # TODO: make this a TRUE async
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
-        return getpass.getpass(text)
+        yield Return(getpass.getpass(text))
     except EOFError:
         print("")
-        return None
+        yield Return(None)
 
 
 class DeviceCommand(object):
