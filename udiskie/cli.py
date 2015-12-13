@@ -7,6 +7,7 @@ setuptools entry points.
 
 import inspect
 import logging
+import traceback
 
 from docopt import docopt, DocoptExit
 
@@ -261,7 +262,8 @@ class _EntryPoint(object):
             yield self._init()
         except Exception:
             self.exit_status = 1
-            udiskie.common.show_traceback()
+            # Print the stack trace only up to the current level:
+            traceback.print_exc()
         self.mainloop.quit()
 
 

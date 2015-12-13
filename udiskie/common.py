@@ -3,7 +3,6 @@ Common DBus utilities.
 """
 
 import os.path
-import traceback
 
 
 __all__ = [
@@ -13,7 +12,6 @@ __all__ = [
     'setdefault',
     'extend',
     'cachedproperty',
-    'show_traceback',
 ]
 
 
@@ -147,17 +145,3 @@ class AttrDictView(object):
             return self.__data[key]
         except KeyError:
             raise AttributeError
-
-
-def show_traceback(*exc_info):
-    """
-    Print traceback of current exception.
-
-    This prints the stack trace only up to the current level. In contrast, if
-    the exception passes upwards to the main loop, all levels in between need
-    to be shown.
-    """
-    if exc_info:
-        traceback.print_exception(*exc_info)
-    else:
-        traceback.print_exc()
