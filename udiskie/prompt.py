@@ -5,10 +5,11 @@ User prompt utility.
 from distutils.spawn import find_executable
 import getpass
 import logging
+import shlex
 import subprocess
 import sys
 
-from udiskie.async_ import Async, Coroutine, Return
+from udiskie.async_ import Async, Coroutine, Return, Subprocess
 from udiskie.locale import _
 from udiskie.compat import basestring
 
@@ -158,21 +159,30 @@ def get_password_tty(device):
 
 class DeviceCommand(object):
 
-    def __init__(self, argv):
-        self.argv = argv
+    """
+    Launcher that starts user-defined password prompts. The command can be
+    specified in terms of a command line template.
+    """
 
-    def __call__(self, device):
-        if isinstance(self.argv, basestring):
-            argv = self.argv.format(device)
-            shell = True
+    def __init__(self, argv):
+        """Create the launcher object from the command line template."""
+        if isinstance(argv, basestring):
+            self.argv = shlex.split(argv)
         else:
-            argv = [arg.format(device) for arg in self.argv]
-            shell = False
+            self.argv = argv
+
+    @Coroutine.from_generator_function
+    def __call__(self, device):
+        """
+        Invoke the subprocess to ask the user to enter a password for unlocking
+        the specified device.
+        """
+        argv = [arg.format(device) for arg in self.argv]
         try:
-            blob = subprocess.check_output(argv, shell=shell)
+            stdout = yield Subprocess(argv)
         except subprocess.CalledProcessError:
-            return None
-        return blob.decode('utf-8').rstrip('\n')
+            yield Return(None)
+        yield Return(stdout.rstrip('\n'))
 
 
 def password(password_command):

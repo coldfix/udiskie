@@ -8,8 +8,10 @@ python3, but more lightweight (incomplete) and compatible with python2.
 
 import sys
 from functools import partial
+from subprocess import CalledProcessError
 
 from gi.repository import GLib
+from gi.repository import Gio
 
 from udiskie.common import cachedproperty, wraps
 
@@ -274,3 +276,39 @@ class Coroutine(Async):
             self.errback(sys.exc_info()[1])
         else:
             self._recv(value)
+
+
+class Subprocess(Async):
+
+    """
+    An Async task that represents a subprocess. If successful, the task's
+    result is set to the collected STDOUT of the subprocess.
+
+    :raises subprocess.CalledProcessError: if the subprocess returns a non-zero exit code
+    """
+
+    def __init__(self, argv):
+        self.p = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
+        self.p.communicate_utf8_async(
+            stdin_buf=None,
+            cancellable=None,
+            callback=self._callback,
+            user_data=None)
+
+    def _callback(self, source_object, result, user_data):
+        try:
+            success, stdout, stderr = self.p.communicate_utf8_finish(result)
+        except:
+            self.errback(sys.exc_info()[1])
+            return
+        if not success:
+            self.errback(RuntimeError("Subprocess did not exit normally!"))
+            return
+        exit_code = self.p.get_exit_status()
+        if exit_code != 0:
+            self.errback(CalledProcessError(
+                "Subprocess returned a non-zero exit-status!",
+                exit_code,
+                stdout))
+            return
+        self.callback(stdout)
