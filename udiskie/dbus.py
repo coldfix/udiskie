@@ -4,8 +4,6 @@ Common DBus utilities.
 
 from __future__ import absolute_import
 
-import sys
-
 from gi.repository import Gio
 from gi.repository import GLib
 
@@ -68,8 +66,8 @@ class DBusCall(Async):
         """
         try:
             value = proxy.call_finish(result)
-        except:
-            self.errback(sys.exc_info()[1])
+        except Exception as e:
+            self.errback(e)
         else:
             self.callback(*value.unpack())
 
@@ -365,8 +363,8 @@ class DBusProxyNew(Async):
         """
         try:
             value = Gio.DBusProxy.new_finish(result)
-        except:
-            self.errback(sys.exc_info()[1])
+        except Exception as e:
+            self.errback(e)
         else:
             if value is None:
                 # TODO: output bus_name + object_path
@@ -412,8 +410,8 @@ class DBusProxyNewForBus(Async):
         """
         try:
             value = Gio.DBusProxy.new_for_bus_finish(result)
-        except:
-            self.errback(sys.exc_info()[1])
+        except Exception as e:
+            self.errback(e)
         else:
             if value is None:
                 # TODO: output bus_name + object_path

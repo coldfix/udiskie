@@ -6,7 +6,6 @@ It is based on ideas from "Twisted" and the "yield from" expression in
 python3, but more lightweight (incomplete) and compatible with python2.
 """
 
-import sys
 from functools import partial
 from subprocess import CalledProcessError
 
@@ -271,9 +270,9 @@ class Coroutine(Async):
         except StopIteration:
             self._generator.close()
             self.callback()
-        except:
+        except Exception as e:
             self._generator.close()
-            self.errback(sys.exc_info()[1])
+            self.errback(e)
         else:
             self._recv(value)
 
@@ -298,8 +297,8 @@ class Subprocess(Async):
     def _callback(self, source_object, result, user_data):
         try:
             success, stdout, stderr = self.p.communicate_utf8_finish(result)
-        except:
-            self.errback(sys.exc_info()[1])
+        except Exception as e:
+            self.errback(e)
             return
         if not success:
             self.errback(RuntimeError("Subprocess did not exit normally!"))

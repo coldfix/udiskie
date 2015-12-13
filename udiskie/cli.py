@@ -259,7 +259,7 @@ class _EntryPoint(object):
         try:
             self.udisks = yield get_backend(self.options['udisks_version'])
             yield self._init()
-        except:
+        except Exception:
             self.exit_status = 1
             udiskie.common.show_traceback()
         self.mainloop.quit()
