@@ -18,7 +18,6 @@ states queried from the UDisks DBus service as requested.
 guarantee the accessibilityy of device properties in between operations.
 """
 
-from copy import copy
 from functools import partial
 import logging
 import os.path
@@ -29,7 +28,9 @@ from udiskie.dbus import connect_service, DBusException
 from udiskie.locale import _
 
 
-__all__ = ['Sniffer', 'Daemon']
+__all__ = [
+    'Daemon',
+]
 
 
 def filter_opt(opt):
@@ -498,7 +499,6 @@ class Daemon(Emitter):
                             AttrDictView(properties), itfc_prox)
             self._devices[object_path] = device
             yield Return(device)
-
 
     # special methods
     def set_error(self, device, action, message):

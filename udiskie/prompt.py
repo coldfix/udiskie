@@ -122,7 +122,7 @@ def password_dialog(title, message):
     """
     Gtk = require_Gtk()
     builder = Gtk.Builder.new()
-    builder.add_from_string (dialog_definition)
+    builder.add_from_string(dialog_definition)
     dialog = builder.get_object('entry_dialog')
     label = builder.get_object('message')
     entry = builder.get_object('entry')

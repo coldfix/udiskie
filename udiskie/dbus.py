@@ -372,6 +372,7 @@ class DBusProxyNew(Async):
             else:
                 self.callback(value)
 
+
 class DBusProxyNewForBus(Async):
 
     """

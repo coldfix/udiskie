@@ -11,7 +11,7 @@ from udiskie.async_ import Async
 from udiskie.common import setdefault
 from udiskie.compat import basestring
 from udiskie.locale import _
-from udiskie.mount import Device, Action, Branch
+from udiskie.mount import Action, Branch
 
 
 __all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
@@ -225,9 +225,10 @@ class SmartUdiskieMenu(UdiskieMenu):
         :param Device node: device
         :param str presentation: node label
         """
+        labels = self._actions._labels
         return [Action(action.method,
                        action.device,
-                       self._actions._labels[action.method].format(presentation),
+                       labels[action.method].format(presentation),
                        action.action)
                 for action in node.methods]
 
