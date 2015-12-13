@@ -21,18 +21,15 @@ def check_dependency(package, version):
         import gi
         gi.require_version(package.rsplit('.')[-1], version)
         __import__(package)
-    except ImportError:
+    except ImportError as e:
         # caused by either of the imports, probably the first
-        logging.warn("\n\t".join(["Missing runtime dependencies:",
-                                  str(sys.exc_info()[1])]))
-    except ValueError:
+        logging.warn("Missing runtime dependencies:\n\t" + str(e))
+    except ValueError as e:
         # caused by the gi.require_version() statement
-        logging.warn("\n\t".join(["Missing runtime dependencies:",
-                                  str(sys.exc_info()[1])]))
-    except RuntimeError:
+        logging.warn("Missing runtime dependencies:\n\t" + str(e))
+    except RuntimeError as e:
         # caused by the final __import__() statement
-        logging.warn("\n\t".join(["Bad runtime dependency:",
-                                  str(sys.exc_info()[1])]))
+        logging.warn("Bad runtime dependency:\n\t" + str(e))
 
 
 check_dependency('gi.repository.Gio', '2.0')
@@ -103,9 +100,9 @@ class build_mo(Command):
         """Create a machine object (.mo) from a portable object (.po) file."""
         try:
             call(['msgfmt', po_filename, '-o', mo_filename])
-        except OSError:
+        except OSError as e:
             # ignore failures since i18n support is optional:
-            logging.warn(sys.exc_info()[1])
+            logging.warn(e)
 
 
 # NOTE: we want the install logic from *distutils* rather than the one from
@@ -132,9 +129,9 @@ class install(orig_install):
         orig_install.run(self)
         try:
             call(['gtk-update-icon-cache', theme_base])
-        except OSError:
+        except OSError as e:
             # ignore failures since the tray icon is an optional component:
-            logging.warn(sys.exc_info()[1])
+            logging.warn(e)
 
 
 class install_data(orig_install_data):

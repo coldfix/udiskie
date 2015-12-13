@@ -3,7 +3,6 @@ Notification utility.
 """
 
 import logging
-import sys
 
 from gi.repository import GLib
 
@@ -200,13 +199,12 @@ class Notify(object):
                 self._add_action(notification, *action)
         try:
             notification.show()
-        except DBusException:
+        except DBusException as exc:
             # Catch and log the exception. Starting udiskie with notifications
             # enabled while not having a notification service installed is a
             # mistake too easy to be made, but it shoud not render the rest of
             # udiskie's logic useless by raising an exception before the
             # automount handler gets invoked.
-            exc = sys.exc_info()[1]
             self._log.error("Failed to show notification: {0}"
                             .format(exc.message))
 

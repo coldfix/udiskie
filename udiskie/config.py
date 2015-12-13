@@ -195,14 +195,14 @@ class Config(object):
             for path in cls.default_pathes():
                 try:
                     return cls.from_file(path)
-                except IOError:
+                except IOError as e:
                     logging.getLogger(__name__).debug(
                         "Failed to read config file: {0}"
-                        .format(sys.exc_info()[1]))
-                except ImportError:
+                        .format(e))
+                except ImportError as e:
                     logging.getLogger(__name__).warn(
                         "Failed to read {0!r}: {1}"
-                        .format(path, sys.exc_info()[1]))
+                        .format(path, e))
             return cls({})
         # False/'' => no config
         if not path:
