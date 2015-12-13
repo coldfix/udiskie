@@ -7,7 +7,6 @@ setuptools entry points.
 
 import inspect
 import logging
-import warnings
 
 from docopt import docopt, DocoptExit
 
@@ -29,10 +28,6 @@ __all__ = [
     'Mount',
     'Umount',
 ]
-
-
-warnings.filterwarnings("ignore", ".*could not open display.*", Warning)
-warnings.filterwarnings("ignore", ".*g_object_unref.*", Warning)
 
 
 @Coroutine.from_generator_function
