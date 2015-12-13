@@ -19,7 +19,7 @@ from gi.repository import GLib
 import udiskie
 import udiskie.config
 import udiskie.mount
-from udiskie.async_ import AsyncList, Coroutine, Return
+from udiskie.async_ import AsyncList, Coroutine, Return, RunForever
 from udiskie.common import extend
 from udiskie.locale import _
 
@@ -361,6 +361,8 @@ class Daemon(_EntryPoint):
             logging.getLogger(__name__).error(libnotify_not_available)
             options['notify'] = False
 
+        tasks = []
+
         # notifications (optional):
         if options['notify']:
             import udiskie.notify
@@ -392,21 +394,21 @@ class Daemon(_EntryPoint):
                 quit_action=self.mainloop.quit)
             TrayIcon = tray_classes[options['tray']]
             statusicon = TrayIcon(menu_maker, icons)
+            tasks.append(statusicon.task)
         else:
             statusicon = None
+            tasks.append(RunForever)
 
         # automounter
         if options['automount']:
             import udiskie.automount
             udiskie.automount.AutoMounter(mounter)
+            tasks.append(mounter.add_all())
 
         # Note: mounter and statusicon are saved so these are kept alive:
         self.mounter = mounter
         self.statusicon = statusicon
 
-        tasks = [self.statusicon.task]
-        if self.options['automount']:
-            tasks.append(self.mounter.add_all())
         return AsyncList(tasks)
 
 

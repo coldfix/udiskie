@@ -35,6 +35,9 @@ class Async(object):
 
     The task is started on initialization, but most not finish immediately.
 
+    Tasks must take care to increase their reference count on their own in
+    order not to be deleted until completion.
+
     Success/error exit is signaled to the observer by calling exactly one of
     `self.callback(value)` or `self.errback(exception)` when the operation
     finishes.
@@ -73,6 +76,12 @@ class Async(object):
         """Signal unsuccessful completion."""
         if not self._finish(self.errbacks, exception):
             raise exception
+
+
+# Making this object a global is important to prevent garbage collection which
+# could cause the waiting function to be de-reference-counted and henceforth
+# destroyed as well.
+RunForever = Async()
 
 
 class AsyncList(Async):
