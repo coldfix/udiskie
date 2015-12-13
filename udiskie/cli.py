@@ -301,6 +301,9 @@ class Daemon(_EntryPoint):
         -s, --smart-tray                        Auto hide tray icon
         -T, --no-tray                           Disable tray icon
 
+        --password-cache MINUTES                Set password cache timeout
+        --no-password-cache                     Disable password cache
+
         -p COMMAND, --password-prompt COMMAND   Command for password retrieval
         -P, --no-password-prompt                Disable unlocking
 
@@ -317,6 +320,7 @@ class Daemon(_EntryPoint):
         'tray': False,
         'file_manager': 'xdg-open',
         'password_prompt': 'builtin:gui',
+        'password_cache': False,
     })
 
     option_rules = extend(_EntryPoint.option_rules, {
@@ -328,6 +332,7 @@ class Daemon(_EntryPoint):
             '--smart-tray': 'auto'}),
         'file_manager': OptionalValue('--file-manager'),
         'password_prompt': OptionalValue('--password-prompt'),
+        'password_cache': OptionalValue('--password-cache'),
     })
 
     def _init(self):
@@ -341,11 +346,19 @@ class Daemon(_EntryPoint):
 
         prompt = udiskie.prompt.password(options['password_prompt'])
         browser = udiskie.prompt.browser(options['file_manager'])
+        cache = None
+
+        if options['password_cache'] is not False:
+            import udiskie.cache
+            timeout = int(options['password_cache']) * 60
+            cache = udiskie.cache.PasswordCache(timeout)
+
         mounter = udiskie.mount.Mounter(
             mount_options=config.mount_options,
             ignore_device=config.ignore_device,
             prompt=prompt,
             browser=browser,
+            cache=cache,
             udisks=self.udisks)
 
         if options['notify'] and not module_available('gi.repository.Notify', '0.7'):

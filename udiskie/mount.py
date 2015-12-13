@@ -78,7 +78,8 @@ class Mounter(object):
                  mount_options=None,
                  ignore_device=None,
                  prompt=None,
-                 browser=None):
+                 browser=None,
+                 cache=None):
         """
         Initialize mounter with the given defaults.
 
@@ -99,6 +100,7 @@ class Mounter(object):
             IgnoreDevice({'is_ignored': True, 'ignore': True})]
         self._prompt = prompt
         self._browser = browser
+        self._cache = cache
         self._log = logging.getLogger(__name__)
         try:
             # propagate error messages to UDisks1 daemon for 'Job failed'
@@ -195,14 +197,40 @@ class Mounter(object):
         if not self._prompt:
             self._log.error(_('not unlocking {0}: no password prompt', device))
             yield Return(False)
+        unlocked = yield self._unlock_from_cache(device)
+        if unlocked:
+            yield Return(True)
         password = yield self._prompt(device)
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))
             yield Return(False)
         self._log.debug(_('unlocking {0}', device))
         yield device.unlock(password)
+        self._update_cache(device, password)
         self._log.info(_('unlocked {0}', device))
         yield Return(True)
+
+    @Coroutine.from_generator_function
+    def _unlock_from_cache(self, device):
+        if not self._cache:
+            yield Return(False)
+        try:
+            password = self._cache[device]
+        except KeyError:
+            yield Return(False)
+        self._log.debug(_('unlocking {0} using cached password', device))
+        try:
+            yield device.unlock(password)
+        except Exception:
+            self._log.debug(_('failed to unlock {0} using cached password', device))
+            yield Return(False)
+        self._log.debug(_('unlocked {0} using cached password', device))
+        yield Return(True)
+
+    def _update_cache(self, device, password):
+        if not self._cache:
+            return
+        self._cache[device] = password
 
     @_device_method
     def lock(self, device):
