@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-23 15:52+0200\n"
+"POT-Creation-Date: 2015-12-13 18:16+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,27 +17,32 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../udiskie/prompt.py:29
+#: ../udiskie/prompt.py:38
+msgid ""
+"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
+msgstr ""
+
+#: ../udiskie/prompt.py:46
 msgid "X server not connected!"
 msgstr ""
 
-#: ../udiskie/prompt.py:111 ../udiskie/prompt.py:120
+#: ../udiskie/prompt.py:142 ../udiskie/prompt.py:152
 #, python-brace-format
 msgid "Enter password for {0.device_presentation}: "
 msgstr ""
 
-#: ../udiskie/prompt.py:195
+#: ../udiskie/prompt.py:236
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "b' option."
 msgstr ""
 
-#: ../udiskie/udisks1.py:485 ../udiskie/udisks2.py:657
+#: ../udiskie/udisks1.py:424 ../udiskie/udisks2.py:586
 #, python-brace-format
 msgid "Device not found: {0}"
 msgstr ""
 
-#: ../udiskie/udisks1.py:687
+#: ../udiskie/udisks1.py:594
 #, python-brace-format
 msgid "{0} operation failed for device: {1}"
 msgstr ""
@@ -60,232 +65,228 @@ msgstr ""
 msgid "{0} used for {1}"
 msgstr ""
 
-#: ../udiskie/mount.py:25
+#: ../udiskie/mount.py:40
 #, python-brace-format
 msgid "found device owning \"{0}\": \"{1}\""
 msgstr ""
 
-#: ../udiskie/mount.py:28
+#: ../udiskie/mount.py:43
 #, python-brace-format
 msgid "no device found owning \"{0}\""
 msgstr ""
 
-#: ../udiskie/mount.py:37
+#: ../udiskie/mount.py:111
 #, python-brace-format
 msgid "failed to {0} {1}: {2}"
 msgstr ""
 
-#: ../udiskie/mount.py:111
+#: ../udiskie/mount.py:125
 #, python-brace-format
 msgid "not browsing {0}: not mounted"
 msgstr ""
 
-#: ../udiskie/mount.py:114
+#: ../udiskie/mount.py:128
 #, python-brace-format
 msgid "not browsing {0}: no program"
 msgstr ""
 
-#: ../udiskie/mount.py:116
+#: ../udiskie/mount.py:130
 msgid "opening {0} on {0.mount_paths[0]}"
 msgstr ""
 
-#: ../udiskie/mount.py:118
+#: ../udiskie/mount.py:132
 msgid "opened {0} on {0.mount_paths[0]}"
 msgstr ""
 
-#: ../udiskie/mount.py:132
+#: ../udiskie/mount.py:146
 #, python-brace-format
 msgid "not mounting {0}: unhandled device"
 msgstr ""
 
-#: ../udiskie/mount.py:135
+#: ../udiskie/mount.py:149
 #, python-brace-format
 msgid "not mounting {0}: already mounted"
 msgstr ""
 
-#: ../udiskie/mount.py:140
+#: ../udiskie/mount.py:154
 #, python-brace-format
 msgid "mounting {0} with {1}"
 msgstr ""
 
-#: ../udiskie/mount.py:142
+#: ../udiskie/mount.py:156
 #, python-brace-format
 msgid "mounted {0} on {1}"
 msgstr ""
 
-#: ../udiskie/mount.py:155
+#: ../udiskie/mount.py:169
 #, python-brace-format
 msgid "not unmounting {0}: unhandled device"
 msgstr ""
 
-#: ../udiskie/mount.py:158
+#: ../udiskie/mount.py:172
 #, python-brace-format
 msgid "not unmounting {0}: not mounted"
 msgstr ""
 
-#: ../udiskie/mount.py:160
+#: ../udiskie/mount.py:174
 #, python-brace-format
 msgid "unmounting {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:162
+#: ../udiskie/mount.py:176
 #, python-brace-format
 msgid "unmounted {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:176
+#: ../udiskie/mount.py:190
 #, python-brace-format
 msgid "not unlocking {0}: unhandled device"
 msgstr ""
 
-#: ../udiskie/mount.py:179
+#: ../udiskie/mount.py:193
 #, python-brace-format
 msgid "not unlocking {0}: already unlocked"
 msgstr ""
 
-#: ../udiskie/mount.py:182
+#: ../udiskie/mount.py:196
 #, python-brace-format
 msgid "not unlocking {0}: no password prompt"
 msgstr ""
 
-#: ../udiskie/mount.py:186
+#: ../udiskie/mount.py:200
 #, python-brace-format
 msgid "not unlocking {0}: cancelled by user"
 msgstr ""
 
-#: ../udiskie/mount.py:188
+#: ../udiskie/mount.py:202
 #, python-brace-format
 msgid "unlocking {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:190
+#: ../udiskie/mount.py:204
 #, python-brace-format
 msgid "unlocked {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:203
+#: ../udiskie/mount.py:217
 #, python-brace-format
 msgid "not locking {0}: unhandled device"
 msgstr ""
 
-#: ../udiskie/mount.py:206
+#: ../udiskie/mount.py:220
 #, python-brace-format
 msgid "not locking {0}: not unlocked"
 msgstr ""
 
-#: ../udiskie/mount.py:208
+#: ../udiskie/mount.py:222
 #, python-brace-format
 msgid "locking {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:210
+#: ../udiskie/mount.py:224
 #, python-brace-format
 msgid "locked {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:238
+#: ../udiskie/mount.py:255
 #, python-brace-format
 msgid "not adding {0}: unhandled device"
 msgstr ""
 
-#: ../udiskie/mount.py:272
+#: ../udiskie/mount.py:292
 #, python-brace-format
 msgid "not removing {0}: unhandled device"
 msgstr ""
 
-#: ../udiskie/mount.py:296
+#: ../udiskie/mount.py:316
 #, python-brace-format
 msgid "not ejecting {0}: unhandled device"
 msgstr ""
 
-#: ../udiskie/mount.py:300
+#: ../udiskie/mount.py:320
 #, python-brace-format
 msgid "not ejecting {0}: drive not ejectable"
 msgstr ""
 
-#: ../udiskie/mount.py:304
+#: ../udiskie/mount.py:324
 #, python-brace-format
 msgid "ejecting {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:306
+#: ../udiskie/mount.py:326
 #, python-brace-format
 msgid "ejected {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:320
+#: ../udiskie/mount.py:340
 #, python-brace-format
 msgid "not detaching {0}: unhandled device"
 msgstr ""
 
-#: ../udiskie/mount.py:324
+#: ../udiskie/mount.py:344
 #, python-brace-format
 msgid "not detaching {0}: drive not detachable"
 msgstr ""
 
-#: ../udiskie/mount.py:328
+#: ../udiskie/mount.py:348
 #, python-brace-format
 msgid "detaching {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:330
+#: ../udiskie/mount.py:350
 #, python-brace-format
 msgid "detached {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:459
+#: ../udiskie/mount.py:489
 #, python-brace-format
 msgid "Browse {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:460
+#: ../udiskie/mount.py:490
 #, python-brace-format
 msgid "Mount {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:461
+#: ../udiskie/mount.py:491
 #, python-brace-format
 msgid "Unmount {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:462
+#: ../udiskie/mount.py:492
 #, python-brace-format
 msgid "Unlock {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:463
+#: ../udiskie/mount.py:493
 #, python-brace-format
 msgid "Lock {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:464
+#: ../udiskie/mount.py:494
 #, python-brace-format
 msgid "Eject {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:465
+#: ../udiskie/mount.py:495
 #, python-brace-format
 msgid "Unpower {0}"
 msgstr ""
 
-#: ../udiskie/udisks2.py:220
-msgid "Interface {0!r} not available for {1}"
-msgstr ""
-
-#: ../udiskie/udisks2.py:777
+#: ../udiskie/udisks2.py:656
 #, python-brace-format
 msgid "+++ {0}: {1}"
 msgstr ""
 
-#: ../udiskie/tray.py:79
+#: ../udiskie/tray.py:82
 msgid "Quit"
 msgstr ""
 
-#: ../udiskie/tray.py:169
+#: ../udiskie/tray.py:172
 msgid "Invalid node!"
 msgstr ""
 
-#: ../udiskie/tray.py:277
+#: ../udiskie/tray.py:287
 msgid "udiskie"
 msgstr ""
 
@@ -366,23 +367,23 @@ msgstr ""
 msgid "Job failed"
 msgstr ""
 
-#: ../udiskie/cli.py:53
+#: ../udiskie/cli.py:52
 msgid ""
 "Failed to connect UDisks2 dbus service..\n"
 "Falling back to UDisks1."
 msgstr ""
 
-#: ../udiskie/cli.py:63
+#: ../udiskie/cli.py:62
 #, python-brace-format
 msgid "UDisks version not supported: {0}!"
 msgstr ""
 
-#: ../udiskie/cli.py:86
+#: ../udiskie/cli.py:87
 #, python-brace-format
 msgid "These options are mutually exclusive: {0}"
 msgstr ""
 
-#: ../udiskie/cli.py:154
+#: ../udiskie/cli.py:155
 msgid ""
 "\n"
 "    Note, that the options in the individual groups are mutually exclusive.\n"
@@ -392,17 +393,17 @@ msgid ""
 "    "
 msgstr ""
 
-#: ../udiskie/cli.py:174
+#: ../udiskie/cli.py:175
 #, python-format
 msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 msgstr ""
 
-#: ../udiskie/cli.py:176
+#: ../udiskie/cli.py:177
 #, python-format
 msgid "%(message)s"
 msgstr ""
 
-#: ../udiskie/cli.py:333
+#: ../udiskie/cli.py:351
 msgid ""
 "Typelib for 'libnotify' is not available. Possible causes include:\n"
 "\t- libnotify is not installed\n"
