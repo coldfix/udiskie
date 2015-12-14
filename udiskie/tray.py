@@ -37,6 +37,7 @@ class Icons(object):
         'eject': ['udiskie-eject', 'media-eject'],
         'detach': ['udiskie-detach'],
         'quit': ['application-exit'],
+        'forget_password': ['edit-delete'],
     }
 
     def __init__(self, icon_names={}):

@@ -232,6 +232,12 @@ class Mounter(object):
             return
         self._cache[device] = password
 
+    def forget_password(self, device):
+        try:
+            del self._cache[device]
+        except KeyError:
+            pass
+
     @_device_method
     def lock(self, device):
         """
@@ -521,6 +527,7 @@ class DeviceActions(object):
         'lock': _('Lock {0}'),
         'eject': _('Eject {0}'),
         'detach': _('Unpower {0}'),
+        'forget_password': _('Clear password for {0}'),
     }
 
     def __init__(self, mounter, actions={}):
@@ -534,6 +541,7 @@ class DeviceActions(object):
             'lock': partial(mounter.remove, force=True),
             'eject': partial(mounter.eject, force=True),
             'detach': partial(mounter.detach, force=True),
+            'forget_password': mounter.forget_password,
         })
 
     def detect(self, root_device=''):
@@ -567,6 +575,9 @@ class DeviceActions(object):
                 yield 'lock'
             else:
                 yield 'unlock'
+            cache = self._mounter._cache
+            if cache and device in cache:
+                yield 'forget_password'
         if device.is_ejectable and device.has_media:
             yield 'eject'
         if device.is_detachable:
