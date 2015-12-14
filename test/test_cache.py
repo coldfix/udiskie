@@ -39,13 +39,13 @@ class TestPasswordCache(unittest.TestCase):
         """Key access refreshes the timeout."""
         device = TestDev('BETA')
         password = u'{<}hëllo ωορλδ!{>}'
-        cache = PasswordCache(2)
+        cache = PasswordCache(3)
         cache[device] = password
-        time.sleep(1)
+        time.sleep(2)
         self.assertEqual(cache[device], password)
-        time.sleep(1.5)
+        time.sleep(2)
         self.assertEqual(cache[device], password)
-        time.sleep(2.5)
+        time.sleep(4)
         with self.assertRaises(KeyError):
             _ = cache[device]
 
