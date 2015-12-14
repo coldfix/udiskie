@@ -19,11 +19,12 @@ virtualenv:
 # (these can't be built via setuptools)
 before_install:
   - sudo apt-get -qy update
-  - sudo apt-get -qy install python-gobject python3-gobject
+  - sudo apt-get -qy install python-gobject python3-gobject libkeyutils-dev
 
 # Setup (performed within virtualenv)
 install:
   # Check that package can be installed from source distribution:
+  - pip install keyutils
   - python setup.py sdist
   - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
 
