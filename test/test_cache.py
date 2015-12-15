@@ -3,6 +3,8 @@
 Tests for the udiskie.cache module.
 """
 
+from __future__ import unicode_literals
+
 import unittest
 import time
 
@@ -27,7 +29,7 @@ class TestPasswordCache(unittest.TestCase):
     def test_timeout(self):
         """The cached password expires after the specified timeout."""
         device = TestDev('ALPHA')
-        password = u'{<}hëllo ωορλδ!{>}'
+        password = '{<}hëllo ωορλδ!{>}'
         cache = PasswordCache(1)
         cache[device] = password
         self.assertEqual(cache[device], password)
@@ -38,7 +40,7 @@ class TestPasswordCache(unittest.TestCase):
     def test_touch(self):
         """Key access refreshes the timeout."""
         device = TestDev('BETA')
-        password = u'{<}hëllo ωορλδ!{>}'
+        password = '{<}hëllo ωορλδ!{>}'
         cache = PasswordCache(3)
         cache[device] = password
         time.sleep(2)
@@ -52,7 +54,7 @@ class TestPasswordCache(unittest.TestCase):
     def test_revoke(self):
         """A key can be deleted manually."""
         device = TestDev('GAMMA')
-        password = u'{<}hëllo ωορλδ!{>}'
+        password = '{<}hëllo ωορλδ!{>}'
         cache = PasswordCache(0)
         cache[device] = password
         self.assertEqual(cache[device], password)
@@ -62,7 +64,7 @@ class TestPasswordCache(unittest.TestCase):
 
     def test_update(self):
         device = TestDev('DELTA')
-        password = u'{<}hëllo ωορλδ!{>}'
+        password = '{<}hëllo ωορλδ!{>}'
         cache = PasswordCache(0)
         cache[device] = password
         self.assertEqual(cache[device], password)
