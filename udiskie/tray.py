@@ -367,6 +367,7 @@ class AutoTray(TrayIcon):
         self._menu = menumaker
         self._conn_left = None
         self._conn_right = None
+        self.task = Async()
         # Okay, the following is BAD:
         menumaker._quit_action = None
         menumaker._mounter.udisks.connect_all(self)
