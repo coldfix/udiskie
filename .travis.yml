@@ -4,26 +4,33 @@ language: python
 # This means that binary distributions can be used for the dependencies.
 # Travis runs on Ubuntu 12.04 LTS currently. :(
 python:
-  # - "2.5"
-  # - "2.6"
   - "2.7"
   - "3.2"
   # - "3.3"
   # - "pypy"
- 
+
+# Build inside docker containers instead of virtual machines. These are
+# faster, start quicker and support caching. Only downside: sudo is not
+# supported.
+sudo: false
+
+# Dependencies can be installed as follows. This works only for packages
+# whitelisted on https://github.com/travis-ci/apt-package-whitelist:
+addons:
+  apt:
+    packages:
+    - python-gobject
+    - python3-gi
+    - libkeyutils-dev
+
 # Inherit system site packages for use in virtualenv:
 virtualenv:
   system_site_packages: true
 
-# Install dependencies that are hard to install:
-# (these can't be built via setuptools)
-before_install:
-  - sudo apt-get -qy update
-  - sudo apt-get -qy install python-gobject python3-gobject
-
 # Setup (performed within virtualenv)
 install:
   # Check that package can be installed from source distribution:
+  - pip install keyutils
   - python setup.py sdist
   - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
 

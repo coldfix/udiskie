@@ -185,6 +185,11 @@ setup(
         # Currently not building out of the box:
         # 'PyGObject',
     ],
+    extras_require={
+        'password-cache': [
+            'keyutils==0.3'
+        ],
+    },
     tests_require=[
     ],
     classifiers=[
