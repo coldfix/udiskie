@@ -1,6 +1,16 @@
 CHANGELOG
 ---------
 
+1.4.0
+~~~~~
+Date: 19.12.2015
+
+- go async (with self-made async module for now, until gbulb becomes ready)
+- specify GTK/Notify versions to be imported (hence fix warnings and a problem
+  for the tray icon resulting from accidentally importing GTK2)
+- add optional password caching
+
+
 1.3.2
 ~~~~~
 
