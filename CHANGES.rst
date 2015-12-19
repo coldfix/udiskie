@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+
+1.4.1
+~~~~~
+Date: 19.12.2015
+
+- fix problem in SmartTray due to recent transition to async
+
+
 1.4.0
 ~~~~~
 Date: 19.12.2015
