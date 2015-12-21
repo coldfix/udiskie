@@ -181,9 +181,9 @@ program_options:
 
   notify:           true    # [bool] Enable notifications.
 
-  password_cache:	30		# [int] Password cache in minutes. Caching is
-							# disabled by default. It can be disabled
-							# explicitly by setting it to false
+  password_cache:   30      # [int] Password cache in minutes. Caching is
+                            # disabled by default. It can be disabled
+                            # explicitly by setting it to false
 
   file_manager:     xdg-open
     # [string] Set program to open directories. It will be invoked
