@@ -146,6 +146,7 @@ def get_password_gui(device):
         return None
 
 
+@Coroutine.from_generator_function
 def get_password_tty(device):
     """Get the password to unlock a device from terminal."""
     # TODO: make this a TRUE async
