@@ -2,6 +2,13 @@ CHANGELOG
 ---------
 
 
+1.4.2
+~~~~~
+Date: 22.12.2015
+
+- fix regression in get_password_tty
+
+
 1.4.1
 ~~~~~
 Date: 19.12.2015
