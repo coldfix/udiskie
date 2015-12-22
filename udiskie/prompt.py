@@ -11,7 +11,7 @@ import sys
 
 from udiskie.async_ import Async, Coroutine, Return, Subprocess
 from udiskie.locale import _
-from udiskie.compat import basestring
+from udiskie.compat import basestring, unicode
 
 
 __all__ = ['password', 'browser']
@@ -178,7 +178,7 @@ class DeviceCommand(object):
         Invoke the subprocess to ask the user to enter a password for unlocking
         the specified device.
         """
-        argv = [arg.format(device) for arg in self.argv]
+        argv = [unicode(arg).format(device) for arg in self.argv]
         try:
             stdout = yield Subprocess(argv)
         except subprocess.CalledProcessError:
