@@ -2,6 +2,14 @@ CHANGELOG
 ---------
 
 
+1.4.4
+~~~~~
+Date: 24.12.2015
+
+- fix too narrow dependency enforcement
+- make udiskie slightly less verbose in default mode
+
+
 1.4.3
 ~~~~~
 Date: 24.12.2015
