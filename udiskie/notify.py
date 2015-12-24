@@ -119,14 +119,20 @@ class Notify(object):
     def _device_added(self, device):
         device_file = device.device_presentation
         if (device.is_drive or device.is_toplevel) and device_file:
-            node_tree = self._actions.detect(device.object_path)
-            flat_actions = self._flatten_node(node_tree)
-            actions = [
-                (action.method,
-                 action.label.format(action.device.id_label or action.device.device_presentation),
-                 action.action)
-                for action in flat_actions
-            ]
+            # On UDisks1: cannot invoke self._actions.detect() for newly added
+            # LUKS devices. It should be okay if we had waited for the actions
+            # to be added, though.
+            if self._has_actions('device_added'):
+                node_tree = self._actions.detect(device.object_path)
+                flat_actions = self._flatten_node(node_tree)
+                actions = [
+                    (action.method,
+                    action.label.format(action.device.id_label or action.device.device_presentation),
+                    action.action)
+                    for action in flat_actions
+                ]
+            else:
+                actions = ()
             self._show_notification(
                 'device_added',
                 _('Device added'),
