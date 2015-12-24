@@ -7,6 +7,7 @@ import os.path
 
 __all__ = [
     'wraps',
+    'check_call',
     'Emitter',
     'samefile',
     'setdefault',
@@ -19,6 +20,14 @@ try:
     from black_magic.decorator import wraps
 except ImportError:
     from functools import wraps
+
+
+def check_call(exc_type, func, *args):
+    try:
+        func(*args)
+        return True
+    except exc_type:
+        return False
 
 
 class Emitter(object):

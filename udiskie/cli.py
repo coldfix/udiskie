@@ -5,15 +5,15 @@ The application classes in this module are installed as executables via
 setuptools entry points.
 """
 
+# import udiskie.depend first - for side effects!
+from udiskie.depend import has_Notify, has_Gtk
+
 import inspect
 import logging
 import traceback
 
 from docopt import docopt, DocoptExit
 
-from gi import require_version
-require_version('Gio', '2.0')
-require_version('GLib', '2.0')
 from gi.repository import GLib
 
 import udiskie
@@ -61,16 +61,6 @@ def get_backend(version=None):
     else:
         raise ValueError(_("UDisks version not supported: {0}!", version))
     yield Return(daemon)
-
-
-def module_available(name, version):
-    """Check if the module is importable."""
-    require_version(name.rsplit('.', 1)[-1], version)
-    try:
-        __import__(name)
-        return True
-    except ImportError:
-        return False
 
 
 class Choice(object):
@@ -366,7 +356,7 @@ class Daemon(_EntryPoint):
             cache=cache,
             udisks=self.udisks)
 
-        if options['notify'] and not module_available('gi.repository.Notify', '0.7'):
+        if options['notify'] and not has_Notify():
             libnotify_not_available = _(
                 "Typelib for 'libnotify' is not available. Possible causes include:"
                 "\n\t- libnotify is not installed"
@@ -375,6 +365,16 @@ class Daemon(_EntryPoint):
                 "\n\nStarting udiskie without notifications.")
             logging.getLogger(__name__).error(libnotify_not_available)
             options['notify'] = False
+
+        if options['tray'] and not has_Gtk(3):
+            gtk3_not_available = _(
+                "Typelib for 'Gtk 3.0' is not available. Possible causes include:"
+                "\n\t- GTK3 is not installed"
+                "\n\t- the typelib is provided by a separate package"
+                "\n\t- GTK3 was built with introspection disabled"
+                "\n\nStarting udiskie without tray icon.")
+            logging.getLogger(__name__).error(gtk3_not_available)
+            options['tray'] = False
 
         tasks = []
 
