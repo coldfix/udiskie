@@ -7,7 +7,7 @@ from functools import partial
 import logging
 
 from udiskie.async_ import AsyncList, Coroutine, Return
-from udiskie.common import wraps, setdefault
+from udiskie.common import wraps, setdefault, decode
 from udiskie.compat import basestring
 from udiskie.config import IgnoreDevice, FilterMatcher
 from udiskie.locale import _
@@ -109,10 +109,12 @@ class Mounter(object):
         except AttributeError:
             self._set_error = lambda device, action, message: None
 
-    def _error(self, fn, device, err):
+    def _error(self, fn, device, err, fmt):
+        message = decode(err.message)
         self._log.error(_('failed to {0} {1}: {2}',
-                          fn.__name__, device, err.message))
-        self._set_error(device, fn.__name__, err.message)
+                          fn.__name__, device, message))
+        self._set_error(device, fn.__name__, message)
+        return True
 
     @_device_method
     def browse(self, device):

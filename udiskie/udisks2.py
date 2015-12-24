@@ -555,7 +555,7 @@ class Daemon(Emitter):
         logger.warn(_('Device not found: {0}', path))
         return None
 
-    def __init__(self, proxy=None):
+    def __init__(self, proxy):
 
         """Initialize object and start listening to UDisks2 events."""
 
@@ -571,7 +571,7 @@ class Daemon(Emitter):
                        'job_failed']
         super(Daemon, self).__init__(event_names)
 
-        self._proxy = proxy = proxy
+        self._proxy = proxy
         self._log = logging.getLogger(__name__)
         self._objects = {}
 

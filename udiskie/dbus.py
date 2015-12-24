@@ -4,6 +4,8 @@ Common DBus utilities.
 
 from __future__ import absolute_import
 
+import traceback
+
 from gi.repository import Gio
 from gi.repository import GLib
 
@@ -67,7 +69,7 @@ class DBusCall(Async):
         try:
             value = proxy.call_finish(result)
         except Exception as e:
-            self.errback(e)
+            self.errback(e, traceback.format_exc())
         else:
             self.callback(*value.unpack())
 
@@ -363,14 +365,12 @@ class DBusProxyNew(Async):
         """
         try:
             value = Gio.DBusProxy.new_finish(result)
-        except Exception as e:
-            self.errback(e)
-        else:
             if value is None:
-                # TODO: output bus_name + object_path
-                self.errback(RuntimeError("Failed to connect DBus object!"))
-            else:
-                self.callback(value)
+                raise RuntimeError("Failed to connect DBus object!")
+        except Exception as e:
+            self.errback(e, traceback.format_exc())
+        else:
+            self.callback(value)
 
 
 class DBusProxyNewForBus(Async):
@@ -411,14 +411,12 @@ class DBusProxyNewForBus(Async):
         """
         try:
             value = Gio.DBusProxy.new_for_bus_finish(result)
-        except Exception as e:
-            self.errback(e)
-        else:
             if value is None:
-                # TODO: output bus_name + object_path
-                self.errback(RuntimeError("Failed to connect DBus object!"))
-            else:
-                self.callback(value)
+                raise RuntimeError("Failed to connect DBus object!")
+        except Exception as e:
+            self.errback(e, traceback.format_exc())
+        else:
+            self.callback(value)
 
 
 @Coroutine.from_generator_function

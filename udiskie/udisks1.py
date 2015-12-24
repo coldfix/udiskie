@@ -413,7 +413,7 @@ class EventQueue(object):
         if not self._execing:
             self.pop()
 
-    def pop(self):
+    def pop(self, *_ignored):
         """Start executing the next event handler."""
         if not self._waiting:
             self._execing = False
@@ -421,15 +421,8 @@ class EventQueue(object):
         self._execing = True
         func, args, kwargs = self._waiting.pop()
         coroutine = Coroutine(func(*args, **kwargs))
-        coroutine.errbacks.append(self._on_error)
-        coroutine.callbacks.append(self._on_result)
-
-    def _on_result(self, *values):
-        self.pop()
-
-    def _on_error(self, exc):
-        self.pop()
-        raise exc
+        coroutine.errbacks.append(self.pop)
+        coroutine.callbacks.append(self.pop)
 
 
 class Daemon(Emitter):
@@ -476,7 +469,7 @@ class Daemon(Emitter):
         logger.warn(_('Device not found: {0}', path))
         return None
 
-    def __init__(self, proxy=None):
+    def __init__(self, proxy):
         """
         Create a Daemon object and start listening to DBus events.
 
@@ -496,9 +489,9 @@ class Daemon(Emitter):
                        'job_failed']
         super(Daemon, self).__init__(event_names)
 
-        proxy = proxy
-
         self._proxy = proxy
+        self._log = logging.getLogger(__name__)
+
         self._jobs = {}
         self._devices = {}
         self._property_proxy = {}
@@ -659,9 +652,8 @@ class Daemon(Emitter):
                 # get and delete message, if available:
                 message = self._errors[action].pop(object_path, "")
                 self.trigger('job_failed', device, action, message)
-                log = logging.getLogger(__name__)
-                log.info(_('{0} operation failed for device: {1}',
-                           action, object_path))
+                self._log.info(_('{0} operation failed for device: {1}',
+                                 action, object_path))
 
     # used internally by _device_job_changed:
     _action_mapping = {

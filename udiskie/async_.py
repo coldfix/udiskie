@@ -6,8 +6,12 @@ It is based on ideas from "Twisted" and the "yield from" expression in
 python3, but more lightweight (incomplete) and compatible with python2.
 """
 
+from __future__ import print_function
+
 from functools import partial
 from subprocess import CalledProcessError
+import traceback
+import sys
 
 from gi.repository import GLib
 from gi.repository import Gio
@@ -65,18 +69,17 @@ class Async(object):
             raise RuntimeError("Async already finished!")
         self.done = True
         # TODO: handle Async callbacks:
-        for fn in callbacks:
-            fn(*args)
-        return callbacks
+        return [fn(*args) for fn in callbacks]
 
     def callback(self, *values):
         """Signal successful completion."""
         self._finish(self.callbacks, *values)
 
-    def errback(self, exception):
+    def errback(self, exception, formatted):
         """Signal unsuccessful completion."""
-        if not self._finish(self.errbacks, exception):
-            raise exception
+        was_handled = self._finish(self.errbacks, exception, formatted)
+        if not any(was_handled):
+            print(formatted, file=sys.stderr)
 
 
 # Making this object a global is important to prevent garbage collection which
@@ -114,7 +117,7 @@ class AsyncList(Async):
         if self._completed == self._total:
             self.callback(self._results)
 
-    def _subtask_error(self, idx, error):
+    def _subtask_error(self, idx, error, fmt):
         """Receive an error from a single subtask."""
         self._results[idx] = (False, error)
         self._completed += 1
@@ -252,7 +255,7 @@ class Coroutine(Async):
         else:
             return values
 
-    def _throw(self, exc):
+    def _throw(self, exc, fmt):
         """
         Interact with the coroutine by raising an exception.
 
@@ -260,6 +263,7 @@ class Coroutine(Async):
         exception from the `yield` expression.
         """
         self._interact(self._generator.throw, exc)
+        return True
 
     def _interact(self, func, *args):
         """
@@ -272,7 +276,7 @@ class Coroutine(Async):
             self.callback()
         except Exception as e:
             self._generator.close()
-            self.errback(e)
+            self.errback(e, traceback.format_exc())
         else:
             self._recv(value)
 
@@ -297,17 +301,15 @@ class Subprocess(Async):
     def _callback(self, source_object, result, user_data):
         try:
             success, stdout, stderr = self.p.communicate_utf8_finish(result)
+            if not success:
+                raise RuntimeError("Subprocess did not exit normally!")
+            exit_code = self.p.get_exit_status()
+            if exit_code != 0:
+                raise CalledProcessError(
+                    "Subprocess returned a non-zero exit-status!",
+                    exit_code,
+                    stdout)
         except Exception as e:
-            self.errback(e)
-            return
-        if not success:
-            self.errback(RuntimeError("Subprocess did not exit normally!"))
-            return
-        exit_code = self.p.get_exit_status()
-        if exit_code != 0:
-            self.errback(CalledProcessError(
-                "Subprocess returned a non-zero exit-status!",
-                exit_code,
-                stdout))
-            return
-        self.callback(stdout)
+            self.errback(e, traceback.format_exc())
+        else:
+            self.callback(stdout)
