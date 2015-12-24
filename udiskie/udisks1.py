@@ -18,9 +18,11 @@ from functools import partial
 import logging
 import os.path
 
+from gi.repository import GLib
+
 from udiskie.async_ import AsyncList, Coroutine, Return
 from udiskie.common import Emitter, samefile, AttrDictView, decode, decoded, wraps
-from udiskie.dbus import connect_service, DBusException
+from udiskie.dbus import connect_service
 from udiskie.locale import _
 
 
@@ -548,7 +550,7 @@ class Daemon(Emitter):
 
         try:
             properties = yield prop_prox.GetAll()
-        except DBusException:
+        except GLib.GError:
             self._invalidate(object_path)
             yield Return(None)
             # TODO: return something useful? (NullDevice)

@@ -18,11 +18,7 @@ __all__ = [
     'ObjectProxy',
     'BusProxy',
     'connect_service',
-    'DBusException',
 ]
-
-
-DBusException = GLib.GError
 
 
 class DBusCall(Async):
@@ -87,8 +83,6 @@ class InterfaceProxy(object):
     :ivar Gio.DBusProxy method: attribute access to DBus methods
     :ivar Gio.DBusProxy _proxy: underlying proxy object
     """
-
-    Exception = DBusException
 
     def __init__(self, proxy):
         """

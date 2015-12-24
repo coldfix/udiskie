@@ -38,17 +38,16 @@ def get_backend(version=None):
 
     :param int version: requested UDisks backend version
     :returns: UDisks service wrapper object
-    :raises dbus.DBusException: if unable to connect to UDisks dbus service.
+    :raises GLib.GError: if unable to connect to UDisks dbus service.
     :raises ValueError: if the version is invalid
 
     If ``version`` has a false truth value, try to connect to UDisks1 and
     fall back to UDisks2 if not available.
     """
     if not version:
-        from udiskie.dbus import DBusException
         try:
             daemon = yield get_backend(2)
-        except DBusException:
+        except GLib.GError:
             log = logging.getLogger(__name__)
             log.warning(_('Failed to connect UDisks2 dbus service..\n'
                           'Falling back to UDisks1.'))

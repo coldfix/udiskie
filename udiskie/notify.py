@@ -7,7 +7,6 @@ import logging
 from gi.repository import GLib
 
 from udiskie.mount import DeviceActions
-from udiskie.dbus import DBusException
 from udiskie.locale import _
 
 
@@ -205,7 +204,7 @@ class Notify(object):
                 self._add_action(notification, *action)
         try:
             notification.show()
-        except DBusException as exc:
+        except GLib.GError as exc:
             # Catch and log the exception. Starting udiskie with notifications
             # enabled while not having a notification service installed is a
             # mistake too easy to be made, but it shoud not render the rest of
