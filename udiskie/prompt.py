@@ -20,7 +20,7 @@ __all__ = ['password', 'browser']
 def _require_version(package, version):
     import gi
     try:
-        gi.require_version('Gtk', '3.0')
+        gi.require_version(package, version)
         return True
     except ValueError:
         return False
