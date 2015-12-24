@@ -462,12 +462,14 @@ class Daemon(Emitter):
         This searches through all accessible devices and compares device
         path as well as mount pathes.
         """
+        if isinstance(path, Device):
+            return path
         for device in self:
             if device.is_file(path):
+                self._log.debug(_('found device owning "{0}": "{1}"',
+                                  path, device))
                 return device
-        logger = logging.getLogger(__name__)
-        logger.warn(_('Device not found: {0}', path))
-        return None
+        raise ValueError(_('no device found owning "{0}"', path))
 
     def __init__(self, proxy):
         """

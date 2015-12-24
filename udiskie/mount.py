@@ -25,7 +25,7 @@ def _False():
     yield Return(False)
 
 
-def _device_method(fn):
+def _find_device(fn, set_error=False):
     """
     Decorator for Mounter methods taking a Device as their first argument.
 
@@ -34,19 +34,33 @@ def _device_method(fn):
     """
     @wraps(fn)
     def wrapper(self, device_or_path, *args, **kwargs):
-        if isinstance(device_or_path, basestring):
+        try:
             device = self.udisks.find(device_or_path)
-            if device:
-                self._log.debug(_('found device owning "{0}": "{1}"',
-                                  device_or_path, device))
-            else:
-                self._log.error(_('no device found owning "{0}"',
-                                  device_or_path))
-                return _False()
-        else:
-            device = device_or_path
-        async_ = Coroutine(fn(self, device, *args, **kwargs))
+        except ValueError as e:
+            self._log.error(decode(e.message))
+            return _False()
+        return Coroutine(fn(self, device, *args, **kwargs))
+    return wrapper
+
+
+def _sets_async_error(fn):
+    @wraps(fn)
+    def wrapper(self, device, *args, **kwargs):
+        async_ = fn(self, device, *args, **kwargs)
         async_.errbacks.append(partial(self._error, fn, device))
+        return async_
+    return wrapper
+
+
+def _suppress_error(fn):
+    """
+    Prevent errors in this function from being shown. This is OK, since all
+    errors happen in sub-functions in which errors ARE logged.
+    """
+    @wraps(fn)
+    def wrapper(self, device, *args, **kwargs):
+        async_ = fn(self, device, *args, **kwargs)
+        async_.errbacks.append(lambda *args: True)
         return async_
     return wrapper
 
@@ -116,7 +130,8 @@ class Mounter(object):
         self._set_error(device, fn.__name__, message)
         return True
 
-    @_device_method
+    @_sets_async_error
+    @_find_device
     def browse(self, device):
         """
         Browse device.
@@ -137,7 +152,8 @@ class Mounter(object):
         yield Return(True)
 
     # mount/unmount
-    @_device_method
+    @_sets_async_error
+    @_find_device
     def mount(self, device):
         """
         Mount the device if not already mounted.
@@ -160,7 +176,8 @@ class Mounter(object):
         self._log.info(_('mounted {0} on {1}', device, mount_path))
         yield Return(True)
 
-    @_device_method
+    @_sets_async_error
+    @_find_device
     def unmount(self, device):
         """
         Unmount a Device if mounted.
@@ -181,7 +198,8 @@ class Mounter(object):
         yield Return(True)
 
     # unlock/lock (LUKS)
-    @_device_method
+    @_sets_async_error
+    @_find_device
     def unlock(self, device):
         """
         Unlock the device if not already unlocked.
@@ -240,7 +258,8 @@ class Mounter(object):
         except KeyError:
             pass
 
-    @_device_method
+    @_sets_async_error
+    @_find_device
     def lock(self, device):
         """
         Lock device if unlocked.
@@ -261,7 +280,8 @@ class Mounter(object):
         yield Return(True)
 
     # add/remove (unlock/lock or mount/unmount)
-    @_device_method
+    @_suppress_error
+    @_find_device
     def add(self, device, recursive=False):
         """
         Mount or unlock the device depending on its type.
@@ -292,7 +312,8 @@ class Mounter(object):
             yield Return(False)
         yield Return(success)
 
-    @_device_method
+    @_suppress_error
+    @_find_device
     def auto_add(self, device, recursive=False):
         """
         Automatically attempt to mount or unlock a device, but be quiet if the
@@ -328,7 +349,8 @@ class Mounter(object):
             self._log.debug(_('not adding {0}: unhandled device', device))
         yield Return(success)
 
-    @_device_method
+    @_suppress_error
+    @_find_device
     def remove(self, device, force=False, detach=False, eject=False,
                lock=False):
         """
@@ -373,7 +395,8 @@ class Mounter(object):
             success = yield self.detach(device)
         yield Return(success)
 
-    @_device_method
+    @_suppress_error
+    @_find_device
     def auto_remove(self, device, force=False, detach=False, eject=False,
                     lock=False):
         """
@@ -423,7 +446,8 @@ class Mounter(object):
         yield Return(success)
 
     # eject/detach device
-    @_device_method
+    @_sets_async_error
+    @_find_device
     def eject(self, device, force=False):
         """
         Eject a device after unmounting all its mounted filesystems.
@@ -447,7 +471,8 @@ class Mounter(object):
         self._log.info(_('ejected {0}', device))
         yield Return(True)
 
-    @_device_method
+    @_sets_async_error
+    @_find_device
     def detach(self, device, force=False):
         """
         Detach a device after unmounting all its mounted filesystems.
