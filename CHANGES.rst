@@ -2,6 +2,15 @@ CHANGELOG
 ---------
 
 
+1.4.5
+~~~~~
+Date: 24.12.2015
+
+- fix another bug with unicode data on command line (py2)
+- slightly improve stack traces in async code
+- further decrease verbosity while removing devices
+
+
 1.4.4
 ~~~~~
 Date: 24.12.2015
