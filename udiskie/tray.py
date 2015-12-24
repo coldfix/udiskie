@@ -370,8 +370,11 @@ class AutoTray(TrayIcon):
         self.task = Async()
         # Okay, the following is BAD:
         menumaker._quit_action = None
-        menumaker._mounter.udisks.connect_all(self)
-        self.show(self.has_menu())
+        udisks = menumaker._mounter.udisks
+        udisks.connect('device_changed', self.update)
+        udisks.connect('device_added', self.update)
+        udisks.connect('device_removed', self.update)
+        self.update()
 
     def _show(self):
         """Extends TrayIcon._show: create a new status icon."""
@@ -387,14 +390,6 @@ class AutoTray(TrayIcon):
         """Check if a menu action is available."""
         return any(self._menu._prepare_menu(self._menu.detect()).groups)
 
-    def device_changed(self, old_state, new_state):
-        """Update visibility."""
-        self.show(self.has_menu())
-
-    def device_added(self, device):
-        """Update visibility."""
-        self.show(self.has_menu())
-
-    def device_removed(self, device):
-        """Update visibility."""
+    def update(self, *args):
+        """Show/hide icon depending on whether there are devices."""
         self.show(self.has_menu())
