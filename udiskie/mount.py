@@ -322,6 +322,8 @@ class Mounter(object):
                     tasks.append(self.auto_add(dev, recursive=True))
             # TODO: AND results
             success = yield AsyncList(tasks)
+        else:
+            self._log.debug(_('not adding {0}: unhandled device', device))
         yield Return(success)
 
     @_device_method
@@ -342,13 +344,13 @@ class Mounter(object):
             success = yield self.unmount(device)
         elif device.is_crypto:
             if force and device.is_unlocked:
-                yield self.remove(device.luks_cleartext_holder, force=True)
+                yield self.auto_remove(device.luks_cleartext_holder, force=True)
             success = yield self.lock(device)
         elif force and (device.is_partition_table or device.is_drive):
             tasks = []
             for child in self.get_all_handleable():
                 if _is_parent_of(device, child):
-                    tasks.append(self.remove(
+                    tasks.append(self.auto_remove(
                         child,
                         force=True,
                         detach=detach,
@@ -366,6 +368,55 @@ class Mounter(object):
         if eject:
             success = yield self.eject(device)
         if detach:
+            success = yield self.detach(device)
+        yield Return(success)
+
+    @_device_method
+    def auto_remove(self, device, force=False, detach=False, eject=False,
+                    lock=False):
+        """
+        Unmount or lock the device depending on device type.
+
+        :param device: device object, block device path or mount path
+        :param bool force: recursively remove all child devices
+        :param bool detach: detach the root drive
+        :param bool eject: remove media from the root drive
+        :param bool lock: lock the associated LUKS cleartext slave
+        :returns: whether all attempted operations succeeded
+        :rtype: bool
+        """
+        success = True
+        if not self.is_handleable(device):
+            pass
+        elif device.is_filesystem:
+            if device.is_mounted:
+                success = yield self.unmount(device)
+        elif device.is_crypto:
+            if force and device.is_unlocked:
+                yield self.auto_remove(device.luks_cleartext_holder, force=True)
+            if device.is_unlocked:
+                success = yield self.lock(device)
+        elif force and (device.is_partition_table or device.is_drive):
+            tasks = []
+            for child in self.get_all_handleable():
+                if _is_parent_of(device, child):
+                    tasks.append(self.auto_remove(
+                        child,
+                        force=True,
+                        detach=detach,
+                        eject=eject,
+                        lock=lock))
+            # TODO: AND results
+            success = yield AsyncList(tasks)
+        else:
+            self._log.debug(_('not removing {0}: unhandled device', device))
+        # if these operations work, everything is fine, we can return True:
+        if lock and device.is_luks_cleartext:
+            device = device.luks_cleartext_slave
+            success = yield self.lock(device)
+        if eject and device.has_media:
+            success = yield self.eject(device)
+        if detach and device.is_detachable:
             success = yield self.detach(device)
         yield Return(success)
 
@@ -388,7 +439,7 @@ class Mounter(object):
             self._log.warn(_('not ejecting {0}: drive not ejectable', drive))
             yield Return(False)
         if force:
-            yield self.remove(drive, force=True)
+            yield self.auto_remove(drive, force=True)
         self._log.debug(_('ejecting {0}', device))
         yield drive.eject()
         self._log.info(_('ejected {0}', device))
@@ -412,7 +463,7 @@ class Mounter(object):
             self._log.warn(_('not detaching {0}: drive not detachable', drive))
             yield Return(False)
         if force:
-            yield self.remove(drive, force=True)
+            yield self.auto_remove(drive, force=True)
         self._log.debug(_('detaching {0}', device))
         yield drive.detach()
         self._log.info(_('detached {0}', device))
@@ -448,11 +499,7 @@ class Mounter(object):
         for device in self.get_all_handleable():
             if device.parent_object_path != '/':
                 continue
-            if (device.is_filesystem
-                    or device.is_crypto
-                    or device.is_partition_table
-                    or device.is_drive):
-                tasks.append(self.remove(device, **remove_args))
+            tasks.append(self.auto_remove(device, **remove_args))
         # TODO: AND results
         return AsyncList(tasks)
 
