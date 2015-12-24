@@ -16,7 +16,7 @@ import logging
 
 from gi.repository import GLib
 
-from udiskie.common import Emitter, samefile, AttrDictView
+from udiskie.common import Emitter, samefile, AttrDictView, decode
 from udiskie.dbus import connect_service
 from udiskie.locale import _
 from udiskie.async_ import Coroutine, Return
@@ -61,39 +61,6 @@ Interface = {
     'ObjectManager':    'org.freedesktop.DBus.ObjectManager',
     'Properties':       'org.freedesktop.DBus.Properties',
 }
-
-
-# ----------------------------------------
-# byte array to string conversion
-# ----------------------------------------
-
-try:
-    unicode
-except NameError:
-    unicode = str
-
-
-def decode(ay):
-    """Convert data from DBus queries to strings."""
-    if ay is None:
-        return ''
-    elif isinstance(ay, unicode):
-        return ay
-    elif isinstance(ay, bytes):
-        return ay.decode('utf-8')
-    else:
-        # dbus.Array([dbus.Byte]) or any similar sequence type:
-        return bytearray(ay).rstrip(bytearray((0,))).decode('utf-8')
-
-
-def encode(s):
-    """Convert data from DBus queries to strings."""
-    if s is None:
-        return b''
-    elif isinstance(s, unicode):
-        return s.encode('utf-8')
-    else:
-        return s
 
 
 # ----------------------------------------
@@ -455,12 +422,13 @@ class Device(object):
         return list(map(decode, self._P.Filesystem.MountPoints or ()))
 
     # Filesystem methods
+    @Coroutine.from_generator_function
     def mount(self,
               fstype=None,
               options=None,
               auth_no_user_interaction=None):
         """Mount filesystem."""
-        return self._M.Filesystem.Mount(
+        path = yield self._M.Filesystem.Mount(
             '(a{sv})',
             filter_opt({
                 'fstype': ('s', fstype),
@@ -468,6 +436,7 @@ class Device(object):
                 'auth.no_user_interaction': ('b', auth_no_user_interaction),
             })
         )
+        yield Return(decode(path))
 
     def unmount(self, force=None, auth_no_user_interaction=None):
         """Unmount filesystem."""
