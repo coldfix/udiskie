@@ -20,7 +20,7 @@ import udiskie
 import udiskie.config
 import udiskie.mount
 from udiskie.async_ import AsyncList, Coroutine, Return, RunForever
-from udiskie.common import extend
+from udiskie.common import extend, decode
 from udiskie.locale import _
 
 
@@ -102,6 +102,12 @@ def Switch(name):
                    '--no-' + name: False})
 
 
+def _decode(arg):
+    if isinstance(arg, list):
+        return [decode(s) for s in arg]
+    return decode(arg)
+
+
 class Value(object):
 
     """Option which is given as value of a command line argument."""
@@ -112,7 +118,7 @@ class Value(object):
 
     def __call__(self, args):
         """Get the value of the command line argument."""
-        return args[self._name]
+        return _decode(args[self._name])
 
 
 class OptionalValue(object):
@@ -124,7 +130,7 @@ class OptionalValue(object):
 
     def __call__(self, args):
         """Get the value of the command line argument."""
-        return self._choice(args) and args[self._name]
+        return self._choice(args) and _decode(args[self._name])
 
 
 class _EntryPoint(object):
