@@ -661,7 +661,7 @@ class Daemon(Emitter):
                 self.trigger('job_failed', device, action, message)
                 log = logging.getLogger(__name__)
                 log.info(_('{0} operation failed for device: {1}',
-                           job_id, object_path))
+                           action, object_path))
 
     # used internally by _device_job_changed:
     _action_mapping = {

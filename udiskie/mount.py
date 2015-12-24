@@ -456,7 +456,7 @@ class Mounter(object):
         :rtype: bool
         """
         if not self.is_handleable(device):
-            self._log.warn(_('not detaching {0}: unhandled device'))
+            self._log.warn(_('not detaching {0}: unhandled device', device))
             yield Return(False)
         drive = device.root
         if not drive.is_detachable:
