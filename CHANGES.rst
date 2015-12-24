@@ -2,6 +2,15 @@ CHANGELOG
 ---------
 
 
+1.4.3
+~~~~~
+Date: 24.12.2015
+
+- fix bug with unicode data on python2
+- fix bug due to event ordering in udisks1
+- fix bug due to inavailability of device data at specific time
+
+
 1.4.2
 ~~~~~
 Date: 22.12.2015
