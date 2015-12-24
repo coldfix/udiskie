@@ -261,24 +261,30 @@ class TrayIcon(object):
 
     """Default TrayIcon class."""
 
-    def __init__(self, menumaker, icons, statusicon=None):
+    def __init__(self, menumaker, icons, statusicon=None, show=True):
         """
-        Create and show a simple Gtk.StatusIcon.
+        Create an object managing a tray icon.
+
+        The actual Gtk.StatusIcon is only created as soon as you call show()
+        for the first time. The reason to delay its creation is that the GTK
+        icon will be initially visible, which results in a perceptable
+        flickering.
 
         :param UdiskieMenu menumaker: menu factory
         :param Gtk.StatusIcon statusicon: status icon
         """
         self._icons = icons
-        self._icon = statusicon or self._create_statusicon()
+        self._icon = statusicon
         self._menu = menumaker
         self._conn_left = None
         self._conn_right = None
-        self.show()
         self.task = Async()
         menumaker._quit_action = self.destroy
+        if show:
+            self.show()
 
     def destroy(self):
-        self.hide()
+        self.show(False)
         self.task.callback()
 
     def _create_statusicon(self):
@@ -295,19 +301,15 @@ class TrayIcon(object):
 
     def show(self, show=True):
         """Show or hide the tray icon."""
-        if show:
-            if not self.visible:
-                self._show()
-        else:
-            self.hide()
-
-    def hide(self):
-        """Hide the tray icon."""
-        if self.visible:
+        if show and not self.visible:
+            self._show()
+        if not show and self.visible:
             self._hide()
 
     def _show(self):
         """Show the tray icon."""
+        if not self._icon:
+            self._icon = self._create_statusicon()
         widget = self._icon
         widget.set_visible(True)
         self._conn_left = widget.connect("activate", self._activate)
@@ -358,16 +360,7 @@ class AutoTray(TrayIcon):
 
         Overrides TrayIcon.__init__.
         """
-        # The reason to overwrite TrayIcon.__init__ is that the AutoTray
-        # icon may need to be hidden at initialization time. When creating a
-        # Gtk.StatusIcon, it will initially be visible, creating a minor
-        # nuisance.
-        self._icons = icons
-        self._icon = None
-        self._menu = menumaker
-        self._conn_left = None
-        self._conn_right = None
-        self.task = Async()
+        super(AutoTray, self).__init__(menumaker, icons, show=False)
         # Okay, the following is BAD:
         menumaker._quit_action = None
         udisks = menumaker._mounter.udisks
@@ -375,16 +368,6 @@ class AutoTray(TrayIcon):
         udisks.connect('device_added', self.update)
         udisks.connect('device_removed', self.update)
         self.update()
-
-    def _show(self):
-        """Extends TrayIcon._show: create a new status icon."""
-        self._icon = self._create_statusicon()
-        super(AutoTray, self)._show()
-
-    def _hide(self):
-        """Extends TrayIcon._hide: forget the status icon."""
-        super(AutoTray, self)._hide()
-        self._icon = None
 
     def has_menu(self):
         """Check if a menu action is available."""
