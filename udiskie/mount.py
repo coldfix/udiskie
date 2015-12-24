@@ -291,6 +291,40 @@ class Mounter(object):
         yield Return(success)
 
     @_device_method
+    def auto_add(self, device, recursive=False):
+        """
+        Automatically attempt to mount or unlock a device, but be quiet if the
+        device is not supported.
+
+        :param device: device object, block device path or mount path
+        :param bool recursive: recursively mount and unlock child devices
+        :returns: whether all attempted operations succeeded
+        :rtype: bool
+        """
+        success = True
+        if not self.is_handleable(device):
+            pass
+        elif device.is_filesystem:
+            if not device.is_mounted:
+                success = yield self.mount(device)
+        elif device.is_crypto:
+            if self._prompt and not device.is_unlocked:
+                success = yield self.unlock(device)
+            if success and recursive:
+                # TODO: update device
+                success = yield self.auto_add(
+                    device.luks_cleartext_holder,
+                    recursive=True)
+        elif recursive and device.is_partition_table:
+            tasks = []
+            for dev in self.get_all_handleable():
+                if dev.is_partition and dev.partition_slave == device:
+                    tasks.append(self.auto_add(dev, recursive=True))
+            # TODO: AND results
+            success = yield AsyncList(tasks)
+        yield Return(success)
+
+    @_device_method
     def remove(self, device, force=False, detach=False, eject=False,
                lock=False):
         """
@@ -394,11 +428,8 @@ class Mounter(object):
         :rtype: bool
         """
         tasks = []
-        for device in self.get_all_handleable():
-            if (device.is_filesystem
-                    or device.is_crypto
-                    or (recursive and device.is_partition_table)):
-                tasks.append(self.add(device, recursive=recursive))
+        for device in self.udisks:
+            tasks.append(self.auto_add(device, recursive=recursive))
         # TODO: AND results
         return AsyncList(tasks)
 

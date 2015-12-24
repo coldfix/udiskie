@@ -24,25 +24,9 @@ class AutoMounter(object):
         :param Mounter mounter: mounter object
         """
         self._mounter = mounter
-        mounter.udisks.connect_all(self)
-
-    def device_added(self, device):
-        """
-        Mount newly added devices.
-
-        :param Device device: newly added device
-        """
-        if self._mounter.is_handleable(device):
-            self._mounter.add(device)
-
-    def media_added(self, device):
-        """
-        Mount newly added media.
-
-        :param Device device: device with newly added media
-        """
-        if self._mounter.is_handleable(device):
-            self._mounter.add(device)
+        mounter.udisks.connect('device_changed', self.device_changed)
+        mounter.udisks.connect('device_added', mounter.auto_add)
+        mounter.udisks.connect('media_added', mounter.auto_add)
 
     def device_changed(self, old_state, new_state):
         """
