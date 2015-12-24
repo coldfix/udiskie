@@ -503,64 +503,6 @@ class Mounter(object):
         # TODO: AND results
         return AsyncList(tasks)
 
-    def mount_all(self):
-        """
-        Mount handleable devices that are already present.
-
-        :returns: whether all attempted operations succeeded
-        :rtype: bool
-        """
-        tasks = []
-        for device in self.get_all_handleable():
-            tasks.append(self.mount(device))
-        # TODO: AND results
-        return AsyncList(tasks)
-
-    def unmount_all(self):
-        """
-        Unmount all filesystems handleable by udiskie.
-
-        :returns: whether all attempted operations succeeded
-        :rtype: bool
-        """
-        tasks = []
-        # TODO: unmount leaf devices first
-        # OR:   recursively unmount root devices
-        for device in self.get_all_handleable():
-            tasks.append(self.unmount(device))
-        # TODO: AND results
-        return AsyncList(tasks)
-
-    def eject_all(self, force=True):
-        """
-        Eject all ejectable devices.
-
-        :param bool force: remove child devices before trying to eject
-        :returns: whether all attempted operations succeeded
-        :rtype: bool
-        """
-        tasks = []
-        for device in self.get_all_handleable():
-            if device.is_drive and device.is_ejectable:
-                tasks.append(self.eject(device, force=force))
-        # TODO: AND results
-        return AsyncList(tasks)
-
-    def detach_all(self, force=True):
-        """
-        Detach all detachable devices.
-
-        :param bool force: remove child devices before trying to detach
-        :returns: whether all attempted operations succeeded
-        :rtype: bool
-        """
-        tasks = []
-        for device in self.get_all_handleable():
-            if device.is_drive and device.is_detachable:
-                tasks.append(self.detach(device, force=force))
-        # TODO: AND results
-        return AsyncList(tasks)
-
     # iterate devices
     def is_handleable(self, device):
         # TODO: handle pathes in first argument
