@@ -17,7 +17,7 @@ import logging
 from gi.repository import GLib
 
 from udiskie.common import Emitter, samefile, AttrDictView, decode
-from udiskie.dbus import connect_service
+from udiskie.dbus import connect_service, MethodsProxy
 from udiskie.locale import _
 from udiskie.async_ import Coroutine, Return
 
@@ -66,20 +66,6 @@ Interface = {
 # ----------------------------------------
 # Internal helper classes
 # ----------------------------------------
-
-class MethodsProxy(object):
-
-    """Provide methods as attributes for one interface of a DBus object."""
-
-    def __init__(self, object_proxy, interface_name):
-        """Initialize from (ObjectProxy, str)."""
-        self._object_proxy = object_proxy
-        self._interface_name = interface_name
-
-    def __getattr__(self, name):
-        """Get a proxy for the specified method on this interface."""
-        return partial(self._object_proxy.call, self._interface_name, name)
-
 
 class MethodHub(object):
 

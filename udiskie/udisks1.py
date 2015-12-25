@@ -22,7 +22,7 @@ from gi.repository import GLib
 
 from udiskie.async_ import AsyncList, Coroutine, Return
 from udiskie.common import Emitter, samefile, AttrDictView, decode, decoded, wraps
-from udiskie.dbus import connect_service
+from udiskie.dbus import connect_service, MethodsProxy
 from udiskie.locale import _
 
 
@@ -34,20 +34,6 @@ __all__ = [
 def filter_opt(opt):
     """Remove ``None`` values from a dictionary."""
     return [k for k, v in opt.items() if v]
-
-
-class MethodsProxy(object):
-
-    """Provide methods as attributes for one interface of a DBus object."""
-
-    def __init__(self, object_proxy, interface_name):
-        """Initialize from (ObjectProxy, str)."""
-        self._object_proxy = object_proxy
-        self._interface_name = interface_name
-
-    def __getattr__(self, name):
-        """Get a proxy for the specified method on this interface."""
-        return partial(self._object_proxy.call, self._interface_name, name)
 
 
 class Device(object):

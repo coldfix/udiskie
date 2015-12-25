@@ -18,6 +18,7 @@ __all__ = [
     'ObjectProxy',
     'BusProxy',
     'connect_service',
+    'MethodsProxy',
 ]
 
 
@@ -432,3 +433,17 @@ def connect_service(cls):
         interface_name=cls.Interface,
     )
     yield Return(InterfaceProxy(proxy))
+
+
+class MethodsProxy(object):
+
+    """Provide methods as attributes for one interface of a DBus object."""
+
+    def __init__(self, object_proxy, interface_name):
+        """Initialize from (ObjectProxy, str)."""
+        self._object_proxy = object_proxy
+        self._interface_name = interface_name
+
+    def __getattr__(self, name):
+        """Get a proxy for the specified method on this interface."""
+        return partial(self._object_proxy.call, self._interface_name, name)
