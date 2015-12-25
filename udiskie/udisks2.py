@@ -765,6 +765,7 @@ class Daemon(Emitter):
 
         Called when a job of a long running task completes.
         """
+        message = decode(message)
         job = self._objects[job_name][Interface['Job']]
         action = self._action_mapping.get(job['Operation'])
         if not action:
