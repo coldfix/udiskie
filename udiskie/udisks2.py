@@ -20,6 +20,7 @@ import logging
 from gi.repository import GLib
 
 from .common import Emitter, samefile, AttrDictView, decode_ay
+from .compat import fix_str_conversions
 from .dbus import connect_service, MethodsProxy
 from .locale import _
 from .async_ import Coroutine, Return
@@ -117,6 +118,7 @@ class PropertiesNotAvailable(object):
 # Device wrapper
 # ----------------------------------------
 
+@fix_str_conversions
 class Device(object):
 
     """

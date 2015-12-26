@@ -24,6 +24,7 @@ from gi.repository import GLib
 
 from .async_ import AsyncList, Coroutine, Return
 from .common import Emitter, samefile, AttrDictView, wraps
+from .compat import fix_str_conversions
 from .dbus import connect_service, MethodsProxy
 from .locale import _
 
@@ -38,6 +39,7 @@ def filter_opt(opt):
     return [k for k, v in opt.items() if v]
 
 
+@fix_str_conversions
 class Device(object):
 
     """Helper base class for devices."""

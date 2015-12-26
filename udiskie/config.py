@@ -13,7 +13,7 @@ import os
 import sys
 
 from .common import exc_message
-from .compat import basestring
+from .compat import basestring, fix_str_conversions
 from .locale import _
 
 
@@ -29,6 +29,7 @@ def lower(s):
         return s
 
 
+@fix_str_conversions
 class DeviceFilter(object):
 
     """Associate a certain value to matching devices."""
