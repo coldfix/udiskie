@@ -29,6 +29,17 @@ def lower(s):
         return s
 
 
+def yaml_load(stream):
+    """Load YAML document, but load all strings as unicode on py2."""
+    import yaml
+    class UnicodeLoader(yaml.SafeLoader):
+        pass
+    UnicodeLoader.add_constructor(
+        u'tag:yaml.org,2002:str',
+        UnicodeLoader.construct_scalar)
+    return yaml.load(stream, UnicodeLoader)
+
+
 @fix_str_conversions
 class DeviceFilter(object):
 
@@ -213,7 +224,7 @@ class Config(object):
         if os.path.splitext(path)[1].lower() == '.json':
             from json import load
         else:
-            from yaml import safe_load as load
+            load = yaml_load
         with open(path) as f:
             return cls(load(f))
 
