@@ -5,6 +5,7 @@ Common DBus utilities.
 from __future__ import absolute_import
 
 import traceback
+from functools import partial
 
 from gi.repository import Gio
 from gi.repository import GLib

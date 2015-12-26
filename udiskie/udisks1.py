@@ -14,7 +14,6 @@ guarantee the accessibilityy of device properties in between operations.
 """
 
 from collections import defaultdict
-from functools import partial
 import logging
 import os.path
 
