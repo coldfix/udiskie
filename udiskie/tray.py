@@ -2,16 +2,17 @@
 Tray icon for udiskie.
 """
 
+from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from gi.repository import Gio
 from gi.repository import Gtk
 
-from udiskie.async_ import Async
-from udiskie.common import setdefault
-from udiskie.compat import basestring
-from udiskie.locale import _
-from udiskie.mount import Action, Branch
+from .async_ import Async
+from .common import setdefault
+from .compat import basestring
+from .locale import _
+from .mount import Action, Branch
 
 
 __all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']

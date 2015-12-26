@@ -5,10 +5,11 @@ The application classes in this module are installed as executables via
 setuptools entry points.
 """
 
+from __future__ import absolute_import
 from __future__ import unicode_literals
 
 # import udiskie.depend first - for side effects!
-from udiskie.depend import has_Notify, has_Gtk
+from .depend import has_Notify, has_Gtk
 
 import inspect
 import logging
@@ -21,9 +22,9 @@ from gi.repository import GLib
 import udiskie
 import udiskie.config
 import udiskie.mount
-from udiskie.async_ import AsyncList, Coroutine, Return, RunForever
-from udiskie.common import extend, decode
-from udiskie.locale import _
+from .async_ import AsyncList, Coroutine, Return, RunForever
+from .common import extend, decode
+from .locale import _
 
 
 __all__ = [

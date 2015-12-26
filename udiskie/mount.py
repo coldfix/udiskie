@@ -2,17 +2,18 @@
 Mount utilities.
 """
 
+from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from collections import namedtuple
 from functools import partial
 import logging
 
-from udiskie.async_ import AsyncList, Coroutine, Return
-from udiskie.common import wraps, setdefault, decode
-from udiskie.compat import basestring
-from udiskie.config import IgnoreDevice, FilterMatcher
-from udiskie.locale import _
+from .async_ import AsyncList, Coroutine, Return
+from .common import wraps, setdefault, decode
+from .compat import basestring
+from .config import IgnoreDevice, FilterMatcher
+from .locale import _
 
 
 __all__ = ['Mounter']

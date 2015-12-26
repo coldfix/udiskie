@@ -6,6 +6,7 @@ It is based on ideas from "Twisted" and the "yield from" expression in
 python3, but more lightweight (incomplete) and compatible with python2.
 """
 
+from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -17,7 +18,7 @@ import sys
 from gi.repository import GLib
 from gi.repository import Gio
 
-from udiskie.common import cachedproperty, wraps
+from .common import cachedproperty, wraps
 
 
 __all__ = [

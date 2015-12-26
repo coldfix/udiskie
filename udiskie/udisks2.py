@@ -10,6 +10,7 @@ This wraps the DBus API of Udisks2 providing a common interface with the
 udisks1 module.
 """
 
+from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from copy import copy, deepcopy
@@ -18,10 +19,10 @@ import logging
 
 from gi.repository import GLib
 
-from udiskie.common import Emitter, samefile, AttrDictView, decode
-from udiskie.dbus import connect_service, MethodsProxy
-from udiskie.locale import _
-from udiskie.async_ import Coroutine, Return
+from .common import Emitter, samefile, AttrDictView, decode
+from .dbus import connect_service, MethodsProxy
+from .locale import _
+from .async_ import Coroutine, Return
 
 __all__ = ['Daemon']
 

@@ -2,14 +2,15 @@
 Notification utility.
 """
 
+from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import logging
 
 from gi.repository import GLib
 
-from udiskie.mount import DeviceActions
-from udiskie.locale import _
+from .mount import DeviceActions
+from .locale import _
 
 
 __all__ = ['Notify']

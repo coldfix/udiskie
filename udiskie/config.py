@@ -5,14 +5,15 @@ For an example config file, see the manual. If you don't have the man page
 installed, a raw version is available in doc/udiskie.8.txt.
 """
 
+from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import logging
 import os
 import sys
 
-from udiskie.compat import basestring
-from udiskie.locale import _
+from .compat import basestring
+from .locale import _
 
 
 __all__ = ['DeviceFilter',

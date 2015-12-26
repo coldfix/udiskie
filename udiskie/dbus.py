@@ -12,7 +12,7 @@ from functools import partial
 from gi.repository import Gio
 from gi.repository import GLib
 
-from udiskie.async_ import Async, Coroutine, Return
+from .async_ import Async, Coroutine, Return
 
 
 __all__ = [

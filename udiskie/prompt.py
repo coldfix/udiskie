@@ -2,6 +2,7 @@
 User prompt utility.
 """
 
+from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from udiskie.depend import has_Gtk, require_Gtk
@@ -13,9 +14,9 @@ import shlex
 import subprocess
 import sys
 
-from udiskie.async_ import Async, Coroutine, Return, Subprocess
-from udiskie.locale import _
-from udiskie.compat import basestring, unicode
+from .async_ import Async, Coroutine, Return, Subprocess
+from .locale import _
+from .compat import basestring, unicode
 
 
 __all__ = ['password', 'browser']

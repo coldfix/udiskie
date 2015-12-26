@@ -13,6 +13,7 @@ udisks2 module.
 guarantee the accessibilityy of device properties in between operations.
 """
 
+from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from collections import defaultdict
@@ -21,10 +22,10 @@ import os.path
 
 from gi.repository import GLib
 
-from udiskie.async_ import AsyncList, Coroutine, Return
-from udiskie.common import Emitter, samefile, AttrDictView, wraps
-from udiskie.dbus import connect_service, MethodsProxy
-from udiskie.locale import _
+from .async_ import AsyncList, Coroutine, Return
+from .common import Emitter, samefile, AttrDictView, wraps
+from .dbus import connect_service, MethodsProxy
+from .locale import _
 
 
 __all__ = [
