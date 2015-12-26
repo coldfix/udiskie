@@ -4,6 +4,7 @@ Common DBus utilities.
 
 from __future__ import absolute_import
 
+import sys
 import traceback
 from functools import partial
 
@@ -21,6 +22,36 @@ __all__ = [
     'connect_service',
     'MethodsProxy',
 ]
+
+
+if sys.version_info >= (3,):
+    unpack_variant = GLib.Variant.unpack
+
+else:
+    dict_type = GLib.VariantType.new('a{?*}')
+
+    def unpack_variant(v):
+        """Unpack a GLib.Variant."""
+        if v.get_type_string() in 'sog':
+            return v.get_string().decode('utf-8')
+        t = v.get_type()
+        if t.is_basic():
+            return v.unpack()
+        elems = [v.get_child_value(i) for i in range(v.n_children())]
+        if t.is_subtype_of(dict_type):
+            return dict(map(unpack_variant, elems))
+        if t.is_tuple():
+            return tuple(map(unpack_variant, elems))
+        if t.is_array():
+            return list(map(unpack_variant, elems))
+        if t.is_dict_entry():
+            return list(map(unpack_variant, elems))
+        # The following cases should never occur for DBus data:
+        if t.is_variant():
+            return unpack_variant(elems[0])
+        if t.is_maybe():
+            return unpack_variant(elems[0]) if elems else None
+        raise ValueError("Unknown variant type: {}!".format(v.get_type_string()))
 
 
 class DBusCall(Async):
@@ -69,7 +100,7 @@ class DBusCall(Async):
         except Exception as e:
             self.errback(e, traceback.format_exc())
         else:
-            self.callback(*value.unpack())
+            self.callback(*unpack_variant(value))
 
 
 class InterfaceProxy(object):
@@ -240,7 +271,7 @@ class DBusCallback(object):
                  parameters,
                  *user_data):
         """Call handler unpacked signal parameters."""
-        return self._handler(*parameters.unpack())
+        return self._handler(*unpack_variant(parameters))
 
 
 class DBusCallbackWithObjectPath(object):
@@ -258,7 +289,7 @@ class DBusCallbackWithObjectPath(object):
                  parameters,
                  *user_data):
         """Call handler with object_path and unpacked signal parameters."""
-        return self._handler(object_path, *parameters.unpack())
+        return self._handler(object_path, *unpack_variant(parameters))
 
 
 class BusProxy(object):
