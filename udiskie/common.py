@@ -6,6 +6,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import os.path
+import traceback
 
 
 __all__ = [
@@ -16,6 +17,11 @@ __all__ = [
     'setdefault',
     'extend',
     'cachedproperty',
+    'decode_ay',
+    # dealing with py2 strings:
+    'str2unicode',
+    'exc_message',
+    'format_exc',
 ]
 
 
@@ -149,8 +155,8 @@ except NameError:
     unicode = str
 
 
-def decode(ay):
-    """Convert data from DBus queries to strings."""
+def decode_ay(ay):
+    """Convert binary blob from DBus queries to strings."""
     if ay is None:
         return ''
     elif isinstance(ay, unicode):
@@ -160,3 +166,22 @@ def decode(ay):
     else:
         # dbus.Array([dbus.Byte]) or any similar sequence type:
         return bytearray(ay).rstrip(bytearray((0,))).decode('utf-8')
+
+
+def str2unicode(arg):
+    """Decode python2 strings (bytes) to unicode."""
+    if isinstance(arg, list):
+        return [str2unicode(s) for s in arg]
+    if isinstance(arg, bytes):
+        return arg.decode('utf-8')
+    return arg
+
+
+def exc_message(exc):
+    """Get an exception message."""
+    message = getattr(exc, 'message', None)
+    return str2unicode(message or str(exc))
+
+
+def format_exc():
+    return str2unicode(traceback.format_exc())

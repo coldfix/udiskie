@@ -6,13 +6,13 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import sys
-import traceback
 from functools import partial
 
 from gi.repository import Gio
 from gi.repository import GLib
 
 from .async_ import Async, Coroutine, Return
+from .common import format_exc
 
 
 __all__ = [
@@ -99,7 +99,7 @@ class DBusCall(Async):
         try:
             value = proxy.call_finish(result)
         except Exception as e:
-            self.errback(e, traceback.format_exc())
+            self.errback(e, format_exc())
         else:
             self.callback(*unpack_variant(value))
 
@@ -396,7 +396,7 @@ class DBusProxyNew(Async):
             if value is None:
                 raise RuntimeError("Failed to connect DBus object!")
         except Exception as e:
-            self.errback(e, traceback.format_exc())
+            self.errback(e, format_exc())
         else:
             self.callback(value)
 
@@ -442,7 +442,7 @@ class DBusProxyNewForBus(Async):
             if value is None:
                 raise RuntimeError("Failed to connect DBus object!")
         except Exception as e:
-            self.errback(e, traceback.format_exc())
+            self.errback(e, format_exc())
         else:
             self.callback(value)
 

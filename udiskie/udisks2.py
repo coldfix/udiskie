@@ -19,7 +19,7 @@ import logging
 
 from gi.repository import GLib
 
-from .common import Emitter, samefile, AttrDictView, decode
+from .common import Emitter, samefile, AttrDictView, decode_ay
 from .dbus import connect_service, MethodsProxy
 from .locale import _
 from .async_ import Coroutine, Return
@@ -247,12 +247,12 @@ class Device(object):
     @property
     def device_file(self):
         """The filesystem path of the device block file."""
-        return decode(self._P.Block.Device)
+        return decode_ay(self._P.Block.Device)
 
     @property
     def device_presentation(self):
         """The device file path to present to the user."""
-        return decode(self._P.Block.PreferredDevice)
+        return decode_ay(self._P.Block.PreferredDevice)
 
     @property
     def device_size(self):
@@ -284,7 +284,7 @@ class Device(object):
         """
         if self.is_block:
             for filename in self._P.Block.Symlinks:
-                parts = decode(filename).split('/')
+                parts = decode_ay(filename).split('/')
                 if parts[-2] == 'by-id':
                     return parts[-1]
         elif self.is_drive:
@@ -408,7 +408,7 @@ class Device(object):
     @property
     def mount_paths(self):
         """Return list of active mount paths."""
-        return list(map(decode, self._P.Filesystem.MountPoints or ()))
+        return list(map(decode_ay, self._P.Filesystem.MountPoints or ()))
 
     # Filesystem methods
     def mount(self,

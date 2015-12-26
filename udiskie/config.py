@@ -12,6 +12,7 @@ import logging
 import os
 import sys
 
+from .common import exc_message
 from .compat import basestring
 from .locale import _
 
@@ -200,10 +201,10 @@ class Config(object):
                     return cls.from_file(path)
                 except IOError as e:
                     logging.getLogger(__name__).debug(
-                        _("Failed to read config file: {0}", e))
+                        _("Failed to read config file: {0}", exc_message(e)))
                 except ImportError as e:
                     logging.getLogger(__name__).warn(
-                        _("Failed to read {0!r}: {1}", path, e))
+                        _("Failed to read {0!r}: {1}", path, exc_message(e)))
             return cls({})
         # False/'' => no config
         if not path:
