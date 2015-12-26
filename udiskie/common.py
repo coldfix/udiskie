@@ -157,20 +157,3 @@ def decode(ay):
     else:
         # dbus.Array([dbus.Byte]) or any similar sequence type:
         return bytearray(ay).rstrip(bytearray((0,))).decode('utf-8')
-
-
-def encode(s):
-    """Convert data from DBus queries to strings."""
-    if s is None:
-        return b''
-    elif isinstance(s, unicode):
-        return s.encode('utf-8')
-    else:
-        return s
-
-
-def decoded(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        return decode(func(*args, **kwargs))
-    return wrapper

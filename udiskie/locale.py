@@ -4,8 +4,6 @@ I18n utilities.
 
 import gettext
 
-from udiskie.compat import unicode
-
 
 __all__ = ['_']
 
@@ -38,7 +36,7 @@ class Translator(object):
 
     def __call__(self, text, *args, **kwargs):
         """Translate and then and format the text with ``str.format``."""
-        msg = unicode(self._gettext(text))
+        msg = self._gettext(text)
         if args or kwargs:
             return msg.format(*args, **kwargs)
         else:

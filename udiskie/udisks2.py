@@ -259,7 +259,7 @@ class Device(object):
     @property
     def id_usage(self):
         """Device usage class, for example 'filesystem' or 'crypto'."""
-        return decode(self._P.Block.IdUsage)
+        return self._P.Block.IdUsage
 
     @property
     def is_crypto(self):
@@ -285,7 +285,7 @@ class Device(object):
                 if parts[-2] == 'by-id':
                     return parts[-1]
         elif self.is_drive:
-            return decode(self._assocdrive._P.Drive.Id)
+            return self._assocdrive._P.Drive.Id
         return ''
 
     @property
@@ -298,17 +298,17 @@ class Device(object):
         IdUsage     'filesystem'    'crypto'
         IdType      'ext4'          'crypto_LUKS'
         """
-        return decode(self._P.Block.IdType)
+        return self._P.Block.IdType
 
     @property
     def id_label(self):
         """Label of the device if available."""
-        return decode(self._P.Block.IdLabel)
+        return self._P.Block.IdLabel
 
     @property
     def id_uuid(self):
         """Device UUID."""
-        return decode(self._P.Block.IdUUID)
+        return self._P.Block.IdUUID
 
     @property
     def luks_cleartext_slave(self):
@@ -408,13 +408,12 @@ class Device(object):
         return list(map(decode, self._P.Filesystem.MountPoints or ()))
 
     # Filesystem methods
-    @Coroutine.from_generator_function
     def mount(self,
               fstype=None,
               options=None,
               auth_no_user_interaction=None):
         """Mount filesystem."""
-        path = yield self._M.Filesystem.Mount(
+        return self._M.Filesystem.Mount(
             '(a{sv})',
             filter_opt({
                 'fstype': ('s', fstype),
@@ -422,7 +421,6 @@ class Device(object):
                 'auth.no_user_interaction': ('b', auth_no_user_interaction),
             })
         )
-        yield Return(decode(path))
 
     def unmount(self, force=None, auth_no_user_interaction=None):
         """Unmount filesystem."""
@@ -751,7 +749,6 @@ class Daemon(Emitter):
 
         Called when a job of a long running task completes.
         """
-        message = decode(message)
         job = self._objects[job_name][Interface['Job']]
         action = self._action_mapping.get(job['Operation'])
         if not action:

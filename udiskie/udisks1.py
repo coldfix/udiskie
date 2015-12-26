@@ -20,7 +20,7 @@ import os.path
 from gi.repository import GLib
 
 from udiskie.async_ import AsyncList, Coroutine, Return
-from udiskie.common import Emitter, samefile, AttrDictView, decode, decoded, wraps
+from udiskie.common import Emitter, samefile, AttrDictView, wraps
 from udiskie.dbus import connect_service, MethodsProxy
 from udiskie.locale import _
 
@@ -56,7 +56,6 @@ class Device(object):
 
     def is_file(self, path):
         """Comparison by mount and device file path."""
-        path = decode(path)
         return samefile(path, self.device_file) or any(
             samefile(path, mp) for mp in self.mount_paths)
 
@@ -148,7 +147,7 @@ class Device(object):
     @property
     def device_file(self):
         """The filesystem path of the device block file."""
-        return os.path.normpath(decode(self._P.DeviceFile))
+        return os.path.normpath(self._P.DeviceFile)
 
     @property
     def device_presentation(self):
@@ -173,7 +172,6 @@ class Device(object):
         return self._P.DevicePresentationHide
 
     @property
-    @decoded
     def device_id(self):
         """
         Return a unique and persistent identifier for the device.
@@ -188,7 +186,6 @@ class Device(object):
         return ''
 
     @property
-    @decoded
     def id_type(self):
         """"
         Return IdType property.
@@ -201,13 +198,11 @@ class Device(object):
         return self._P.IdType
 
     @property
-    @decoded
     def id_label(self):
         """Label of the device if available."""
         return self._P.IdLabel
 
     @property
-    @decoded
     def id_uuid(self):
         """Device UUID."""
         return self._P.IdUuid
@@ -256,7 +251,6 @@ class Device(object):
         return self._P.DeviceAutomountHint != 'never'
 
     @property
-    @decoded
     def icon_name(self):
         """Return the recommended device icon name."""
         return self._P.DevicePresentationIconName or 'drive-removable-media'
@@ -291,10 +285,9 @@ class Device(object):
         if not self.is_mounted:
             return []
         raw_paths = self._P.DeviceMountPaths
-        return [os.path.normpath(decode(path)) for path in raw_paths]
+        return [os.path.normpath(path) for path in raw_paths]
 
     # Filesystem methods
-    @Coroutine.from_generator_function
     def mount(self,
               fstype=None,
               options=None,
@@ -303,11 +296,10 @@ class Device(object):
         options = (options or []) + filter_opt({
             'auth_no_user_interaction': auth_no_user_interaction
         })
-        path = yield self._M.FilesystemMount(
+        return self._M.FilesystemMount(
             '(sas)',
             fstype or self.id_type,
             options)
-        yield Return(decode(path))
 
     def unmount(self, force=False):
         """Unmount filesystem."""
