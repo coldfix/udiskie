@@ -5,6 +5,8 @@ The application classes in this module are installed as executables via
 setuptools entry points.
 """
 
+from __future__ import unicode_literals
+
 # import udiskie.depend first - for side effects!
 from udiskie.depend import has_Notify, has_Gtk
 

@@ -2,6 +2,8 @@
 I18n utilities.
 """
 
+from __future__ import unicode_literals
+
 import gettext
 
 

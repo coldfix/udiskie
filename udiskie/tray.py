@@ -2,6 +2,8 @@
 Tray icon for udiskie.
 """
 
+from __future__ import unicode_literals
+
 from gi.repository import Gio
 from gi.repository import Gtk
 

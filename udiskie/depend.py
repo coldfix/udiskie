@@ -3,6 +3,8 @@ Make sure that the correct versions of gobject introspection dependencies
 are installed.
 """
 
+from __future__ import unicode_literals
+
 from gi import require_version
 from udiskie.common import check_call
 

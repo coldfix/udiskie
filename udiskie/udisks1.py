@@ -13,6 +13,8 @@ udisks2 module.
 guarantee the accessibilityy of device properties in between operations.
 """
 
+from __future__ import unicode_literals
+
 from collections import defaultdict
 import logging
 import os.path

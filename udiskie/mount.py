@@ -2,6 +2,8 @@
 Mount utilities.
 """
 
+from __future__ import unicode_literals
+
 from collections import namedtuple
 from functools import partial
 import logging

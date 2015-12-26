@@ -2,6 +2,8 @@
 User prompt utility.
 """
 
+from __future__ import unicode_literals
+
 from udiskie.depend import has_Gtk, require_Gtk
 
 from distutils.spawn import find_executable

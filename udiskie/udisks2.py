@@ -10,6 +10,8 @@ This wraps the DBus API of Udisks2 providing a common interface with the
 udisks1 module.
 """
 
+from __future__ import unicode_literals
+
 from copy import copy, deepcopy
 from functools import partial
 import logging

@@ -5,6 +5,8 @@ For an example config file, see the manual. If you don't have the man page
 installed, a raw version is available in doc/udiskie.8.txt.
 """
 
+from __future__ import unicode_literals
+
 import logging
 import os
 import sys

@@ -2,6 +2,8 @@
 Common DBus utilities.
 """
 
+from __future__ import unicode_literals
+
 import os.path
 
 

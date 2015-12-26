@@ -2,6 +2,8 @@
 Utility for temporarily caching passwords.
 """
 
+from __future__ import unicode_literals
+
 import keyutils
 
 
