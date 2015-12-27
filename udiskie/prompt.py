@@ -16,7 +16,7 @@ import sys
 
 from .async_ import Async, Coroutine, Return, Subprocess
 from .locale import _
-from .compat import basestring, unicode
+from .compat import basestring
 
 
 __all__ = ['password', 'browser']
@@ -153,7 +153,7 @@ class DeviceCommand(object):
         Invoke the subprocess to ask the user to enter a password for unlocking
         the specified device.
         """
-        argv = [unicode(arg).format(device) for arg in self.argv]
+        argv = [arg.format(device) for arg in self.argv]
         try:
             stdout = yield Subprocess(argv)
         except subprocess.CalledProcessError:
