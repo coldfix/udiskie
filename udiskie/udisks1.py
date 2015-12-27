@@ -596,7 +596,12 @@ class Daemon(Emitter):
         """Internal method."""
         old_state = self[object_path]
         new_state = yield self.update(object_path)
-        self.trigger('device_changed', old_state, new_state)
+        # Sometimes there may be a device change right when starting udiskie
+        # before we did get a chance to finish _sync()ing the state. In this
+        # case, just ignore the event (I don't know anything better to do
+        # here):
+        if old_state is not None:
+            self.trigger('device_changed', old_state, new_state)
         yield Return(None)
 
     # NOTE: it seems the UDisks1 documentation for DeviceJobChanged is
