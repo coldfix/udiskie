@@ -650,8 +650,8 @@ class Daemon(Emitter):
                 job = interfaces[job_interface]
                 job_objects = job['Objects']
                 job_operation = job['Operation']
-                job_action = self._action_mapping[job_operation]
-                job_event = self._event_mapping[job_action]
+                job_action = self._action_by_operation[job_operation]
+                job_event = self._event_by_action[job_action]
                 if event_name == job_event and device_path in job_objects:
                     return True
             except KeyError:
@@ -721,7 +721,7 @@ class Daemon(Emitter):
         # InterfaceAdded/Removed handlers.
 
     # jobs
-    _action_mapping = {
+    _action_by_operation = {
         'filesystem-mount': 'mount',
         'filesystem-unmount': 'unmount',
         'encrypted-unlock': 'unlock',
@@ -730,7 +730,7 @@ class Daemon(Emitter):
         'eject-media': 'eject',
     }
 
-    _event_mapping = {
+    _event_by_action = {
         'mount': 'device_mounted',
         'unmount': 'device_unmounted',
         'unlock': 'device_unlocked',
@@ -739,7 +739,7 @@ class Daemon(Emitter):
         'detach': 'device_removed',
     }
 
-    _check_success = {
+    _check_action_success = {
         'mount': lambda dev: dev.is_mounted,
         'unmount': lambda dev: not dev or not dev.is_mounted,
         'unlock': lambda dev: dev.is_unlocked,
@@ -755,7 +755,7 @@ class Daemon(Emitter):
         Called when a job of a long running task completes.
         """
         job = self._objects[job_name][Interface['Job']]
-        action = self._action_mapping.get(job['Operation'])
+        action = self._action_by_operation.get(job['Operation'])
         if not action:
             return
         # We only handle events, which are associated to exactly one object:
@@ -765,8 +765,8 @@ class Daemon(Emitter):
             # It rarely happens, but sometimes UDisks posts the
             # Job.Completed event before PropertiesChanged, so we have to
             # check if the operation has been carried out yet:
-            if self._check_success[action](device):
-                event_name = self._event_mapping[action]
+            if self._check_action_success[action](device):
+                event_name = self._event_by_action[action]
                 self.trigger(event_name, device)
         else:
             self.trigger('job_failed', device, action, message)

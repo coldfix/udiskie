@@ -567,7 +567,7 @@ class Daemon(Emitter):
         # On the other hand, if the unmount operation is not issued via
         # UDisks1, there will be no corresponding job.
         cached_job = self._jobs.get(old.object_path)
-        action_name = self._event_mapping.get(cached_job)
+        action_name = self._event_by_action.get(cached_job)
         if add_name and new_valid and not old_valid:
             if add_name != action_name:
                 self.trigger(add_name, new)
@@ -616,7 +616,7 @@ class Daemon(Emitter):
         """
         try:
             if job_id:
-                action = self._action_mapping[job_id]
+                action = self._action_by_operation[job_id]
             else:
                 action = self._jobs[object_path]
         except KeyError:
@@ -631,8 +631,8 @@ class Daemon(Emitter):
         else:
             del self._jobs[object_path]
             device = yield self._get_updated_device(object_path)
-            if self._check_success[action](device):
-                event = self._event_mapping[action]
+            if self._check_action_success[action](device):
+                event = self._event_by_action[action]
                 self.trigger(event, device)
             else:
                 # get and delete message, if available:
@@ -642,7 +642,7 @@ class Daemon(Emitter):
                                  action, object_path))
 
     # used internally by _device_job_changed:
-    _action_mapping = {
+    _action_by_operation = {
         'FilesystemMount': 'mount',
         'FilesystemUnmount': 'unmount',
         'LuksUnlock': 'unlock',
@@ -651,7 +651,7 @@ class Daemon(Emitter):
         'DriveEject': 'eject',
     }
 
-    _event_mapping = {
+    _event_by_action = {
         'mount': 'device_mounted',
         'unmount': 'device_unmounted',
         'unlock': 'device_unlocked',
@@ -660,7 +660,7 @@ class Daemon(Emitter):
         'detach': 'device_removed',
     }
 
-    _check_success = {
+    _check_action_success = {
         'mount': lambda dev: dev.is_mounted,
         'unmount': lambda dev: not dev or not dev.is_mounted,
         'unlock': lambda dev: dev.is_unlocked,
