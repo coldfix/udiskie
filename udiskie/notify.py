@@ -2,12 +2,15 @@
 Notification utility.
 """
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 import logging
 
 from gi.repository import GLib
 
-from udiskie.mount import DeviceActions
-from udiskie.locale import _
+from .mount import DeviceActions
+from .locale import _
 
 
 __all__ = ['Notify']
@@ -210,7 +213,7 @@ class Notify(object):
             # mistake too easy to be made, but it shoud not render the rest of
             # udiskie's logic useless by raising an exception before the
             # automount handler gets invoked.
-            self._log.error(_("Failed to show notification: {0}", exc.message))
+            self._log.error(_("Failed to show notification: {0}", exc_message(exc)))
 
     def _add_action(self, notification, action, label, callback, *args):
         """

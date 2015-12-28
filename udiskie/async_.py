@@ -6,17 +6,18 @@ It is based on ideas from "Twisted" and the "yield from" expression in
 python3, but more lightweight (incomplete) and compatible with python2.
 """
 
+from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 from functools import partial
 from subprocess import CalledProcessError
-import traceback
 import sys
 
 from gi.repository import GLib
 from gi.repository import Gio
 
-from udiskie.common import cachedproperty, wraps
+from .common import cachedproperty, wraps, format_exc
 
 
 __all__ = [
@@ -276,7 +277,7 @@ class Coroutine(Async):
             self.callback()
         except Exception as e:
             self._generator.close()
-            self.errback(e, traceback.format_exc())
+            self.errback(e, format_exc())
         else:
             self._recv(value)
 
@@ -310,6 +311,6 @@ class Subprocess(Async):
                     exit_code,
                     stdout)
         except Exception as e:
-            self.errback(e, traceback.format_exc())
+            self.errback(e, format_exc())
         else:
             self.callback(stdout)

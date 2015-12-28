@@ -10,16 +10,20 @@ This wraps the DBus API of Udisks2 providing a common interface with the
 udisks1 module.
 """
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 from copy import copy, deepcopy
 from functools import partial
 import logging
 
 from gi.repository import GLib
 
-from udiskie.common import Emitter, samefile, AttrDictView, decode
-from udiskie.dbus import connect_service, MethodsProxy
-from udiskie.locale import _
-from udiskie.async_ import Coroutine, Return
+from .common import Emitter, samefile, AttrDictView, decode_ay
+from .compat import fix_str_conversions
+from .dbus import connect_service, MethodsProxy
+from .locale import _
+from .async_ import Coroutine, Return
 
 __all__ = ['Daemon']
 
@@ -114,6 +118,7 @@ class PropertiesNotAvailable(object):
 # Device wrapper
 # ----------------------------------------
 
+@fix_str_conversions
 class Device(object):
 
     """
@@ -244,12 +249,12 @@ class Device(object):
     @property
     def device_file(self):
         """The filesystem path of the device block file."""
-        return decode(self._P.Block.Device)
+        return decode_ay(self._P.Block.Device)
 
     @property
     def device_presentation(self):
         """The device file path to present to the user."""
-        return decode(self._P.Block.PreferredDevice)
+        return decode_ay(self._P.Block.PreferredDevice)
 
     @property
     def device_size(self):
@@ -259,7 +264,7 @@ class Device(object):
     @property
     def id_usage(self):
         """Device usage class, for example 'filesystem' or 'crypto'."""
-        return decode(self._P.Block.IdUsage)
+        return self._P.Block.IdUsage
 
     @property
     def is_crypto(self):
@@ -281,11 +286,11 @@ class Device(object):
         """
         if self.is_block:
             for filename in self._P.Block.Symlinks:
-                parts = decode(filename).split('/')
+                parts = decode_ay(filename).split('/')
                 if parts[-2] == 'by-id':
                     return parts[-1]
         elif self.is_drive:
-            return decode(self._assocdrive._P.Drive.Id)
+            return self._assocdrive._P.Drive.Id
         return ''
 
     @property
@@ -298,17 +303,17 @@ class Device(object):
         IdUsage     'filesystem'    'crypto'
         IdType      'ext4'          'crypto_LUKS'
         """
-        return decode(self._P.Block.IdType)
+        return self._P.Block.IdType
 
     @property
     def id_label(self):
         """Label of the device if available."""
-        return decode(self._P.Block.IdLabel)
+        return self._P.Block.IdLabel
 
     @property
     def id_uuid(self):
         """Device UUID."""
-        return decode(self._P.Block.IdUUID)
+        return self._P.Block.IdUUID
 
     @property
     def luks_cleartext_slave(self):
@@ -405,16 +410,15 @@ class Device(object):
     @property
     def mount_paths(self):
         """Return list of active mount paths."""
-        return list(map(decode, self._P.Filesystem.MountPoints or ()))
+        return list(map(decode_ay, self._P.Filesystem.MountPoints or ()))
 
     # Filesystem methods
-    @Coroutine.from_generator_function
     def mount(self,
               fstype=None,
               options=None,
               auth_no_user_interaction=None):
         """Mount filesystem."""
-        path = yield self._M.Filesystem.Mount(
+        return self._M.Filesystem.Mount(
             '(a{sv})',
             filter_opt({
                 'fstype': ('s', fstype),
@@ -422,7 +426,6 @@ class Device(object):
                 'auth.no_user_interaction': ('b', auth_no_user_interaction),
             })
         )
-        yield Return(decode(path))
 
     def unmount(self, force=None, auth_no_user_interaction=None):
         """Unmount filesystem."""
@@ -647,8 +650,8 @@ class Daemon(Emitter):
                 job = interfaces[job_interface]
                 job_objects = job['Objects']
                 job_operation = job['Operation']
-                job_action = self._action_mapping[job_operation]
-                job_event = self._event_mapping[job_action]
+                job_action = self._action_by_operation[job_operation]
+                job_event = self._event_by_action[job_action]
                 if event_name == job_event and device_path in job_objects:
                     return True
             except KeyError:
@@ -718,7 +721,7 @@ class Daemon(Emitter):
         # InterfaceAdded/Removed handlers.
 
     # jobs
-    _action_mapping = {
+    _action_by_operation = {
         'filesystem-mount': 'mount',
         'filesystem-unmount': 'unmount',
         'encrypted-unlock': 'unlock',
@@ -727,7 +730,7 @@ class Daemon(Emitter):
         'eject-media': 'eject',
     }
 
-    _event_mapping = {
+    _event_by_action = {
         'mount': 'device_mounted',
         'unmount': 'device_unmounted',
         'unlock': 'device_unlocked',
@@ -736,7 +739,7 @@ class Daemon(Emitter):
         'detach': 'device_removed',
     }
 
-    _check_success = {
+    _check_action_success = {
         'mount': lambda dev: dev.is_mounted,
         'unmount': lambda dev: not dev or not dev.is_mounted,
         'unlock': lambda dev: dev.is_unlocked,
@@ -751,9 +754,8 @@ class Daemon(Emitter):
 
         Called when a job of a long running task completes.
         """
-        message = decode(message)
         job = self._objects[job_name][Interface['Job']]
-        action = self._action_mapping.get(job['Operation'])
+        action = self._action_by_operation.get(job['Operation'])
         if not action:
             return
         # We only handle events, which are associated to exactly one object:
@@ -763,8 +765,8 @@ class Daemon(Emitter):
             # It rarely happens, but sometimes UDisks posts the
             # Job.Completed event before PropertiesChanged, so we have to
             # check if the operation has been carried out yet:
-            if self._check_success[action](device):
-                event_name = self._event_mapping[action]
+            if self._check_action_success[action](device):
+                event_name = self._event_by_action[action]
                 self.trigger(event_name, device)
         else:
             self.trigger('job_failed', device, action, message)

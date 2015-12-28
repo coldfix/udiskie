@@ -2,15 +2,18 @@
 Mount utilities.
 """
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 from collections import namedtuple
 from functools import partial
 import logging
 
-from udiskie.async_ import AsyncList, Coroutine, Return
-from udiskie.common import wraps, setdefault, decode
-from udiskie.compat import basestring
-from udiskie.config import IgnoreDevice, FilterMatcher
-from udiskie.locale import _
+from .async_ import AsyncList, Coroutine, Return
+from .common import wraps, setdefault, exc_message
+from .compat import basestring
+from .config import IgnoreDevice, FilterMatcher
+from .locale import _
 
 
 __all__ = ['Mounter']
@@ -37,7 +40,7 @@ def _find_device(fn, set_error=False):
         try:
             device = self.udisks.find(device_or_path)
         except ValueError as e:
-            self._log.error(decode(e.message))
+            self._log.error(exc_message(e))
             return _False()
         return Coroutine(fn(self, device, *args, **kwargs))
     return wrapper
@@ -124,7 +127,7 @@ class Mounter(object):
             self._set_error = lambda device, action, message: None
 
     def _error(self, fn, device, err, fmt):
-        message = decode(err.message)
+        message = exc_message(err)
         self._log.error(_('failed to {0} {1}: {2}',
                           fn.__name__, device, message))
         self._set_error(device, fn.__name__, message)

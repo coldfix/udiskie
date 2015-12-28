@@ -13,16 +13,20 @@ udisks2 module.
 guarantee the accessibilityy of device properties in between operations.
 """
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 from collections import defaultdict
 import logging
 import os.path
 
 from gi.repository import GLib
 
-from udiskie.async_ import AsyncList, Coroutine, Return
-from udiskie.common import Emitter, samefile, AttrDictView, decode, decoded, wraps
-from udiskie.dbus import connect_service, MethodsProxy
-from udiskie.locale import _
+from .async_ import AsyncList, Coroutine, Return
+from .common import Emitter, samefile, AttrDictView, wraps
+from .compat import fix_str_conversions
+from .dbus import connect_service, MethodsProxy
+from .locale import _
 
 
 __all__ = [
@@ -35,6 +39,7 @@ def filter_opt(opt):
     return [k for k, v in opt.items() if v]
 
 
+@fix_str_conversions
 class Device(object):
 
     """Helper base class for devices."""
@@ -56,7 +61,6 @@ class Device(object):
 
     def is_file(self, path):
         """Comparison by mount and device file path."""
-        path = decode(path)
         return samefile(path, self.device_file) or any(
             samefile(path, mp) for mp in self.mount_paths)
 
@@ -148,7 +152,7 @@ class Device(object):
     @property
     def device_file(self):
         """The filesystem path of the device block file."""
-        return os.path.normpath(decode(self._P.DeviceFile))
+        return os.path.normpath(self._P.DeviceFile)
 
     @property
     def device_presentation(self):
@@ -173,7 +177,6 @@ class Device(object):
         return self._P.DevicePresentationHide
 
     @property
-    @decoded
     def device_id(self):
         """
         Return a unique and persistent identifier for the device.
@@ -188,7 +191,6 @@ class Device(object):
         return ''
 
     @property
-    @decoded
     def id_type(self):
         """"
         Return IdType property.
@@ -201,13 +203,11 @@ class Device(object):
         return self._P.IdType
 
     @property
-    @decoded
     def id_label(self):
         """Label of the device if available."""
         return self._P.IdLabel
 
     @property
-    @decoded
     def id_uuid(self):
         """Device UUID."""
         return self._P.IdUuid
@@ -256,7 +256,6 @@ class Device(object):
         return self._P.DeviceAutomountHint != 'never'
 
     @property
-    @decoded
     def icon_name(self):
         """Return the recommended device icon name."""
         return self._P.DevicePresentationIconName or 'drive-removable-media'
@@ -291,10 +290,9 @@ class Device(object):
         if not self.is_mounted:
             return []
         raw_paths = self._P.DeviceMountPaths
-        return [os.path.normpath(decode(path)) for path in raw_paths]
+        return [os.path.normpath(path) for path in raw_paths]
 
     # Filesystem methods
-    @Coroutine.from_generator_function
     def mount(self,
               fstype=None,
               options=None,
@@ -303,11 +301,10 @@ class Device(object):
         options = (options or []) + filter_opt({
             'auth_no_user_interaction': auth_no_user_interaction
         })
-        path = yield self._M.FilesystemMount(
+        return self._M.FilesystemMount(
             '(sas)',
             fstype or self.id_type,
             options)
-        yield Return(decode(path))
 
     def unmount(self, force=False):
         """Unmount filesystem."""
@@ -570,7 +567,7 @@ class Daemon(Emitter):
         # On the other hand, if the unmount operation is not issued via
         # UDisks1, there will be no corresponding job.
         cached_job = self._jobs.get(old.object_path)
-        action_name = self._event_mapping.get(cached_job)
+        action_name = self._event_by_action.get(cached_job)
         if add_name and new_valid and not old_valid:
             if add_name != action_name:
                 self.trigger(add_name, new)
@@ -599,7 +596,12 @@ class Daemon(Emitter):
         """Internal method."""
         old_state = self[object_path]
         new_state = yield self.update(object_path)
-        self.trigger('device_changed', old_state, new_state)
+        # Sometimes there may be a device change right when starting udiskie
+        # before we did get a chance to finish _sync()ing the state. In this
+        # case, just ignore the event (I don't know anything better to do
+        # here):
+        if old_state is not None:
+            self.trigger('device_changed', old_state, new_state)
         yield Return(None)
 
     # NOTE: it seems the UDisks1 documentation for DeviceJobChanged is
@@ -619,7 +621,7 @@ class Daemon(Emitter):
         """
         try:
             if job_id:
-                action = self._action_mapping[job_id]
+                action = self._action_by_operation[job_id]
             else:
                 action = self._jobs[object_path]
         except KeyError:
@@ -634,8 +636,8 @@ class Daemon(Emitter):
         else:
             del self._jobs[object_path]
             device = yield self._get_updated_device(object_path)
-            if self._check_success[action](device):
-                event = self._event_mapping[action]
+            if self._check_action_success[action](device):
+                event = self._event_by_action[action]
                 self.trigger(event, device)
             else:
                 # get and delete message, if available:
@@ -645,7 +647,7 @@ class Daemon(Emitter):
                                  action, object_path))
 
     # used internally by _device_job_changed:
-    _action_mapping = {
+    _action_by_operation = {
         'FilesystemMount': 'mount',
         'FilesystemUnmount': 'unmount',
         'LuksUnlock': 'unlock',
@@ -654,7 +656,7 @@ class Daemon(Emitter):
         'DriveEject': 'eject',
     }
 
-    _event_mapping = {
+    _event_by_action = {
         'mount': 'device_mounted',
         'unmount': 'device_unmounted',
         'unlock': 'device_unlocked',
@@ -663,7 +665,7 @@ class Daemon(Emitter):
         'detach': 'device_removed',
     }
 
-    _check_success = {
+    _check_action_success = {
         'mount': lambda dev: dev.is_mounted,
         'unmount': lambda dev: not dev or not dev.is_mounted,
         'unlock': lambda dev: dev.is_unlocked,

@@ -5,12 +5,16 @@ For an example config file, see the manual. If you don't have the man page
 installed, a raw version is available in doc/udiskie.8.txt.
 """
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 import logging
 import os
 import sys
 
-from udiskie.compat import basestring
-from udiskie.locale import _
+from .common import exc_message
+from .compat import basestring, fix_str_conversions
+from .locale import _
 
 
 __all__ = ['DeviceFilter',
@@ -25,6 +29,18 @@ def lower(s):
         return s
 
 
+def yaml_load(stream):
+    """Load YAML document, but load all strings as unicode on py2."""
+    import yaml
+    class UnicodeLoader(yaml.SafeLoader):
+        pass
+    UnicodeLoader.add_constructor(
+        u'tag:yaml.org,2002:str',
+        UnicodeLoader.construct_scalar)
+    return yaml.load(stream, UnicodeLoader)
+
+
+@fix_str_conversions
 class DeviceFilter(object):
 
     """Associate a certain value to matching devices."""
@@ -197,10 +213,10 @@ class Config(object):
                     return cls.from_file(path)
                 except IOError as e:
                     logging.getLogger(__name__).debug(
-                        _("Failed to read config file: {0}", e))
+                        _("Failed to read config file: {0}", exc_message(e)))
                 except ImportError as e:
                     logging.getLogger(__name__).warn(
-                        _("Failed to read {0!r}: {1}", path, e))
+                        _("Failed to read {0!r}: {1}", path, exc_message(e)))
             return cls({})
         # False/'' => no config
         if not path:
@@ -208,7 +224,7 @@ class Config(object):
         if os.path.splitext(path)[1].lower() == '.json':
             from json import load
         else:
-            from yaml import safe_load as load
+            load = yaml_load
         with open(path) as f:
             return cls(load(f))
 

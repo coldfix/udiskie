@@ -2,6 +2,9 @@
 User prompt utility.
 """
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 from udiskie.depend import has_Gtk, require_Gtk
 
 from distutils.spawn import find_executable
@@ -11,9 +14,9 @@ import shlex
 import subprocess
 import sys
 
-from udiskie.async_ import Async, Coroutine, Return, Subprocess
-from udiskie.locale import _
-from udiskie.compat import basestring, unicode
+from .async_ import Async, Coroutine, Return, Subprocess
+from .locale import _
+from .compat import basestring
 
 
 __all__ = ['password', 'browser']
@@ -150,7 +153,7 @@ class DeviceCommand(object):
         Invoke the subprocess to ask the user to enter a password for unlocking
         the specified device.
         """
-        argv = [unicode(arg).format(device) for arg in self.argv]
+        argv = [arg.format(device) for arg in self.argv]
         try:
             stdout = yield Subprocess(argv)
         except subprocess.CalledProcessError:
