@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+1.4.6
+~~~~~
+Date: 28.12.2015
+
+- cleanup recent bugfixes
+- close some gates for more py2/unicode related bugs
+
 
 1.4.5
 ~~~~~
