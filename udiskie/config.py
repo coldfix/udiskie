@@ -35,7 +35,7 @@ def yaml_load(stream):
     class UnicodeLoader(yaml.SafeLoader):
         pass
     UnicodeLoader.add_constructor(
-        u'tag:yaml.org,2002:str',
+        yaml.resolver.BaseResolver.DEFAULT_SCALAR_TAG
         UnicodeLoader.construct_scalar)
     return yaml.load(stream, UnicodeLoader)
 
