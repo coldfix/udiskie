@@ -23,7 +23,7 @@ import os.path
 from gi.repository import GLib
 
 from .async_ import AsyncList, Coroutine, Return
-from .common import Emitter, samefile, AttrDictView, wraps
+from .common import Emitter, samefile, AttrDictView, wraps, NullDevice
 from .compat import fix_str_conversions
 from .dbus import connect_service, MethodsProxy
 from .locale import _
@@ -46,7 +46,17 @@ class Device(object):
 
     Interface = 'org.freedesktop.UDisks.Device'
 
-    # string representation
+    def __init__(self, daemon, object_path, property_proxy, method_proxy):
+        """
+        Initialize an instance with the given DBus proxy object.
+
+        :param dbus.ObjectProxy object:
+        """
+        self._daemon = daemon
+        self.object_path = object_path
+        self._P = property_proxy
+        self._M = method_proxy
+
     def __str__(self):
         """Display as object path."""
         return self.object_path
@@ -63,18 +73,6 @@ class Device(object):
         """Comparison by mount and device file path."""
         return samefile(path, self.device_file) or any(
             samefile(path, mp) for mp in self.mount_paths)
-
-    # construction
-    def __init__(self, daemon, object_path, property_proxy, method_proxy):
-        """
-        Initialize an instance with the given DBus proxy object.
-
-        :param dbus.ObjectProxy object:
-        """
-        self._daemon = daemon
-        self.object_path = object_path
-        self._P = property_proxy
-        self._M = method_proxy
 
     # availability of interfaces
     @property
@@ -487,13 +485,10 @@ class Daemon(Emitter):
 
         # DBus events
         self._event_queue = defaultdict(EventQueue)
-        proxy.connect('DeviceAdded', self._device_added)
-        proxy.connect('DeviceRemoved', self._device_removed)
+        proxy.connect('DeviceAdded', self._device_changed)
+        proxy.connect('DeviceRemoved', self._device_changed)
         proxy.connect('DeviceChanged', self._device_changed)
         proxy.connect('DeviceJobChanged', self._device_job_changed)
-
-        # self generated (dependent) event
-        self.connect('device_changed', self._on_device_changed)
 
     @classmethod
     @Coroutine.from_generator_function
@@ -513,6 +508,10 @@ class Daemon(Emitter):
     def get(self, object_path):
         """Return the current cached state of the device."""
         return self._devices.get(object_path)
+
+    def trigger(self, event, device, *args):
+        self._log.debug(_("+++ {0}: {1}", event, device))
+        super(Daemon, self).trigger(event, device, *args)
 
     @Coroutine.from_generator_function
     def update(self, object_path):
@@ -548,15 +547,6 @@ class Daemon(Emitter):
             self._errors[action][device.object_path] = message
 
     # events
-    def _on_device_changed(self, old_state, new_state):
-        """Detect type of event and trigger appropriate event handlers."""
-        self._detect_toggle('has_media', old_state, new_state,
-                            'media_added', 'media_removed')
-        self._detect_toggle('is_mounted', old_state, new_state,
-                            'device_mounted', 'device_unmounted')
-        self._detect_toggle('is_unlocked', old_state, new_state,
-                            'device_unlocked', 'device_locked')
-
     def _detect_toggle(self, property_name, old, new, add_name, del_name):
         old_valid = old and bool(getattr(old, property_name))
         new_valid = new and bool(getattr(new, property_name))
@@ -573,36 +563,29 @@ class Daemon(Emitter):
                 self.trigger(add_name, new)
         elif del_name and old_valid and not new_valid:
             if del_name != action_name:
-                self.trigger(del_name, new)
+                self.trigger(del_name, old)
 
     # UDisks event listeners
-    @_keep_async_event_order
-    def _device_added(self, object_path):
-        """Internal method."""
-        new_state = yield self.update(object_path)
-        self.trigger('device_added', new_state)
-        yield Return(None)
-
-    @_keep_async_event_order
-    def _device_removed(self, object_path):
-        """Internal method."""
-        old_state = self[object_path]
-        self._invalidate(object_path)
-        self.trigger('device_removed', old_state)
-        yield Return(None)
-
     @_keep_async_event_order
     def _device_changed(self, object_path):
         """Internal method."""
         old_state = self[object_path]
         new_state = yield self.update(object_path)
-        # Sometimes there may be a device change right when starting udiskie
-        # before we did get a chance to finish _sync()ing the state. In this
-        # case, just ignore the event (I don't know anything better to do
-        # here):
-        if old_state is not None:
-            self.trigger('device_changed', old_state, new_state)
-        yield Return(None)
+        if not old_state:
+            if new_state:
+                self.trigger('device_added', new_state)
+            return
+        new_state = new_state or NullDevice(object_path=object_path)
+        self._detect_toggle('has_media', old_state, new_state,
+                            'media_added', 'media_removed')
+        self._detect_toggle('is_mounted', old_state, new_state,
+                            'device_mounted', 'device_unmounted')
+        self._detect_toggle('is_unlocked', old_state, new_state,
+                            'device_unlocked', 'device_locked')
+        self.trigger('device_changed', old_state, new_state)
+        if not new_state:
+            self._invalidate(object_path)
+            self.trigger('device_removed', old_state)
 
     # NOTE: it seems the UDisks1 documentation for DeviceJobChanged is
     # fatally incorrect!

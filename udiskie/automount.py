@@ -41,6 +41,7 @@ class AutoMounter(object):
         """
         # udisks2 sometimes adds empty devices and later updates them which
         # makes is_external become true not at device_added time:
-        if (self._mounter.is_handleable(new_state)
-                and not self._mounter.is_handleable(old_state)):
-            self._mounter.add(new_state)
+        if (self._mounter.is_addable(new_state)
+                and not self._mounter.is_addable(old_state)
+                and not self._mounter.is_removable(old_state)):
+            self._mounter.auto_add(new_state)

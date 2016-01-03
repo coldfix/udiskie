@@ -548,6 +548,38 @@ class Mounter(object):
         """
         return not self._ignore_device(device)
 
+    def is_addable(self, device):
+        """
+        Check if device can be added with ``auto_add``.
+        """
+        if not self.is_handleable(device):
+            return False
+        if device.is_filesystem:
+            return not device.is_mounted
+        if device.is_crypto:
+            return self._prompt and not device.is_unlocked
+        if device.is_partition_table:
+            return any(self.is_addable(dev)
+                       for dev in self.get_all_handleable()
+                       if dev.partition_slave == device)
+        return False
+
+    def is_removable(self, device):
+        """
+        Check if device can be removed with ``auto_remove``.
+        """
+        if not self.is_handleable(device):
+            return False
+        if device.is_filesystem:
+            return device.is_mounted
+        if device.is_crypto:
+            return device.is_unlocked
+        if device.is_partition_table or device.is_drive:
+            return any(self.is_removable(dev)
+                       for dev in self.get_all_handleable()
+                       if _is_parent_of(device, dev))
+        return False
+
     def get_all_handleable(self):
         """
         Enumerate all handleable devices currently known to udisks.

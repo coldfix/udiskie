@@ -8,6 +8,8 @@ from __future__ import unicode_literals
 import os.path
 import traceback
 
+from .compat import fix_str_conversions
+
 
 __all__ = [
     'wraps',
@@ -143,6 +145,127 @@ class AttrDictView(object):
             return self.__data[key]
         except KeyError:
             raise AttributeError
+
+
+@fix_str_conversions
+class NullDevice(object):
+
+    """
+    Invalid object.
+
+    Evaluates to False in boolean context, but allows arbitrary attribute
+    access by returning another Null.
+    """
+
+    object_path = '/'
+
+    def __init__(self, **properties):
+        """Initialize an instance with the given DBus proxy object."""
+        self.__dict__.update(properties)
+
+    def __bool__(self):
+        return False
+
+    __nonzero__ = __bool__
+
+    def __str__(self):
+        """Display as object path."""
+        return self.object_path
+
+    def __eq__(self, other):
+        """Comparison by object path."""
+        return self.object_path == str(other)
+
+    def __ne__(self, other):
+        """Comparison by object path."""
+        return not (self == other)
+
+    def is_file(self, path):
+        """Comparison by mount and device file path."""
+        return False
+
+    # availability of interfaces
+    is_drive = False
+    is_block = False
+    is_partition_table = False
+    is_partition = False
+    is_filesystem = False
+    is_luks = False
+
+    # Drive
+    is_toplevel = is_drive
+    is_detachable = False
+    is_ejectable = False
+    has_media = False
+
+    def eject(self, unmount=False):
+        raise RuntimeError("Cannot call methods on invalid device!")
+
+    def detach(self):
+        raise RuntimeError("Cannot call methods on invalid device!")
+
+    # Block
+    device_file = ''
+    device_presentation = ''
+    device_size = 0
+    id_usage = ''
+    is_crypto = False
+    is_ignored = None
+    device_id = ''
+    id_type = ''
+    id_label = ''
+    id_uuid = ''
+
+    @property
+    def luks_cleartext_slave(self):
+        raise AttributeError('Invalid device has no cleartext slave.')
+
+    is_luks_cleartext = False
+    is_external = None
+    is_systeminternal = None
+
+    @property
+    def drive(self):
+        raise AttributeError('Invalid device has no drive.')
+
+    root = drive
+    should_automount = False
+    icon_name = ''
+    symbolic_icon_name = icon_name
+
+    # Partition
+    @property
+    def partition_slave(self):
+        raise AttributeError('Invalid device has no partition slave.')
+
+    # Filesystem
+    is_mounted = False
+    mount_paths = ()
+
+    def mount(self,
+              fstype=None,
+              options=None,
+              auth_no_user_interaction=False):
+        raise RuntimeError("Cannot call methods on invalid device!")
+
+    def unmount(self, force=False):
+        raise RuntimeError("Cannot call methods on invalid device!")
+
+    # Encrypted
+    def luks_cleartext_holder(self):
+        raise AttributeError('Invalid device has no cleartext holder.')
+
+    is_unlocked = None
+
+    def unlock(self, password):
+        raise RuntimeError("Cannot call methods on invalid device!")
+
+    def lock(self):
+        raise RuntimeError("Cannot call methods on invalid device!")
+
+    # derived properties
+    in_use = False
+    parent_object_path = '/'
 
 
 # ----------------------------------------
