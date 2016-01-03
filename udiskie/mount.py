@@ -667,7 +667,7 @@ class DeviceActions(object):
 
     def _device_node(self, device):
         """Create an empty menu node for the specified device."""
-        label = device.id_label or device.device_presentation
+        label = device.ui_label
         # determine available methods
         methods = [Action(method, device,
                           self._labels[method].format(label),

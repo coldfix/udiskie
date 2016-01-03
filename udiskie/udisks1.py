@@ -365,6 +365,10 @@ class Device(object):
         else:
             return '/'
 
+    @property
+    def ui_label(self):
+        return self.id_label or self.id_uuid or self.device_presentation
+
 
 def _keep_async_event_order(func):
     """

@@ -73,6 +73,7 @@ class DeviceFilter(object):
         'is_unlocked',
         'in_use',
         'should_automount',
+        'ui_label',
     ]
 
     def __init__(self, match, value):

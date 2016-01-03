@@ -498,6 +498,10 @@ class Device(object):
                 or self._P.Block.CryptoBackingDevice
                 or '/')
 
+    @property
+    def ui_label(self):
+        return self.id_label or self.id_uuid or self.device_presentation
+
 
 # ----------------------------------------
 # UDisks2 service wrapper

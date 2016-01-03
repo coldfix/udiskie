@@ -65,7 +65,7 @@ class Notify(object):
         self._show_notification(
             'device_mounted',
             _('Device mounted'),
-            _('{0.id_label} mounted on {0.mount_paths[0]}', device),
+            _('{0.ui_label} mounted on {0.mount_paths[0]}', device),
             device.icon_name,
             self._mounter._browser and browse_action)
 
@@ -78,7 +78,7 @@ class Notify(object):
         self._show_notification(
             'device_unmounted',
             _('Device unmounted'),
-            _('{0.id_label} unmounted', device),
+            _('{0.ui_label} unmounted', device),
             device.icon_name)
 
     def device_locked(self, device):
@@ -129,7 +129,7 @@ class Notify(object):
                 flat_actions = self._flatten_node(node_tree)
                 actions = [
                     (action.method,
-                    action.label.format(action.device.id_label or action.device.device_presentation),
+                    action.label.format(action.device.ui_label),
                     action.action)
                     for action in flat_actions
                 ]

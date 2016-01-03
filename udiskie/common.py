@@ -266,6 +266,7 @@ class NullDevice(object):
     # derived properties
     in_use = False
     parent_object_path = '/'
+    ui_label = '(invalid device)'
 
 
 # ----------------------------------------
