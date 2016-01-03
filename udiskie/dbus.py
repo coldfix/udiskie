@@ -78,14 +78,16 @@ class DBusCall(Async):
         :param int flags:
         :param int timeout_msec:
         """
+        cancellable = None
+        user_data = None
         proxy.call(
             method_name,
             GLib.Variant(signature, tuple(args)),
             flags,
             timeout_msec,
-            cancellable=None,
-            callback=self._callback,
-            user_data=None,
+            cancellable,
+            self._callback,
+            user_data,
         )
 
     def _callback(self, proxy, result, user_data):
@@ -371,6 +373,8 @@ class DBusProxyNew(Async):
         """
         Asynchronously call the specified method on a DBus proxy object.
         """
+        cancellable = None
+        user_data = None
         Gio.DBusProxy.new(
             connection,
             flags,
@@ -378,9 +382,9 @@ class DBusProxyNew(Async):
             name,
             object_path,
             interface_name,
-            cancellable=None,
-            callback=self._callback,
-            user_data=None,
+            cancellable,
+            self._callback,
+            user_data,
         )
 
     def _callback(self, proxy, result, user_data):
@@ -417,6 +421,8 @@ class DBusProxyNewForBus(Async):
         """
         Asynchronously call the specified method on a DBus proxy object.
         """
+        cancellable = None
+        user_data = None
         Gio.DBusProxy.new_for_bus(
             bus_type,
             flags,
@@ -424,9 +430,9 @@ class DBusProxyNewForBus(Async):
             name,
             object_path,
             interface_name,
-            cancellable=None,
-            callback=self._callback,
-            user_data=None,
+            cancellable,
+            self._callback,
+            user_data,
         )
 
     def _callback(self, proxy, result, user_data):

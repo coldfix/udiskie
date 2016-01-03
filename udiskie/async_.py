@@ -293,11 +293,14 @@ class Subprocess(Async):
 
     def __init__(self, argv):
         self.p = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
+        stdin_buf = None
+        cancellable = None
+        user_data = None
         self.p.communicate_utf8_async(
-            stdin_buf=None,
-            cancellable=None,
-            callback=self._callback,
-            user_data=None)
+            stdin_buf,
+            cancellable,
+            self._callback,
+            user_data)
 
     def _callback(self, source_object, result, user_data):
         try:
