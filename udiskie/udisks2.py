@@ -620,7 +620,8 @@ class Daemon(Emitter):
     def _interfaces_added(self, object_path, interfaces_and_properties):
         """Internal method."""
         added = object_path not in self._objects
-        self._objects[object_path] = interfaces_and_properties
+        self._objects.setdefault(object_path, {})
+        self._objects[object_path].update(interfaces_and_properties)
         if added:
             kind = object_kind(object_path)
             if kind in ('device', 'drive'):
