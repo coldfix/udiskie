@@ -1,6 +1,18 @@
 CHANGELOG
 ---------
 
+1.4.7
+~~~~~
+Date: 04.01.2016
+
+- fix typo that prevents the yaml config file from being used
+- fix problem with glib/gio gir API on slackware (olders versions?)
+- fix bug when changing device state (e.g. when formatting existing device or
+  burning ISO file to device)
+- improve handling of race conditions with udisks1 backend
+- fix notifications for devices without labels
+
+
 1.4.6
 ~~~~~
 Date: 28.12.2015
