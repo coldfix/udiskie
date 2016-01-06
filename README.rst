@@ -64,6 +64,22 @@ The…
 .. _Mailing List: http://lists.coldfix.de/mailman/listinfo/udiskie
 
 
+Roadmap
+~~~~~~~
+
+For the next udiskie versions, I am mainly concerned with quality assurance
+and stability. For one this means reducing the number of supported runtime
+configurations and make the remaining easier to test, i.e.:
+
+- **drop support for python2** to avoid unicode issues and make use of the new
+  asyncio module which provides better error handling (stack traces!) than the
+  current solution.
+- **drop support for udisks1**. The udisks1 API is rather unfit for the
+  asynchronous nature of the problem which has led to numerous bugs and
+  problems (plenty more probably waiting to be discovered as we speak)
+- **add automated tests**. needed desperately…
+
+
 .. |Version| image:: http://coldfix.de:8080/v/udiskie/badge.svg
    :target: https://pypi.python.org/pypi/udiskie/
    :alt: Latest Version
