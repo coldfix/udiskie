@@ -61,7 +61,7 @@ The…
 .. _Source Code: https://github.com/coldfix/udiskie
 .. _Latest Release: https://pypi.python.org/pypi/udiskie/
 .. _Issue Tracker: https://github.com/coldfix/udiskie/issues
-.. _Mailing List: http://lists.coldfix.de/mailman/listinfo/udiskie
+.. _Mailing List: https://lists.coldfix.de/mailman/listinfo/udiskie
 
 
 Roadmap
