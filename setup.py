@@ -42,8 +42,8 @@ check_dependency('gi.repository.Notify', '0.7')
 # read long_description from README.rst
 long_description = None
 try:
-    long_description = open('README.rst', encoding='utf-8').read()
-    long_description += '\n' + open('CHANGES.rst', encoding='utf-8').read()
+    long_description = io.open('README.rst', encoding='utf-8').read()
+    long_description += '\n' + io.open('CHANGES.rst', encoding='utf-8').read()
 except IOError:
     pass
 
