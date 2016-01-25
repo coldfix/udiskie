@@ -12,8 +12,6 @@ from os import path, listdir
 from glob import glob
 import io
 
-import udiskie
-
 
 # check availability of runtime dependencies
 def check_dependency(package, version):
