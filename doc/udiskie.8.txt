@@ -288,6 +288,7 @@ remain available:
     is_partition
     is_filesystem
     is_luks
+    is_loop
     is_toplevel
     is_detachable
     is_ejectable
@@ -308,6 +309,7 @@ remain available:
     mount_paths             list of mount paths
     is_unlocked
     in_use                  device or any of its children mounted
+    loop_file               file backing the loop device
 
 
 See Also

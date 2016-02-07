@@ -71,8 +71,9 @@ class Device(object):
 
     def is_file(self, path):
         """Comparison by mount and device file path."""
-        return samefile(path, self.device_file) or any(
-            samefile(path, mp) for mp in self.mount_paths)
+        return (samefile(path, self.device_file) or
+                samefile(path, self.loop_file) or
+                any(samefile(path, mp) for mp in self.mount_paths))
 
     # availability of interfaces
     @property
@@ -104,6 +105,11 @@ class Device(object):
     def is_luks(self):
         """Check if the device is a LUKS container."""
         return self._P.DeviceIsLuks
+
+    @property
+    def is_loop(self):
+        """Check if the device is a loop device."""
+        return self._P.DeviceIsLinuxLoop
 
     # ----------------------------------------
     # Drive
@@ -340,6 +346,15 @@ class Device(object):
     def lock(self):
         """Lock Luks device."""
         return self._M.LuksLock('(as)', [])
+
+    #----------------------------------------
+    # loop
+    #----------------------------------------
+
+    @property
+    def loop_file(self):
+        """Get the file backing the loop device."""
+        return self._P.LinuxLoopFilename
 
     # ----------------------------------------
     # derived properties
