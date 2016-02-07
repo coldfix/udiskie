@@ -52,6 +52,7 @@ class DeviceFilter(object):
         'is_partition',
         'is_filesystem',
         'is_luks',
+        'is_loop',
         'is_toplevel',
         'is_detachable',
         'is_ejectable',
@@ -74,6 +75,7 @@ class DeviceFilter(object):
         'in_use',
         'should_automount',
         'ui_label',
+        'loop_filename',
     ]
 
     def __init__(self, match, value):

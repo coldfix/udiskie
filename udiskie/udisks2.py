@@ -211,7 +211,7 @@ class Device(object):
         This method is used internally to unify the behaviour of top level
         devices in udisks1 and udisks2.
         """
-        return self.drive if self.is_toplevel else self
+        return self.drive if self.is_toplevel and not self.is_loop else self
 
     @property
     def is_detachable(self):
