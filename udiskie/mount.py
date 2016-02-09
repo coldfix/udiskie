@@ -11,7 +11,6 @@ import logging
 
 from .async_ import AsyncList, Coroutine, Return
 from .common import wraps, setdefault, exc_message
-from .compat import basestring
 from .config import IgnoreDevice, FilterMatcher
 from .locale import _
 

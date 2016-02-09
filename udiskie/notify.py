@@ -9,6 +9,7 @@ import logging
 
 from gi.repository import GLib
 
+from .common import exc_message
 from .mount import DeviceActions
 from .locale import _
 
@@ -129,8 +130,8 @@ class Notify(object):
                 flat_actions = self._flatten_node(node_tree)
                 actions = [
                     (action.method,
-                    action.label.format(action.device.ui_label),
-                    action.action)
+                     action.label.format(action.device.ui_label),
+                     action.action)
                     for action in flat_actions
                 ]
             else:

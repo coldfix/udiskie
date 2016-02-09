@@ -10,7 +10,6 @@ from __future__ import unicode_literals
 
 import logging
 import os
-import sys
 
 from .common import exc_message
 from .compat import basestring, fix_str_conversions

@@ -14,7 +14,6 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from copy import copy, deepcopy
-from functools import partial
 import logging
 
 from gi.repository import GLib
@@ -483,9 +482,9 @@ class Device(object):
             })
         )
 
-    #----------------------------------------
+    # ----------------------------------------
     # loop
-    #----------------------------------------
+    # ----------------------------------------
 
     @property
     def loop_file(self):

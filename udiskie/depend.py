@@ -6,6 +6,7 @@ are installed.
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import logging
 from gi import require_version
 from .common import check_call
 from .locale import _
