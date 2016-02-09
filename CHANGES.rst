@@ -1,6 +1,16 @@
 CHANGELOG
 ---------
 
+1.4.8
+~~~~~
+Date: 09.02.2016
+
+- fix problem with setupscript if utf8 is not the default encoding
+- fix crash when starting without X
+- basic support for loop devices (must be enabled explicitly at this time)
+- fix handling of 2 more error cases
+
+
 1.4.7
 ~~~~~
 Date: 04.01.2016
