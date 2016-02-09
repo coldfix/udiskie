@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 
 from gi import require_version
 from .common import check_call
+from .locale import _
 
 require_version('Gio', '2.0')
 require_version('GLib', '2.0')
