@@ -191,6 +191,7 @@ class NullDevice(object):
     is_partition = False
     is_filesystem = False
     is_luks = False
+    is_loop = False
 
     # Drive
     is_toplevel = is_drive
@@ -252,6 +253,7 @@ class NullDevice(object):
         raise RuntimeError("Cannot call methods on invalid device!")
 
     # Encrypted
+    @property
     def luks_cleartext_holder(self):
         raise AttributeError('Invalid device has no cleartext holder.')
 
@@ -262,6 +264,9 @@ class NullDevice(object):
 
     def lock(self):
         raise RuntimeError("Cannot call methods on invalid device!")
+
+    # Loop
+    loop_file = ''
 
     # derived properties
     in_use = False

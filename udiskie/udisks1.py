@@ -348,7 +348,7 @@ class Device(object):
         return self._M.LuksLock('(as)', [])
 
     # ----------------------------------------
-    # loop
+    # Loop
     # ----------------------------------------
 
     @property
