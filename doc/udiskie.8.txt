@@ -277,7 +277,7 @@ Device attributes
 -----------------
 
 Some of the config entries make use of Device attributes. The following list
-of attributes is currently availabe, but there is no guarantee that they will
+of attributes is currently available, but there is no guarantee that they will
 remain available:
 
     Attribute               Hint/Example
