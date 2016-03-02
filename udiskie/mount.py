@@ -298,7 +298,8 @@ class Mounter(object):
         elif device.is_crypto:
             success = yield self.unlock(device)
             if success and recursive:
-                # TODO: update device
+                self.udisks._sync()
+                device = self.udisks[device.object_path]
                 success = yield self.add(
                     device.luks_cleartext_holder,
                     recursive=True)
@@ -336,7 +337,8 @@ class Mounter(object):
             if self._prompt and not device.is_unlocked:
                 success = yield self.unlock(device)
             if success and recursive:
-                # TODO: update device
+                self.udisks._sync()
+                device = self.udisks[device.object_path]
                 success = yield self.auto_add(
                     device.luks_cleartext_holder,
                     recursive=True)
