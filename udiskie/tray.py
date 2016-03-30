@@ -12,7 +12,7 @@ from .async_ import Async
 from .common import setdefault
 from .compat import basestring
 from .locale import _
-from .mount import Action, Branch
+from .mount import Action, Branch, prune_empty_node
 
 
 __all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
@@ -140,7 +140,9 @@ class UdiskieMenu(object):
         :returns: root of device hierarchy
         :rtype: Device
         """
-        return self._actions.detect()
+        root = self._actions.detect()
+        prune_empty_node(root, set())
+        return root
 
     def _branchmenu(self, groups):
         """

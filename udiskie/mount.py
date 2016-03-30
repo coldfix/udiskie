@@ -683,3 +683,24 @@ class DeviceActions(object):
             root = None
         # in this first step leave branches empty
         return device.object_path, Device(root, [], device, label, methods)
+
+
+def prune_empty_node(node, seen):
+    """
+    Recursively remove empty branches and return whether this makes the node
+    itself empty.
+
+    The ``seen`` parameter is used to avoid infinite recursion due to cycles
+    (you never know).
+    """
+    if node.methods:
+        return False
+    if id(node) in seen:
+        return True
+    seen = seen | {id(node)}
+    for branch in list(node.branches):
+        if prune_empty_node(branch, seen):
+            node.branches.remove(branch)
+        else:
+            return False
+    return True
