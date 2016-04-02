@@ -1,6 +1,15 @@
 CHANGELOG
 ---------
 
+1.4.9
+~~~~~
+Date: 02.04.2016
+
+- add is_loop and loop_file properties for devices
+- fix recursive mounting of crypto devices (udiskie-mount)
+- prevent empty submenus from showing
+
+
 1.4.8
 ~~~~~
 Date: 09.02.2016
