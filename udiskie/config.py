@@ -10,6 +10,7 @@ from __future__ import unicode_literals
 
 import logging
 import os
+import fnmatch
 
 from .common import exc_message
 from .compat import basestring, fix_str_conversions
@@ -26,6 +27,14 @@ def lower(s):
         return s.lower()
     except AttributeError:
         return s
+
+
+def match_value(value, pattern):
+    if isinstance(value, (list, tuple)):
+        return any(match_value(v, pattern) for v in value)
+    if isinstance(value, basestring) and isinstance(pattern, basestring):
+        return fnmatch.fnmatch(value.lower(), pattern.lower())
+    return lower(value) == lower(pattern)
 
 
 def yaml_load(stream):
@@ -107,7 +116,7 @@ class DeviceFilter(object):
 
         :param Device device: device to be checked
         """
-        return all(lower(getattr(device, k)) == lower(v)
+        return all(match_value(getattr(device, k), v)
                    for k, v in self._match.items())
 
     def value(self, device):
