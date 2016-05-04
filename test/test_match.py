@@ -4,8 +4,8 @@ Tests for the udiskie.match module.
 
 These tests are intended to demonstrate and ensure the correct usage of the
 config file used by udiskie for custom device options.
-
 """
+
 import unittest
 
 import tempfile
@@ -15,17 +15,21 @@ import gc
 
 from udiskie.config import Config
 
+
 class TestDev(object):
+
     def __init__(self, object_path, id_type, id_uuid):
         self.object_path = object_path
         self.id_type = id_type
         self.id_uuid = id_uuid
 
+
 class TestFilterMatcher(unittest.TestCase):
-    """
-    Tests for the udiskie.match.FilterMatcher class.
 
     """
+    Tests for the udiskie.match.FilterMatcher class.
+    """
+
     def setUp(self):
         """Create a temporary config file."""
         self.base = tempfile.mkdtemp()
@@ -83,3 +87,6 @@ ignore_device:
             self.mount_options(
                 TestDev('/nomatch', 'ext', 'no-matching-id')))
 
+
+if __name__ == '__main__':
+    unittest.main()
