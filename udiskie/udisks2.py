@@ -392,6 +392,13 @@ class Device(object):
         """Return the recommended device symbolic icon name."""
         return self._P.Block.HintSymbolicIconName or 'drive-removable-media'
 
+    @property
+    def symlinks(self):
+        """Known symlinks of the block device."""
+        if not self._P.Block.Symlinks:
+            return []
+        return [decode_ay(path) for path in self._P.Block.Symlinks]
+
     # ----------------------------------------
     # Partition
     # ----------------------------------------

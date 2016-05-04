@@ -233,6 +233,7 @@ class NullDevice(object):
     should_automount = False
     icon_name = ''
     symbolic_icon_name = icon_name
+    symlinks = []
 
     # Partition
     @property

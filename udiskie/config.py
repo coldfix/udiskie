@@ -75,6 +75,7 @@ class DeviceFilter(object):
         'should_automount',
         'ui_label',
         'loop_filename',
+        'symlinks',
     ]
 
     def __init__(self, match, value):

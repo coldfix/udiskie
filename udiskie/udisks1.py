@@ -266,6 +266,16 @@ class Device(object):
 
     symbolic_icon_name = icon_name
 
+    @property
+    def symlinks(self):
+        """Known symlinks of the block device."""
+        return list(filter(None, [
+            self._P.DeviceFile,
+            self._P.DeviceFilePresentation,
+            self._P.DeviceFileById,
+            self._P.DeviceFileByPath,
+        ]))
+
     # ----------------------------------------
     # Partition
     # ----------------------------------------
