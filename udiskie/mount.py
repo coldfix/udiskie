@@ -111,6 +111,8 @@ class Mounter(object):
         self._mount_options = mount_options or (lambda device: None)
         self._ignore_device = ignore_device or FilterMatcher([], False)
         self._ignore_device._filters += [
+            IgnoreDevice({'symlinks': '/dev/mapper/docker-*', 'ignore': True}),
+            IgnoreDevice({'symlinks': '/dev/disk/by-id/dm-name-docker-*', 'ignore': True}),
             IgnoreDevice({'is_block': False, 'ignore': True}),
             IgnoreDevice({'is_external': False, 'ignore': True}),
             IgnoreDevice({'is_ignored': True, 'ignore': True})]
