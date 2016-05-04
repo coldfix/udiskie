@@ -251,7 +251,10 @@ class _EntryPoint(object):
         """Start asynchronous operations."""
         try:
             self.udisks = yield get_backend(self.options['udisks_version'])
-            yield self._init()
+            results = yield self._init()
+            if not all(success and all(result)
+                       for success, result in results):
+                self.exit_status = 1
         except Exception:
             self.exit_status = 1
             # Print the stack trace only up to the current level:
