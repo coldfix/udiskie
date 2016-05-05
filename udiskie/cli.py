@@ -252,8 +252,7 @@ class _EntryPoint(object):
         try:
             self.udisks = yield get_backend(self.options['udisks_version'])
             results = yield self._init()
-            if not all(success and all(result)
-                       for success, result in results):
+            if not udiskie.mount.all_true(results):
                 self.exit_status = 1
         except Exception:
             self.exit_status = 1
@@ -504,10 +503,9 @@ class Mount(_EntryPoint):
         if options['<device>']:
             tasks = [mounter.add(path, recursive=recursive)
                      for path in options['<device>']]
-            # TODO: AND results
-            return AsyncList(tasks)
         else:
-            return mounter.add_all(recursive=recursive)
+            tasks = [mounter.add_all(recursive=recursive)]
+        return AsyncList(tasks)
 
 
 class Umount(_EntryPoint):
@@ -581,7 +579,6 @@ class Umount(_EntryPoint):
             strategy['force'] = options['force']
             tasks = [mounter.remove(path, **strategy)
                      for path in options['<device>']]
-            # TODO: AND results
-            return AsyncList(tasks)
         else:
-            return mounter.remove_all(**strategy)
+            tasks = [mounter.remove_all(**strategy)]
+        return AsyncList(tasks)
