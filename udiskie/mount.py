@@ -27,11 +27,6 @@ def _False():
     yield Return(False)
 
 
-def all_true(results):
-    return all(success and all(result)
-               for success, result in results)
-
-
 def _find_device(fn, set_error=False):
     """
     Decorator for Mounter methods taking a Device as their first argument.
@@ -314,7 +309,7 @@ class Mounter(object):
                 if dev.is_partition and dev.partition_slave == device:
                     tasks.append(self.add(dev, recursive=True))
             results = yield AsyncList(tasks)
-            success = all_true(results)
+            success = all(results)
         else:
             self._log.info(_('not adding {0}: unhandled device', device))
             yield Return(False)
@@ -353,7 +348,7 @@ class Mounter(object):
                 if dev.is_partition and dev.partition_slave == device:
                     tasks.append(self.auto_add(dev, recursive=True))
             results = yield AsyncList(tasks)
-            success = all_true(results)
+            success = all(results)
         else:
             self._log.debug(_('not adding {0}: unhandled device', device))
         yield Return(success)
@@ -390,7 +385,7 @@ class Mounter(object):
                         eject=eject,
                         lock=lock))
             results = yield AsyncList(tasks)
-            success = all_true(results)
+            success = all(results)
         else:
             self._log.info(_('not removing {0}: unhandled device', device))
             success = False
@@ -441,7 +436,7 @@ class Mounter(object):
                         eject=eject,
                         lock=lock))
             results = yield AsyncList(tasks)
-            success = all_true(results)
+            success = all(results)
         else:
             self._log.debug(_('not removing {0}: unhandled device', device))
         # if these operations work, everything is fine, we can return True:
@@ -519,7 +514,7 @@ class Mounter(object):
         for device in self.udisks:
             tasks.append(self.auto_add(device, recursive=recursive))
         results = yield AsyncList(tasks)
-        success = all_true(results)
+        success = all(results)
         yield Return(success)
 
     @Coroutine.from_generator_function
@@ -540,7 +535,7 @@ class Mounter(object):
                 continue
             tasks.append(self.auto_remove(device, **remove_args))
         results = yield AsyncList(tasks)
-        success = all_true(results)
+        success = all(results)
         yield Return(success)
 
     # iterate devices

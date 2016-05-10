@@ -252,7 +252,7 @@ class _EntryPoint(object):
         try:
             self.udisks = yield get_backend(self.options['udisks_version'])
             results = yield self._init()
-            if not udiskie.mount.all_true(results):
+            if not all(results):
                 self.exit_status = 1
         except Exception:
             self.exit_status = 1
