@@ -61,6 +61,8 @@ class Notify(object):
 
         :param device: device object
         """
+        if not self._mounter.is_handleable(device):
+            return
         browse_action = ('browse', _('Browse directory'),
                          self._mounter.browse, device)
         self._show_notification(
@@ -76,6 +78,8 @@ class Notify(object):
 
         :param device: device object
         """
+        if not self._mounter.is_handleable(device):
+            return
         self._show_notification(
             'device_unmounted',
             _('Device unmounted'),
@@ -88,6 +92,8 @@ class Notify(object):
 
         :param device: device object
         """
+        if not self._mounter.is_handleable(device):
+            return
         self._show_notification(
             'device_locked',
             _('Device locked'),
@@ -100,6 +106,8 @@ class Notify(object):
 
         :param device: device object
         """
+        if not self._mounter.is_handleable(device):
+            return
         self._show_notification(
             'device_unlocked',
             _('Device unlocked'),
@@ -112,6 +120,8 @@ class Notify(object):
 
         :param device: device object
         """
+        if not self._mounter.is_handleable(device):
+            return
         if self._has_actions('device_added'):
             # wait for partitions etc to be reported to udiskie, otherwise we
             # can't discover the actions
@@ -156,6 +166,8 @@ class Notify(object):
 
         :param device: device object
         """
+        if not self._mounter.is_handleable(device):
+            return
         device_file = device.device_presentation
         if (device.is_drive or device.is_toplevel) and device_file:
             self._show_notification(
@@ -170,6 +182,8 @@ class Notify(object):
 
         :param device: device object
         """
+        if not self._mounter.is_handleable(device):
+            return
         device_file = device.device_presentation or device.object_path
         if message:
             text = _('failed to {0} {1}:\n{2}', action, device_file, message)
