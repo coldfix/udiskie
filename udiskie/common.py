@@ -16,6 +16,7 @@ __all__ = [
     'check_call',
     'Emitter',
     'samefile',
+    'sameuuid',
     'setdefault',
     'extend',
     'cachedproperty',
@@ -95,6 +96,11 @@ def samefile(a, b):
         return os.path.samefile(a, b)
     except OSError:
         return os.path.normpath(a) == os.path.normpath(b)
+
+
+def sameuuid(a, b):
+    """Compare two UUIDs."""
+    return a and b and a.lower() == b.lower()
 
 
 def setdefault(self, other):

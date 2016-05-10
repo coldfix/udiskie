@@ -18,7 +18,7 @@ import logging
 
 from gi.repository import GLib
 
-from .common import Emitter, samefile, AttrDictView, decode_ay
+from .common import Emitter, samefile, sameuuid, AttrDictView, decode_ay
 from .compat import fix_str_conversions
 from .dbus import connect_service, MethodsProxy
 from .locale import _
@@ -151,7 +151,9 @@ class Device(object):
         """Comparison by mount and device file path."""
         return (samefile(path, self.device_file) or
                 samefile(path, self.loop_file) or
-                any(samefile(path, mp) for mp in self.mount_paths))
+                any(samefile(path, mp) for mp in self.mount_paths) or
+                sameuuid(path, self.id_uuid) or
+                sameuuid(path, self.partition_uuid))
 
     # availability of interfaces
     @property
@@ -408,6 +410,11 @@ class Device(object):
     def partition_slave(self):
         """Get the partition slave (container)."""
         return self._daemon[self._P.Partition.Table]
+
+    @property
+    def partition_uuid(self):
+        """Get the partition UUID."""
+        return self._P.Partition.UUID
 
     # ----------------------------------------
     # Filesystem
