@@ -100,30 +100,42 @@ class AsyncList(Async):
     def __init__(self, tasks):
         """Create an AsyncList from a list of Asyncs."""
         tasks = list(tasks)
-        total = len(tasks)
-        self._results = [None] * total
-        self._completed = 0
-        self._total = total
-        if total == 0:
+        self._results = {}
+        self._num_tasks = len(tasks)
+        if not tasks:
             run_soon(self.callback)
-        else:
-            for idx, task in enumerate(tasks):
-                task.callbacks.append(partial(self._subtask_result, idx))
-                task.errbacks.append(partial(self._subtask_error, idx))
+        for idx, task in enumerate(tasks):
+            task.callbacks.append(partial(self._subtask_result, idx))
+            task.errbacks.append(partial(self._subtask_error, idx))
+
+    def _set_subtask_result(self, idx, result):
+        """Set result of a single subtask."""
+        self._results[idx] = result
+        if len(self._results) == self._num_tasks:
+            self.callback([
+                self._results[i]
+                for i in range(self._num_tasks)
+            ])
 
     def _subtask_result(self, idx, *args):
         """Receive a result from a single subtask."""
-        self._results[idx] = (True, args)
-        self._completed += 1
-        if self._completed == self._total:
-            self.callback(self._results)
+        self._set_subtask_result(idx, AsyncResult(True, *args))
 
     def _subtask_error(self, idx, error, fmt):
         """Receive an error from a single subtask."""
-        self._results[idx] = (False, error)
-        self._completed += 1
-        if self._completed == self._total:
-            self.callback(self._results)
+        self._set_subtask_result(idx, AsyncResult(False, error, fmt))
+
+
+class AsyncResult(object):
+
+    def __init__(self, success, *values):
+        self.success = success
+        self.values = values
+
+    def __bool__(self):
+        return self.success and all(self.values)
+
+    __nonzero__ = __bool__
 
 
 class Return(object):

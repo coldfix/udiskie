@@ -308,8 +308,8 @@ class Mounter(object):
             for dev in self.get_all_handleable():
                 if dev.is_partition and dev.partition_slave == device:
                     tasks.append(self.add(dev, recursive=True))
-            # TODO: AND results
-            success = yield AsyncList(tasks)
+            results = yield AsyncList(tasks)
+            success = all(results)
         else:
             self._log.info(_('not adding {0}: unhandled device', device))
             yield Return(False)
@@ -347,8 +347,8 @@ class Mounter(object):
             for dev in self.get_all_handleable():
                 if dev.is_partition and dev.partition_slave == device:
                     tasks.append(self.auto_add(dev, recursive=True))
-            # TODO: AND results
-            success = yield AsyncList(tasks)
+            results = yield AsyncList(tasks)
+            success = all(results)
         else:
             self._log.debug(_('not adding {0}: unhandled device', device))
         yield Return(success)
@@ -384,8 +384,8 @@ class Mounter(object):
                         detach=detach,
                         eject=eject,
                         lock=lock))
-            # TODO: AND results
-            success = yield AsyncList(tasks)
+            results = yield AsyncList(tasks)
+            success = all(results)
         else:
             self._log.info(_('not removing {0}: unhandled device', device))
             success = False
@@ -435,8 +435,8 @@ class Mounter(object):
                         detach=detach,
                         eject=eject,
                         lock=lock))
-            # TODO: AND results
-            success = yield AsyncList(tasks)
+            results = yield AsyncList(tasks)
+            success = all(results)
         else:
             self._log.debug(_('not removing {0}: unhandled device', device))
         # if these operations work, everything is fine, we can return True:
@@ -501,6 +501,7 @@ class Mounter(object):
         yield Return(True)
 
     # mount_all/unmount_all
+    @Coroutine.from_generator_function
     def add_all(self, recursive=False):
         """
         Add all handleable devices that available at start.
@@ -512,9 +513,11 @@ class Mounter(object):
         tasks = []
         for device in self.udisks:
             tasks.append(self.auto_add(device, recursive=recursive))
-        # TODO: AND results
-        return AsyncList(tasks)
+        results = yield AsyncList(tasks)
+        success = all(results)
+        yield Return(success)
 
+    @Coroutine.from_generator_function
     def remove_all(self, detach=False, eject=False, lock=False):
         """
         Remove all filesystems handleable by udiskie.
@@ -531,8 +534,9 @@ class Mounter(object):
             if device.parent_object_path != '/':
                 continue
             tasks.append(self.auto_remove(device, **remove_args))
-        # TODO: AND results
-        return AsyncList(tasks)
+        results = yield AsyncList(tasks)
+        success = all(results)
+        yield Return(success)
 
     # iterate devices
     def is_handleable(self, device):
