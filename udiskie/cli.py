@@ -9,7 +9,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 # import udiskie.depend first - for side effects!
-from .depend import has_Notify, has_Gtk
+from .depend import has_Notify, has_Gtk, _in_X
 
 import inspect
 import logging
@@ -365,13 +365,20 @@ class Daemon(_EntryPoint):
             logging.getLogger(__name__).error(libnotify_not_available)
             options['notify'] = False
 
+        if options['tray'] and not has_Gtk(3) and not _in_X:
+            no_X_session = _(
+                "Not run within X session. "
+                "\nStarting udiskie without tray icon.\n")
+            logging.getLogger(__name__).error(no_X_session)
+            options['tray'] = False
+
         if options['tray'] and not has_Gtk(3):
             gtk3_not_available = _(
                 "Typelib for 'Gtk 3.0' is not available. Possible causes include:"
                 "\n\t- GTK3 is not installed"
                 "\n\t- the typelib is provided by a separate package"
                 "\n\t- GTK3 was built with introspection disabled"
-                "\n\nStarting udiskie without tray icon.")
+                "\nStarting udiskie without tray icon.\n")
             logging.getLogger(__name__).error(gtk3_not_available)
             options['tray'] = False
 
