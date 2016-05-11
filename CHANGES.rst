@@ -1,6 +1,19 @@
 CHANGELOG
 ---------
 
+1.4.10
+~~~~~~
+Date: 11.05.2016
+
+- signal failing mount/unmount operations with non-zero exit codes (#110)
+- suppress notifications for unhandled devices
+- add rules for docker devices marking them unhandled to avoid excessive
+  notifications (#113)
+- allow mounting/unmounting using UUID (#90)
+- prevent warning when starting without X session (#102)
+- can now match against wildcards in config rules (#49)
+
+
 1.4.9
 ~~~~~
 Date: 02.04.2016
