@@ -39,8 +39,8 @@ class AutoMounter(object):
         :param Device old_state: before change
         :param Device new_state: after change
         """
-        # udisks2 sometimes adds empty devices and later updates them which
-        # makes is_external become true not at device_added time:
+        # udisks2 sometimes adds empty devices and later updates them - which
+        # makes is_external become true at a time later than device_added:
         if (self._mounter.is_addable(new_state)
                 and not self._mounter.is_addable(old_state)
                 and not self._mounter.is_removable(old_state)):
