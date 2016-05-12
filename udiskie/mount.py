@@ -633,7 +633,7 @@ class DeviceActions(object):
             'forget_password': mounter.forget_password,
         })
 
-    def detect(self, root_device=''):
+    def detect(self, root_device='/'):
         """
         Detect all currently known devices.
 
@@ -647,8 +647,7 @@ class DeviceActions(object):
         # insert child devices as branches into their roots:
         for object_path, node in device_nodes.items():
             device_nodes.get(node.root, root).branches.append(node)
-        if not root_device:
-            return root
+        device_nodes['/'] = root
         return device_nodes[root_device]
 
     def _get_device_methods(self, device):
@@ -681,12 +680,7 @@ class DeviceActions(object):
                           partial(self._actions[method], device))
                    for method in self._get_device_methods(device)]
         # find the root device:
-        if device.is_partition:
-            root = device.partition_slave.object_path
-        elif device.is_luks_cleartext:
-            root = device.luks_cleartext_slave.object_path
-        else:
-            root = None
+        root = device.parent_object_path
         # in this first step leave branches empty
         return device.object_path, Device(root, [], device, label, methods)
 
