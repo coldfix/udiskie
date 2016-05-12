@@ -306,10 +306,11 @@ class Mounter(object):
                     device.luks_cleartext_holder,
                     recursive=True)
         elif recursive and device.is_partition_table:
-            tasks = []
-            for dev in self.get_all_handleable():
-                if dev.is_partition and dev.partition_slave == device:
-                    tasks.append(self.add(dev, recursive=True))
+            tasks = [
+                self.add(dev, recursive=True)
+                for dev in self.get_all_handleable()
+                if dev.is_partition and dev.partition_slave == device
+            ]
             results = yield AsyncList(tasks)
             success = all(results)
         else:
@@ -345,10 +346,11 @@ class Mounter(object):
                     device.luks_cleartext_holder,
                     recursive=True)
         elif recursive and device.is_partition_table:
-            tasks = []
-            for dev in self.get_all_handleable():
-                if dev.is_partition and dev.partition_slave == device:
-                    tasks.append(self.auto_add(dev, recursive=True))
+            tasks = [
+                self.auto_add(dev, recursive=True)
+                for dev in self.get_all_handleable()
+                if dev.is_partition and dev.partition_slave == device
+            ]
             results = yield AsyncList(tasks)
             success = all(results)
         else:
@@ -377,15 +379,12 @@ class Mounter(object):
                 yield self.auto_remove(device.luks_cleartext_holder, force=True)
             success = yield self.lock(device)
         elif force and (device.is_partition_table or device.is_drive):
-            tasks = []
-            for child in self.get_all_handleable():
-                if _is_parent_of(device, child):
-                    tasks.append(self.auto_remove(
-                        child,
-                        force=True,
-                        detach=detach,
-                        eject=eject,
-                        lock=lock))
+            kw = dict(force=True, detach=detach, eject=eject, lock=lock)
+            tasks = [
+                self.auto_remove(child, **kw)
+                for child in self.get_all_handleable()
+                if _is_parent_of(device, child)
+            ]
             results = yield AsyncList(tasks)
             success = all(results)
         else:
@@ -428,15 +427,12 @@ class Mounter(object):
             if device.is_unlocked:
                 success = yield self.lock(device)
         elif force and (device.is_partition_table or device.is_drive):
-            tasks = []
-            for child in self.get_all_handleable():
-                if _is_parent_of(device, child):
-                    tasks.append(self.auto_remove(
-                        child,
-                        force=True,
-                        detach=detach,
-                        eject=eject,
-                        lock=lock))
+            kw = dict(force=True, detach=detach, eject=eject, lock=lock)
+            tasks = [
+                self.auto_remove(child, **kw)
+                for child in self.get_all_handleable()
+                if _is_parent_of(device, child)
+            ]
             results = yield AsyncList(tasks)
             success = all(results)
         else:
@@ -512,9 +508,8 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
-        tasks = []
-        for device in self.udisks:
-            tasks.append(self.auto_add(device, recursive=recursive))
+        tasks = [self.auto_add(device, recursive=recursive)
+                 for device in self.get_all_handleable()]
         results = yield AsyncList(tasks)
         success = all(results)
         yield Return(success)
@@ -530,12 +525,10 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
-        tasks = []
-        remove_args = dict(force=True, detach=detach, eject=eject, lock=lock)
-        for device in self.get_all_handleable():
-            if device.parent_object_path != '/':
-                continue
-            tasks.append(self.auto_remove(device, **remove_args))
+        kw = dict(force=True, detach=detach, eject=eject, lock=lock)
+        tasks = [self.auto_remove(device, **kw)
+                 for device in self.get_all_handleable()
+                 if device.parent_object_path == '/']
         results = yield AsyncList(tasks)
         success = all(results)
         yield Return(success)
