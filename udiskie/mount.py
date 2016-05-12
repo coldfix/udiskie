@@ -76,6 +76,11 @@ def _is_parent_of(parent, child):
     return False
 
 
+def _get_parent(device):
+    """Return the container device or ``None``."""
+    return device.partition_slave or device.luks_cleartext_slave
+
+
 class Mounter(object):
 
     """
@@ -109,7 +114,7 @@ class Mounter(object):
         """
         self.udisks = udisks
         self._mount_options = mount_options or (lambda device: None)
-        self._ignore_device = ignore_device or FilterMatcher([], False)
+        self._ignore_device = ignore_device or FilterMatcher([], None)
         self._ignore_device._filters += [
             IgnoreDevice({'symlinks': '/dev/mapper/docker-*', 'ignore': True}),
             IgnoreDevice({'symlinks': '/dev/disk/by-id/dm-name-docker-*', 'ignore': True}),
@@ -546,7 +551,11 @@ class Mounter(object):
         Currently this just means that the device is removable and holds a
         filesystem or the device is a LUKS encrypted volume.
         """
-        return not self._ignore_device(device)
+        ignored = self._ignore_device(device)
+        # propagate handleability of parent devices:
+        if ignored is None and device is not None:
+            return self.is_handleable(_get_parent(device))
+        return not ignored
 
     def is_addable(self, device):
         """
