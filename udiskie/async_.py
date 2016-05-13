@@ -6,6 +6,13 @@ It is based on ideas from "Twisted" and the "yield from" expression in
 python3, but more lightweight (incomplete) and compatible with python2.
 """
 
+# NOTE: neither AsyncList nor Coroutine save references to the active tasks!
+# Although this would create a reference cycle (coro->task->callbacks->coro),
+# the garbage collector can generally detect the cycle and delete the involved
+# objects anyway (there is usually no independent reference to the coroutine).
+# So you must take care to increase the reference-count of all active tasks
+# manually.
+
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
