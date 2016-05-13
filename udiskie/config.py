@@ -178,6 +178,8 @@ class FilterMatcher(object):
         :param Device device: device to be mounted
         :returns: value of the first matching filter
         """
+        if device is None:
+            return self._default
         matches = (f.value(device) for f in self._filters if f.match(device))
         return next(matches, self._default)
 

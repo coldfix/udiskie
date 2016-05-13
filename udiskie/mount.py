@@ -76,6 +76,11 @@ def _is_parent_of(parent, child):
     return False
 
 
+def _get_parent(device):
+    """Return the container device or ``None``."""
+    return device.partition_slave or device.luks_cleartext_slave
+
+
 class Mounter(object):
 
     """
@@ -109,7 +114,7 @@ class Mounter(object):
         """
         self.udisks = udisks
         self._mount_options = mount_options or (lambda device: None)
-        self._ignore_device = ignore_device or FilterMatcher([], False)
+        self._ignore_device = ignore_device or FilterMatcher([], None)
         self._ignore_device._filters += [
             IgnoreDevice({'symlinks': '/dev/mapper/docker-*', 'ignore': True}),
             IgnoreDevice({'symlinks': '/dev/disk/by-id/dm-name-docker-*', 'ignore': True}),
@@ -305,11 +310,14 @@ class Mounter(object):
                 success = yield self.add(
                     device.luks_cleartext_holder,
                     recursive=True)
-        elif recursive and device.is_partition_table:
-            tasks = []
-            for dev in self.get_all_handleable():
-                if dev.is_partition and dev.partition_slave == device:
-                    tasks.append(self.add(dev, recursive=True))
+        elif (recursive
+              and device.is_partition_table
+              and self.is_handleable(device)):
+            tasks = [
+                self.add(dev, recursive=True)
+                for dev in self.get_all_handleable()
+                if dev.is_partition and dev.partition_slave == device
+            ]
             results = yield AsyncList(tasks)
             success = all(results)
         else:
@@ -345,10 +353,11 @@ class Mounter(object):
                     device.luks_cleartext_holder,
                     recursive=True)
         elif recursive and device.is_partition_table:
-            tasks = []
-            for dev in self.get_all_handleable():
-                if dev.is_partition and dev.partition_slave == device:
-                    tasks.append(self.auto_add(dev, recursive=True))
+            tasks = [
+                self.auto_add(dev, recursive=True)
+                for dev in self.get_all_handleable()
+                if dev.is_partition and dev.partition_slave == device
+            ]
             results = yield AsyncList(tasks)
             success = all(results)
         else:
@@ -376,16 +385,15 @@ class Mounter(object):
             if force and device.is_unlocked:
                 yield self.auto_remove(device.luks_cleartext_holder, force=True)
             success = yield self.lock(device)
-        elif force and (device.is_partition_table or device.is_drive):
-            tasks = []
-            for child in self.get_all_handleable():
-                if _is_parent_of(device, child):
-                    tasks.append(self.auto_remove(
-                        child,
-                        force=True,
-                        detach=detach,
-                        eject=eject,
-                        lock=lock))
+        elif (force
+              and (device.is_partition_table or device.is_drive)
+              and self.is_handleable(device)):
+            kw = dict(force=True, detach=detach, eject=eject, lock=lock)
+            tasks = [
+                self.auto_remove(child, **kw)
+                for child in self.get_all_handleable()
+                if _is_parent_of(device, child)
+            ]
             results = yield AsyncList(tasks)
             success = all(results)
         else:
@@ -428,15 +436,12 @@ class Mounter(object):
             if device.is_unlocked:
                 success = yield self.lock(device)
         elif force and (device.is_partition_table or device.is_drive):
-            tasks = []
-            for child in self.get_all_handleable():
-                if _is_parent_of(device, child):
-                    tasks.append(self.auto_remove(
-                        child,
-                        force=True,
-                        detach=detach,
-                        eject=eject,
-                        lock=lock))
+            kw = dict(force=True, detach=detach, eject=eject, lock=lock)
+            tasks = [
+                self.auto_remove(child, **kw)
+                for child in self.get_all_handleable()
+                if _is_parent_of(device, child)
+            ]
             results = yield AsyncList(tasks)
             success = all(results)
         else:
@@ -512,9 +517,8 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
-        tasks = []
-        for device in self.udisks:
-            tasks.append(self.auto_add(device, recursive=recursive))
+        tasks = [self.auto_add(device, recursive=recursive)
+                 for device in self.get_all_handleable_leaves()]
         results = yield AsyncList(tasks)
         success = all(results)
         yield Return(success)
@@ -530,12 +534,9 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
-        tasks = []
-        remove_args = dict(force=True, detach=detach, eject=eject, lock=lock)
-        for device in self.get_all_handleable():
-            if device.parent_object_path != '/':
-                continue
-            tasks.append(self.auto_remove(device, **remove_args))
+        kw = dict(force=True, detach=detach, eject=eject, lock=lock)
+        tasks = [self.auto_remove(device, **kw)
+                 for device in self.get_all_handleable_roots()]
         results = yield AsyncList(tasks)
         success = all(results)
         yield Return(success)
@@ -553,7 +554,11 @@ class Mounter(object):
         Currently this just means that the device is removable and holds a
         filesystem or the device is a LUKS encrypted volume.
         """
-        return not self._ignore_device(device)
+        ignored = self._ignore_device(device)
+        # propagate handleability of parent devices:
+        if ignored is None and device is not None:
+            return self.is_handleable(_get_parent(device))
+        return not ignored
 
     def is_addable(self, device):
         """
@@ -592,12 +597,80 @@ class Mounter(object):
         Enumerate all handleable devices currently known to udisks.
 
         :returns: handleable devices
-        :rtype: iterable
-
-        NOTE: returns only devices that are still valid. This protects from
-        race conditions inside udiskie.
+        :rtype: list
         """
-        return filter(self.is_handleable, self.udisks)
+        nodes = self.get_device_tree()
+        return [node.device
+                for node in nodes.values()
+                if not node.ignored and node.device]
+
+    def get_all_handleable_roots(self):
+        """
+        Get list of all handleable devices, return only those that represent
+        root nodes within the filtered device tree.
+        """
+        nodes = self.get_device_tree()
+        return [node.device
+                for node in nodes.values()
+                if not node.ignored and node.device
+                and (node.root == '/' or nodes[node.root].ignored)]
+
+    def get_all_handleable_leaves(self):
+        """
+        Get list of all handleable devices, return only those that represent
+        leaf nodes within the filtered device tree.
+        """
+        nodes = self.get_device_tree()
+        return [node.device
+                for node in nodes.values()
+                if not node.ignored and node.device
+                and all(child.ignored for child in node.children)]
+
+    def get_device_tree(self):
+        """Get a tree of all devices."""
+        root = DevNode(None, None, [], None)
+        device_nodes = {
+            dev.object_path: DevNode(dev, dev.parent_object_path, [],
+                                     self._ignore_device(dev))
+            for dev in self.udisks
+        }
+        for node in device_nodes.values():
+            device_nodes.get(node.root, root).children.append(node)
+        device_nodes['/'] = root
+        # use parent as fallback, update top->down:
+        def propagate_ignored(node):
+            for child in node.children:
+                if child.ignored is None:
+                    child.ignored = node.ignored
+                propagate_ignored(child)
+        propagate_ignored(root)
+        return device_nodes
+
+    def get_device_tree_filtered(self):
+        """Get a tree of all handleable devices."""
+        root = self.get_device_tree()['/']
+        # remove ignored devices from the structure:
+        def filter_handled(node):
+            node.children[:] = [
+                descendant
+                for child in node.children
+                for descendant in filter_handled(child)
+            ]
+            if node.ignored:
+                return node.children
+            else:
+                return [dev]
+        filter_handled(root)
+        return root
+
+
+class DevNode:
+
+    def __init__(self, device, root, children, ignored):
+        self.device = device
+        self.root = root
+        self.children = children
+        self.ignored = ignored
 
 
 # data structs containing the menu hierarchy:
@@ -633,7 +706,7 @@ class DeviceActions(object):
             'forget_password': mounter.forget_password,
         })
 
-    def detect(self, root_device=''):
+    def detect(self, root_device='/'):
         """
         Detect all currently known devices.
 
@@ -645,10 +718,9 @@ class DeviceActions(object):
         device_nodes = dict(map(self._device_node,
                                 self._mounter.get_all_handleable()))
         # insert child devices as branches into their roots:
-        for object_path, node in device_nodes.items():
+        for node in device_nodes.values():
             device_nodes.get(node.root, root).branches.append(node)
-        if not root_device:
-            return root
+        device_nodes['/'] = root
         return device_nodes[root_device]
 
     def _get_device_methods(self, device):
@@ -681,12 +753,7 @@ class DeviceActions(object):
                           partial(self._actions[method], device))
                    for method in self._get_device_methods(device)]
         # find the root device:
-        if device.is_partition:
-            root = device.partition_slave.object_path
-        elif device.is_luks_cleartext:
-            root = device.luks_cleartext_slave.object_path
-        else:
-            root = None
+        root = device.parent_object_path
         # in this first step leave branches empty
         return device.object_path, Device(root, [], device, label, methods)
 
