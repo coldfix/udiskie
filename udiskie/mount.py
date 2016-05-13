@@ -310,7 +310,9 @@ class Mounter(object):
                 success = yield self.add(
                     device.luks_cleartext_holder,
                     recursive=True)
-        elif recursive and device.is_partition_table:
+        elif (recursive
+              and device.is_partition_table
+              and self.is_handleable(device)):
             tasks = [
                 self.add(dev, recursive=True)
                 for dev in self.get_all_handleable()
@@ -383,7 +385,9 @@ class Mounter(object):
             if force and device.is_unlocked:
                 yield self.auto_remove(device.luks_cleartext_holder, force=True)
             success = yield self.lock(device)
-        elif force and (device.is_partition_table or device.is_drive):
+        elif (force
+              and (device.is_partition_table or device.is_drive)
+              and self.is_handleable(device)):
             kw = dict(force=True, detach=detach, eject=eject, lock=lock)
             tasks = [
                 self.auto_remove(child, **kw)
@@ -514,7 +518,7 @@ class Mounter(object):
         :rtype: bool
         """
         tasks = [self.auto_add(device, recursive=recursive)
-                 for device in self.get_all_handleable()]
+                 for device in self.get_all_handleable_leaves()]
         results = yield AsyncList(tasks)
         success = all(results)
         yield Return(success)
@@ -532,8 +536,7 @@ class Mounter(object):
         """
         kw = dict(force=True, detach=detach, eject=eject, lock=lock)
         tasks = [self.auto_remove(device, **kw)
-                 for device in self.get_all_handleable()
-                 if device.parent_object_path == '/']
+                 for device in self.get_all_handleable_roots()]
         results = yield AsyncList(tasks)
         success = all(results)
         yield Return(success)
@@ -594,12 +597,80 @@ class Mounter(object):
         Enumerate all handleable devices currently known to udisks.
 
         :returns: handleable devices
-        :rtype: iterable
-
-        NOTE: returns only devices that are still valid. This protects from
-        race conditions inside udiskie.
+        :rtype: list
         """
-        return filter(self.is_handleable, self.udisks)
+        nodes = self.get_device_tree()
+        return [node.device
+                for node in nodes.values()
+                if not node.ignored and node.device]
+
+    def get_all_handleable_roots(self):
+        """
+        Get list of all handleable devices, return only those that represent
+        root nodes within the filtered device tree.
+        """
+        nodes = self.get_device_tree()
+        return [node.device
+                for node in nodes.values()
+                if not node.ignored and node.device
+                and (node.root == '/' or nodes[node.root].ignored)]
+
+    def get_all_handleable_leaves(self):
+        """
+        Get list of all handleable devices, return only those that represent
+        leaf nodes within the filtered device tree.
+        """
+        nodes = self.get_device_tree()
+        return [node.device
+                for node in nodes.values()
+                if not node.ignored and node.device
+                and all(child.ignored for child in node.children)]
+
+    def get_device_tree(self):
+        """Get a tree of all devices."""
+        root = DevNode(None, None, [], None)
+        device_nodes = {
+            dev.object_path: DevNode(dev, dev.parent_object_path, [],
+                                     self._ignore_device(dev))
+            for dev in self.udisks
+        }
+        for node in device_nodes.values():
+            device_nodes.get(node.root, root).children.append(node)
+        device_nodes['/'] = root
+        # use parent as fallback, update top->down:
+        def propagate_ignored(node):
+            for child in node.children:
+                if child.ignored is None:
+                    child.ignored = node.ignored
+                propagate_ignored(child)
+        propagate_ignored(root)
+        return device_nodes
+
+    def get_device_tree_filtered(self):
+        """Get a tree of all handleable devices."""
+        root = self.get_device_tree()['/']
+        # remove ignored devices from the structure:
+        def filter_handled(node):
+            node.children[:] = [
+                descendant
+                for child in node.children
+                for descendant in filter_handled(child)
+            ]
+            if node.ignored:
+                return node.children
+            else:
+                return [dev]
+        filter_handled(root)
+        return root
+
+
+class DevNode:
+
+    def __init__(self, device, root, children, ignored):
+        self.device = device
+        self.root = root
+        self.children = children
+        self.ignored = ignored
 
 
 # data structs containing the menu hierarchy:
@@ -647,7 +718,7 @@ class DeviceActions(object):
         device_nodes = dict(map(self._device_node,
                                 self._mounter.get_all_handleable()))
         # insert child devices as branches into their roots:
-        for object_path, node in device_nodes.items():
+        for node in device_nodes.values():
             device_nodes.get(node.root, root).branches.append(node)
         device_nodes['/'] = root
         return device_nodes[root_device]
