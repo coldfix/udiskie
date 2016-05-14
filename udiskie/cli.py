@@ -186,8 +186,8 @@ class _EntryPoint(object):
                 'detail': {'format': _('%(levelname)s [%(asctime)s] %(name)s: %(message)s')},
             },
             'filters': {
-                'oninfo': {'()': 'udiskie.cli.RemoveLevel', 'level': logging.INFO},
-                'noinfo': {'()': 'udiskie.cli.SelectLevel', 'level': logging.INFO},
+                'noinfo': {'()': 'udiskie.cli.RemoveLevel', 'level': logging.INFO},
+                'oninfo': {'()': 'udiskie.cli.SelectLevel', 'level': logging.INFO},
             },
             'handlers': {
                 'info':  {'class': 'logging.StreamHandler',
