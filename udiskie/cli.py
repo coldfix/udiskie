@@ -12,7 +12,7 @@ from __future__ import unicode_literals
 from .depend import has_Notify, has_Gtk, _in_X
 
 import inspect
-import logging
+import logging.config
 import traceback
 
 from docopt import docopt, DocoptExit
@@ -119,6 +119,20 @@ class OptionalValue(object):
         return self._choice(args) and str2unicode(args[self._name])
 
 
+class SelectLevel(logging.Filter):
+    def __init__(self, level):
+        self.level = level
+    def filter(self, record):
+        return record.levelno == self.level
+
+
+class RemoveLevel(logging.Filter):
+    def __init__(self, level):
+        self.level = level
+    def filter(self, record):
+        return record.levelno != self.level
+
+
 class _EntryPoint(object):
 
     """
@@ -164,11 +178,33 @@ class _EntryPoint(object):
         program_opts = self.program_options(args)
         # initialize logging configuration:
         log_level = program_opts.get('log_level', default_opts['log_level'])
-        if log_level <= logging.DEBUG:
-            fmt = _('%(levelname)s [%(asctime)s] %(name)s: %(message)s')
-        else:
-            fmt = _('%(message)s')
-        logging.basicConfig(level=log_level, format=fmt)
+        logging.config.dictConfig({
+            'version': 1,
+            'disable_existing_loggers': False,
+            'formatters': {
+                'plain':  {'format': _('%(message)s')},
+                'detail': {'format': _('%(levelname)s [%(asctime)s] %(name)s: %(message)s')},
+            },
+            'filters': {
+                'oninfo': {'()': 'udiskie.cli.RemoveLevel', 'level': logging.INFO},
+                'noinfo': {'()': 'udiskie.cli.SelectLevel', 'level': logging.INFO},
+            },
+            'handlers': {
+                'info':  {'class': 'logging.StreamHandler',
+                          'stream': 'ext://sys.stdout',
+                          'formatter': 'plain',
+                          'filters': ['oninfo']},
+                'error': {'class': 'logging.StreamHandler',
+                          'stream': 'ext://sys.stderr',
+                          'formatter': 'detail',
+                          'filters': ['noinfo']},
+            },
+            # configure root logger:
+            'root': {
+                'handlers': ['info', 'error'],
+                'level': log_level,
+            },
+        })
         # parse config options
         config_file = OptionalValue('--config')(args)
         config = udiskie.config.Config.from_file(config_file)
