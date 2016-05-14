@@ -8,9 +8,9 @@ Date: 13.05.2016
 - protect password dialog against garbage collection (which makes the invoking
   coroutine hang up and not unlock the device)
 - fix add_all/remove_all operations: only consider leaf/root devices within
-  the handleable devices hierarchy
-    - avoid considering the same device twice (#114)
-    - makes sure every handleable device is considered at all in remove_all
+  the handleable devices hierarchy:
+- avoid considering the same device twice (#114)
+- makes sure every handleable device is considered at all in remove_all
 
 
 1.4.10
