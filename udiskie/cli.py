@@ -126,13 +126,6 @@ class SelectLevel(logging.Filter):
         return record.levelno == self.level
 
 
-class RemoveLevel(logging.Filter):
-    def __init__(self, level):
-        self.level = level
-    def filter(self, record):
-        return record.levelno != self.level
-
-
 class _EntryPoint(object):
 
     """
@@ -178,6 +171,7 @@ class _EntryPoint(object):
         program_opts = self.program_options(args)
         # initialize logging configuration:
         log_level = program_opts.get('log_level', default_opts['log_level'])
+        debug = log_level <= logging.DEBUG
         logging.config.dictConfig({
             'version': 1,
             'disable_existing_loggers': False,
@@ -186,22 +180,24 @@ class _EntryPoint(object):
                 'detail': {'format': _('%(levelname)s [%(asctime)s] %(name)s: %(message)s')},
             },
             'filters': {
-                'noinfo': {'()': 'udiskie.cli.RemoveLevel', 'level': logging.INFO},
-                'oninfo': {'()': 'udiskie.cli.SelectLevel', 'level': logging.INFO},
+                'info': {'()': 'udiskie.cli.SelectLevel', 'level': logging.INFO},
             },
             'handlers': {
                 'info':  {'class': 'logging.StreamHandler',
                           'stream': 'ext://sys.stdout',
                           'formatter': 'plain',
-                          'filters': ['oninfo']},
+                          'filters': ['info']},
                 'error': {'class': 'logging.StreamHandler',
                           'stream': 'ext://sys.stderr',
-                          'formatter': 'detail',
-                          'filters': ['noinfo']},
+                          'formatter': 'plain',
+                          'level': 'WARNING'},
+                'debug': {'class': 'logging.StreamHandler',
+                          'stream': 'ext://sys.stderr',
+                          'formatter': 'detail'},
             },
             # configure root logger:
             'root': {
-                'handlers': ['info', 'error'],
+                'handlers': ['info', 'debug' if debug else 'error'],
                 'level': log_level,
             },
         })
