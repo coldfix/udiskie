@@ -218,7 +218,7 @@ class Notify(object):
         if timeout != -1:
             notification.set_timeout(int(timeout * 1000))
         for action in actions:
-            if self._action_enabled(event, action[0]):
+            if action and self._action_enabled(event, action[0]):
                 self._add_action(notification, *action)
         try:
             notification.show()
