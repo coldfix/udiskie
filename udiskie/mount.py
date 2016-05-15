@@ -727,7 +727,8 @@ class DeviceActions(object):
         """Return an iterable over all available methods the device has."""
         if device.is_filesystem:
             if device.is_mounted:
-                yield 'browse'
+                if self._mounter._browser:
+                    yield 'browse'
                 yield 'unmount'
             else:
                 yield 'mount'
