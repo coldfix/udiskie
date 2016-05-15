@@ -1,6 +1,17 @@
 CHANGELOG
 ---------
 
+1.4.12
+~~~~~~
+Date: 15.05.2016
+
+- log INFO events to STDOUT (#112)
+- fix exception in notifications when action is not available. This concerns
+  the retry button in the ``job_failed`` notification, as well as the browse
+  action in the ``device_mounted`` notification (#117)
+- don't show 'browse' action in tray menu if unavailable
+
+
 1.4.11
 ~~~~~~
 Date: 13.05.2016
