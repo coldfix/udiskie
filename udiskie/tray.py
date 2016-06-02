@@ -260,6 +260,15 @@ class SmartUdiskieMenu(UdiskieMenu):
             ])
 
 
+class FlatUdiskieMenu(SmartUdiskieMenu):
+
+    def _prepare_menu(self, node):
+        """Overrides UdiskieMenu._prepare_menu."""
+        return Branch(
+            label=node.label,
+            groups=self._collapse_device(node))
+
+
 class TrayIcon(object):
 
     """Default TrayIcon class."""
