@@ -476,7 +476,9 @@ class Mounter(object):
             self._log.warn(_('not ejecting {0}: drive not ejectable', drive))
             yield Return(False)
         if force:
-            yield self.auto_remove(drive, force=True)
+            # Can't autoremove 'device.drive', because that will be filtered
+            # due to block=False:
+            yield self.auto_remove(device.root, force=True)
         self._log.debug(_('ejecting {0}', device))
         yield drive.eject()
         self._log.info(_('ejected {0}', device))
