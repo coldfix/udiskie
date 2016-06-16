@@ -538,7 +538,10 @@ class Device(object):
 
     @property
     def ui_label(self):
-        return self.id_label or self.id_uuid or self.device_presentation
+        return ': '.join(filter(None, [
+            self.device_presentation,
+            self.id_label or self.drive_label or self.id_uuid
+        ]))
 
     @property
     def drive_label(self):
