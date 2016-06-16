@@ -154,6 +154,60 @@ class AttrDictView(object):
 
 
 @fix_str_conversions
+class BaseDevice(object):
+
+    def __str__(self):
+        """Show as object_path."""
+        return self.object_path
+
+    def __eq__(self, other):
+        """Comparison by object_path."""
+        return self.object_path == str(other)
+
+    def __ne__(self, other):
+        """Comparison by object_path."""
+        return not (self == other)
+
+    def is_file(self, path):
+        """Comparison by mount and device file path."""
+        return (samefile(path, self.device_file) or
+                samefile(path, self.loop_file) or
+                any(samefile(path, mp) for mp in self.mount_paths) or
+                sameuuid(path, self.id_uuid) or
+                sameuuid(path, self.partition_uuid))
+
+    # ----------------------------------------
+    # derived properties
+    # ----------------------------------------
+
+    @property
+    def in_use(self):
+        """Check whether this device is in use, i.e. mounted or unlocked."""
+        if self.is_mounted or self.is_unlocked:
+            return True
+        if self.is_partition_table:
+            for device in self._daemon:
+                if device.partition_slave == self and device.in_use:
+                    return True
+        return False
+
+    @property
+    def ui_label(self):
+        return ': '.join(filter(None, [
+            self.device_presentation,
+            self.id_label or self.drive_label or self.id_uuid
+        ]))
+
+    @property
+    def drive_label(self):
+        """Return drive label."""
+        return ' '.join(filter(None, [
+            self.drive_vendor,
+            self.drive_model,
+        ]))
+
+
+@fix_str_conversions
 class NullDevice(object):
 
     """

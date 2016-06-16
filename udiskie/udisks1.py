@@ -23,7 +23,8 @@ import os.path
 from gi.repository import GLib
 
 from .async_ import AsyncList, Coroutine, Return
-from .common import Emitter, samefile, sameuuid, AttrDictView, wraps, NullDevice
+from .common import (Emitter, samefile, sameuuid, AttrDictView, wraps,
+                     NullDevice, BaseDevice)
 from .compat import fix_str_conversions
 from .dbus import connect_service, MethodsProxy
 from .locale import _
@@ -39,8 +40,7 @@ def filter_opt(opt):
     return [k for k, v in opt.items() if v]
 
 
-@fix_str_conversions
-class Device(object):
+class Device(BaseDevice):
 
     """Helper base class for devices."""
 
@@ -56,26 +56,6 @@ class Device(object):
         self.object_path = object_path
         self._P = property_proxy
         self._M = method_proxy
-
-    def __str__(self):
-        """Display as object path."""
-        return self.object_path
-
-    def __eq__(self, other):
-        """Comparison by object path."""
-        return self.object_path == str(other)
-
-    def __ne__(self, other):
-        """Comparison by object path."""
-        return not (self == other)
-
-    def is_file(self, path):
-        """Comparison by mount and device file path."""
-        return (samefile(path, self.device_file) or
-                samefile(path, self.loop_file) or
-                any(samefile(path, mp) for mp in self.mount_paths) or
-                sameuuid(path, self.id_uuid) or
-                sameuuid(path, self.partition_uuid))
 
     # availability of interfaces
     @property
@@ -388,17 +368,6 @@ class Device(object):
     # ----------------------------------------
 
     @property
-    def in_use(self):
-        """Check whether this device is in use, i.e. mounted or unlocked."""
-        if self.is_mounted or self.is_unlocked:
-            return True
-        if self.is_partition_table:
-            for device in self._daemon:
-                if device.partition_slave == self and device.in_use:
-                    return True
-        return False
-
-    @property
     def parent_object_path(self):
         if self.is_partition:
             return self._P.PartitionSlave
@@ -406,21 +375,6 @@ class Device(object):
             return self._P.LuksCleartextSlave
         else:
             return '/'
-
-    @property
-    def ui_label(self):
-        return ': '.join(filter(None, [
-            self.device_presentation,
-            self.id_label or self.drive_label or self.id_uuid
-        ]))
-
-    @property
-    def drive_label(self):
-        """Return drive label."""
-        return ' '.join(filter(None, [
-            self.drive_vendor,
-            self.drive_model,
-        ]))
 
 
 def _keep_async_event_order(func):
