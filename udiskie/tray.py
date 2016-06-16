@@ -247,33 +247,13 @@ class UdiskieMenu(object):
 
 class SmartUdiskieMenu(UdiskieMenu):
 
-    def _actions_section(self, node, presentation):
-        """
-        Create the actions section for the specified device node.
-
-        :param Device node: device
-        :param str presentation: node label
-        """
-        labels = self._actions._labels
-        return MenuSection(None, [
-            Action(action.method,
-                   action.device,
-                   labels[action.method].format(presentation),
-                   action.action)
-            for action in node.methods
-        ])
-
-    def _collapse_device(self, node, presentation=""):
+    def _collapse_device(self, node):
         """Collapse device hierarchy into a flat folder."""
-        if (not presentation
-                or node.device.is_mounted
-                or not node.device.is_luks_cleartext):
-            presentation = node.label
         items = [item
                  for branch in node.branches
-                 for item in self._collapse_device(branch, presentation)
+                 for item in self._collapse_device(branch)
                  if item]
-        items.append(self._actions_section(node, presentation))
+        items.append(MenuSection(None, node.methods))
         return items
 
     def _prepare_menu(self, node):
@@ -285,19 +265,15 @@ class SmartUdiskieMenu(UdiskieMenu):
         ]
 
 
-class FlatUdiskieMenu(SmartUdiskieMenu):
+class FlatUdiskieMenu(UdiskieMenu):
 
-    def _collapse_device(self, node, presentation=""):
+    def _collapse_device(self, node):
         """Collapse device hierarchy into a flat folder."""
-        if (not presentation
-                or node.device.is_mounted
-                or not node.device.is_luks_cleartext):
-            presentation = node.label
         items = [item
                  for branch in node.branches
-                 for item in self._collapse_device(branch, presentation)
+                 for item in self._collapse_device(branch)
                  if item]
-        items.extend(self._actions_section(node, presentation).items)
+        items.extend(node.methods)
         return items
 
     def _prepare_menu(self, node):
