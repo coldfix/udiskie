@@ -85,6 +85,9 @@ class DeviceFilter(object):
         'ui_label',
         'loop_filename',
         'symlinks',
+        'drive_model',
+        'drive_vendor',
+        'drive_label',
     ]
 
     def __init__(self, match, value):

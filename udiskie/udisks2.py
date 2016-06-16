@@ -229,6 +229,16 @@ class Device(object):
         """Check if there is media available in the drive."""
         return bool(self._assocdrive._P.Drive.MediaAvailable)
 
+    @property
+    def drive_vendor(self):
+        """Return drive vendor."""
+        return self._assocdrive._P.Drive.Vendor
+
+    @property
+    def drive_model(self):
+        """Return drive model."""
+        return self._assocdrive._P.Drive.Model
+
     # Drive methods
     def eject(self, auth_no_user_interaction=None):
         """Eject media from the device."""
@@ -529,6 +539,14 @@ class Device(object):
     @property
     def ui_label(self):
         return self.id_label or self.id_uuid or self.device_presentation
+
+    @property
+    def drive_label(self):
+        """Return drive label."""
+        return ' '.join(filter(None, [
+            self.drive_vendor,
+            self.drive_model,
+        ]))
 
 
 # ----------------------------------------

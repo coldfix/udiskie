@@ -139,6 +139,16 @@ class Device(object):
         """Check if there is media available in the drive."""
         return self._P.DeviceIsMediaAvailable
 
+    @property
+    def drive_vendor(self):
+        """Return drive vendor."""
+        return self._P.DriveVendor
+
+    @property
+    def drive_model(self):
+        """Return drive model."""
+        return self._P.DriveModel
+
     # Drive methods
     def eject(self, unmount=False):
         """Eject media from the device."""
@@ -400,6 +410,14 @@ class Device(object):
     @property
     def ui_label(self):
         return self.id_label or self.id_uuid or self.device_presentation
+
+    @property
+    def drive_label(self):
+        """Return drive label."""
+        return ' '.join(filter(None, [
+            self.drive_vendor,
+            self.drive_model,
+        ]))
 
 
 def _keep_async_event_order(func):
