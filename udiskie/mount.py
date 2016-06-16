@@ -676,7 +676,6 @@ class DevNode:
 # data structs containing the menu hierarchy:
 Device = namedtuple('Device', ['root', 'branches', 'device', 'label', 'methods'])
 Action = namedtuple('Action', ['method', 'device', 'label', 'action'])
-Branch = namedtuple('Branch', ['label', 'groups'])
 
 
 class DeviceActions(object):
