@@ -88,6 +88,10 @@ class DeviceFilter(object):
         'drive_model',
         'drive_vendor',
         'drive_label',
+        'ui_device_label',
+        'ui_device_presentation',
+        'ui_id_label',
+        'ui_id_uuid',
     ]
 
     def __init__(self, match, value):
