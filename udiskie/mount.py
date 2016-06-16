@@ -678,7 +678,6 @@ class DevNode:
 # data structs containing the menu hierarchy:
 Device = namedtuple('Device', ['root', 'branches', 'device', 'label', 'methods'])
 Action = namedtuple('Action', ['method', 'device', 'label', 'action'])
-Branch = namedtuple('Branch', ['label', 'groups'])
 
 
 class DeviceActions(object):
@@ -689,8 +688,8 @@ class DeviceActions(object):
         'unmount': _('Unmount {0}'),
         'unlock': _('Unlock {0}'),
         'lock': _('Lock {0}'),
-        'eject': _('Eject {0}'),
-        'detach': _('Unpower {0}'),
+        'eject': _('Eject {1}'),
+        'detach': _('Unpower {1}'),
         'forget_password': _('Clear password for {0}'),
     }
 
@@ -723,6 +722,8 @@ class DeviceActions(object):
         for node in device_nodes.values():
             device_nodes.get(node.root, root).branches.append(node)
         device_nodes['/'] = root
+        for node in device_nodes.values():
+            node.branches.sort(key=lambda node: node.label)
         return device_nodes[root_device]
 
     def _get_device_methods(self, device):
@@ -750,15 +751,16 @@ class DeviceActions(object):
     def _device_node(self, device):
         """Create an empty menu node for the specified device."""
         label = device.ui_label
+        dev_label = device.ui_device_label
         # determine available methods
         methods = [Action(method, device,
-                          self._labels[method].format(label),
+                          self._labels[method].format(label, dev_label),
                           partial(self._actions[method], device))
                    for method in self._get_device_methods(device)]
         # find the root device:
         root = device.parent_object_path
         # in this first step leave branches empty
-        return device.object_path, Device(root, [], device, label, methods)
+        return device.object_path, Device(root, [], device, dev_label, methods)
 
 
 def prune_empty_node(node, seen):

@@ -48,7 +48,7 @@ Common options
 	Use UDisks2 as DBus backend.
 
 *-c FILE, \--config=FILE*::
-    Specify config file.
+	Specify config file.
 
 *-C, \--no-config*::
 	Don't use any config file.
@@ -176,6 +176,9 @@ program_options:
   tray:             auto    # [bool] Enable the tray icon. "auto"
                             # means auto-hide the tray icon when
                             # there are no handled devices.
+
+  menu:             smart   # ["smart" | "nested" | "flat"] Set the
+                            # systray menu behaviour.
 
   automount:        false   # [bool] Enable automatic mounting.
 

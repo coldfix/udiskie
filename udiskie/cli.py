@@ -326,6 +326,7 @@ class Daemon(_EntryPoint):
         -t, --tray                              Show tray icon
         -s, --smart-tray                        Auto hide tray icon
         -T, --no-tray                           Disable tray icon
+        -m MENU, --menu MENU                    Tray menu [smart/nested/flat]
 
         --password-cache MINUTES                Set password cache timeout
         --no-password-cache                     Disable password cache
@@ -344,6 +345,7 @@ class Daemon(_EntryPoint):
         'automount': True,
         'notify': True,
         'tray': False,
+        'menu': 'smart',
         'file_manager': 'xdg-open',
         'password_prompt': 'builtin:gui',
         'password_cache': False,
@@ -356,6 +358,7 @@ class Daemon(_EntryPoint):
             '--tray': True,
             '--no-tray': False,
             '--smart-tray': 'auto'}),
+        'menu': Value('--menu'),
         'file_manager': OptionalValue('--file-manager'),
         'password_prompt': OptionalValue('--password-prompt'),
         'password_cache': OptionalValue('--password-cache'),
@@ -440,11 +443,15 @@ class Daemon(_EntryPoint):
                 raise ValueError("Invalid tray: %s" % (options['tray'],))
             icons = udiskie.tray.Icons(config.icon_names)
             actions = udiskie.mount.DeviceActions(mounter)
-            menu_maker = udiskie.tray.SmartUdiskieMenu(
-                mounter,
-                icons,
-                actions,
-                quit_action=self.mainloop.quit)
+
+            menu_classes = {'smart': udiskie.tray.SmartUdiskieMenu,
+                            'nested': udiskie.tray.UdiskieMenu,
+                            'flat': udiskie.tray.FlatUdiskieMenu}
+            if options['menu'] not in menu_classes:
+                raise ValueError("Invalid menu: %s" % (options['tray'],))
+            Menu = menu_classes[options['menu']]
+            menu_maker = Menu(mounter, icons, actions,
+                              quit_action=self.mainloop.quit)
             TrayIcon = tray_classes[options['tray']]
             statusicon = TrayIcon(menu_maker, icons)
             tasks.append(statusicon.task)

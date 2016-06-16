@@ -18,8 +18,8 @@ import logging
 
 from gi.repository import GLib
 
-from .common import Emitter, samefile, sameuuid, AttrDictView, decode_ay
-from .compat import fix_str_conversions
+from .common import (Emitter, samefile, sameuuid, AttrDictView, decode_ay,
+                     BaseDevice)
 from .dbus import connect_service, MethodsProxy
 from .locale import _
 from .async_ import Coroutine, Return
@@ -117,8 +117,7 @@ class PropertiesNotAvailable(object):
 # Device wrapper
 # ----------------------------------------
 
-@fix_str_conversions
-class Device(object):
+class Device(BaseDevice):
 
     """
     Proxy class for UDisks2 devices.
@@ -134,26 +133,6 @@ class Device(object):
         self.object_path = object_path
         self._P = property_hub
         self._M = method_hub
-
-    def __str__(self):
-        """Show as object_path."""
-        return self.object_path
-
-    def __eq__(self, other):
-        """Comparison by object_path."""
-        return self.object_path == str(other)
-
-    def __ne__(self, other):
-        """Comparison by object_path."""
-        return not (self == other)
-
-    def is_file(self, path):
-        """Comparison by mount and device file path."""
-        return (samefile(path, self.device_file) or
-                samefile(path, self.loop_file) or
-                any(samefile(path, mp) for mp in self.mount_paths) or
-                sameuuid(path, self.id_uuid) or
-                sameuuid(path, self.partition_uuid))
 
     # availability of interfaces
     @property
@@ -228,6 +207,16 @@ class Device(object):
     def has_media(self):
         """Check if there is media available in the drive."""
         return bool(self._assocdrive._P.Drive.MediaAvailable)
+
+    @property
+    def drive_vendor(self):
+        """Return drive vendor."""
+        return self._assocdrive._P.Drive.Vendor
+
+    @property
+    def drive_model(self):
+        """Return drive model."""
+        return self._assocdrive._P.Drive.Model
 
     # Drive methods
     def eject(self, auth_no_user_interaction=None):
@@ -510,25 +499,10 @@ class Device(object):
     # ----------------------------------------
 
     @property
-    def in_use(self):
-        """Check whether this device is in use, i.e. mounted or unlocked."""
-        if self.is_mounted or self.is_unlocked:
-            return True
-        if self.is_partition_table:
-            for device in self._daemon:
-                if device.partition_slave == self and device.in_use:
-                    return True
-        return False
-
-    @property
     def parent_object_path(self):
         return (self._P.Partition.Table
                 or self._P.Block.CryptoBackingDevice
                 or '/')
-
-    @property
-    def ui_label(self):
-        return self.id_label or self.id_uuid or self.device_presentation
 
 
 # ----------------------------------------

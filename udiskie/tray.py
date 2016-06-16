@@ -12,10 +12,27 @@ from .async_ import Async
 from .common import setdefault
 from .compat import basestring
 from .locale import _
-from .mount import Action, Branch, prune_empty_node
+from .mount import Action, prune_empty_node
 
 
 __all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
+
+
+class MenuFolder(object):
+
+    def __init__(self, label, items):
+        self.label = label
+        self.items = items
+
+    def __bool__(self):
+        return bool(self.items)
+
+    __nonzero__ = __bool__
+
+
+class MenuSection(MenuFolder): pass
+class SubMenu(MenuFolder): pass
+
 
 
 class Icons(object):
@@ -121,7 +138,7 @@ class UdiskieMenu(object):
         :rtype: Gtk.Menu
         """
         # create actions items
-        menu = self._branchmenu(self._prepare_menu(self.detect()).groups)
+        menu = self._create_menu(self._prepare_menu(self.detect()))
         # append menu item for closing the application
         if self._quit_action:
             if len(menu) > 0:
@@ -144,37 +161,45 @@ class UdiskieMenu(object):
         prune_empty_node(root, set())
         return root
 
-    def _branchmenu(self, groups):
+    def _create_menu(self, items):
         """
         Create a menu from the given node.
 
-        :param Branch groups: contains information about the menu
-        :returns: a new menu object holding all groups of the node
+        :param list items: list of menu items
+        :returns: a new menu object holding all items of the node
         :rtype: Gtk.Menu
         """
+        menu = Gtk.Menu()
+        self._create_menu_items(menu, items)
+        return menu
+
+    def _create_menu_items(self, menu, items):
         def make_action_callback(node):
             return lambda _: node.action()
-        menu = Gtk.Menu()
-        separate = False
-        for group in groups:
-            if len(group) > 0:
-                if separate:
-                    menu.append(Gtk.SeparatorMenuItem())
-                separate = True
-            for node in group:
-                if isinstance(node, Action):
-                    menu.append(self._menuitem(
-                        node.label,
-                        self._icons.get_icon(node.method, Gtk.IconSize.MENU),
-                        make_action_callback(node)))
-                elif isinstance(node, Branch):
-                    menu.append(self._menuitem(
-                        node.label,
-                        icon=None,
-                        onclick=self._branchmenu(node.groups)))
-                else:
-                    raise ValueError(_("Invalid node!"))
-        return menu
+        for node in items:
+            if isinstance(node, Action):
+                menu.append(self._menuitem(
+                    node.label,
+                    self._icons.get_icon(node.method, Gtk.IconSize.MENU),
+                    make_action_callback(node)))
+            elif isinstance(node, SubMenu):
+                menu.append(self._menuitem(
+                    node.label,
+                    icon=None,
+                    onclick=self._create_menu(node.items)))
+            elif isinstance(node, MenuSection):
+                self._create_menu_section(menu, node)
+            else:
+                raise ValueError(_("Invalid node!"))
+
+    def _create_menu_section(self, menu, section):
+        if len(menu) > 0:
+            menu.append(Gtk.SeparatorMenuItem())
+        if section.label:
+            mi = self._menuitem(section.label, None, None)
+            mi.set_sensitive(False)
+            menu.append(mi)
+        self._create_menu_items(menu, section.items)
 
     def _menuitem(self, label, icon, onclick):
         """
@@ -198,7 +223,7 @@ class UdiskieMenu(object):
             item.set_label(label)
         if isinstance(onclick, Gtk.Menu):
             item.set_submenu(onclick)
-        else:
+        elif onclick is not None:
             item.connect('activate', onclick)
         return item
 
@@ -208,56 +233,56 @@ class UdiskieMenu(object):
 
         :param Device node: root node of device hierarchy
         :returns: menu hierarchy
-        :rtype: Branch
+        :rtype: list
         """
-        return Branch(
-            label=node.label,
-            groups=[
-                [self._prepare_menu(branch)
-                 for branch in node.branches
-                 if branch.methods or branch.branches],
-                node.methods,
-            ])
+        return [
+            MenuSection(None, [
+                SubMenu(branch.label, self._prepare_menu(branch))
+                for branch in node.branches
+                if branch.methods or branch.branches
+            ]),
+            MenuSection(None, node.methods),
+        ]
 
 
 class SmartUdiskieMenu(UdiskieMenu):
 
-    def _actions_group(self, node, presentation):
-        """
-        Create the actions group for the specified device node.
-
-        :param Device node: device
-        :param str presentation: node label
-        """
-        labels = self._actions._labels
-        return [Action(action.method,
-                       action.device,
-                       labels[action.method].format(presentation),
-                       action.action)
-                for action in node.methods]
-
-    def _collapse_device(self, node, presentation=""):
+    def _collapse_device(self, node):
         """Collapse device hierarchy into a flat folder."""
-        if (not presentation
-                or node.device.is_mounted
-                or not node.device.is_luks_cleartext):
-            presentation = node.label
-        groups = [group
-                  for branch in node.branches
-                  for group in self._collapse_device(branch, presentation)
-                  if group]
-        groups.append(self._actions_group(node, presentation))
-        return groups
+        items = [item
+                 for branch in node.branches
+                 for item in self._collapse_device(branch)
+                 if item]
+        items.append(MenuSection(None, node.methods))
+        return items
 
     def _prepare_menu(self, node):
         """Overrides UdiskieMenu._prepare_menu."""
-        return Branch(
-            label=node.label,
-            groups=[
-                [Branch(branch.label, self._collapse_device(branch))
+        return [
+            SubMenu(branch.label, self._collapse_device(branch))
+            for branch in node.branches
+            if branch.methods or branch.branches
+        ]
+
+
+class FlatUdiskieMenu(UdiskieMenu):
+
+    def _collapse_device(self, node):
+        """Collapse device hierarchy into a flat folder."""
+        items = [item
                  for branch in node.branches
-                 if branch.methods or branch.branches],
-            ])
+                 for item in self._collapse_device(branch)
+                 if item]
+        items.extend(node.methods)
+        return items
+
+    def _prepare_menu(self, node):
+        """Overrides UdiskieMenu._prepare_menu."""
+        return [
+            MenuSection(branch.label, self._collapse_device(branch))
+            for branch in node.branches
+            if branch.methods or branch.branches
+        ]
 
 
 class TrayIcon(object):
@@ -374,7 +399,7 @@ class AutoTray(TrayIcon):
 
     def has_menu(self):
         """Check if a menu action is available."""
-        return any(self._menu._prepare_menu(self._menu.detect()).groups)
+        return any(self._menu._prepare_menu(self._menu.detect()))
 
     def update(self, *args):
         """Show/hide icon depending on whether there are devices."""
