@@ -615,8 +615,12 @@ class Umount(_EntryPoint):
 
         """Implements _EntryPoint._init."""
 
+        config = self.config
         options = self.options
-        mounter = udiskie.mount.Mounter(self.udisks)
+
+        mounter = udiskie.mount.Mounter(
+            self.udisks,
+            ignore_device=config.ignore_device)
 
         strategy = dict(detach=options['detach'],
                         eject=options['eject'],
