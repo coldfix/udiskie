@@ -83,7 +83,9 @@ class DeviceFilter(object):
         'in_use',
         'should_automount',
         'ui_label',
-        'loop_filename',
+        'loop_file',
+        'setup_by_uid',
+        'autoclear',
         'symlinks',
         'drive_model',
         'drive_vendor',
@@ -103,10 +105,10 @@ class DeviceFilter(object):
         """
         self._log = logging.getLogger(__name__)
         self._match = match.copy()
-        # the use of keys() makes deletion inside the loop safe:
-        for k in self._match.keys():
+        # the use of list() makes deletion inside the loop safe:
+        for k in list(self._match):
             if k not in self.VALID_PARAMETERS:
-                self._log.warn(_('Unknown matching attribute: {!r}', k))
+                self._log.error(_('Unknown matching attribute: {!r}', k))
                 del self._match[k]
         self._value = value
         self._log.debug(_('{0} created', self))

@@ -312,7 +312,19 @@ remain available:
     mount_paths             list of mount paths
     is_unlocked
     in_use                  device or any of its children mounted
+    should_automount
+    ui_label
     loop_file               file backing the loop device
+    setup_by_uid            user that setup the loop device
+    autoclear               automatically delete loop device after use
+    symlinks
+    drive_model
+    drive_vendor
+    drive_label
+    ui_device_label
+    ui_device_presentation
+    ui_id_label
+    ui_id_uuid
 
 
 See Also
