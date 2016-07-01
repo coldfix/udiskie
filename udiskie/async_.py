@@ -110,7 +110,7 @@ class AsyncList(Async):
         self._results = {}
         self._num_tasks = len(tasks)
         if not tasks:
-            run_soon(self.callback)
+            run_soon(self.callback, [])
         for idx, task in enumerate(tasks):
             task.callbacks.append(partial(self._subtask_result, idx))
             task.errbacks.append(partial(self._subtask_error, idx))
