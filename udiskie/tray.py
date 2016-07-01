@@ -255,16 +255,16 @@ class UdiskieMenu:
         if checked is not None:
             item = Gtk.CheckMenuItem()
             item.set_active(checked)
-        elif icon is None:
-            item = Gtk.MenuItem()
         else:
-            item = Gtk.ImageMenuItem()
-            item.set_image(icon)
+            item = Gtk.MenuItem()
+            box = Gtk.Box(Gtk.Orientation.HORIZONTAL, 6)
             # I don't really care for the "show icons only for nouns, not
             # for verbs" policy:
-            item.set_always_show_image(True)
+            if icon is not None:
+                box.add(icon)
         if label is not None:
-            item.set_label(label)
+            box.add(Gtk.Label(label))
+        item.add(box)
         if isinstance(onclick, Gtk.Menu):
             item.set_submenu(onclick)
         elif onclick is not None:
