@@ -345,7 +345,7 @@ class Daemon(_EntryPoint):
         'automount': True,
         'notify': True,
         'tray': False,
-        'menu': 'smart',
+        'menu': 'flat',
         'file_manager': 'xdg-open',
         'password_prompt': 'builtin:gui',
         'password_cache': False,
