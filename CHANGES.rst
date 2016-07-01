@@ -1,10 +1,20 @@
 CHANGELOG
 ---------
 
-next
-~~~~
+1.5.0
+~~~~~
+Date: 03.06.2016
 
-- fix error message for empty task lists
+- make systray menu flat (use ``udiskie --tray --menu smart`` to request the
+  old menu) [#119]
+- extend support for loop devices (requires UDisks2) [#101]
+- support ubuntu/unity AppIndicator backend for status icon [#59]
+- add basic utility to obtain info on block devices [#122]
+- add zsh completions [#26]
+- improve UI menu labels for devices
+- fix error when force-ejecting device [#121]
+- respect configured ignore-rules in ``udiskie-umount``
+- fix error message for empty task lists [#123]
 
 
 1.4.12
