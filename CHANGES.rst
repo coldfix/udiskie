@@ -1,6 +1,12 @@
 CHANGELOG
 ---------
 
+next
+~~~~
+
+- fix error message for empty task lists
+
+
 1.4.12
 ~~~~~~
 Date: 15.05.2016
