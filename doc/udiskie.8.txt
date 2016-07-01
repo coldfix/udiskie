@@ -269,6 +269,7 @@ icon_names:
   lock:    [udiskie-lock]
   eject:   [udiskie-eject, media-eject]
   detach:  [udiskie-detach]
+  delete:  [udiskie-eject]
   quit:    [application-exit]
 ----------------------------------------------------------------------
 

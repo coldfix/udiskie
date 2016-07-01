@@ -219,6 +219,7 @@ class BaseDevice(object):
         """UI string identifying the device (drive) if toplevel."""
         return ': '.join(filter(None, [
             self.ui_device_presentation,
+            self.loop_file or
             self.drive_label or self.ui_id_label or self.ui_id_uuid
         ]))
 

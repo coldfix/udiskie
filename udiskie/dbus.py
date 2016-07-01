@@ -106,6 +106,60 @@ class DBusCall(Async):
             self.callback(*unpack_variant(value))
 
 
+class DBusCallWithFdList(Async):
+
+    """
+    Asynchronously call a DBus method.
+    """
+
+    def __init__(self,
+                 proxy,
+                 method_name,
+                 signature,
+                 args,
+                 fds,
+                 flags=0,
+                 timeout_msec=-1):
+        """
+        Asynchronously call the specified method on a DBus proxy object.
+
+        :param Gio.DBusProxy proxy:
+        :param str method_name:
+        :param str signature:
+        :param tuple args:
+        :param int flags:
+        :param int timeout_msec:
+        """
+        cancellable = None
+        user_data = None
+        fd_list = Gio.UnixFDList.new_from_array(fds)
+        proxy.call_with_unix_fd_list(
+            method_name,
+            GLib.Variant(signature, tuple(args)),
+            flags,
+            timeout_msec,
+            fd_list,
+            cancellable,
+            self._callback,
+            user_data,
+        )
+
+    def _callback(self, proxy, result, user_data):
+        """
+        Handle call result.
+
+        :param Gio.DBusProxy proxy:
+        :param Gio.AsyncResult result:
+        :param user_data: unused
+        """
+        try:
+            value, fds = proxy.call_with_unix_fd_list_finish(result)
+        except Exception as e:
+            self.errback(e, format_exc())
+        else:
+            self.callback(*unpack_variant(value))
+
+
 class InterfaceProxy(object):
 
     """
@@ -454,7 +508,7 @@ class DBusProxyNewForBus(Async):
 
 
 @Coroutine.from_generator_function
-def connect_service(cls):
+def connect_service(bus_name, object_path, interface):
     """
     Connect to the service object on DBus.
 
@@ -467,9 +521,9 @@ def connect_service(cls):
         Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES |
         Gio.DBusProxyFlags.DO_NOT_CONNECT_SIGNALS,
         info=None,
-        name=cls.BusName,
-        object_path=cls.ObjectPath,
-        interface_name=cls.Interface,
+        name=bus_name,
+        object_path=object_path,
+        interface_name=interface,
     )
     yield Return(InterfaceProxy(proxy))
 

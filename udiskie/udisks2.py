@@ -20,7 +20,7 @@ from gi.repository import GLib
 
 from .common import (Emitter, samefile, sameuuid, AttrDictView, decode_ay,
                      BaseDevice)
-from .dbus import connect_service, MethodsProxy
+from .dbus import connect_service, MethodsProxy, DBusCallWithFdList
 from .locale import _
 from .async_ import Coroutine, Return
 
@@ -494,6 +494,37 @@ class Device(BaseDevice):
         """Get the file backing the loop device."""
         return decode_ay(self._P.Loop.BackingFile)
 
+    @property
+    def setup_by_uid(self):
+        """Get the ID of the user who set up the loop device."""
+        return self._P.Loop.SetupByUID
+
+    @property
+    def autoclear(self):
+        """If True the loop device will be deleted after unmounting."""
+        return self._P.Loop.Autoclear
+
+    def delete(self, auth_no_user_interaction=None):
+        """Delete loop partition."""
+        return self._M.Loop.Delete(
+            '(a{sv})',
+            filter_opt({
+                'auth.no_user_interaction': ('b', auth_no_user_interaction),
+            })
+        )
+
+    def set_autoclear(self, value, auth_no_user_interaction=None):
+        """Set autoclear flag for loop partition."""
+        return self._M.Loop.SetAutoclear(
+            '(ba{sv})',
+            value,
+            filter_opt({
+                'auth.no_user_interaction': ('b', auth_no_user_interaction),
+            })
+        )
+
+    loop_support = True
+
     # ----------------------------------------
     # derived properties
     # ----------------------------------------
@@ -596,10 +627,33 @@ class Daemon(Emitter):
     @classmethod
     @Coroutine.from_generator_function
     def create(cls):
-        proxy = yield connect_service(cls)
+        service = (cls.BusName, cls.ObjectPath, cls.Interface)
+        proxy = yield connect_service(*service)
         daemon = cls(proxy)
         yield daemon._sync()
         yield Return(daemon)
+
+    @Coroutine.from_generator_function
+    def loop_setup(self, fd, options):
+        service = (self.BusName,
+                   '/org/freedesktop/UDisks2/Manager',
+                   Interface['Manager'])
+        manager = yield connect_service(*service)
+        object_path = yield DBusCallWithFdList(
+            manager._proxy, 'LoopSetup', '(ha{sv})',
+            (0, filter_opt({
+                'auth.no_user_interaction': ('b', options.get('auth.no_user_interaction')),
+                'offset': ('t', options.get('offset')),
+                'size': ('t', options.get('size')),
+                'read-only': ('b', options.get('read-only')),
+                'no-part-scan': ('b', options.get('no-part-scan')),
+            })),
+            [fd],
+        )
+        yield self._sync()
+        yield Return(self[object_path])
+
+    loop_support = True
 
     # UDisks2 interface
     def paths(self):
