@@ -510,7 +510,7 @@ class Mount(_EntryPoint):
     name = 'udiskie-mount'
 
     option_defaults = extend(_EntryPoint.option_defaults, {
-        'recursive': False,
+        'recursive': None,
         'options': None,
         '<device>': None,
         'password_prompt': 'builtin:tty',
@@ -596,7 +596,7 @@ class Umount(_EntryPoint):
     name = 'udiskie-umount'
 
     option_defaults = extend(_EntryPoint.option_defaults, {
-        'detach': False,
+        'detach': None,
         'eject': False,
         'force': False,
         'lock': True,

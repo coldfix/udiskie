@@ -363,6 +363,23 @@ class Device(BaseDevice):
         """Get the file backing the loop device."""
         return self._P.LinuxLoopFilename
 
+    @property
+    def setup_by_uid(self):
+        """[NOT IN UDISKS1] Get the ID of the user who set up the loop device."""
+        return None
+
+    @property
+    def autoclear(self):
+        """[NOT IN UDISKS1] If True the loop device will be deleted after unmounting."""
+        return None
+
+    def delete(self, *args, **kwargs):
+        raise NotImplementedError("No support for manipulating loop devices in UDisks1!")
+
+    set_autoclear = delete
+
+    loop_support = False
+
     # ----------------------------------------
     # derived properties
     # ----------------------------------------
@@ -504,10 +521,16 @@ class Daemon(Emitter):
     @classmethod
     @Coroutine.from_generator_function
     def create(cls):
-        proxy = yield connect_service(cls)
+        service = (cls.BusName, cls.ObjectPath, cls.Interface)
+        proxy = yield connect_service(*service)
         udisks = cls(proxy)
         yield udisks._sync()
         yield Return(udisks)
+
+    def loop_setup(self, fd, options):
+        raise NotImplementedError("UDisks1 does not support LoopSetup!")
+
+    loop_support = False
 
     # Sniffer overrides
     def paths(self):

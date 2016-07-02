@@ -7,7 +7,9 @@ from __future__ import unicode_literals
 
 from collections import namedtuple
 from functools import partial
+import inspect
 import logging
+import os
 
 from .async_ import AsyncList, Coroutine, Return
 from .common import wraps, setdefault, exc_message
@@ -27,7 +29,7 @@ def _False():
     yield Return(False)
 
 
-def _find_device(fn, set_error=False):
+def _find_device(fn):
     """
     Decorator for Mounter methods taking a Device as their first argument.
 
@@ -42,6 +44,27 @@ def _find_device(fn, set_error=False):
             self._log.error(exc_message(e))
             return _False()
         return Coroutine(fn(self, device, *args, **kwargs))
+    return wrapper
+
+
+def _find_device_auto_losetup(fn):
+    @Coroutine.from_generator_function
+    def wrapper(self, device_or_path, *args, **kwargs):
+        try:
+            try:
+                device = self.udisks.find(device_or_path)
+            except ValueError as e:
+                if not os.path.isfile(device_or_path):
+                    raise
+                device = yield self.losetup(device_or_path)
+                bound = inspect.getcallargs(fn, self, device, *args, **kwargs)
+                if bound.get('recursive') is False:
+                    yield Return(device)
+        except Exception as e:
+            self._log.error(exc_message(e))
+            yield Return(False)
+        result = yield Coroutine(fn(self, device, *args, **kwargs))
+        yield Return(result)
     return wrapper
 
 
@@ -118,6 +141,7 @@ class Mounter(object):
         self._ignore_device._filters += [
             IgnoreDevice({'symlinks': '/dev/mapper/docker-*', 'ignore': True}),
             IgnoreDevice({'symlinks': '/dev/disk/by-id/dm-name-docker-*', 'ignore': True}),
+            IgnoreDevice({'is_loop': True, 'loop_file': '/*', 'ignore': False}),
             IgnoreDevice({'is_block': False, 'ignore': True}),
             IgnoreDevice({'is_external': False, 'ignore': True}),
             IgnoreDevice({'is_ignored': True, 'ignore': True})]
@@ -290,8 +314,8 @@ class Mounter(object):
 
     # add/remove (unlock/lock or mount/unmount)
     @_suppress_error
-    @_find_device
-    def add(self, device, recursive=False):
+    @_find_device_auto_losetup
+    def add(self, device, recursive=None):
         """
         Mount or unlock the device depending on its type.
 
@@ -305,7 +329,7 @@ class Mounter(object):
         elif device.is_crypto:
             success = yield self.unlock(device)
             if success and recursive:
-                self.udisks._sync()
+                yield self.udisks._sync()
                 device = self.udisks[device.object_path]
                 success = yield self.add(
                     device.luks_cleartext_holder,
@@ -326,8 +350,8 @@ class Mounter(object):
         yield Return(success)
 
     @_suppress_error
-    @_find_device
-    def auto_add(self, device, recursive=False):
+    @_find_device_auto_losetup
+    def auto_add(self, device, recursive=None):
         """
         Automatically attempt to mount or unlock a device, but be quiet if the
         device is not supported.
@@ -347,7 +371,7 @@ class Mounter(object):
             if self._prompt and not device.is_unlocked:
                 success = yield self.unlock(device)
             if success and recursive:
-                self.udisks._sync()
+                yield self.udisks._sync()
                 device = self.udisks[device.object_path]
                 success = yield self.auto_add(
                     device.luks_cleartext_holder,
@@ -380,7 +404,8 @@ class Mounter(object):
         :rtype: bool
         """
         if device.is_filesystem:
-            success = yield self.unmount(device)
+            if device.is_mounted or not device.is_loop or detach is False:
+                success = yield self.unmount(device)
         elif device.is_crypto:
             if force and device.is_unlocked:
                 yield self.auto_remove(device.luks_cleartext_holder, force=True)
@@ -405,7 +430,9 @@ class Mounter(object):
             success = yield self.lock(device)
         if eject:
             success = yield self.eject(device)
-        if detach:
+        if (detach or detach is None) and device.is_loop:
+            success = yield self.delete(device, remove=False)
+        elif detach:
             success = yield self.detach(device)
         yield Return(success)
 
@@ -452,7 +479,9 @@ class Mounter(object):
             success = yield self.lock(device)
         if eject and device.has_media:
             success = yield self.eject(device)
-        if detach and device.is_detachable:
+        if (detach or detach is None) and device.is_loop:
+            success = yield self.delete(device, remove=False)
+        elif detach and device.is_detachable:
             success = yield self.detach(device)
         yield Return(success)
 
@@ -542,6 +571,66 @@ class Mounter(object):
         results = yield AsyncList(tasks)
         success = all(results)
         yield Return(success)
+
+    # loop devices
+    @Coroutine.from_generator_function
+    def losetup(self, image,
+                read_only=True, offset=None, size=None, no_part_scan=None):
+        """
+        Setup a loop device.
+
+        :param str image: path of the image file
+        :param bool read_only:
+        :param int offset:
+        :param int size:
+        :param bool no_part_scan:
+        :returns: the device object for the loop device
+        """
+        try:
+            device = self.udisks.find(image)
+        except ValueError:
+            pass
+        else:
+            self._log.info(_('not setting up {0}: already up', device))
+            yield Return(device)
+        if not os.path.isfile(image):
+            self._log.error(_('not setting up {0}: not a file', image))
+            yield Return(None)
+        if not self.udisks.loop_support:
+            self._log.error(_('not setting up {0}: unsupported in UDisks1', image))
+            yield Return(None)
+        self._log.debug(_('setting up {0}', image))
+        fd = os.open(image, os.O_RDONLY)
+        device = yield self.udisks.loop_setup(fd, {
+            'offset': offset,
+            'size': size,
+            'read-only': read_only,
+            'no-part-scan': no_part_scan,
+        })
+        self._log.info(_('set up {0} as {1}', image,
+                         device.device_presentation))
+        yield Return(device)
+
+    @_sets_async_error
+    @_find_device
+    def delete(self, device, remove=True):
+        """
+        Detach the loop device.
+
+        :param device: device object, block device path or mount path
+        :param bool remove: whether to unmount the partition etc.
+        :returns: whether the loop device is deleted
+        :rtype: bool
+        """
+        if not self.is_handleable(device) or not device.is_loop:
+            self._log.warn(_('not deleting {0}: unhandled device', device))
+            yield Return(False)
+        if remove:
+            yield self.auto_remove(device, force=True)
+        self._log.debug(_('deleting {0}', device))
+        yield device.delete()
+        self._log.info(_('deleted {0}', device))
+        yield Return(True)
 
     # iterate devices
     def is_handleable(self, device):
@@ -691,6 +780,7 @@ class DeviceActions(object):
         'eject': _('Eject {1}'),
         'detach': _('Unpower {1}'),
         'forget_password': _('Clear password for {0}'),
+        'delete': _('Detach {0}'),
     }
 
     def __init__(self, mounter, actions={}):
@@ -705,6 +795,7 @@ class DeviceActions(object):
             'eject': partial(mounter.eject, force=True),
             'detach': partial(mounter.detach, force=True),
             'forget_password': mounter.forget_password,
+            'delete': mounter.delete,
         })
 
     def detect(self, root_device='/'):
@@ -747,6 +838,8 @@ class DeviceActions(object):
             yield 'eject'
         if device.is_detachable:
             yield 'detach'
+        if device.is_loop and device.loop_support:
+            yield 'delete'
 
     def _device_node(self, device):
         """Create an empty menu node for the specified device."""

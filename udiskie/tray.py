@@ -8,11 +8,12 @@ from __future__ import unicode_literals
 from gi.repository import Gio
 from gi.repository import Gtk
 
-from .async_ import Async
+from .async_ import Async, Coroutine, Return
 from .common import setdefault
 from .compat import basestring
 from .locale import _
 from .mount import Action, prune_empty_node
+from .prompt import Dialog
 
 
 __all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
@@ -56,6 +57,8 @@ class Icons(object):
         'detach': ['udiskie-detach'],
         'quit': ['application-exit'],
         'forget_password': ['edit-delete'],
+        'delete': ['udiskie-eject'],
+        'losetup': ['udiskie-mount'],
     }
 
     def __init__(self, icon_names={}):
@@ -99,6 +102,7 @@ class UdiskieMenu(object):
     """
 
     _quit_label = _('Quit')
+    _losetup_label = _('Setup loop device')
 
     def __init__(self, mounter, icons, actions, quit_action=None):
         """
@@ -139,6 +143,14 @@ class UdiskieMenu(object):
         """
         # create actions items
         menu = self._create_menu(self._prepare_menu(self.detect()))
+        if self._mounter.udisks.loop_support:
+            if len(menu) > 0:
+                menu.append(Gtk.SeparatorMenuItem())
+            menu.append(self._menuitem(
+                self._losetup_label,
+                self._icons.get_icon('losetup', Gtk.IconSize.MENU),
+                lambda _: self._losetup()
+            ))
         # append menu item for closing the application
         if self._quit_action:
             if len(menu) > 0:
@@ -149,6 +161,20 @@ class UdiskieMenu(object):
                 lambda _: self._quit_action()
             ))
         return menu
+
+    @Coroutine.from_generator_function
+    def _losetup(self):
+        dialog = Gtk.FileChooserDialog(
+            _('Open disc image'), None,
+            Gtk.FileChooserAction.OPEN,
+            (_('Open'), Gtk.ResponseType.OK,
+             _('Cancel'), Gtk.ResponseType.CANCEL))
+        dialog.show_all()
+        response = yield Dialog(dialog)
+        dialog.hide()
+        if response != Gtk.ResponseType.OK:
+            return
+        yield self._mounter.losetup(dialog.get_filename())
 
     def detect(self):
         """

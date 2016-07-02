@@ -12,6 +12,7 @@ as CDs or flash drives from userspace. Its features include:
 - GTK tray icon to manage all available devices
 - command line tools for manual un-/mounting
 - support for LUKS encrypted devices
+- support for loop devices (mounting iso archives)
 - password caching
 - works with either udisks1 or udisks2
 - an extensible code base (python)
