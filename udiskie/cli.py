@@ -644,3 +644,91 @@ class Umount(_EntryPoint):
         else:
             tasks = [mounter.remove_all(**strategy)]
         return AsyncList(tasks)
+
+
+def _parse_filter(spec):
+    try:
+        key, val = spec.split('=', 1)
+    except ValueError:
+        if spec.startswith('!'):
+            val = False
+            key = spec[1:]
+        else:
+            val = True
+            key = spec
+    return key, val
+
+
+class Info(_EntryPoint):
+
+    """
+    udiskie-info: get information about handleable devices.
+
+    Usage:
+        udiskie-info [options] [-o OUTPUT] [-f FILTER]... (-a | DEVICE...)
+        udiskie-info (--help | --version)
+
+    General options:
+        -c FILE, --config=FILE      Set config file
+        -C, --no-config             Don't use config file
+
+        -v, --verbose               Increase verbosity (DEBUG)
+        -q, --quiet                 Decrease verbosity
+
+        -0, --udisks-auto           Auto discover UDisks version
+        -1, --use-udisks1           Use UDisks1 as backend
+        -2, --use-udisks2           Use UDisks2 as backend
+
+        -h, --help                  Show this help
+        -V, --version               Show version information
+
+    Unmount options:
+        -a, --all                   List all handleable devices
+
+        -o COL, --output COL        Specify which output column to print
+                                    [default: device_presentation].
+
+        -f FILT, --filter FILT      Print only devices that match the given
+                                    filter.
+    """
+
+    name = 'udiskie-info'
+
+    option_defaults = extend(_EntryPoint.option_defaults, {
+        'output': '',
+        'filter': '',
+        '<device>': None,
+    })
+
+    option_rules = extend(_EntryPoint.option_rules, {
+        'output': Value('--output'),
+        'filter': Value('--filter'),
+        '<device>': Value('DEVICE'),
+    })
+
+    def _init(self):
+
+        """Implements _EntryPoint._init."""
+
+        config = self.config
+        options = self.options
+
+        mounter = udiskie.mount.Mounter(
+            self.udisks,
+            ignore_device=config.ignore_device)
+
+        if options['<device>']:
+            devices = [self.udisks.find(path) for path in options['<device>']]
+        else:
+            devices = mounter.get_all_handleable()
+
+        output = options['output']
+
+        filters = [_parse_filter(spec) for spec in options['filter']]
+        matcher = udiskie.config.DeviceFilter(dict(filters), None)
+
+        for device in devices:
+            if matcher.match(device):
+                print(getattr(device, output))
+
+        return AsyncList([])

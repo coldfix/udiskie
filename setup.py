@@ -176,6 +176,7 @@ setup(
             'udiskie = udiskie.cli:Daemon.main',
             'udiskie-mount = udiskie.cli:Mount.main',
             'udiskie-umount = udiskie.cli:Umount.main',
+            'udiskie-info = udiskie.cli:Info.main',
         ],
     },
     install_requires=[
