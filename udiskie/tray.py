@@ -79,9 +79,8 @@ class Icons(object):
         :rtype: str
         """
         icon_theme = Gtk.IconTheme.get_default()
-        icon_names = icon_theme.list_icons()
         for name in self._icon_names[icon_id]:
-            if name in icon_names:
+            if icon_theme.has_icon(name):
                 return name
         return 'not-available'
 
