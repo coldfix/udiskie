@@ -1,0 +1,51 @@
+#compdef udiskie-umount
+# vim: ft=zsh sts=2 sw=2 ts=2
+
+function _udiskie-umount
+{
+  local state ret=1
+  local args tmp
+
+  args=(
+    '(- *)'{-h,--help}"[show help]"
+    '(- *)'{-V,--version}"[show version]"
+    '(-q)'{-v,--verbose}"[more output]"
+    '(-v)'{-q,--quiet}"[less output]"
+    '(--use-udisks1 --use-udisks2)'--udisks-auto"[autodetect UDisks version]"
+    '(--udisks-auto --use-udisks2)'--use-udisks1"[use UDisks 1]"
+    '(--udisks-auto --use-udisks1)'--use-udisks2"[use UDisks 2]"
+    '(-C)'{-c,--config}"[set config file]:file:_files"
+    '(-c)'{-C,--no-config}"[don't use config file]"
+    '(*)'{-a,--all}"[unmount all devices]"
+    '(-D)'{-d,--detach}"[detach device]"
+    '(-d)'{-D,--no-detach}"[don't detach device]"
+    '(-E)'{-e,--eject}"[eject device]"
+    '(-e)'{-E,--no-eject}"[don't eject device]"
+    '(-F)'{-f,--force}"[recursive unmounting]"
+    '(-f)'{-F,--no-force}"[no recursive unmountinng]"
+    '(-L)'{-l,--lock}"[lock device after unmounting]"
+    '(-l)'{-L,--no-lock}"[don't lock device]"
+    '*:dev or dir:->udevordir'
+  )
+  _arguments -C -s "$args[@]" && ret=0
+
+  case "$state" in
+  udevordir)
+    local dev_tmp mp_tmp loop_tmp
+
+    dev_tmp=( $(udiskie-info -a) )
+    mp_tmp=( $(udiskie-info -a -f is_filesystem -f is_mounted -o mount_path) )
+    loop_tmp=( $(udiskie-info -a -f is_loop -o loop_file) )
+
+    _alternative \
+      'directories:mount point:_canonical_paths -A mp_tmp -N directories mount\ point' \
+      'device-paths: device path:_canonical_paths -A dev_tmp -N device-paths device\ path' \
+      'loop-files: loop file:_canonical_paths -A loop_tmp -N loop-files loop\ file' \
+      && ret=0
+
+  ;;
+  esac
+  return ret
+}
+
+_udiskie-umount

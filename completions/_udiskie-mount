@@ -1,0 +1,45 @@
+#compdef udiskie-mount
+# vim: ft=zsh sts=2 sw=2 ts=2
+
+function _udiskie-mount
+{
+  local state ret=1
+  local args tmp
+
+  args=(
+    '(- *)'{-h,--help}"[show help]"
+    '(- *)'{-V,--version}"[show version]"
+    '(-q)'{-v,--verbose}"[more output]"
+    '(-v)'{-q,--quiet}"[less output]"
+    '(--use-udisks1 --use-udisks2)'--udisks-auto"[autodetect UDisks version]"
+    '(--udisks-auto --use-udisks2)'--use-udisks1"[use UDisks 1]"
+    '(--udisks-auto --use-udisks1)'--use-udisks2"[use UDisks 2]"
+    '(-C)'{-c,--config}"[set config file]:file:_files"
+    '(-c)'{-C,--no-config}"[don't use config file]"
+    '(*)'{-a,--all}"[unmount all devices]"
+    '(-R)'{-r,--recursive}"[recursively add devices]"
+    '(-r)'{-R,--no-recursive}"[disable recursive mounting]"
+    {-o,--options}"[set filesystem options]:file system option"
+    '(-P)'{-p,--password-prompt}"[Command for password retrieval]:passwordialog:(builtin:gui builtin:cli)"
+    '(-p)'{-P,--no-password-prompt}"[Disable unlocking]"
+    '*:dev or dir:->udevordir'
+  )
+  _arguments -C -s "$args[@]" && ret=0
+
+  case "$state" in
+
+  udevordir)
+    local dev_tmp mp_tmp
+
+    dev_tmp=( $(udiskie-info -a) )
+
+    _alternative \
+      'device-paths: device path:_canonical_paths -A dev_tmp -N device-paths device\ path' \
+      && ret=0
+
+  ;;
+  esac
+  return ret
+}
+
+_udiskie-mount

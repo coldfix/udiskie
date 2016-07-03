@@ -61,6 +61,10 @@ po_source_folder = 'lang'
 mo_build_prefix = path.join('build', 'locale')
 mo_install_prefix = path.join('share', 'locale')
 
+# completion files
+comp_source_folder = 'completions'
+comp_install_prefix = path.join('share', 'zsh', 'site-functions')
+
 # menu icons
 theme_base = path.join('share', 'icons', 'hicolor')
 icon_names = ['mount', 'unmount', 'lock', 'unlock', 'eject', 'detach']
@@ -141,6 +145,12 @@ class install_data(orig_install_data):
             (path.join(mo_install_prefix, lang, 'LC_MESSAGES'),
              [path.join(mo_build_prefix, lang, 'LC_MESSAGES', 'udiskie.mo')])
             for lang in listdir(mo_build_prefix)
+        ]
+        self.data_files += [
+            (comp_install_prefix, [
+                path.join(comp_source_folder, cmd)
+                for cmd in listdir(comp_source_folder)
+            ])
         ]
         orig_install_data.run(self)
 
