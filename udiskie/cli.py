@@ -7,6 +7,7 @@ setuptools entry points.
 
 from __future__ import absolute_import
 from __future__ import unicode_literals
+from __future__ import print_function
 
 # import udiskie.depend first - for side effects!
 from .depend import has_Notify, has_Gtk, _in_X
@@ -22,6 +23,7 @@ from gi.repository import GLib
 import udiskie
 import udiskie.config
 import udiskie.mount
+import udiskie.compat
 from .async_ import AsyncList, Coroutine, Return, RunForever
 from .common import extend, str2unicode
 from .locale import _
@@ -165,6 +167,7 @@ class _EntryPoint(object):
 
         :param list argv: command line parameters
         """
+        udiskie.compat.patch_print_unicode()
         # parse program options (retrieve log level and config file name):
         args = docopt(self.usage, version=self.name + ' ' + self.version)
         default_opts = self.option_defaults

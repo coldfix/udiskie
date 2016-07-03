@@ -27,3 +27,17 @@ def fix_str_conversions(cls):
     else:
         cls.__str__ = __unicode__
     return cls
+
+
+def patch_print_unicode():
+    if sys.version_info[0] == 2:
+        # When STDOUT is redirected, printing unicode on python2 will result
+        # in a UnicodeEncodeError, because python only uses UTF-8 if printing
+        # to a terminal. See:
+        # - https://pythonhosted.org/kitchen/unicode-frustrations.html
+        # - https://wiki.python.org/moin/PrintFails
+        import locale
+        import codecs
+        encoding = locale.getpreferredencoding()
+        writer = codecs.getwriter(encoding)
+        sys.stdout = writer(sys.stdout)
