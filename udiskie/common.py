@@ -353,11 +353,28 @@ class NullDevice(object):
 
     # Loop
     loop_file = ''
+    setup_by_uid = -1
+    autoclear = None
+
+    def delete(self, auth_no_user_interaction=None):
+        raise RuntimeError("Cannot call methods on invalid device!")
+
+    def set_autoclear(self, value, auth_no_user_interaction=None):
+        raise RuntimeError("Cannot call methods on invalid device!")
+
+    loop_support = False
 
     # derived properties
     in_use = False
-    parent_object_path = '/'
+    ui_id_label = ''
+    ui_id_uuid = ''
+    ui_device_presentation = ''
     ui_label = '(invalid device)'
+    ui_device_label = ''
+    drive_label = ''
+    parent_object_path = '/'
+    can_add = False
+    can_remove = False
 
 
 # ----------------------------------------
