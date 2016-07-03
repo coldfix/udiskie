@@ -1,6 +1,7 @@
 include doc/*.txt
 include doc/asciidoc.conf
 include doc/Makefile
+graft completions
 recursive-include icons *.svg
 recursive-include lang *.pot *.po
 include CONTRIBUTORS COPYING LICENSE
