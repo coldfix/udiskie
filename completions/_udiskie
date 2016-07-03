@@ -1,0 +1,41 @@
+#compdef udiskie
+# vim: ft=zsh sts=2 sw=2 ts=2
+
+function _udiskie
+{
+  local state ret=1
+  local args tmp
+
+  args=(
+    '(- *)'{-h,--help}"[show help]"
+    '(- *)'{-V,--version}"[show version]"
+    '(-q)'{-v,--verbose}"[more output]"
+    '(-v)'{-q,--quiet}"[less output]"
+    '(--use-udisks1 --use-udisks2)'--udisks-auto"[autodetect UDisks version]"
+    '(--udisks-auto --use-udisks2)'--use-udisks1"[use UDisks 1]"
+    '(--udisks-auto --use-udisks1)'--use-udisks2"[use UDisks 2]"
+    '(-C)'{-c,--config}"[set config file]:file:_files"
+    '(-c)'{-C,--no-config}"[don't use config file]"
+    '(-A)'{-a,--automount}"[automount new devices]"
+    '(-a)'{-A,--no-automount}"[disable automounting]"
+    '(-N)'{-n,--notify}"[show popup notifications]"
+    '(-n)'{-N,--no-notify}"[disable notifications]"
+    '(--no-appindicator)'--appindicator"[use appindicator for status icon]"
+    '(--appindicator)'--no-appindicator"[don't use appindicator]"
+    '(-T -s)'{-t,--tray}"[show tray icon]"
+    '(-T -t)'{-s,--smart-tray}"[auto hide tray icon]"
+    '(-t -s)'{-T,--no-tray}"[disable tray icon]"
+    {-m,--menu}"[set behaviour for tray menu]:traymenu:(flat smart nested)"
+    '(--no-password-cache)'--password-cache"[use appindicator for status icon]:minutes"
+    '(--password-cache)'--no-password-cache"[don't use appindicator]"
+    '(-P)'{-p,--password-prompt}"[Command for password retrieval]:passwordialog:(builtin:gui builtin:cli)"
+    '(-p)'{-P,--no-password-prompt}"[Disable unlocking]"
+    '(-F)'{-f,--file-manager}"[set program for browsing directories]:filemanager"
+    '(-f)'{-F,--no-file-manager}"[disable browsing]"
+  )
+  _arguments -C -s "$args[@]" && ret=0
+
+  return ret
+}
+
+_udiskie
