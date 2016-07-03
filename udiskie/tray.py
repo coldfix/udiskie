@@ -315,7 +315,7 @@ class TrayIcon(object):
 
     """Default TrayIcon class."""
 
-    def __init__(self, menumaker, icons, statusicon=None, show=True):
+    def __init__(self, menumaker, icons, statusicon=None):
         """
         Create an object managing a tray icon.
 
@@ -334,8 +334,6 @@ class TrayIcon(object):
         self._conn_right = None
         self.task = Async()
         menumaker._quit_action = self.destroy
-        if show:
-            self.show()
 
     def destroy(self):
         self.show(False)
@@ -399,34 +397,47 @@ class TrayIcon(object):
         self._m = m
 
 
-class AutoTray(TrayIcon):
+class UdiskieStatusIcon(object):
 
     """
-    TrayIcon that automatically hides.
+    Manage a status icon.
 
-    The menu has no 'Quit' item, and the tray icon will automatically hide
-    if there is no action available.
+    When `smart` is on, the icon will automatically hide if there is no action
+    available and the menu will have no 'Quit' item.
     """
 
-    def __init__(self, menumaker, icons):
-        """
-        Create and automatically set visibility of a new status icon.
-
-        Overrides TrayIcon.__init__.
-        """
-        super(AutoTray, self).__init__(menumaker, icons, show=False)
-        # Okay, the following is BAD:
-        menumaker._quit_action = None
+    def __init__(self, icon, menumaker, smart=False):
+        self._icon = icon
+        self._menumaker = menumaker
+        self._quit_action = menumaker._quit_action
         udisks = menumaker._mounter.udisks
         udisks.connect('device_changed', self.update)
         udisks.connect('device_added', self.update)
         udisks.connect('device_removed', self.update)
+        self.smart = smart
+
+    @property
+    def smart(self):
+        return getattr(self, '_smart', None)
+
+    @smart.setter
+    def smart(self, smart):
+        if smart == self.smart:
+            return
+        if smart:
+            self._menumaker._quit_action = None
+        else:
+            self._menumaker._quit_action = self._quit_action
+        self._smart = smart
         self.update()
 
     def has_menu(self):
         """Check if a menu action is available."""
-        return any(self._menu._prepare_menu(self._menu.detect()))
+        return any(self._menumaker._prepare_menu(self._menumaker.detect()))
 
     def update(self, *args):
         """Show/hide icon depending on whether there are devices."""
-        self.show(self.has_menu())
+        if self.smart:
+            self._icon.show(self.has_menu())
+        else:
+            self._icon.show(True)
