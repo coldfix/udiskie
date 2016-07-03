@@ -692,7 +692,7 @@ class Mounter(object):
         """
         nodes = self.get_device_tree()
         return [node.device
-                for node in nodes.values()
+                for node in sorted(nodes.values(), key=DevNode._sort_key)
                 if not node.ignored and node.device]
 
     def get_all_handleable_roots(self):
@@ -702,7 +702,7 @@ class Mounter(object):
         """
         nodes = self.get_device_tree()
         return [node.device
-                for node in nodes.values()
+                for node in sorted(nodes.values(), key=DevNode._sort_key)
                 if not node.ignored and node.device
                 and (node.root == '/' or nodes[node.root].ignored)]
 
@@ -713,7 +713,7 @@ class Mounter(object):
         """
         nodes = self.get_device_tree()
         return [node.device
-                for node in nodes.values()
+                for node in sorted(nodes.values(), key=DevNode._sort_key)
                 if not node.ignored and node.device
                 and all(child.ignored for child in node.children)]
 
@@ -728,6 +728,8 @@ class Mounter(object):
         for node in device_nodes.values():
             device_nodes.get(node.root, root).children.append(node)
         device_nodes['/'] = root
+        for node in device_nodes.values():
+            node.children.sort(key=DevNode._sort_key)
         # use parent as fallback, update top->down:
         def propagate_ignored(node):
             for child in node.children:
@@ -762,6 +764,9 @@ class DevNode:
         self.root = root
         self.children = children
         self.ignored = ignored
+
+    def _sort_key(self):
+        return self.device.device_presentation if self.device else ''
 
 
 # data structs containing the menu hierarchy:
