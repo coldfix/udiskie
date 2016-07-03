@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+1.5.1
+~~~~~
+Date: 03.06.2016
+
+- fix unicode issue that occurs on python2 when stdout is redirected (in
+  particular for zsh autocompletion)
+
+
 1.5.0
 ~~~~~
 Date: 03.06.2016
