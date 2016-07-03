@@ -200,6 +200,18 @@ class UdiskieMenu(object):
         prune_empty_node(root, set())
         return root
 
+    def _create_menu(self, items):
+        """
+        Create a menu from the given node.
+
+        :param list items: list of menu items
+        :returns: a new menu object holding all items of the node
+        :rtype: Gtk.Menu
+        """
+        menu = Gtk.Menu()
+        self._create_menu_items(menu, items)
+        return menu
+
     def _create_menu_items(self, menu, items):
         def make_action_callback(node):
             return lambda _: node.action()
