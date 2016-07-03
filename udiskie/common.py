@@ -181,6 +181,14 @@ class BaseDevice(object):
     # ----------------------------------------
 
     @property
+    def mount_path(self):
+        """Return any mount path."""
+        try:
+            return self.mount_paths[0]
+        except IndexError:
+            return ''
+
+    @property
     def in_use(self):
         """Check whether this device is in use, i.e. mounted or unlocked."""
         if self.is_mounted or self.is_unlocked:
@@ -365,6 +373,7 @@ class NullDevice(object):
     loop_support = False
 
     # derived properties
+    mount_path = ''
     in_use = False
     ui_id_label = ''
     ui_id_uuid = ''

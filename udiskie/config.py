@@ -79,6 +79,7 @@ class DeviceFilter(object):
         'is_systeminternal',
         'is_mounted',
         'mount_paths',
+        'mount_path',
         'is_unlocked',
         'in_use',
         'should_automount',

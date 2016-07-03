@@ -323,6 +323,7 @@ remain available:
     is_systeminternal       udisks flag HintSystem=true
     is_mounted
     mount_paths             list of mount paths
+	mount_path              any mount path
     is_unlocked
     in_use                  device or any of its children mounted
     should_automount
