@@ -134,15 +134,14 @@ class UdiskieMenu(object):
         self._actions = actions
         self._quit_action = quit_action
 
-    def __call__(self):
+    def __call__(self, menu):
         """
-        Create menu for udiskie mount operations.
+        Populate the menu with udiskie mount operations.
 
-        :returns: a new menu
-        :rtype: Gtk.Menu
+        :param Gtk.Menu menu:
         """
         # create actions items
-        menu = self._create_menu(self._prepare_menu(self.detect()))
+        self._create_menu_items(menu, self._prepare_menu(self.detect()))
         if self._mounter.udisks.loop_support:
             if len(menu) > 0:
                 menu.append(Gtk.SeparatorMenuItem())
@@ -186,18 +185,6 @@ class UdiskieMenu(object):
         root = self._actions.detect()
         prune_empty_node(root, set())
         return root
-
-    def _create_menu(self, items):
-        """
-        Create a menu from the given node.
-
-        :param list items: list of menu items
-        :returns: a new menu object holding all items of the node
-        :rtype: Gtk.Menu
-        """
-        menu = Gtk.Menu()
-        self._create_menu_items(menu, items)
-        return menu
 
     def _create_menu_items(self, menu, items):
         def make_action_callback(node):
@@ -377,7 +364,9 @@ class TrayIcon(object):
 
     def create_context_menu(self):
         """Create the context menu."""
-        return self._menu()
+        menu = Gtk.Menu()
+        self._menu(menu)
+        return menu
 
     def _activate(self, icon):
         """Handle a left click event (show the menu)."""
