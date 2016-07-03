@@ -70,6 +70,21 @@ class Icons(object):
             if isinstance(v, basestring):
                 self._icon_names[k] = [v]
 
+    def get_icon_name(self, icon_id):
+        """
+        Try to determine the name of the icon that should be used.
+
+        :param str icon_id: udiskie internal icon id
+        :returns: the icon name to be used
+        :rtype: str
+        """
+        icon_theme = Gtk.IconTheme.get_default()
+        icon_names = icon_theme.list_icons()
+        for name in self._icon_names[icon_id]:
+            if name in icon_names:
+                return name
+        return 'not-available'
+
     def get_icon(self, icon_id, size):
         """
         Load icon dynamically.
