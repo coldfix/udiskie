@@ -94,6 +94,18 @@ Daemon options
 *-F, \--no-file-manager*::
 	Disable browsing.
 
+*-appindicator*::
+	Use AppIndicator3 for the status icon. Use this on Ubuntu/Unity if no icon is shown.
+
+*--no-appindicator*::
+	Use Gtk.StatusIcon for the status icon (default).
+
+*--password-cache MINUTES*::
+	Cache passwords for LUKS partitions and set the timeout.
+
+*--no-password-cache*::
+	Never cache passwords (default).
+
 
 Mount options
 -------------

@@ -328,6 +328,9 @@ class Daemon(_EntryPoint):
         -T, --no-tray                           Disable tray icon
         -m MENU, --menu MENU                    Tray menu [smart/nested/flat]
 
+        --appindicator                          Use appindicator for status icon
+        --no-appindicator                       Don't use appindicator
+
         --password-cache MINUTES                Set password cache timeout
         --no-password-cache                     Disable password cache
 
@@ -346,6 +349,7 @@ class Daemon(_EntryPoint):
         'notify': True,
         'tray': False,
         'menu': 'flat',
+        'appindicator': False,
         'file_manager': 'xdg-open',
         'password_prompt': 'builtin:gui',
         'password_cache': False,
@@ -359,6 +363,7 @@ class Daemon(_EntryPoint):
             '--no-tray': False,
             '--smart-tray': 'auto'}),
         'menu': Value('--menu'),
+        'appindicator': Switch('appindicator'),
         'file_manager': OptionalValue('--file-manager'),
         'password_prompt': OptionalValue('--password-prompt'),
         'password_cache': OptionalValue('--password-cache'),
@@ -437,9 +442,11 @@ class Daemon(_EntryPoint):
         # tray icon (optional):
         if options['tray']:
             import udiskie.tray
-            tray_classes = {True: udiskie.tray.TrayIcon,
-                            'auto': udiskie.tray.AutoTray}
-            if options['tray'] not in tray_classes:
+            if options['tray'] == 'auto':
+                smart = True
+            elif options['tray'] is True:
+                smart = False
+            else:
                 raise ValueError("Invalid tray: %s" % (options['tray'],))
             icons = udiskie.tray.Icons(config.icon_names)
             actions = udiskie.mount.DeviceActions(mounter)
@@ -452,9 +459,14 @@ class Daemon(_EntryPoint):
             Menu = menu_classes[options['menu']]
             menu_maker = Menu(mounter, icons, actions,
                               quit_action=self.mainloop.quit)
-            TrayIcon = tray_classes[options['tray']]
-            statusicon = TrayIcon(menu_maker, icons)
-            tasks.append(statusicon.task)
+            if options['appindicator']:
+                import udiskie.appindicator
+                TrayIcon = udiskie.appindicator.AppIndicatorIcon
+            else:
+                TrayIcon = udiskie.tray.TrayIcon
+            trayicon = TrayIcon(menu_maker, icons)
+            statusicon = udiskie.tray.UdiskieStatusIcon(trayicon, menu_maker, smart)
+            tasks.append(trayicon.task)
         else:
             statusicon = None
             tasks.append(RunForever)
