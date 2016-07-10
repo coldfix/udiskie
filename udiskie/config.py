@@ -204,7 +204,7 @@ class Config(object):
 
         :param ConfigParser data: config file accessor
         """
-        self._data = data
+        self._data = data or {}
 
     @classmethod
     def default_pathes(cls):
