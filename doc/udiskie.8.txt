@@ -58,8 +58,9 @@ Shared Mount and Daemon options
 -------------------------------
 
 *-p COMMAND, \--password-prompt=COMMAND*::
-	Password retrieval command. The string is formatted with a Device object
-	as its first argument.
+	Password retrieval command. The string is formatted with the device attributes as keyword arguments, e.g.:
+
+	-p "zenity --entry --hide-text --text 'Enter password for {device_presentation}:'"
 
 *-P, \--no-password-prompt*::
 	Disable unlocking of LUKS devices.
@@ -105,6 +106,14 @@ Daemon options
 
 *--no-password-cache*::
 	Never cache passwords (default).
+
+*--notify-command COMMAND*::
+	Command to execute on device events. Command string be formatted using the event name and the list of device attributes (see below), e.g.:
+
+	--notify-command "zenity --info --text '{event}: {device_presentation}'"
+
+*--no-notify-command*::
+	No notify command (default).
 
 
 Mount options
@@ -212,6 +221,10 @@ program_options:
     # list of device attributes, see below. The two special string values
     # "builtin:gui" and "builtin:tty" signify to use udiskie's
     # builtin password prompt.
+
+  notify_command: "zenity --info --text '{event}: {device_presentation}'"
+    # [string|list] Set command to be executed on any device event.
+    # This is specified like `password_prompt`.
 
 
 mount_options:
