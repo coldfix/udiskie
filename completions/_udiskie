@@ -32,6 +32,8 @@ function _udiskie
     '(-p)'{-P,--no-password-prompt}"[Disable unlocking]"
     '(-F)'{-f,--file-manager}"[set program for browsing directories]:filemanager"
     '(-f)'{-F,--no-file-manager}"[disable browsing]"
+    '(--no-notify-command)'--notify-command"[execute this command on events]:minutes"
+    '(--notify-command)'--no-notify-command"[don't execute event handler]"
   )
   _arguments -C -s "$args[@]" && ret=0
 

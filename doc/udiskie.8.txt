@@ -58,8 +58,9 @@ Shared Mount and Daemon options
 -------------------------------
 
 *-p COMMAND, \--password-prompt=COMMAND*::
-	Password retrieval command. The string is formatted with a Device object
-	as its first argument.
+	Password retrieval command. The string is formatted with the device attributes as keyword arguments, e.g.:
+
+	-p "zenity --entry --hide-text --text 'Enter password for {device_presentation}:'"
 
 *-P, \--no-password-prompt*::
 	Disable unlocking of LUKS devices.
@@ -105,6 +106,14 @@ Daemon options
 
 *--no-password-cache*::
 	Never cache passwords (default).
+
+*--notify-command COMMAND*::
+	Command to execute on device events. Command string be formatted using the event name and the list of device attributes (see below), e.g.:
+
+	--notify-command "zenity --info --text '{event}: {device_presentation}'"
+
+*--no-notify-command*::
+	No notify command (default).
 
 
 Mount options
@@ -202,17 +211,20 @@ program_options:
 
   file_manager:     xdg-open
     # [string] Set program to open directories. It will be invoked
-    # with the folder path as its # command line first argument.
+    # with the folder path as its first command line argument.
 
-  password_prompt: ["gnome-keyring-query", "get", "{.id_uuid}"]
+  password_prompt: ["gnome-keyring-query", "get", "{id_uuid}"]
     # [string|list] Set command to retrieve passwords. If specified
     # as a list it defines the ARGV array for the program call. If
     # specified as a string, it will be expanded in a shell-like
-    # manner. Each string will be formatted using str.format with a
-    # Device object as the first argument. For a list of device
-    # attributes, see below. The two special string values
+    # manner. Each string will be formatted using `str.format`. For a
+    # list of device attributes, see below. The two special string values
     # "builtin:gui" and "builtin:tty" signify to use udiskie's
     # builtin password prompt.
+
+  notify_command: "zenity --info --text '{event}: {device_presentation}'"
+    # [string|list] Set command to be executed on any device event.
+    # This is specified like `password_prompt`.
 
 
 mount_options:

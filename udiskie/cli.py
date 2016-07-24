@@ -340,6 +340,9 @@ class Daemon(_EntryPoint):
         -p COMMAND, --password-prompt COMMAND   Command for password retrieval
         -P, --no-password-prompt                Disable unlocking
 
+        --notify-command COMMAND                Command to execute on events
+        --no-notify-command                     Disable command notifications
+
     Deprecated options:
         -f PROGRAM, --file-manager PROGRAM      Set program for browsing
         -F, --no-file-manager                   Disable browsing
@@ -356,6 +359,7 @@ class Daemon(_EntryPoint):
         'file_manager': 'xdg-open',
         'password_prompt': 'builtin:gui',
         'password_cache': False,
+        'notify_command': None,
     })
 
     option_rules = extend(_EntryPoint.option_rules, {
@@ -370,6 +374,7 @@ class Daemon(_EntryPoint):
         'file_manager': OptionalValue('--file-manager'),
         'password_prompt': OptionalValue('--password-prompt'),
         'password_cache': OptionalValue('--password-cache'),
+        'notify_command': OptionalValue('--notify-command'),
     })
 
     def _init(self):
@@ -441,6 +446,10 @@ class Daemon(_EntryPoint):
                                   mounter=mounter,
                                   timeout=config.notifications,
                                   aconfig=aconfig)
+
+        # command notifincations (optional):
+        if options['notify_command']:
+            udiskie.prompt.notify_command(options['notify_command'], mounter)
 
         # tray icon (optional):
         if options['tray']:
