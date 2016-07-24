@@ -247,3 +247,27 @@ def browser(browser_name='xdg-open'):
         return subprocess.Popen([executable, path])
 
     return browse
+
+
+def notify_command(command_format, mounter):
+    """
+    Command notification tool.
+
+    This works similar to Notify, but will issue command instead of showing
+    the notifications on the desktop. This can then be used to react to events
+    from shell scripts.
+
+    The command can contain modern pythonic format placeholders like:
+    {device_file}. The following placeholders are supported:
+    event, device_file, device_id, device_size, drive, drive_label, id_label,
+    id_type, id_usage, id_uuid, mount_path, root
+
+    :param str command_format: The command format string to run when an event occurs.
+    :param mounter: Mounter object
+    """
+    udisks = mounter.udisks
+    for event in ['device_mounted', 'device_unmounted',
+                  'device_locked', 'device_unlocked',
+                  'device_added', 'device_removed',
+                  'job_failed']:
+        udisks.connect(event, DeviceCommand(command_format, event=event))

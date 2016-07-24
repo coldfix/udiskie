@@ -359,7 +359,7 @@ class Daemon(_EntryPoint):
         'file_manager': 'xdg-open',
         'password_prompt': 'builtin:gui',
         'password_cache': False,
-        'notify-command': None,
+        'notify_command': None,
     })
 
     option_rules = extend(_EntryPoint.option_rules, {
@@ -374,7 +374,7 @@ class Daemon(_EntryPoint):
         'file_manager': OptionalValue('--file-manager'),
         'password_prompt': OptionalValue('--password-prompt'),
         'password_cache': OptionalValue('--password-cache'),
-        'notify-command': OptionalValue('--notify-command')
+        'notify_command': OptionalValue('--notify-command'),
     })
 
     def _init(self):
@@ -448,9 +448,8 @@ class Daemon(_EntryPoint):
                                   aconfig=aconfig)
 
         # command notifincations (optional):
-        if options["notify-command"]:
-            import udiskie.cmdnotify
-            udiskie.cmdnotify.CommandNotify(options['notify-command'], mounter)
+        if options['notify_command']:
+            udiskie.prompt.notify_command(options['notify_command'], mounter)
 
         # tray icon (optional):
         if options['tray']:
