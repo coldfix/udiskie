@@ -10,13 +10,17 @@ from udiskie.depend import has_Gtk, require_Gtk
 from distutils.spawn import find_executable
 import getpass
 import logging
+import re
 import shlex
+import string
 import subprocess
 import sys
 
 from .async_ import Async, Coroutine, Return, Subprocess
 from .locale import _
+from .common import AttrDictView
 from .compat import basestring
+from .config import DeviceFilter
 
 
 __all__ = ['password', 'browser']
@@ -151,12 +155,35 @@ class DeviceCommand(object):
     specified in terms of a command line template.
     """
 
-    def __init__(self, argv):
+    def __init__(self, argv, **extra):
         """Create the launcher object from the command line template."""
         if isinstance(argv, basestring):
             self.argv = shlex.split(argv)
         else:
             self.argv = argv
+        self.extra = extra.copy()
+        # obtain a list of used fields names
+        formatter = string.Formatter()
+        field_name = re.compile('(\d*\.)?(\w+)')
+        self.used_attrs = []
+        for arg in self.argv:
+            for text, name, spec, conv in formatter.parse(arg):
+                if name is None:
+                    continue
+                pos, kwd = field_name.match(name).groups()
+                if pos is not None:
+                    logging.getLogger(__name__).warn(
+                        _('Positional field in format string {!r} is deprecated.', arg))
+                # check used field names
+                if kwd in self.used_attrs or kwd in self.extra:
+                    continue
+                if kwd in DeviceFilter.VALID_PARAMETERS:
+                    self.used_attrs.append(kwd)
+                else:
+                    self.extra[kwd] = None
+                    logging.getLogger(__name__).error(_(
+                        'Unknown device attribute {!r} in format string: {!r}',
+                        kwd, arg))
 
     @Coroutine.from_generator_function
     def __call__(self, device):
@@ -164,7 +191,11 @@ class DeviceCommand(object):
         Invoke the subprocess to ask the user to enter a password for unlocking
         the specified device.
         """
-        argv = [arg.format(device) for arg in self.argv]
+        attrs = {attr: getattr(device, attr) for attr in self.used_attrs}
+        attrs.update(self.extra)
+        # for backward compatibility provide positional argument:
+        fake_dev = AttrDictView(attrs)
+        argv = [arg.format(fake_dev, **attrs) for arg in self.argv]
         try:
             stdout = yield Subprocess(argv)
         except subprocess.CalledProcessError:
@@ -208,7 +239,7 @@ def browser(browser_name='xdg-open'):
         # end users) to have a reasonable default, without enforcing it.
         logging.getLogger(__name__).warn(
             _("Can't find file browser: {0!r}. "
-              "You may want to change the value for the '-b' option.",
+              "You may want to change the value for the '-f' option.",
               browser_name))
         return None
 

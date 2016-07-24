@@ -202,15 +202,14 @@ program_options:
 
   file_manager:     xdg-open
     # [string] Set program to open directories. It will be invoked
-    # with the folder path as its # command line first argument.
+    # with the folder path as its first command line argument.
 
-  password_prompt: ["gnome-keyring-query", "get", "{.id_uuid}"]
+  password_prompt: ["gnome-keyring-query", "get", "{id_uuid}"]
     # [string|list] Set command to retrieve passwords. If specified
     # as a list it defines the ARGV array for the program call. If
     # specified as a string, it will be expanded in a shell-like
-    # manner. Each string will be formatted using str.format with a
-    # Device object as the first argument. For a list of device
-    # attributes, see below. The two special string values
+    # manner. Each string will be formatted using `str.format`. For a
+    # list of device attributes, see below. The two special string values
     # "builtin:gui" and "builtin:tty" signify to use udiskie's
     # builtin password prompt.
 
