@@ -77,7 +77,7 @@ Daemon options
 *-n, \--notify*::
 	Enable pop-up notifications (default).
 
-*-N, \--disable-notify*::
+*-N, \--no-notify*::
 	Disable pop-up notifications.
 
 *-t, \--tray*::
