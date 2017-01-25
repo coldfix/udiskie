@@ -9,7 +9,7 @@ from gi.repository import Gio
 from gi.repository import Gtk
 
 from .async_ import Async, Coroutine, Return
-from .common import setdefault
+from .common import setdefault, DaemonBase
 from .compat import basestring
 from .locale import _
 from .mount import Action, prune_empty_node
@@ -412,7 +412,7 @@ class TrayIcon(object):
         self._m = m
 
 
-class UdiskieStatusIcon(object):
+class UdiskieStatusIcon(DaemonBase):
 
     """
     Manage a status icon.
@@ -428,22 +428,19 @@ class UdiskieStatusIcon(object):
         self._quit_action = menumaker._quit_action
         self.smart = smart
         self.active = False
+        self.events = {
+            'device_changed': self.update,
+            'device_added': self.update,
+            'device_removed': self.update,
+        }
 
     def activate(self):
-        udisks = self._mounter.udisks
-        udisks.connect('device_changed', self.update)
-        udisks.connect('device_added', self.update)
-        udisks.connect('device_removed', self.update)
+        super(UdiskieStatusIcon, self).activate()
         self.update()
-        self.active = True
 
     def deactivate(self):
-        udisks = self._mounter.udisks
-        udisks.disconnect('device_changed', self.update)
-        udisks.disconnect('device_added', self.update)
-        udisks.disconnect('device_removed', self.update)
+        super(UdiskieStatusIcon, self).deactivate()
         self._icon.show(False)
-        self.active = False
 
     @property
     def smart(self):

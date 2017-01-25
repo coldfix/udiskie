@@ -5,11 +5,13 @@ Automount utility.
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+from .common import DaemonBase
+
 
 __all__ = ['AutoMounter']
 
 
-class AutoMounter(object):
+class AutoMounter(DaemonBase):
 
     """
     Automount utility.
@@ -28,21 +30,11 @@ class AutoMounter(object):
         :param Mounter mounter: mounter object
         """
         self._mounter = mounter
-        self.active = False
-
-    def activate(self):
-        udisks = self._mounter.udisks
-        udisks.connect('device_changed', self.device_changed)
-        udisks.connect('device_added', self._mounter.auto_add)
-        udisks.connect('media_added', self._mounter.auto_add)
-        self.active = True
-
-    def deactivate(self):
-        udisks = self._mounter.udisks
-        udisks.disconnect('device_changed', self.device_changed)
-        udisks.disconnect('device_added', self._mounter.auto_add)
-        udisks.disconnect('media_added', self._mounter.auto_add)
-        self.active = False
+        self.events = {
+            'device_changed': self.device_changed,
+            'device_added': self._mounter.auto_add,
+            'media_added': self._mounter.auto_add,
+        }
 
     def device_changed(self, old_state, new_state):
         """
