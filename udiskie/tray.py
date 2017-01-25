@@ -424,12 +424,26 @@ class UdiskieStatusIcon(object):
     def __init__(self, icon, menumaker, smart=False):
         self._icon = icon
         self._menumaker = menumaker
+        self._mounter = menumaker._mounter
         self._quit_action = menumaker._quit_action
-        udisks = menumaker._mounter.udisks
+        self.smart = smart
+        self.active = False
+
+    def activate(self):
+        udisks = self._mounter.udisks
         udisks.connect('device_changed', self.update)
         udisks.connect('device_added', self.update)
         udisks.connect('device_removed', self.update)
-        self.smart = smart
+        self.update()
+        self.active = True
+
+    def deactivate(self):
+        udisks = self._mounter.udisks
+        udisks.disconnect('device_changed', self.update)
+        udisks.disconnect('device_added', self.update)
+        udisks.disconnect('device_removed', self.update)
+        self._icon.show(False)
+        self.active = False
 
     @property
     def smart(self):

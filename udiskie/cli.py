@@ -442,10 +442,12 @@ class Daemon(_EntryPoint):
                 aconfig.setdefault('device_added', [])
             else:
                 aconfig.setdefault('device_added', ['mount'])
-            udiskie.notify.Notify(Notify.Notification.new,
-                                  mounter=mounter,
-                                  timeout=config.notifications,
-                                  aconfig=aconfig)
+            notify = udiskie.notify.Notify(
+                Notify.Notification.new,
+                mounter=mounter,
+                timeout=config.notifications,
+                aconfig=aconfig)
+            notify.activate()
 
         # command notifincations (optional):
         if options['notify_command']:
@@ -478,6 +480,7 @@ class Daemon(_EntryPoint):
                 TrayIcon = udiskie.tray.TrayIcon
             trayicon = TrayIcon(menu_maker, icons)
             statusicon = udiskie.tray.UdiskieStatusIcon(trayicon, menu_maker, smart)
+            statusicon.activate()
             tasks.append(trayicon.task)
         else:
             statusicon = None
@@ -486,7 +489,8 @@ class Daemon(_EntryPoint):
         # automounter
         if options['automount']:
             import udiskie.automount
-            udiskie.automount.AutoMounter(mounter)
+            automounter = udiskie.automount.AutoMounter(mounter)
+            automounter.activate()
             tasks.append(mounter.add_all())
 
         # Note: mounter and statusicon are saved so these are kept alive:

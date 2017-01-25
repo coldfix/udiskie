@@ -29,6 +29,11 @@ class Notify(object):
     notification services.
     """
 
+    EVENTS = ['device_mounted', 'device_unmounted',
+              'device_locked', 'device_unlocked',
+              'device_added', 'device_removed',
+              'job_failed']
+
     def __init__(self, notify, mounter, timeout=None, aconfig=None):
         """
         Initialize notifier and connect to service.
@@ -45,14 +50,21 @@ class Notify(object):
         self._default = self._timeout.get('timeout', -1)
         self._log = logging.getLogger(__name__)
         self._notifications = []
-        # Subscribe all enabled events to the daemon:
-        udisks = mounter.udisks
-        for event in ['device_mounted', 'device_unmounted',
-                      'device_locked', 'device_unlocked',
-                      'device_added', 'device_removed',
-                      'job_failed']:
+        self.active = False
+
+    def activate(self):
+        udisks = self._mounter.udisks
+        for event in self.EVENTS:
             if self._enabled(event):
                 udisks.connect(event, getattr(self, event))
+        self.active = True
+
+    def deactivate(self):
+        udisks = self._mounter.udisks
+        for event in self.EVENTS:
+            if self._enabled(event):
+                udisks.disconnect(event, getattr(self, event))
+        self.active = False
 
     # event handlers:
     def device_mounted(self, device):
