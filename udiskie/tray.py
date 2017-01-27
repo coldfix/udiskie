@@ -149,7 +149,7 @@ class UdiskieMenu(object):
         self._actions = actions
         self._quit_action = daemon.mainloop.quit
 
-    def __call__(self, menu):
+    def __call__(self, menu, extended):
         """
         Populate the menu with udiskie mount operations.
 
@@ -165,7 +165,8 @@ class UdiskieMenu(object):
                 self._icons.get_icon('losetup', Gtk.IconSize.MENU),
                 lambda _: self._losetup()
             ))
-        self._insert_options(menu)
+        if extended:
+            self._insert_options(menu)
         # append menu item for closing the application
         if self._quit_action:
             if len(menu) > 0:
@@ -405,19 +406,20 @@ class TrayIcon(object):
         self._conn_left = None
         self._conn_right = None
 
-    def create_context_menu(self):
+    def create_context_menu(self, extended):
         """Create the context menu."""
         menu = Gtk.Menu()
-        self._menu(menu)
+        self._menu(menu, extended)
         return menu
 
     def _activate(self, icon):
         """Handle a left click event (show the menu)."""
-        self._popup_menu(icon, button=0, time=Gtk.get_current_event_time())
+        self._popup_menu(icon, button=0, time=Gtk.get_current_event_time(),
+                         extended=False)
 
-    def _popup_menu(self, icon, button, time):
+    def _popup_menu(self, icon, button, time, extended=True):
         """Handle a right click event (show the menu)."""
-        m = self.create_context_menu()
+        m = self.create_context_menu(extended)
         m.show_all()
         m.popup(parent_menu_shell=None,
                 parent_menu_item=None,
