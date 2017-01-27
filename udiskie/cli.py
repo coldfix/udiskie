@@ -316,6 +316,12 @@ class Component(object):
         if self.active:
             self.instance.deactivate()
 
+    def toggle(self):
+        if self.active:
+            self.deactivate()
+        else:
+            self.activate()
+
 
 class Daemon(_EntryPoint):
 
@@ -515,7 +521,7 @@ class Daemon(_EntryPoint):
         if options['menu'] not in menu_classes:
             raise ValueError("Invalid menu: %s" % (options['tray'],))
         Menu = menu_classes[options['menu']]
-        menu_maker = Menu(self.mounter, icons, actions)
+        menu_maker = Menu(self, icons, actions)
         if options['appindicator']:
             import udiskie.appindicator
             TrayIcon = udiskie.appindicator.AppIndicatorIcon
