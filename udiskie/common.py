@@ -386,6 +386,23 @@ class NullDevice(object):
     can_remove = False
 
 
+class DaemonBase(object):
+
+    active = False
+
+    def activate(self):
+        udisks = self._mounter.udisks
+        for event, handler in self.events.items():
+            udisks.connect(event, handler)
+        self.active = True
+
+    def deactivate(self):
+        udisks = self._mounter.udisks
+        for event, handler in self.events.items():
+            udisks.disconnect(event, handler)
+        self.active = False
+
+
 # ----------------------------------------
 # byte array to string conversion
 # ----------------------------------------

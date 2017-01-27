@@ -296,6 +296,33 @@ class _EntryPoint(object):
         self.mainloop.quit()
 
 
+class Component(object):
+
+    def __init__(self, create):
+        self.create = create
+        self.instance = None
+
+    @property
+    def active(self):
+        return self.instance is not None and self.instance.active
+
+    def activate(self):
+        if self.instance is None:
+            self.instance = self.create()
+        if not self.instance.active:
+            self.instance.activate()
+
+    def deactivate(self):
+        if self.active:
+            self.instance.deactivate()
+
+    def toggle(self):
+        if self.active:
+            self.deactivate()
+        else:
+            self.activate()
+
+
 class Daemon(_EntryPoint):
 
     """
@@ -386,6 +413,7 @@ class Daemon(_EntryPoint):
         config = self.config
         options = self.options
 
+        # prepare mounter object
         prompt = udiskie.prompt.password(options['password_prompt'])
         browser = udiskie.prompt.browser(options['file_manager'])
         cache = None
@@ -395,7 +423,7 @@ class Daemon(_EntryPoint):
             timeout = int(options['password_cache']) * 60
             cache = udiskie.cache.PasswordCache(timeout)
 
-        mounter = udiskie.mount.Mounter(
+        self.mounter = udiskie.mount.Mounter(
             mount_options=config.mount_options,
             ignore_device=config.ignore_device,
             prompt=prompt,
@@ -403,6 +431,7 @@ class Daemon(_EntryPoint):
             cache=cache,
             udisks=self.udisks)
 
+        # check component availability
         if options['notify'] and not has_Notify():
             libnotify_not_available = _(
                 "Typelib for 'libnotify' is not available. Possible causes include:"
@@ -430,70 +459,80 @@ class Daemon(_EntryPoint):
             logging.getLogger(__name__).error(gtk3_not_available)
             options['tray'] = False
 
+        # start components
         tasks = []
 
-        # notifications (optional):
+        self.notify         = Component(self._load_notify)
+        self.statusicon     = Component(self._load_statusicon)
+        self.automounter    = Component(self._load_automounter)
+
         if options['notify']:
-            import udiskie.notify
-            from gi.repository import Notify
-            Notify.init('udiskie')
-            aconfig = config.notification_actions
-            if options['automount']:
-                aconfig.setdefault('device_added', [])
-            else:
-                aconfig.setdefault('device_added', ['mount'])
-            udiskie.notify.Notify(Notify.Notification.new,
-                                  mounter=mounter,
-                                  timeout=config.notifications,
-                                  aconfig=aconfig)
-
-        # command notifincations (optional):
+            self.notify.activate()
         if options['notify_command']:
-            udiskie.prompt.notify_command(options['notify_command'], mounter)
-
-        # tray icon (optional):
+            # is currently enabled/disabled statically only once:
+            self.notify_command()
         if options['tray']:
-            import udiskie.tray
-            if options['tray'] == 'auto':
-                smart = True
-            elif options['tray'] is True:
-                smart = False
-            else:
-                raise ValueError("Invalid tray: %s" % (options['tray'],))
-            icons = udiskie.tray.Icons(config.icon_names)
-            actions = udiskie.mount.DeviceActions(mounter)
-
-            menu_classes = {'smart': udiskie.tray.SmartUdiskieMenu,
-                            'nested': udiskie.tray.UdiskieMenu,
-                            'flat': udiskie.tray.FlatUdiskieMenu}
-            if options['menu'] not in menu_classes:
-                raise ValueError("Invalid menu: %s" % (options['tray'],))
-            Menu = menu_classes[options['menu']]
-            menu_maker = Menu(mounter, icons, actions,
-                              quit_action=self.mainloop.quit)
-            if options['appindicator']:
-                import udiskie.appindicator
-                TrayIcon = udiskie.appindicator.AppIndicatorIcon
-            else:
-                TrayIcon = udiskie.tray.TrayIcon
-            trayicon = TrayIcon(menu_maker, icons)
-            statusicon = udiskie.tray.UdiskieStatusIcon(trayicon, menu_maker, smart)
-            tasks.append(trayicon.task)
+            self.statusicon.activate()
+            tasks.append(self.statusicon.instance._icon.task)
         else:
-            statusicon = None
             tasks.append(RunForever)
-
-        # automounter
         if options['automount']:
-            import udiskie.automount
-            udiskie.automount.AutoMounter(mounter)
-            tasks.append(mounter.add_all())
-
-        # Note: mounter and statusicon are saved so these are kept alive:
-        self.mounter = mounter
-        self.statusicon = statusicon
+            self.automounter.activate()
+            tasks.append(self.mounter.add_all())
 
         return AsyncList(tasks)
+
+    def _load_notify(self):
+        import udiskie.notify
+        from gi.repository import Notify
+        Notify.init('udiskie')
+        aconfig = self.config.notification_actions
+        if self.options['automount']:
+            aconfig.setdefault('device_added', [])
+        else:
+            aconfig.setdefault('device_added', ['mount'])
+        return udiskie.notify.Notify(
+            Notify.Notification.new,
+            mounter=self.mounter,
+            timeout=self.config.notifications,
+            aconfig=aconfig)
+
+    def notify_command(self):
+        import udiskie.prompt
+        return udiskie.prompt.notify_command(
+            self.options['notify_command'], self.mounter)
+
+    def _load_statusicon(self):
+        import udiskie.tray
+        options = self.options
+
+        if options['tray'] == 'auto':
+            smart = True
+        elif options['tray'] is True:
+            smart = False
+        else:
+            raise ValueError("Invalid tray: %s" % (options['tray'],))
+        icons = udiskie.tray.Icons(self.config.icon_names)
+        actions = udiskie.mount.DeviceActions(self.mounter)
+
+        menu_classes = {'smart': udiskie.tray.SmartUdiskieMenu,
+                        'nested': udiskie.tray.UdiskieMenu,
+                        'flat': udiskie.tray.FlatUdiskieMenu}
+        if options['menu'] not in menu_classes:
+            raise ValueError("Invalid menu: %s" % (options['tray'],))
+        Menu = menu_classes[options['menu']]
+        menu_maker = Menu(self, icons, actions)
+        if options['appindicator']:
+            import udiskie.appindicator
+            TrayIcon = udiskie.appindicator.AppIndicatorIcon
+        else:
+            TrayIcon = udiskie.tray.TrayIcon
+        trayicon = TrayIcon(menu_maker, icons)
+        return udiskie.tray.UdiskieStatusIcon(trayicon, menu_maker, smart)
+
+    def _load_automounter(self):
+        import udiskie.automount
+        return udiskie.automount.AutoMounter(self.mounter)
 
 
 class Mount(_EntryPoint):

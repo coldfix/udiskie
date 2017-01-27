@@ -9,7 +9,7 @@ from gi.repository import Gio
 from gi.repository import Gtk
 
 from .async_ import Async, Coroutine, Return
-from .common import setdefault
+from .common import setdefault, DaemonBase
 from .compat import basestring
 from .locale import _
 from .mount import Action, prune_empty_node
@@ -118,7 +118,7 @@ class UdiskieMenu(object):
     _quit_label = _('Quit')
     _losetup_label = _('Setup loop device')
 
-    def __init__(self, mounter, icons, actions, quit_action=None):
+    def __init__(self, daemon, icons, actions):
         """
         Initialize a new menu maker.
 
@@ -144,9 +144,10 @@ class UdiskieMenu(object):
         must be customized.
         """
         self._icons = icons
-        self._mounter = mounter
+        self._daemon = daemon
+        self._mounter = daemon.mounter
         self._actions = actions
-        self._quit_action = quit_action
+        self._quit_action = daemon.mainloop.quit
 
     def __call__(self, menu):
         """
@@ -164,6 +165,7 @@ class UdiskieMenu(object):
                 self._icons.get_icon('losetup', Gtk.IconSize.MENU),
                 lambda _: self._losetup()
             ))
+        self._insert_options(menu)
         # append menu item for closing the application
         if self._quit_action:
             if len(menu) > 0:
@@ -174,6 +176,18 @@ class UdiskieMenu(object):
                 lambda _: self._quit_action()
             ))
         return menu
+
+    def _insert_options(self, menu):
+        """Add configuration options to menu."""
+        if len(menu) > 0:
+            menu.append(Gtk.SeparatorMenuItem())
+        # TODO: checkitem
+        menu.append(self._menuitem(
+            _("Enable automounting"),
+            icon=None,
+            onclick=lambda _: self._daemon.automounter.toggle(),
+            checked=self._daemon.automounter.active,
+        ))
 
     @Coroutine.from_generator_function
     def _losetup(self):
@@ -240,7 +254,7 @@ class UdiskieMenu(object):
             menu.append(mi)
         self._create_menu_items(menu, section.items)
 
-    def _menuitem(self, label, icon, onclick):
+    def _menuitem(self, label, icon, onclick, checked=None):
         """
         Create a generic menu item.
 
@@ -250,7 +264,10 @@ class UdiskieMenu(object):
         :returns: the menu item object
         :rtype: Gtk.MenuItem
         """
-        if icon is None:
+        if checked is not None:
+            item = Gtk.CheckMenuItem()
+            item.set_active(checked)
+        elif icon is None:
             item = Gtk.MenuItem()
         else:
             item = Gtk.ImageMenuItem()
@@ -412,7 +429,7 @@ class TrayIcon(object):
         self._m = m
 
 
-class UdiskieStatusIcon(object):
+class UdiskieStatusIcon(DaemonBase):
 
     """
     Manage a status icon.
@@ -424,12 +441,23 @@ class UdiskieStatusIcon(object):
     def __init__(self, icon, menumaker, smart=False):
         self._icon = icon
         self._menumaker = menumaker
+        self._mounter = menumaker._mounter
         self._quit_action = menumaker._quit_action
-        udisks = menumaker._mounter.udisks
-        udisks.connect('device_changed', self.update)
-        udisks.connect('device_added', self.update)
-        udisks.connect('device_removed', self.update)
         self.smart = smart
+        self.active = False
+        self.events = {
+            'device_changed': self.update,
+            'device_added': self.update,
+            'device_removed': self.update,
+        }
+
+    def activate(self):
+        super(UdiskieStatusIcon, self).activate()
+        self.update()
+
+    def deactivate(self):
+        super(UdiskieStatusIcon, self).deactivate()
+        self._icon.show(False)
 
     @property
     def smart(self):

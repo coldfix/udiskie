@@ -9,7 +9,7 @@ import logging
 
 from gi.repository import GLib
 
-from .common import exc_message
+from .common import exc_message, DaemonBase
 from .mount import DeviceActions
 from .locale import _
 
@@ -17,7 +17,7 @@ from .locale import _
 __all__ = ['Notify']
 
 
-class Notify(object):
+class Notify(DaemonBase):
 
     """
     Notification tool.
@@ -28,6 +28,11 @@ class Notify(object):
     NOTE: the action buttons in the notifications don't work with all
     notification services.
     """
+
+    EVENTS = ['device_mounted', 'device_unmounted',
+              'device_locked', 'device_unlocked',
+              'device_added', 'device_removed',
+              'job_failed']
 
     def __init__(self, notify, mounter, timeout=None, aconfig=None):
         """
@@ -45,14 +50,11 @@ class Notify(object):
         self._default = self._timeout.get('timeout', -1)
         self._log = logging.getLogger(__name__)
         self._notifications = []
-        # Subscribe all enabled events to the daemon:
-        udisks = mounter.udisks
-        for event in ['device_mounted', 'device_unmounted',
-                      'device_locked', 'device_unlocked',
-                      'device_added', 'device_removed',
-                      'job_failed']:
-            if self._enabled(event):
-                udisks.connect(event, getattr(self, event))
+        self.events = {
+            event: getattr(self, event)
+            for event in self.EVENTS
+            if self._enabled(event)
+        }
 
     # event handlers:
     def device_mounted(self, device):
