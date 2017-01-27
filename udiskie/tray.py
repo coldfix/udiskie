@@ -189,6 +189,12 @@ class UdiskieMenu(object):
             onclick=lambda _: self._daemon.automounter.toggle(),
             checked=self._daemon.automounter.active,
         ))
+        menu.append(self._menuitem(
+            _("Enable notifications"),
+            icon=None,
+            onclick=lambda _: self._daemon.notify.toggle(),
+            checked=self._daemon.notify.active,
+        ))
 
     @Coroutine.from_generator_function
     def _losetup(self):
