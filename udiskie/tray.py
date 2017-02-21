@@ -157,7 +157,8 @@ class UdiskieMenu(object):
         :param Gtk.Menu menu:
         """
         # create actions items
-        self._create_menu_items(menu, self._prepare_menu(self.detect()))
+        flat = self.flat and not extended
+        self._create_menu_items(menu, self._prepare_menu(self.detect(), flat))
         if self._mounter.udisks.loop_support:
             if len(menu) > 0:
                 menu.append(Gtk.SeparatorMenuItem())
@@ -291,7 +292,7 @@ class UdiskieMenu(object):
             item.connect('activate', onclick)
         return item
 
-    def _prepare_menu(self, node):
+    def _prepare_menu(self, node, flat=None):
         """
         Prepare the menu hierarchy from the given device tree.
 
@@ -299,20 +300,22 @@ class UdiskieMenu(object):
         :returns: menu hierarchy
         :rtype: list
         """
-        ItemGroup = MenuSection if self.flat else SubMenu
+        if flat is None:
+            flat = self.flat
+        ItemGroup = MenuSection if flat else SubMenu
         return [
-            ItemGroup(branch.label, self._collapse_device(branch))
+            ItemGroup(branch.label, self._collapse_device(branch, flat))
             for branch in node.branches
             if branch.methods or branch.branches
         ]
 
-    def _collapse_device(self, node):
+    def _collapse_device(self, node, flat):
         """Collapse device hierarchy into a flat folder."""
         items = [item
                  for branch in node.branches
-                 for item in self._collapse_device(branch)
+                 for item in self._collapse_device(branch, flat)
                  if item]
-        if self.flat:
+        if flat:
             items.extend(node.methods)
         else:
             items.append(MenuSection(None, node.methods))
