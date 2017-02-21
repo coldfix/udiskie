@@ -16,7 +16,7 @@ from .mount import Action, prune_empty_node
 from .prompt import Dialog
 
 
-__all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
+__all__ = ['UdiskieMenu', 'TrayIcon']
 
 
 class MenuFolder(object):
@@ -118,7 +118,7 @@ class UdiskieMenu(object):
     _quit_label = _('Quit')
     _losetup_label = _('Setup loop device')
 
-    def __init__(self, daemon, icons, actions):
+    def __init__(self, daemon, icons, actions, flat=True):
         """
         Initialize a new menu maker.
 
@@ -148,6 +148,7 @@ class UdiskieMenu(object):
         self._mounter = daemon.mounter
         self._actions = actions
         self._quit_action = daemon.mainloop.quit
+        self.flat = flat
 
     def __call__(self, menu, extended):
         """
@@ -298,17 +299,12 @@ class UdiskieMenu(object):
         :returns: menu hierarchy
         :rtype: list
         """
+        ItemGroup = MenuSection if self.flat else SubMenu
         return [
-            MenuSection(None, [
-                SubMenu(branch.label, self._prepare_menu(branch))
-                for branch in node.branches
-                if branch.methods or branch.branches
-            ]),
-            MenuSection(None, node.methods),
+            ItemGroup(branch.label, self._collapse_device(branch))
+            for branch in node.branches
+            if branch.methods or branch.branches
         ]
-
-
-class SmartUdiskieMenu(UdiskieMenu):
 
     def _collapse_device(self, node):
         """Collapse device hierarchy into a flat folder."""
@@ -316,36 +312,11 @@ class SmartUdiskieMenu(UdiskieMenu):
                  for branch in node.branches
                  for item in self._collapse_device(branch)
                  if item]
-        items.append(MenuSection(None, node.methods))
+        if self.flat:
+            items.extend(node.methods)
+        else:
+            items.append(MenuSection(None, node.methods))
         return items
-
-    def _prepare_menu(self, node):
-        """Overrides UdiskieMenu._prepare_menu."""
-        return [
-            SubMenu(branch.label, self._collapse_device(branch))
-            for branch in node.branches
-            if branch.methods or branch.branches
-        ]
-
-
-class FlatUdiskieMenu(UdiskieMenu):
-
-    def _collapse_device(self, node):
-        """Collapse device hierarchy into a flat folder."""
-        items = [item
-                 for branch in node.branches
-                 for item in self._collapse_device(branch)
-                 if item]
-        items.extend(node.methods)
-        return items
-
-    def _prepare_menu(self, node):
-        """Overrides UdiskieMenu._prepare_menu."""
-        return [
-            MenuSection(branch.label, self._collapse_device(branch))
-            for branch in node.branches
-            if branch.methods or branch.branches
-        ]
 
 
 class TrayIcon(object):
