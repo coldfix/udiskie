@@ -16,7 +16,7 @@ from .mount import Action, prune_empty_node
 from .prompt import Dialog
 
 
-__all__ = ['UdiskieMenu', 'SmartUdiskieMenu', 'TrayIcon']
+__all__ = ['UdiskieMenu', 'TrayIcon']
 
 
 class MenuFolder(object):
@@ -118,7 +118,7 @@ class UdiskieMenu(object):
     _quit_label = _('Quit')
     _losetup_label = _('Setup loop device')
 
-    def __init__(self, daemon, icons, actions):
+    def __init__(self, daemon, icons, actions, flat=True):
         """
         Initialize a new menu maker.
 
@@ -148,15 +148,17 @@ class UdiskieMenu(object):
         self._mounter = daemon.mounter
         self._actions = actions
         self._quit_action = daemon.mainloop.quit
+        self.flat = flat
 
-    def __call__(self, menu):
+    def __call__(self, menu, extended):
         """
         Populate the menu with udiskie mount operations.
 
         :param Gtk.Menu menu:
         """
         # create actions items
-        self._create_menu_items(menu, self._prepare_menu(self.detect()))
+        flat = self.flat and not extended
+        self._create_menu_items(menu, self._prepare_menu(self.detect(), flat))
         if self._mounter.udisks.loop_support:
             if len(menu) > 0:
                 menu.append(Gtk.SeparatorMenuItem())
@@ -165,7 +167,8 @@ class UdiskieMenu(object):
                 self._icons.get_icon('losetup', Gtk.IconSize.MENU),
                 lambda _: self._losetup()
             ))
-        self._insert_options(menu)
+        if extended:
+            self._insert_options(menu)
         # append menu item for closing the application
         if self._quit_action:
             if len(menu) > 0:
@@ -187,6 +190,12 @@ class UdiskieMenu(object):
             icon=None,
             onclick=lambda _: self._daemon.automounter.toggle(),
             checked=self._daemon.automounter.active,
+        ))
+        menu.append(self._menuitem(
+            _("Enable notifications"),
+            icon=None,
+            onclick=lambda _: self._daemon.notify.toggle(),
+            checked=self._daemon.notify.active,
         ))
 
     @Coroutine.from_generator_function
@@ -283,7 +292,7 @@ class UdiskieMenu(object):
             item.connect('activate', onclick)
         return item
 
-    def _prepare_menu(self, node):
+    def _prepare_menu(self, node, flat=None):
         """
         Prepare the menu hierarchy from the given device tree.
 
@@ -291,54 +300,26 @@ class UdiskieMenu(object):
         :returns: menu hierarchy
         :rtype: list
         """
+        if flat is None:
+            flat = self.flat
+        ItemGroup = MenuSection if flat else SubMenu
         return [
-            MenuSection(None, [
-                SubMenu(branch.label, self._prepare_menu(branch))
-                for branch in node.branches
-                if branch.methods or branch.branches
-            ]),
-            MenuSection(None, node.methods),
-        ]
-
-
-class SmartUdiskieMenu(UdiskieMenu):
-
-    def _collapse_device(self, node):
-        """Collapse device hierarchy into a flat folder."""
-        items = [item
-                 for branch in node.branches
-                 for item in self._collapse_device(branch)
-                 if item]
-        items.append(MenuSection(None, node.methods))
-        return items
-
-    def _prepare_menu(self, node):
-        """Overrides UdiskieMenu._prepare_menu."""
-        return [
-            SubMenu(branch.label, self._collapse_device(branch))
+            ItemGroup(branch.label, self._collapse_device(branch, flat))
             for branch in node.branches
             if branch.methods or branch.branches
         ]
 
-
-class FlatUdiskieMenu(UdiskieMenu):
-
-    def _collapse_device(self, node):
+    def _collapse_device(self, node, flat):
         """Collapse device hierarchy into a flat folder."""
         items = [item
                  for branch in node.branches
-                 for item in self._collapse_device(branch)
+                 for item in self._collapse_device(branch, flat)
                  if item]
-        items.extend(node.methods)
+        if flat:
+            items.extend(node.methods)
+        else:
+            items.append(MenuSection(None, node.methods))
         return items
-
-    def _prepare_menu(self, node):
-        """Overrides UdiskieMenu._prepare_menu."""
-        return [
-            MenuSection(branch.label, self._collapse_device(branch))
-            for branch in node.branches
-            if branch.methods or branch.branches
-        ]
 
 
 class TrayIcon(object):
@@ -405,19 +386,20 @@ class TrayIcon(object):
         self._conn_left = None
         self._conn_right = None
 
-    def create_context_menu(self):
+    def create_context_menu(self, extended):
         """Create the context menu."""
         menu = Gtk.Menu()
-        self._menu(menu)
+        self._menu(menu, extended)
         return menu
 
     def _activate(self, icon):
         """Handle a left click event (show the menu)."""
-        self._popup_menu(icon, button=0, time=Gtk.get_current_event_time())
+        self._popup_menu(icon, button=0, time=Gtk.get_current_event_time(),
+                         extended=False)
 
-    def _popup_menu(self, icon, button, time):
+    def _popup_menu(self, icon, button, time, extended=True):
         """Handle a right click event (show the menu)."""
-        m = self.create_context_menu()
+        m = self.create_context_menu(extended)
         m.show_all()
         m.popup(parent_menu_shell=None,
                 parent_menu_item=None,

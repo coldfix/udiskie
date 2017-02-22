@@ -515,13 +515,15 @@ class Daemon(_EntryPoint):
         icons = udiskie.tray.Icons(self.config.icon_names)
         actions = udiskie.mount.DeviceActions(self.mounter)
 
-        menu_classes = {'smart': udiskie.tray.SmartUdiskieMenu,
-                        'nested': udiskie.tray.UdiskieMenu,
-                        'flat': udiskie.tray.FlatUdiskieMenu}
-        if options['menu'] not in menu_classes:
-            raise ValueError("Invalid menu: %s" % (options['tray'],))
-        Menu = menu_classes[options['menu']]
-        menu_maker = Menu(self, icons, actions)
+        if options['menu'] == 'flat':
+            flat = True
+        # dropped legacy 'nested' mode:
+        elif options['menu'] in ('smart', 'nested'):
+            flat = False
+        else:
+            raise ValueError("Invalid menu: %s" % (options['menu'],))
+
+        menu_maker = udiskie.tray.UdiskieMenu(self, icons, actions, flat)
         if options['appindicator']:
             import udiskie.appindicator
             TrayIcon = udiskie.appindicator.AppIndicatorIcon

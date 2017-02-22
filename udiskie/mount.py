@@ -201,9 +201,8 @@ class Mounter(object):
         if device.is_mounted:
             self._log.info(_('not mounting {0}: already mounted', device))
             yield Return(True)
-        fstype = str(device.id_type)
         options = self._mount_options(device)
-        kwargs = dict(fstype=fstype, options=options)
+        kwargs = dict(options=options)
         self._log.debug(_('mounting {0} with {1}', device, kwargs))
         mount_path = yield device.mount(**kwargs)
         self._log.info(_('mounted {0} on {1}', device, mount_path))
