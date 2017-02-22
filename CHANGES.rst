@@ -1,6 +1,16 @@
 CHANGELOG
 ---------
 
+1.6.0
+~~~~~
+Date: 22.02.2017
+
+- fix crash on startup if config file is empty
+- add ``--notify-command`` to notify external programs (@jgraef) [#127]
+- can enable/disable automounting via special right-click menu [#98]
+- do not explicitly specify filesystem when mounting [#131]
+
+
 1.5.1
 ~~~~~
 Date: 03.06.2016
