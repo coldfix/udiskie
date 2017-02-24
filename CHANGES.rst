@@ -1,6 +1,15 @@
 CHANGELOG
 ---------
 
+1.6.1
+~~~~~
+Date: 24.02.2017
+
+- add format strings for the undocumented ``udiskie-info`` utility
+- speed up autocompletion times, for ``udiskie-mount`` by about a factor
+  three, for ``udiskie-umount`` by about a factor 10
+
+
 1.6.0
 ~~~~~
 Date: 22.02.2017
