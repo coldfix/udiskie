@@ -116,7 +116,7 @@ class UdiskieMenu(object):
     """
 
     _quit_label = _('Quit')
-    _losetup_label = _('Setup loop device')
+    _losetup_label = _('Mount disc image')
 
     def __init__(self, daemon, icons, actions, flat=True):
         """
