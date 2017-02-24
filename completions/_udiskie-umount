@@ -31,11 +31,24 @@ function _udiskie-umount
 
   case "$state" in
   udevordir)
-    local dev_tmp mp_tmp loop_tmp
+    local dev_tmp mp_tmp loop_tmp dev_detail
 
-    dev_tmp=( $(udiskie-info -a) )
-    mp_tmp=( $(udiskie-info -a -f is_filesystem -f is_mounted -o mount_path) )
-    loop_tmp=( $(udiskie-info -a -f is_loop -o loop_file) )
+    # "${(@f)X}" means to use lines as separators
+    dev_detail=( "${(@f)$(udiskie-info -a -o '{device_presentation}<:1:>{mount_path}<:2:>{is_filesystem}<:3:>{is_mounted}<:4:>{is_loop}<:5:>{loop_file}')}" )
+
+    # select: 'device_presentation'
+    dev_tmp=( ${dev_detail%%<:1:>*} )
+
+    # filter: 'is_filesystem' and 'is_mounted'
+    mp_tmp=( ${(M)dev_detail:#*<:2:>True<:3:>True<:4:>*} )
+    # select: 'mount_path'
+    mp_tmp=( ${mp_tmp##*<:1:>} )
+    mp_tmp=( ${mp_tmp%%<:2:>*} )
+
+    # filter: 'is_loop'
+    loop_tmp=( ${(M)dev_detail:#*<:3:>True<:5:>*} )
+    # select: 'mount_path'
+    loop_tmp=( ${loop_tmp##*<:5:>} )
 
     _alternative \
       'directories:mount point:_canonical_paths -A mp_tmp -N directories mount\ point' \
