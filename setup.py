@@ -5,6 +5,9 @@ from distutils.command.install_data import install_data as orig_install_data
 from distutils.command.build import build as orig_build
 from distutils.util import convert_path
 
+# monkey-patch: use faster entry points!
+import fastentrypoints
+
 from subprocess import call
 import sys
 import logging
