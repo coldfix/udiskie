@@ -25,7 +25,7 @@ import udiskie.config
 import udiskie.mount
 import udiskie.compat
 from .async_ import AsyncList, Coroutine, Return, RunForever
-from .common import extend, str2unicode
+from .common import extend, str2unicode, ObjDictView
 from .locale import _
 
 
@@ -738,7 +738,9 @@ class Info(_EntryPoint):
     Unmount options:
         -a, --all                   List all handleable devices
 
-        -o COL, --output COL        Specify which output column to print
+        -o COL, --output COL        Specify output columns in a format string
+                                    containing the allowed device attributes,
+                                    e.g.: "{ui_label} {is_luks}"
                                     [default: device_presentation].
 
         -f FILT, --filter FILT      Print only devices that match the given
@@ -775,13 +777,25 @@ class Info(_EntryPoint):
         else:
             devices = mounter.get_all_handleable()
 
+        DeviceFilter = udiskie.config.DeviceFilter
         output = options['output']
+        # old behaviour: single attribute
+        if output in DeviceFilter.VALID_PARAMETERS:
+            def format_output(device):
+                return getattr(device, output)
+        # new behaviour: format string
+        else:
+            from string import Formatter
+            formatter = Formatter()
+            def format_output(device):
+                view = ObjDictView(device, DeviceFilter.VALID_PARAMETERS)
+                return formatter.vformat(output, (), view)
 
         filters = [_parse_filter(spec) for spec in options['filter']]
-        matcher = udiskie.config.DeviceFilter(dict(filters), None)
+        matcher = DeviceFilter(dict(filters), None)
 
         for device in devices:
             if matcher.match(device):
-                print(getattr(device, output))
+                print(format_output(device))
 
         return AsyncList([])

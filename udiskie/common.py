@@ -153,6 +153,23 @@ class AttrDictView(object):
             raise AttributeError
 
 
+class ObjDictView(object):
+
+    """Provide dict-like access view to the attributes of an object."""
+
+    def __init__(self, object, valid=None):
+        self._object = object
+        self._valid = valid
+
+    def __getitem__(self, key):
+        if self._valid is None or key in self._valid:
+            try:
+                return getattr(self._object, key)
+            except AttributeError:
+                raise KeyError(key)
+        raise KeyError("Unknown key: {}".format(key))
+
+
 @fix_str_conversions
 class BaseDevice(object):
 
