@@ -2,7 +2,7 @@
 udiskie
 =======
 
-|Version| |Downloads| |License|
+|Version| |License|
 
 *udiskie* is a UDisks_ front-end that allows to manage removeable media such
 as CDs or flash drives from userspace. Its features include:
@@ -86,10 +86,6 @@ configurations and make the remaining easier to test, i.e.:
 .. |Version| image:: http://coldfix.de:8080/v/udiskie/badge.svg
    :target: https://pypi.python.org/pypi/udiskie/
    :alt: Latest Version
-
-.. |Downloads| image:: http://coldfix.de:8080/d/udiskie/badge.svg
-   :target: https://pypi.python.org/pypi/udiskie#downloads
-   :alt: Downloads
 
 .. |License| image:: http://coldfix.de:8080/license/udiskie/badge.svg
    :target: https://github.com/coldfix/udiskie/blob/master/COPYING
