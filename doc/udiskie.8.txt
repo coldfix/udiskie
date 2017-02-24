@@ -323,7 +323,7 @@ remain available:
     has_media
     device_file             block device path, e.g. "/dev/sdb1"
     device_presentation     display string, e.g. "/dev/sdb1"
-    device_id               unique, persistent device identifer
+    device_id               unique, persistent device identifier
     id_usage                E.g. "filesystem" or "crypto"
     is_crypto
     is_ignored
