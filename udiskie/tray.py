@@ -35,7 +35,6 @@ class MenuSection(MenuFolder): pass
 class SubMenu(MenuFolder): pass
 
 
-
 class Icons(object):
 
     """Encapsulates the responsibility to load icons."""
@@ -115,9 +114,6 @@ class UdiskieMenu(object):
     Objects of this class generate action menus when being called.
     """
 
-    _quit_label = _('Quit')
-    _losetup_label = _('Mount disc image')
-
     def __init__(self, daemon, icons, actions, flat=True):
         """
         Initialize a new menu maker.
@@ -159,32 +155,21 @@ class UdiskieMenu(object):
         # create actions items
         flat = self.flat and not extended
         self._create_menu_items(menu, self._prepare_menu(self.detect(), flat))
-        if self._mounter.udisks.loop_support:
-            if len(menu) > 0:
-                menu.append(Gtk.SeparatorMenuItem())
-            menu.append(self._menuitem(
-                self._losetup_label,
-                self._icons.get_icon('losetup', Gtk.IconSize.MENU),
-                lambda _: self._losetup()
-            ))
         if extended:
             self._insert_options(menu)
-        # append menu item for closing the application
-        if self._quit_action:
-            if len(menu) > 0:
-                menu.append(Gtk.SeparatorMenuItem())
-            menu.append(self._menuitem(
-                self._quit_label,
-                self._icons.get_icon('quit', Gtk.IconSize.MENU),
-                lambda _: self._quit_action()
-            ))
         return menu
 
     def _insert_options(self, menu):
         """Add configuration options to menu."""
         if len(menu) > 0:
             menu.append(Gtk.SeparatorMenuItem())
-        # TODO: checkitem
+        if self._mounter.udisks.loop_support:
+            menu.append(self._menuitem(
+                _('Mount disc image'),
+                self._icons.get_icon('losetup', Gtk.IconSize.MENU),
+                lambda _: self._losetup()
+            ))
+            menu.append(Gtk.SeparatorMenuItem())
         menu.append(self._menuitem(
             _("Enable automounting"),
             icon=None,
@@ -197,6 +182,14 @@ class UdiskieMenu(object):
             onclick=lambda _: self._daemon.notify.toggle(),
             checked=self._daemon.notify.active,
         ))
+        # append menu item for closing the application
+        if self._quit_action:
+            menu.append(Gtk.SeparatorMenuItem())
+            menu.append(self._menuitem(
+                _('Quit'),
+                self._icons.get_icon('quit', Gtk.IconSize.MENU),
+                lambda _: self._quit_action()
+            ))
 
     @Coroutine.from_generator_function
     def _losetup(self):
