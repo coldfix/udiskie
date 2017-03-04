@@ -161,8 +161,7 @@ class UdiskieMenu(object):
 
     def _insert_options(self, menu):
         """Add configuration options to menu."""
-        if len(menu) > 0:
-            menu.append(Gtk.SeparatorMenuItem())
+        menu.append(Gtk.SeparatorMenuItem())
         if self._mounter.udisks.loop_support:
             menu.append(self._menuitem(
                 _('Mount disc image'),
@@ -246,6 +245,10 @@ class UdiskieMenu(object):
                 self._create_menu_section(menu, node)
             else:
                 raise ValueError(_("Invalid node!"))
+        if len(menu) == 0:
+            mi = self._menuitem(_("No external devices"), None, None)
+            mi.set_sensitive(False)
+            menu.append(mi)
 
     def _create_menu_section(self, menu, section):
         if len(menu) > 0:
