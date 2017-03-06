@@ -198,7 +198,7 @@ program_options:
                             # means auto-hide the tray icon when
                             # there are no handled devices.
 
-  menu:             smart   # ["smart" | "nested" | "flat"] Set the
+  menu:             flat    # ["flat" | "nested"] Set the
                             # systray menu behaviour.
 
   automount:        false   # [bool] Enable automatic mounting.

@@ -356,7 +356,7 @@ class Daemon(_EntryPoint):
         -t, --tray                              Show tray icon
         -s, --smart-tray                        Auto hide tray icon
         -T, --no-tray                           Disable tray icon
-        -m MENU, --menu MENU                    Tray menu [smart/nested/flat]
+        -m MENU, --menu MENU                    Tray menu [flat/nested]
 
         --appindicator                          Use appindicator for status icon
         --no-appindicator                       Don't use appindicator
