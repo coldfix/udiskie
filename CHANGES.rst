@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+1.6.2
+~~~~~
+Date: 06.03.2017
+
+- Show losetup/quit actions only in ex-menu
+- Show note in menu if no devices are found
+
+
 1.6.1
 ~~~~~
 Date: 24.02.2017
