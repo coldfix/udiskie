@@ -55,8 +55,8 @@ The…
 - `Source Code`_ is hosted on github.
 - `Latest Release`_ is available for download on PyPI.
 - `Issue Tracker`_ is the right place to report any issues you encounter,
-  ask general questions or suggest new features. There is also a public
-  `Mailing List`_ if you prefer email.
+  ask general questions or suggest new features. (Or you can send me an
+  email.)
 
 
 .. _Wiki: https://github.com/coldfix/udiskie/wiki
@@ -64,7 +64,6 @@ The…
 .. _Source Code: https://github.com/coldfix/udiskie
 .. _Latest Release: https://pypi.python.org/pypi/udiskie/
 .. _Issue Tracker: https://github.com/coldfix/udiskie/issues
-.. _Mailing List: https://lists.coldfix.de/mailman/listinfo/udiskie
 
 
 Roadmap
