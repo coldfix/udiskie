@@ -20,7 +20,7 @@ from gi.repository import GLib
 
 from .common import (Emitter, samefile, sameuuid, AttrDictView, decode_ay,
                      BaseDevice)
-from .dbus import connect_service, MethodsProxy, DBusCallWithFdList
+from .dbus import connect_service, MethodsProxy, DBusCallWithFdList, DBusCall
 from .locale import _
 from .async_ import Coroutine, Return
 
@@ -583,7 +583,7 @@ class Daemon(Emitter):
                 return device
         raise ValueError(_('no device found owning "{0}"', path))
 
-    def __init__(self, proxy):
+    def __init__(self, proxy, version):
 
         """Initialize object and start listening to UDisks2 events."""
 
@@ -599,8 +599,13 @@ class Daemon(Emitter):
                        'job_failed']
         super(Daemon, self).__init__(event_names)
 
-        self._proxy = proxy
         self._log = logging.getLogger(__name__)
+        self._log.debug(_('Daemon version: {0}', version))
+
+        self.version = version
+        self.version_info = tuple(map(int, version.split('.')))
+
+        self._proxy = proxy
         self._objects = {}
 
         proxy.connect('InterfacesAdded', self._interfaces_added)
@@ -629,9 +634,21 @@ class Daemon(Emitter):
     def create(cls):
         service = (cls.BusName, cls.ObjectPath, cls.Interface)
         proxy = yield connect_service(*service)
-        daemon = cls(proxy)
+        version = yield cls.get_version()
+        daemon = cls(proxy, version)
         yield daemon._sync()
         yield Return(daemon)
+
+    @classmethod
+    @Coroutine.from_generator_function
+    def get_version(cls):
+        service = (cls.BusName,
+                   '/org/freedesktop/UDisks2/Manager',
+                   Interface['Properties'])
+        manager = yield connect_service(*service)
+        version = yield DBusCall(manager._proxy, 'Get', '(ss)', (
+            Interface['Manager'], 'Version'))
+        yield Return(version)
 
     @Coroutine.from_generator_function
     def loop_setup(self, fd, options):

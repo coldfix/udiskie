@@ -26,7 +26,7 @@ from .async_ import AsyncList, Coroutine, Return
 from .common import (Emitter, samefile, sameuuid, AttrDictView, wraps,
                      NullDevice, BaseDevice)
 from .compat import fix_str_conversions
-from .dbus import connect_service, MethodsProxy
+from .dbus import connect_service, MethodsProxy, DBusCall
 from .locale import _
 
 
@@ -481,7 +481,7 @@ class Daemon(Emitter):
                 return device
         raise ValueError(_('no device found owning "{0}"', path))
 
-    def __init__(self, proxy):
+    def __init__(self, proxy, version):
         """
         Create a Daemon object and start listening to DBus events.
 
@@ -501,8 +501,13 @@ class Daemon(Emitter):
                        'job_failed']
         super(Daemon, self).__init__(event_names)
 
-        self._proxy = proxy
         self._log = logging.getLogger(__name__)
+        self._log.debug(_('Daemon version: {0}', version))
+
+        self.version = version
+        self.version_info = tuple(map(int, version.split('.')))
+
+        self._proxy = proxy
 
         self._jobs = {}
         self._devices = {}
@@ -523,9 +528,20 @@ class Daemon(Emitter):
     def create(cls):
         service = (cls.BusName, cls.ObjectPath, cls.Interface)
         proxy = yield connect_service(*service)
-        udisks = cls(proxy)
-        yield udisks._sync()
-        yield Return(udisks)
+        version = yield cls.get_version()
+        daemon = cls(proxy, version)
+        yield daemon._sync()
+        yield Return(daemon)
+
+    @classmethod
+    @Coroutine.from_generator_function
+    def get_version(cls):
+        service = (cls.BusName, cls.ObjectPath,
+                   'org.freedesktop.DBus.Properties')
+        manager = yield connect_service(*service)
+        version = yield DBusCall(manager._proxy, 'Get', '(ss)', (
+            cls.Interface, 'DaemonVersion'))
+        yield Return(version)
 
     def loop_setup(self, fd, options):
         raise NotImplementedError("UDisks1 does not support LoopSetup!")
