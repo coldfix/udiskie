@@ -241,8 +241,13 @@ device_config:
 - id_uuid: 9d53-13ba        # [filter] match by device UUID
   options: [noexec, nodev]  # [action] mount options can be given as list
   ignore:  false            # [action] never ignore this device (even if fs=FAT)
+  automount: false          # [action] do not automount this device
 - id_type: vfat             # [filter] match file system type
   ignore:  true             # [action] ignore all FAT devices
+
+- ignore:    True           # never mount/unmount or even show this in the GUI
+  automount: False          # show but do not automount this device
+  options: []               # additional options to be passed when mounting
 
 mount_options:              # [deprecated] do not use
 ignore_device:              # [deprecated] do not use

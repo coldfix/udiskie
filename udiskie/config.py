@@ -115,7 +115,10 @@ class DeviceFilter(object):
             self._values['options'] = options
         # ignore device:
         if 'ignore' in match:
-            self._values['ignore'] = match.pop('ignore', True)
+            self._values['ignore'] = match.pop('ignore')
+        # automount:
+        if 'automount' in match:
+            self._values['automount'] = match.pop('automount')
         # the use of list() makes deletion inside the loop safe:
         for k in list(self._match):
             if k not in self.VALID_PARAMETERS:

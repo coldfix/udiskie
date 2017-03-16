@@ -358,7 +358,7 @@ class Mounter(object):
         :rtype: bool
         """
         success = True
-        if not self.is_handleable(device):
+        if not self.is_automount(device):
             pass
         elif device.is_filesystem:
             if not device.is_mounted:
@@ -647,6 +647,11 @@ class Mounter(object):
             return self.is_handleable(_get_parent(device))
         return not ignored
 
+    def is_automount(self, device):
+        if not self.is_handleable(device):
+            return False
+        return match_config(self._config, device, 'automount', True)
+
     def _ignore_device(self, device):
         return match_config(self._config, device, 'ignore', False)
 
@@ -654,7 +659,7 @@ class Mounter(object):
         """
         Check if device can be added with ``auto_add``.
         """
-        if not self.is_handleable(device):
+        if not self.is_automount(device):
             return False
         if device.is_filesystem:
             return not device.is_mounted
