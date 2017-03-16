@@ -424,8 +424,7 @@ class Daemon(_EntryPoint):
             cache = udiskie.cache.PasswordCache(timeout)
 
         self.mounter = udiskie.mount.Mounter(
-            mount_options=config.mount_options,
-            ignore_device=config.ignore_device,
+            config=config.device_config,
             prompt=prompt,
             browser=browser,
             cache=cache,
@@ -597,16 +596,15 @@ class Mount(_EntryPoint):
         config = self.config
         options = self.options
 
+        device_config = config.device_config
         if options['options']:
-            opts = [o.strip() for o in options['options'].split(',')]
-            mount_options = lambda dev: opts
-        else:
-            mount_options = config.mount_options
+            device_config._filters.insert(0, udiskie.config.MountOptions({
+                'options': [o.strip() for o in options['options'].split(',')],
+            }))
 
         prompt = udiskie.prompt.password(options['password_prompt'])
         mounter = udiskie.mount.Mounter(
-            mount_options=mount_options,
-            ignore_device=config.ignore_device,
+            config=config.device_config,
             prompt=prompt,
             udisks=self.udisks)
 
@@ -685,7 +683,7 @@ class Umount(_EntryPoint):
 
         mounter = udiskie.mount.Mounter(
             self.udisks,
-            ignore_device=config.ignore_device)
+            config=config.device_config)
 
         strategy = dict(detach=options['detach'],
                         eject=options['eject'],
@@ -770,7 +768,7 @@ class Info(_EntryPoint):
 
         mounter = udiskie.mount.Mounter(
             self.udisks,
-            ignore_device=config.ignore_device)
+            config=config.device_config)
 
         if options['<device>']:
             devices = [self.udisks.find(path) for path in options['<device>']]
@@ -792,7 +790,7 @@ class Info(_EntryPoint):
                 return formatter.vformat(output, (), view)
 
         filters = [_parse_filter(spec) for spec in options['filter']]
-        matcher = DeviceFilter(dict(filters), None)
+        matcher = DeviceFilter(dict(filters))
 
         for device in devices:
             if matcher.match(device):

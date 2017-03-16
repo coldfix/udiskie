@@ -13,7 +13,7 @@ import os
 
 from .async_ import AsyncList, Coroutine, Return
 from .common import wraps, setdefault, exc_message
-from .config import IgnoreDevice, FilterMatcher
+from .config import IgnoreDevice, match_config
 from .locale import _
 
 
@@ -119,8 +119,7 @@ class Mounter(object):
     """
 
     def __init__(self, udisks,
-                 mount_options=None,
-                 ignore_device=None,
+                 config=None,
                  prompt=None,
                  browser=None,
                  cache=None):
@@ -128,7 +127,7 @@ class Mounter(object):
         Initialize mounter with the given defaults.
 
         :param udisks: udisks service object. May be a Sniffer or a Daemon.
-        :param FilterMatcher filter: customize mount options and handleability
+        :param list config: list of :class:`DeviceFilter`
         :param callable prompt: retrieve passwords for devices
         :param callable browser: open devices
 
@@ -136,9 +135,7 @@ class Mounter(object):
         If browser is None, browse will not work.
         """
         self.udisks = udisks
-        self._mount_options = mount_options or (lambda device: None)
-        self._ignore_device = ignore_device or FilterMatcher([], None)
-        self._ignore_device._filters += [
+        self._config = (config or []) + [
             IgnoreDevice({'symlinks': '/dev/mapper/docker-*', 'ignore': True}),
             IgnoreDevice({'symlinks': '/dev/disk/by-id/dm-name-docker-*', 'ignore': True}),
             IgnoreDevice({'is_loop': True, 'loop_file': '/*', 'ignore': False}),
@@ -201,7 +198,7 @@ class Mounter(object):
         if device.is_mounted:
             self._log.info(_('not mounting {0}: already mounted', device))
             yield Return(True)
-        options = self._mount_options(device)
+        options = match_config(self._config, device, 'options', None)
         kwargs = dict(options=options)
         self._log.debug(_('mounting {0} with {1}', device, kwargs))
         mount_path = yield device.mount(**kwargs)
@@ -649,6 +646,9 @@ class Mounter(object):
         if ignored is None and device is not None:
             return self.is_handleable(_get_parent(device))
         return not ignored
+
+    def _ignore_device(self, device):
+        return match_config(self._config, device, 'ignore', False)
 
     def is_addable(self, device):
         """
