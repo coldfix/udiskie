@@ -18,7 +18,7 @@ from .locale import _
 
 
 __all__ = ['DeviceFilter',
-           'FilterMatcher',
+           'match_config',
            'Config']
 
 
@@ -97,7 +97,7 @@ class DeviceFilter(object):
         'ui_id_uuid',
     ]
 
-    def __init__(self, match, value):
+    def __init__(self, match):
         """
         Construct an instance.
 
@@ -105,20 +105,32 @@ class DeviceFilter(object):
         :param list value: value
         """
         self._log = logging.getLogger(__name__)
-        self._match = match.copy()
+        self._match = match = match.copy()
+        self._values = {}
+        # mount options:
+        if 'options' in match:
+            options = match.pop('options')
+            if isinstance(options, basestring):
+                options = [o.strip() for o in options.split(',')]
+            self._values['options'] = options
+        # ignore device:
+        if 'ignore' in match:
+            self._values['ignore'] = match.pop('ignore')
+        # automount:
+        if 'automount' in match:
+            self._values['automount'] = match.pop('automount')
         # the use of list() makes deletion inside the loop safe:
         for k in list(self._match):
             if k not in self.VALID_PARAMETERS:
                 self._log.error(_('Unknown matching attribute: {!r}', k))
                 del self._match[k]
-        self._value = value
         self._log.debug(_('{0} created', self))
 
     def __str__(self):
         return _('{0}(match={1!r}, value={2!r})',
                  self.__class__.__name__,
                  self._match,
-                 self._value)
+                 self._values)
 
     def match(self, device):
         """
@@ -129,7 +141,10 @@ class DeviceFilter(object):
         return all(match_value(getattr(device, k), v)
                    for k, v in self._match.items())
 
-    def value(self, device):
+    def has_value(self, kind):
+        return kind in self._values
+
+    def value(self, kind, device):
         """
         Get the associated value.
 
@@ -138,8 +153,12 @@ class DeviceFilter(object):
         If :meth:`match` is False for the device, the return value of this
         method is undefined.
         """
-        self._log.debug(_('{0} used for {1}', self, device.object_path))
-        return self._value
+        self._log.debug(_('{0}(match={1!r}, {2}={3!r}) used for {4}',
+                          self.__class__.__name__,
+                          self._match,
+                          kind, self._values[kind],
+                          device.object_path))
+        return self._values[kind]
 
 
 class MountOptions(DeviceFilter):
@@ -148,11 +167,8 @@ class MountOptions(DeviceFilter):
 
     def __init__(self, config_item):
         """Parse the MountOptions filter from the config item."""
-        config_item = config_item.copy()
-        options = config_item.pop('options')
-        if isinstance(options, basestring):
-            options = [o.strip() for o in options.split(',')]
-        super(MountOptions, self).__init__(config_item, options)
+        config_item.setdefault('options', None)
+        super(MountOptions, self).__init__(config_item)
 
 
 class IgnoreDevice(DeviceFilter):
@@ -161,37 +177,25 @@ class IgnoreDevice(DeviceFilter):
 
     def __init__(self, config_item):
         """Parse the IgnoreDevice filter from the config item."""
-        config_item = config_item.copy()
-        ignore = config_item.pop('ignore', True)
-        super(IgnoreDevice, self).__init__(config_item, ignore)
+        config_item.setdefault('ignore', True)
+        super(IgnoreDevice, self).__init__(config_item)
 
 
-class FilterMatcher(object):
+def match_config(filters, device, kind, default):
+    """
+    Matches devices against multiple :class:`DeviceFilter`s.
 
-    """Matches devices against multiple `DeviceFilter`s."""
-
-    def __init__(self, filters, default):
-        """
-        Construct a FilterMatcher instance from list of DeviceFilter.
-
-        :param list filters:
-        """
-        self._filters = list(filters)
-        self._default = default
-
-    def __call__(self, device):
-        """
-        Matches devices against multiple :class:`DeviceFilter`s.
-
-        :param default: default value
-        :param list filters: device filters
-        :param Device device: device to be mounted
-        :returns: value of the first matching filter
-        """
-        if device is None:
-            return self._default
-        matches = (f.value(device) for f in self._filters if f.match(device))
-        return next(matches, self._default)
+    :param default: default value
+    :param list filters: device filters
+    :param Device device: device to be mounted
+    :returns: value of the first matching filter
+    """
+    if device is None:
+        return default
+    matches = (f.value(kind, device)
+               for f in filters
+               if f.has_value(kind) and f.match(device))
+    return next(matches, default)
 
 
 class Config(object):
@@ -253,16 +257,11 @@ class Config(object):
             return cls(load(f))
 
     @property
-    def mount_options(self):
-        """Get a MountOptions filter list from the config data."""
-        config_list = self._data.get('mount_options', [])
-        return FilterMatcher(map(MountOptions, config_list), None)
-
-    @property
-    def ignore_device(self):
-        """Get a IgnoreDevice filter list from the config data"""
-        config_list = self._data.get('ignore_device', [])
-        return FilterMatcher(map(IgnoreDevice, config_list), False)
+    def device_config(self):
+        device_config = map(DeviceFilter, self._data.get('device_config', []))
+        mount_options = map(MountOptions, self._data.get('mount_options', []))
+        ignore_device = map(IgnoreDevice, self._data.get('ignore_device', []))
+        return list(device_config) + list(mount_options) + list(ignore_device)
 
     @property
     def program_options(self):

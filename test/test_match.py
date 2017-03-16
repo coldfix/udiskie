@@ -13,7 +13,7 @@ import shutil
 import os.path
 import gc
 
-from udiskie.config import Config
+from udiskie.config import Config, match_config
 
 
 class TestDev(object):
@@ -47,9 +47,13 @@ ignore_device:
 - id_uuid: ignored-DEVICE
 ''')
 
-        config = Config.from_file(self.config_file)
-        self.mount_options = config.mount_options
-        self.ignore_device = config.ignore_device
+        self.filters = Config.from_file(self.config_file).device_config
+
+    def mount_options(self, device):
+        return match_config(self.filters, device, 'options', None)
+
+    def ignore_device(self, device):
+        return match_config(self.filters, device, 'ignore', False)
 
     def tearDown(self):
         """Remove the config file."""
