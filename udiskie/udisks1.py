@@ -379,6 +379,7 @@ class Device(BaseDevice):
     set_autoclear = delete
 
     loop_support = False
+    keyfile_support = False
 
     # ----------------------------------------
     # derived properties

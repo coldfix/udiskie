@@ -249,6 +249,9 @@ class Mounter(object):
         unlocked = yield self._unlock_from_cache(device)
         if unlocked:
             yield Return(True)
+        unlocked = yield self._unlock_from_keyfile(device)
+        if unlocked:
+            yield Return(True)
         password = yield self._prompt(device)
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))
@@ -273,7 +276,29 @@ class Mounter(object):
         except Exception:
             self._log.debug(_('failed to unlock {0} using cached password', device))
             yield Return(False)
-        self._log.debug(_('unlocked {0} using cached password', device))
+        self._log.info(_('unlocked {0} using cached password', device))
+        yield Return(True)
+
+    @Coroutine.from_generator_function
+    def _unlock_from_keyfile(self, device):
+        if not self.udisks.keyfile_support:
+            yield Return(False)
+        filename = match_config(self._config, device, 'keyfile', None)
+        if filename is None:
+            yield Return(False)
+        try:
+            with open(filename, 'rb') as f:
+                keyfile = f.read()
+        except IOError:
+            self._log.warn(_('configured keyfile for {0} not found', device))
+            yield Return(False)
+        self._log.debug(_('unlocking {0} using keyfile {1}', device, filename))
+        try:
+            yield device.unlock_keyfile(keyfile)
+        except Exception:
+            self._log.debug(_('failed to unlock {0} using keyfile', device))
+            yield Return(False)
+        self._log.info(_('unlocked {0} using keyfile', device))
         yield Return(True)
 
     def _update_cache(self, device, password):
