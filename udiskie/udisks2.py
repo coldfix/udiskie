@@ -476,6 +476,14 @@ class Device(BaseDevice):
             })
         )
 
+    def unlock_keyfile(self, password, auth_no_user_interaction=None):
+        return self._M.Encrypted.Unlock(
+            '(sa{sv})', '', filter_opt({
+                'keyfile_contents': ('ay', password),
+                'auth.no_user_interaction': ('b', auth_no_user_interaction),
+            })
+        )
+
     def lock(self, auth_no_user_interaction=None):
         """Lock Luks device."""
         return self._M.Encrypted.Lock(
@@ -604,6 +612,7 @@ class Daemon(Emitter):
 
         self.version = version
         self.version_info = tuple(map(int, version.split('.')))
+        self.keyfile_support = self.version_info >= (2,6,4)
 
         self._proxy = proxy
         self._objects = {}

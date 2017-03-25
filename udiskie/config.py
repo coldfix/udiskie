@@ -119,6 +119,9 @@ class DeviceFilter(object):
         # automount:
         if 'automount' in match:
             self._values['automount'] = match.pop('automount')
+        # keyfile:
+        if 'keyfile' in match:
+            self._values['keyfile'] = match.pop('keyfile')
         # the use of list() makes deletion inside the loop safe:
         for k in list(self._match):
             if k not in self.VALID_PARAMETERS:
