@@ -1,6 +1,17 @@
 CHANGELOG
 ---------
 
+1.7.0
+~~~~~
+Date: 26.03.2017
+
+- add joined ``device_config`` list in the config file
+- deprecate ``mount_options`` and ``ignore_device`` in favor of
+  ``device_config``
+- can configure ``automount`` per device using the new ``device_config`` [#107]
+- can configure keyfiles (requires udisks 2.6.4) [#66]
+- remove mailing list
+
 1.6.2
 ~~~~~
 Date: 06.03.2017
