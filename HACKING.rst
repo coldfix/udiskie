@@ -17,8 +17,6 @@ Further resources:
 - `UDisks1 API`_
 - `UDisks2 API`_
 - `PyGObject APIs`_
-- `Icon naming`_
-- `Icon lookup`_
 
 .. _github: https://github.com/coldfix/udiskie
 .. _PEP8: http://www.python.org/dev/peps/pep-0008/
@@ -29,5 +27,3 @@ Further resources:
 .. _`UDisks1 API`: http://udisks.freedesktop.org/docs/1.0.5/
 .. _`UDisks2 API`: http://udisks.freedesktop.org/docs/latest/
 .. _`PyGObject APIs`: http://lazka.github.io/pgi-docs/index.html
-.. _`Icon naming`: http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
-.. _`Icon lookup`: http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
