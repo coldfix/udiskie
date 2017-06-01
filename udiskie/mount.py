@@ -252,12 +252,16 @@ class Mounter(object):
         unlocked = yield self._unlock_from_keyfile(device)
         if unlocked:
             yield Return(True)
-        password = yield self._prompt(device)
+        password = yield self._prompt(device, self.udisks.keyfile_support)
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))
             yield Return(False)
-        self._log.debug(_('unlocking {0}', device))
-        yield device.unlock(password)
+        if isinstance(password, bytes):
+            self._log.debug(_('unlocking {0} using keyfile', device))
+            yield device.unlock_keyfile(password)
+        else:
+            self._log.debug(_('unlocking {0}', device))
+            yield device.unlock(password)
         self._update_cache(device, password)
         self._log.info(_('unlocked {0}', device))
         yield Return(True)

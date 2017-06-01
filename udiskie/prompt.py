@@ -22,6 +22,7 @@ from .common import AttrDictView
 from .compat import basestring
 from .config import DeviceFilter
 
+Gtk = None
 
 __all__ = ['password', 'browser']
 
@@ -95,12 +96,58 @@ class Dialog(Async):
 
     def _result_handler(self, dialog, response):
         self.callback(response)
+        dialog.hide()
         dialog.destroy()
         self._ACTIVE_INSTANCES.remove(self)
 
 
+class PasswordDialog(Dialog):
+
+    content = None
+
+    def __init__(self, title, message, allow_keyfile):
+        global Gtk
+        Gtk = require_Gtk()
+        builder = Gtk.Builder.new()
+        builder.add_from_string(dialog_definition)
+        self.dialog = builder.get_object('entry_dialog')
+        self.entry = builder.get_object('entry')
+        if allow_keyfile:
+            button = Gtk.Button('Open keyfile…')
+            button.connect('clicked', self.on_open_keyfile)
+            self.dialog.get_action_area().pack_end(button, False, False, 10)
+
+        label = builder.get_object('message')
+        label.set_label(message)
+        self.dialog.set_title(title)
+        self.dialog.show_all()
+        super(PasswordDialog, self).__init__(self.dialog)
+
+    def on_open_keyfile(self, button):
+        dialog = Gtk.FileChooserDialog(
+            "Open a keyfile to unlock the LUKS device", self.dialog,
+            Gtk.FileChooserAction.OPEN,
+            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+             Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        dialog.connect("response", self.on_select_keyfile)
+        dialog.show_all()
+
+    def on_select_keyfile(self, dialog, response):
+        if response == Gtk.ResponseType.OK:
+            with open(dialog.get_filename(), 'rb') as f:
+                self.content = f.read()
+            self.dialog.response(response)
+        dialog.hide()
+        dialog.destroy()
+
+    def get_text(self):
+        if self.content is not None:
+            return self.content
+        return self.entry.get_text()
+
+
 @Coroutine.from_generator_function
-def password_dialog(title, message):
+def password_dialog(title, message, allow_keyfile):
     """
     Show a Gtk password dialog.
 
@@ -110,34 +157,25 @@ def password_dialog(title, message):
     :rtype: str
     :raises RuntimeError: if Gtk can not be properly initialized
     """
-    Gtk = require_Gtk()
-    builder = Gtk.Builder.new()
-    builder.add_from_string(dialog_definition)
-    dialog = builder.get_object('entry_dialog')
-    label = builder.get_object('message')
-    entry = builder.get_object('entry')
-    dialog.set_title(title)
-    label.set_label(message)
-    dialog.show_all()
-    response = yield Dialog(dialog)
-    dialog.hide()
+    dialog = PasswordDialog(title, message, allow_keyfile)
+    response = yield dialog
     if response == Gtk.ResponseType.OK:
-        yield Return(entry.get_text())
+        yield Return(dialog.get_text())
     else:
         yield Return(None)
 
 
-def get_password_gui(device):
+def get_password_gui(device, allow_keyfile=False):
     """Get the password to unlock a device from GUI."""
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
-        return password_dialog('udiskie', text)
+        return password_dialog('udiskie', text, allow_keyfile)
     except RuntimeError:
         return None
 
 
 @Coroutine.from_generator_function
-def get_password_tty(device):
+def get_password_tty(device, allow_keyfile=False):
     """Get the password to unlock a device from terminal."""
     # TODO: make this a TRUE async
     text = _('Enter password for {0.device_presentation}: ', device)
