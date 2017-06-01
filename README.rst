@@ -34,6 +34,7 @@ Documentation
 
 Miscellaneous:
 
+- `Automatic LUKS unlocking`_
 - `Custom mount paths`_
 - `Acquiring debug information`_
 - `Miscellaneous`_
@@ -41,6 +42,7 @@ Miscellaneous:
 .. _Usage: https://github.com/coldfix/udiskie/wiki/Usage
 .. _Permissions: https://github.com/coldfix/udiskie/wiki/Permissions
 .. _Installation: https://github.com/coldfix/udiskie/wiki/Installation
+.. _Automatic LUKS unlocking: https://github.com/coldfix/udiskie/wiki/Automatic-LUKS-unlocking
 .. _Custom mount paths: https://github.com/coldfix/udiskie/wiki/Custom-mount-paths
 .. _Acquiring debug information: https://github.com/coldfix/udiskie/wiki/Debugging-a-problem
 .. _Miscellaneous: https://github.com/coldfix/udiskie/wiki/Miscellaneous
