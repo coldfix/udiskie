@@ -15,6 +15,10 @@ from os import path, listdir
 from glob import glob
 import io
 
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('DBus', '1.0')
+gi.require_version('Notify', '0.7')
 
 # check availability of runtime dependencies
 def check_dependency(package, version):
