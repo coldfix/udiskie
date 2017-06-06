@@ -613,6 +613,7 @@ class Daemon(Emitter):
         self.version = version
         self.version_info = tuple(map(int, version.split('.')))
         self.keyfile_support = self.version_info >= (2,6,4)
+        self._log.debug(_('Keyfile support: {0}', keyfile_support))
 
         self._proxy = proxy
         self._objects = {}

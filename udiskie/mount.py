@@ -289,6 +289,7 @@ class Mounter(object):
             yield Return(False)
         filename = match_config(self._config, device, 'keyfile', None)
         if filename is None:
+            self._log.debug(_('No matching keyfile rule for {}.', device))
             yield Return(False)
         try:
             with open(filename, 'rb') as f:
