@@ -29,23 +29,14 @@ Documentation
 ~~~~~~~~~~~~~
 
 - Usage_
-- Permissions_
 - Installation_
-
-Miscellaneous:
-
-- `Automatic LUKS unlocking`_
-- `Custom mount paths`_
-- `Acquiring debug information`_
-- `Miscellaneous`_
+- Troubleshooting_
+- FAQ_
 
 .. _Usage: https://github.com/coldfix/udiskie/wiki/Usage
-.. _Permissions: https://github.com/coldfix/udiskie/wiki/Permissions
 .. _Installation: https://github.com/coldfix/udiskie/wiki/Installation
-.. _Automatic LUKS unlocking: https://github.com/coldfix/udiskie/wiki/Automatic-LUKS-unlocking
-.. _Custom mount paths: https://github.com/coldfix/udiskie/wiki/Custom-mount-paths
-.. _Acquiring debug information: https://github.com/coldfix/udiskie/wiki/Debugging-a-problem
-.. _Miscellaneous: https://github.com/coldfix/udiskie/wiki/Miscellaneous
+.. _Troubleshooting: https://github.com/coldfix/udiskie/wiki/Troubleshooting
+.. _FAQ: https://github.com/coldfix/udiskie/wiki/FAQ
 
 
 Project pages
@@ -60,7 +51,6 @@ The…
 - `Issue Tracker`_ is the right place to report any issues you encounter,
   ask general questions or suggest new features. (Or you can send me an
   email.)
-
 
 .. _Wiki: https://github.com/coldfix/udiskie/wiki
 .. _Man Page: https://raw.githubusercontent.com/coldfix/udiskie/master/doc/udiskie.8.txt
