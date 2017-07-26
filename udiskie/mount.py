@@ -5,6 +5,7 @@ Mount utilities.
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+from distutils.spawn import find_executable
 from collections import namedtuple
 from functools import partial
 import inspect
@@ -201,9 +202,17 @@ class Mounter(object):
         options = match_config(self._config, device, 'options', None)
         kwargs = dict(options=options)
         self._log.debug(_('mounting {0} with {1}', device, kwargs))
+        self._check_device_before_mount(device)
         mount_path = yield device.mount(**kwargs)
         self._log.info(_('mounted {0} on {1}', device, mount_path))
         yield Return(True)
+
+    def _check_device_before_mount(self, device):
+        if device.id_type == 'ntfs' and not find_executable('ntfs-3g'):
+            self._log.warn(_(
+                "Mounting NTFS device with default driver.\n"
+                "Please install 'ntfs-3g' if you experience problems or the "
+                "device is readonly."))
 
     @_sets_async_error
     @_find_device
