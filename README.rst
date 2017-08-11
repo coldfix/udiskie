@@ -75,10 +75,12 @@ configurations and make the remaining easier to test, i.e.:
 - **add automated tests**. needed desperately…
 
 
-.. |Version| image:: http://coldfix.de:8080/v/udiskie/badge.svg
-   :target: https://pypi.python.org/pypi/udiskie/
-   :alt: Latest Version
+.. Badges:
 
-.. |License| image:: http://coldfix.de:8080/license/udiskie/badge.svg
-   :target: https://github.com/coldfix/udiskie/blob/master/COPYING
-   :alt: License
+.. |Version| image::   https://img.shields.io/pypi/v/udiskie.svg
+   :target:            https://pypi.python.org/pypi/udiskie
+   :alt:               Version
+
+.. |License| image::   https://img.shields.io/pypi/l/udiskie.svg
+   :target:            https://github.com/coldfix/udiskie/blob/master/COPYING
+   :alt:               License: MIT
