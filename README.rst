@@ -26,7 +26,7 @@ unmaintainable code and make me salty!)
 
 
 Documentation
-~~~~~~~~~~~~~
+-------------
 
 - Usage_
 - Installation_
@@ -40,7 +40,7 @@ Documentation
 
 
 Project pages
-~~~~~~~~~~~~~
+-------------
 
 The…
 
@@ -60,7 +60,7 @@ The…
 
 
 Roadmap
-~~~~~~~
+-------
 
 For the next udiskie versions, I am mainly concerned with quality assurance
 and stability. For one this means reducing the number of supported runtime
