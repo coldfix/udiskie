@@ -7,20 +7,16 @@ udiskie
 *udiskie* is a UDisks_ front-end that allows to manage removeable media such
 as CDs or flash drives from userspace. Its features include:
 
-- automount removable media when inserted
-- notifications (on insertion, mount, unmount, …)
-- GTK tray icon to manage all available devices
+- automount removable media
+- notifications
+- tray icon
 - command line tools for manual un-/mounting
-- support for LUKS encrypted devices
-- support for unlocking with keyfiles (requires udisks 2.6.4)
-- support for loop devices (mounting iso archives, requires UDisks2)
+- LUKS encrypted devices
+- unlocking with keyfiles (requires udisks 2.6.4)
+- loop devices (mounting iso archives, requires UDisks2)
 - password caching (requires python keyutils 0.3)
-- works with either udisks1 or udisks2
-- an extensible code base (python)
-- a maintainer who is open for suggestions;)
 
-All features can be indidually enabled or disabled (yes, you can submit
-unmaintainable code and make me salty!)
+All features can be indidually enabled or disabled.
 
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
 
