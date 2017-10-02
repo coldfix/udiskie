@@ -14,7 +14,7 @@ as CDs or flash drives from userspace. Its features include:
 - support for LUKS encrypted devices
 - support for unlocking with keyfiles (requires udisks 2.6.4)
 - support for loop devices (mounting iso archives, requires UDisks2)
-- password caching
+- password caching (requires python keyutils 0.3)
 - works with either udisks1 or udisks2
 - an extensible code base (python)
 - a maintainer who is open for suggestions;)
@@ -30,27 +30,25 @@ Documentation
 
 - Usage_
 - Installation_
+- `Debug Info`_
 - Troubleshooting_
 - FAQ_
 
 .. _Usage: https://github.com/coldfix/udiskie/wiki/Usage
 .. _Installation: https://github.com/coldfix/udiskie/wiki/Installation
+.. _Debug Info: https://github.com/coldfix/udiskie/wiki/Debug-Info
 .. _Troubleshooting: https://github.com/coldfix/udiskie/wiki/Troubleshooting
 .. _FAQ: https://github.com/coldfix/udiskie/wiki/FAQ
 
 
-Project pages
--------------
+Links
+-----
 
-The…
-
-- `Wiki`_ contains installation instructions and additional information.
-- `Man page`_ describes the command line options
-- `Source Code`_ is hosted on github.
-- `Latest Release`_ is available for download on PyPI.
-- `Issue Tracker`_ is the right place to report any issues you encounter,
-  ask general questions or suggest new features. (Or you can send me an
-  email.)
+- `Wiki`_
+- `Man page`_
+- `Source Code`_
+- `Latest Release`_
+- `Issue Tracker`_
 
 .. _Wiki: https://github.com/coldfix/udiskie/wiki
 .. _Man Page: https://raw.githubusercontent.com/coldfix/udiskie/master/doc/udiskie.8.txt
