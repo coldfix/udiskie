@@ -27,3 +27,19 @@ Further resources:
 .. _`UDisks1 API`: http://udisks.freedesktop.org/docs/1.0.5/
 .. _`UDisks2 API`: http://udisks.freedesktop.org/docs/latest/
 .. _`PyGObject APIs`: http://lazka.github.io/pgi-docs/index.html
+
+
+Roadmap
+-------
+
+For the next udiskie versions, I am mainly concerned with quality assurance
+and stability. For one this means reducing the number of supported runtime
+configurations and make the remaining easier to test, i.e.:
+
+- **drop support for python2** to avoid unicode issues and make use of the new
+  asyncio module which provides better error handling (stack traces!) than the
+  current solution.
+- **drop support for udisks1**. The udisks1 API is rather unfit for the
+  asynchronous nature of the problem which has led to numerous bugs and
+  problems (plenty more probably waiting to be discovered as we speak)
+- **add automated tests**. needed desperately…
