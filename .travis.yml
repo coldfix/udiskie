@@ -5,8 +5,7 @@ language: python
 # Travis runs on Ubuntu 12.04 LTS currently. :(
 python:
   - "2.7"
-  - "3.2"
-  # - "3.3"
+  - "3.4"       # trusty's native python3 version
   # - "pypy"
 
 # Build inside docker containers instead of virtual machines. These are
