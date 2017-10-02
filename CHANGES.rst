@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+1.7.1
+~~~~~
+Date: 02.10.2017
+
+- add an "open keyfile" button to the password dialog
+- add warning if mounting device without ntfs-3g (#143)
+- fix problem with LVM devices
+
 1.7.0
 ~~~~~
 Date: 26.03.2017
