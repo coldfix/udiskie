@@ -191,7 +191,9 @@ class Device(BaseDevice):
         This method is used internally to unify the behaviour of top level
         devices in udisks1 and udisks2.
         """
-        return self.drive if self.is_toplevel and not self.is_loop else self
+        # NOTE: always fallback to `self` because udisks2 doesn't report
+        # CryptoBackingDevice nor Drive for logical volumes:
+        return self.is_toplevel and not self.is_loop and self.drive or self
 
     @property
     def is_detachable(self):
