@@ -13,11 +13,12 @@ python3, but more lightweight (incomplete) and compatible with python2.
 # So you must take care to increase the reference-count of all active tasks
 # manually.
 
+import asyncio
+
 from functools import partial
 from subprocess import CalledProcessError
 import sys
 
-from gi.repository import GLib
 from gi.repository import Gio
 
 from .common import cachedproperty, wraps, format_exc
@@ -176,7 +177,7 @@ def call_func(fn, *args):
 
 def run_soon(fn, *args):
     """Run the function once."""
-    GLib.idle_add(call_func, fn, *args)
+    asyncio.get_event_loop().call_soon(call_func, fn, *args)
 
 
 class Coroutine(Async):

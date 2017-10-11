@@ -13,6 +13,9 @@ import inspect
 import logging.config
 import traceback
 
+import asyncio
+import gbulb
+
 from docopt import docopt, DocoptExit
 
 from gi.repository import GLib
@@ -285,10 +288,11 @@ class _EntryPoint(object):
         :returns: exit code
         :rtype: int
         """
-        self.mainloop = GLib.MainLoop()
+        gbulb.install()
+        self.mainloop = asyncio.get_event_loop()
         self._start_async_tasks()
         try:
-            self.mainloop.run()
+            self.mainloop.run_forever()
             return self.exit_status
         except KeyboardInterrupt:
             return 1
@@ -305,7 +309,7 @@ class _EntryPoint(object):
             self.exit_status = 1
             # Print the stack trace only up to the current level:
             traceback.print_exc()
-        self.mainloop.quit()
+        self.mainloop.stop()
 
 
 class Component(object):

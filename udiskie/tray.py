@@ -139,7 +139,7 @@ class UdiskieMenu(object):
         self._daemon = daemon
         self._mounter = daemon.mounter
         self._actions = actions
-        self._quit_action = daemon.mainloop.quit
+        self._quit_action = daemon.mainloop.stop
         self.flat = flat
 
     def __call__(self, menu, extended):
