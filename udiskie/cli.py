@@ -23,7 +23,7 @@ from gi.repository import GLib
 import udiskie
 import udiskie.config
 import udiskie.mount
-from .async_ import AsyncList, RunForever
+from .async_ import AsyncList
 from .common import extend, ObjDictView
 from .locale import _
 
@@ -488,7 +488,7 @@ class Daemon(_EntryPoint):
             self.statusicon.activate()
             tasks.append(self.statusicon.instance._icon.task)
         else:
-            tasks.append(RunForever)
+            tasks.append(asyncio.Future())
         if options['automount']:
             self.automounter.activate()
             tasks.append(self.mounter.add_all())

@@ -40,8 +40,6 @@ def pack(*values):
 
 Async = asyncio.Future
 
-RunForever = Async()
-
 
 def AsyncList(tasks):
     return asyncio.gather(*tasks)
