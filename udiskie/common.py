@@ -2,13 +2,8 @@
 Common DBus utilities.
 """
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 import os.path
 import traceback
-
-from .compat import fix_str_conversions
 
 
 __all__ = [
@@ -21,8 +16,6 @@ __all__ = [
     'extend',
     'cachedproperty',
     'decode_ay',
-    # dealing with py2 strings:
-    'str2unicode',
     'exc_message',
     'format_exc',
 ]
@@ -170,7 +163,6 @@ class ObjDictView(object):
         raise KeyError("Unknown key: {}".format(key))
 
 
-@fix_str_conversions
 class BaseDevice(object):
 
     def __str__(self):
@@ -257,7 +249,6 @@ class BaseDevice(object):
         ]))
 
 
-@fix_str_conversions
 class NullDevice(object):
 
     """
@@ -424,17 +415,11 @@ class DaemonBase(object):
 # byte array to string conversion
 # ----------------------------------------
 
-try:
-    unicode
-except NameError:
-    unicode = str
-
-
 def decode_ay(ay):
     """Convert binary blob from DBus queries to strings."""
     if ay is None:
         return ''
-    elif isinstance(ay, unicode):
+    elif isinstance(ay, str):
         return ay
     elif isinstance(ay, bytes):
         return ay.decode('utf-8')
@@ -443,20 +428,11 @@ def decode_ay(ay):
         return bytearray(ay).rstrip(bytearray((0,))).decode('utf-8')
 
 
-def str2unicode(arg):
-    """Decode python2 strings (bytes) to unicode."""
-    if isinstance(arg, list):
-        return [str2unicode(s) for s in arg]
-    if isinstance(arg, bytes):
-        return arg.decode('utf-8')
-    return arg
-
-
 def exc_message(exc):
     """Get an exception message."""
     message = getattr(exc, 'message', None)
-    return str2unicode(message or str(exc))
+    return message or str(exc)
 
 
 def format_exc():
-    return str2unicode(traceback.format_exc())
+    return traceback.format_exc()

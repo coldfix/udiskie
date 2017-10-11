@@ -2,9 +2,6 @@
 Mount utilities.
 """
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 from distutils.spawn import find_executable
 from collections import namedtuple
 from functools import partial

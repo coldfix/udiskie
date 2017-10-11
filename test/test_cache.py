@@ -1,9 +1,6 @@
-# encoding: utf-8
 """
 Tests for the udiskie.cache module.
 """
-
-from __future__ import unicode_literals
 
 import unittest
 import time

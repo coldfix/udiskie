@@ -13,10 +13,6 @@ python3, but more lightweight (incomplete) and compatible with python2.
 # So you must take care to increase the reference-count of all active tasks
 # manually.
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
 from functools import partial
 from subprocess import CalledProcessError
 import sys

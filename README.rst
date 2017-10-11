@@ -18,6 +18,10 @@ as CDs or flash drives from userspace. Its features include:
 
 All features can be indidually enabled or disabled.
 
+**NOTE:** support for python2 has been removed. If you need a version of
+udiskie that supports python2, please check out the ``1.7.X`` releases or the
+``maint-1.7`` branch.
+
 **NOTE:** support for udisks1 and python2 is deprecated and will be
 discontinued in the next major version of udiskie.
 

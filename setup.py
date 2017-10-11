@@ -1,4 +1,3 @@
-# encoding: utf-8
 from setuptools import setup, Command
 from setuptools.command.install import install as orig_install
 from distutils.command.install_data import install_data as orig_install_data

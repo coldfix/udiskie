@@ -2,15 +2,11 @@
 Tray icon for udiskie.
 """
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 from gi.repository import Gio
 from gi.repository import Gtk
 
 from .async_ import Async, Coroutine, Return
 from .common import setdefault, DaemonBase
-from .compat import basestring
 from .locale import _
 from .mount import Action, prune_empty_node
 from .prompt import Dialog
@@ -66,7 +62,7 @@ class Icons(object):
         setdefault(_icon_names, self.__class__._icon_names)
         self._icon_names = _icon_names
         for k, v in _icon_names.items():
-            if isinstance(v, basestring):
+            if isinstance(v, str):
                 self._icon_names[k] = [v]
 
     def get_icon_name(self, icon_id):

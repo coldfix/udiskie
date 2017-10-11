@@ -10,9 +10,6 @@ This wraps the DBus API of Udisks2 providing a common interface with the
 udisks1 module.
 """
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 from copy import copy, deepcopy
 import logging
 
@@ -104,9 +101,8 @@ class PropertiesNotAvailable(object):
 
     """Null class for properties of an unavailable interface."""
 
-    def __nonzero__(self):      # python2
+    def __bool__(self):
         return False
-    __bool__ = __nonzero__      # python3
 
     def __getattr__(self, key):
         """Return None when asked for any attribute."""

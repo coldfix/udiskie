@@ -5,10 +5,6 @@ The application classes in this module are installed as executables via
 setuptools entry points.
 """
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import print_function
-
 # import udiskie.depend first - for side effects!
 from .depend import has_Notify, has_Gtk, _in_X
 
@@ -24,9 +20,8 @@ from gi.repository import GLib
 import udiskie
 import udiskie.config
 import udiskie.mount
-import udiskie.compat
 from .async_ import AsyncList, Coroutine, Return, RunForever
-from .common import extend, str2unicode, ObjDictView
+from .common import extend, ObjDictView
 from .locale import _
 
 
@@ -119,7 +114,7 @@ class Value(object):
 
     def __call__(self, args):
         """Get the value of the command line argument."""
-        return str2unicode(args[self._name])
+        return args[self._name]
 
 
 class OptionalValue(object):
@@ -131,7 +126,7 @@ class OptionalValue(object):
 
     def __call__(self, args):
         """Get the value of the command line argument."""
-        return self._choice(args) and str2unicode(args[self._name])
+        return self._choice(args) and args[self._name]
 
 
 class SelectLevel(logging.Filter):
@@ -180,7 +175,6 @@ class _EntryPoint(object):
 
         :param list argv: command line parameters
         """
-        udiskie.compat.patch_print_unicode()
         # parse program options (retrieve log level and config file name):
         args = docopt(self.usage, version=self.name + ' ' + self.version)
         default_opts = self.option_defaults

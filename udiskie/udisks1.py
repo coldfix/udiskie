@@ -13,9 +13,6 @@ udisks2 module.
 guarantee the accessibilityy of device properties in between operations.
 """
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 from collections import defaultdict
 import logging
 import os.path
@@ -25,7 +22,6 @@ from gi.repository import GLib
 from .async_ import AsyncList, Coroutine, Return
 from .common import (Emitter, samefile, sameuuid, AttrDictView, wraps,
                      NullDevice, BaseDevice)
-from .compat import fix_str_conversions
 from .dbus import connect_service, MethodsProxy, DBusCall
 from .locale import _
 

@@ -3,9 +3,6 @@ Make sure that the correct versions of gobject introspection dependencies
 are installed.
 """
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 import os
 import logging
 

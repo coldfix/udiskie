@@ -5,15 +5,11 @@ For an example config file, see the manual. If you don't have the man page
 installed, a raw version is available in doc/udiskie.8.txt.
 """
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 import logging
 import os
 import fnmatch
 
 from .common import exc_message
-from .compat import basestring, fix_str_conversions
 from .locale import _
 
 
@@ -32,23 +28,11 @@ def lower(s):
 def match_value(value, pattern):
     if isinstance(value, (list, tuple)):
         return any(match_value(v, pattern) for v in value)
-    if isinstance(value, basestring) and isinstance(pattern, basestring):
+    if isinstance(value, str) and isinstance(pattern, str):
         return fnmatch.fnmatch(value.lower(), pattern.lower())
     return lower(value) == lower(pattern)
 
 
-def yaml_load(stream):
-    """Load YAML document, but load all strings as unicode on py2."""
-    import yaml
-    class UnicodeLoader(yaml.SafeLoader):
-        pass
-    UnicodeLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_SCALAR_TAG,
-        UnicodeLoader.construct_scalar)
-    return yaml.load(stream, UnicodeLoader)
-
-
-@fix_str_conversions
 class DeviceFilter(object):
 
     """Associate a certain value to matching devices."""
@@ -110,7 +94,7 @@ class DeviceFilter(object):
         # mount options:
         if 'options' in match:
             options = match.pop('options')
-            if isinstance(options, basestring):
+            if isinstance(options, str):
                 options = [o.strip() for o in options.split(',')]
             self._values['options'] = options
         # ignore device:
@@ -255,7 +239,7 @@ class Config(object):
         if os.path.splitext(path)[1].lower() == '.json':
             from json import load
         else:
-            load = yaml_load
+            from yaml import safe_load as load
         with open(path) as f:
             return cls(load(f))
 

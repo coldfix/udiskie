@@ -1,10 +1,6 @@
-# encoding: utf-8
 """
 User prompt utility.
 """
-
-from __future__ import absolute_import
-from __future__ import unicode_literals
 
 from udiskie.depend import has_Gtk, require_Gtk
 
@@ -20,7 +16,6 @@ import sys
 from .async_ import Async, Coroutine, Return, Subprocess
 from .locale import _
 from .common import AttrDictView
-from .compat import basestring
 from .config import DeviceFilter
 
 Gtk = None
@@ -196,7 +191,7 @@ class DeviceCommand(object):
 
     def __init__(self, argv, **extra):
         """Create the launcher object from the command line template."""
-        if isinstance(argv, basestring):
+        if isinstance(argv, str):
             self.argv = shlex.split(argv)
         else:
             self.argv = argv

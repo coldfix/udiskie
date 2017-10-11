@@ -2,9 +2,6 @@
 I18n utilities.
 """
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 import gettext
 
 
@@ -25,12 +22,7 @@ class Translator(object):
         Arguments are as in ``gettext.translation``.
         """
         t = gettext.translation(domain, localedir, languages, fallback=True)
-        try:
-            # on python2 we want the unicode version:
-            g = t.ugettext
-        except AttributeError:
-            # which is the default in python3:
-            g = t.gettext
+        g = t.gettext
         return cls(g)
 
     def __init__(self, gettext):
