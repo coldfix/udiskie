@@ -163,21 +163,9 @@ class Return(object):
         self.value = value
 
 
-def call_func(fn, *args):
-    """
-    Call the function with the specified arguments but return None.
-
-    This rather boring helper function is used by run_soon to make sure the
-    function is executed only once.
-    """
-    # NOTE: Apparently, idle_add does not re-execute its argument if an
-    # exception is raised. So it's okay to let exceptions propagate.
-    fn(*args)
-
-
 def run_soon(fn, *args):
     """Run the function once."""
-    asyncio.get_event_loop().call_soon(call_func, fn, *args)
+    asyncio.get_event_loop().call_soon(fn, *args)
 
 
 class Coroutine(Async):
