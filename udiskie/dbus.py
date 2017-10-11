@@ -8,7 +8,7 @@ from functools import partial
 from gi.repository import Gio
 from gi.repository import GLib
 
-from .async_ import Async, Coroutine, Return, gio_callback, pack
+from .async_ import Async, gio_callback, pack
 from .common import format_exc
 
 
@@ -199,8 +199,7 @@ class ObjectProxy(object):
             interface_name=name,
         )
 
-    @Coroutine.from_generator_function
-    def get_interface(self, name):
+    async def get_interface(self, name):
         """
         Get an interface proxy for this Dbus object.
 
@@ -208,13 +207,12 @@ class ObjectProxy(object):
         :returns: a proxy object for the other interface
         :rtype: InterfaceProxy
         """
-        proxy = yield self._get_interface(name)
-        yield Return(InterfaceProxy(proxy))
+        proxy = await self._get_interface(name)
+        return InterfaceProxy(proxy)
 
-    @Coroutine.from_generator_function
-    def get_property_interface(self, interface_name=None):
-        proxy = yield self._get_interface(PropertiesProxy.Interface)
-        yield Return(PropertiesProxy(proxy, interface_name))
+    async def get_property_interface(self, interface_name=None):
+        proxy = await self._get_interface(PropertiesProxy.Interface)
+        return PropertiesProxy(proxy, interface_name)
 
     @property
     def bus(self):
@@ -238,11 +236,10 @@ class ObjectProxy(object):
         object_path = self.object_path
         return self.bus.connect(interface, event, object_path, handler)
 
-    @Coroutine.from_generator_function
-    def call(self, interface_name, method_name, signature='()', *args):
-        proxy = yield self.get_interface(interface_name)
-        result = yield proxy.call(method_name, signature, *args)
-        yield Return(result)
+    async def call(self, interface_name, method_name, signature='()', *args):
+        proxy = await self.get_interface(interface_name)
+        result = await proxy.call(method_name, signature, *args)
+        return result
 
 
 def DBusCallback(connection, sender_name, object_path,
@@ -376,8 +373,7 @@ def _DBusProxyNewForBus_callback(proxy, result, user_data):
     return value
 
 
-@Coroutine.from_generator_function
-def connect_service(bus_name, object_path, interface):
+async def connect_service(bus_name, object_path, interface):
     """
     Connect to the service object on DBus.
 
@@ -385,7 +381,7 @@ def connect_service(bus_name, object_path, interface):
     :rtype: InterfaceProxy
     :raises BusException: if unable to connect to service.
     """
-    proxy = yield DBusProxyNewForBus(
+    proxy = await DBusProxyNewForBus(
         Gio.BusType.SYSTEM,
         Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES |
         Gio.DBusProxyFlags.DO_NOT_CONNECT_SIGNALS,
@@ -394,7 +390,7 @@ def connect_service(bus_name, object_path, interface):
         object_path=object_path,
         interface_name=interface,
     )
-    yield Return(InterfaceProxy(proxy))
+    return InterfaceProxy(proxy)
 
 
 class MethodsProxy(object):
