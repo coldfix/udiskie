@@ -2,14 +2,12 @@
 Common DBus utilities.
 """
 
-import sys
 from functools import partial
 
 from gi.repository import Gio
 from gi.repository import GLib
 
 from .async_ import Async, gio_callback, pack
-from .common import format_exc
 
 
 __all__ = [

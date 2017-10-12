@@ -3,7 +3,6 @@ Common DBus utilities.
 """
 
 import os.path
-import traceback
 
 
 __all__ = [
@@ -14,10 +13,8 @@ __all__ = [
     'sameuuid',
     'setdefault',
     'extend',
-    'cachedproperty',
     'decode_ay',
     'exc_message',
-    'format_exc',
 ]
 
 
@@ -112,20 +109,6 @@ def extend(a, b):
     res = a.copy()
     res.update(b)
     return res
-
-
-def cachedproperty(func):
-    """A memoize decorator for class properties."""
-    key = '_' + func.__name__
-    @wraps(func)
-    def get(self):
-        try:
-            return getattr(self, key)
-        except AttributeError:
-            val = func(self)
-            setattr(self, key, val)
-            return val
-    return property(get)
 
 
 # ----------------------------------------
@@ -432,7 +415,3 @@ def exc_message(exc):
     """Get an exception message."""
     message = getattr(exc, 'message', None)
     return message or str(exc)
-
-
-def format_exc():
-    return traceback.format_exc()

@@ -4,7 +4,7 @@ Mount utilities.
 
 from distutils.spawn import find_executable
 from collections import namedtuple
-from functools import partial, wraps
+from functools import partial
 import inspect
 import logging
 import os

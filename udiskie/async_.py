@@ -11,13 +11,10 @@ This module defines the protocol used for asynchronous operations in udiskie.
 
 import asyncio
 
-from functools import partial, wraps
+from functools import wraps
 from subprocess import CalledProcessError
-import sys
 
 from gi.repository import Gio
-
-from .common import cachedproperty, wraps, format_exc
 
 
 __all__ = [
