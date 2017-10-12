@@ -46,13 +46,13 @@ def AsyncList(tasks):
 
 
 def gio_callback(extract_result):
-    def callback(self, *args):
+    def callback(proxy, result, future, *args):
         try:
-            value = extract_result(*args)
+            value = extract_result(proxy, result, *args)
         except Exception as e:
-            self.set_exception(e)
+            future.set_exception(e)
         else:
-            self.set_result(value)
+            future.set_result(value)
     return callback
 
 
@@ -67,12 +67,12 @@ def Subprocess(argv):
     process = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
     stdin_buf = None
     cancellable = None
-    user_data = process
     process.communicate_utf8_async(
         stdin_buf,
         cancellable,
-        partial(_Subprocess_callback, future),
-        user_data)
+        _Subprocess_callback,
+        future,
+        process)
     return future
 
 
