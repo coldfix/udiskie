@@ -11,7 +11,7 @@ This module defines the protocol used for asynchronous operations in udiskie.
 
 import asyncio
 
-from functools import partial
+from functools import partial, wraps
 from subprocess import CalledProcessError
 import sys
 
@@ -39,6 +39,20 @@ def pack(*values):
 
 
 Async = asyncio.Future
+
+
+def to_coro(func):
+    @wraps(func)
+    async def coro(*args, **kwargs):
+        return func(*args, **kwargs)
+    return coro
+
+
+def run_bg(func):
+    @wraps(func)
+    def runner(*args, **kwargs):
+        return asyncio.ensure_future(func(*args, **kwargs))
+    return runner
 
 
 def AsyncList(tasks):

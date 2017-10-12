@@ -226,7 +226,7 @@ class UdiskieMenu(object):
 
     def _create_menu_items(self, menu, items):
         def make_action_callback(node):
-            return lambda _: node.action()
+            return lambda _: asyncio.ensure_future(node.action())
         for node in items:
             if isinstance(node, Action):
                 menu.append(self._menuitem(

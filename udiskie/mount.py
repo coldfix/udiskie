@@ -4,12 +4,12 @@ Mount utilities.
 
 from distutils.spawn import find_executable
 from collections import namedtuple
-from functools import partial
+from functools import partial, wraps
 import inspect
 import logging
 import os
 
-from .async_ import AsyncList
+from .async_ import AsyncList, to_coro
 from .common import wraps, setdefault, exc_message
 from .config import IgnoreDevice, match_config
 from .locale import _
@@ -830,7 +830,7 @@ class DeviceActions(object):
             'lock': partial(mounter.remove, force=True),
             'eject': partial(mounter.eject, force=True),
             'detach': partial(mounter.detach, force=True),
-            'forget_password': mounter.forget_password,
+            'forget_password': to_coro(mounter.forget_password),
             'delete': mounter.delete,
         })
 
