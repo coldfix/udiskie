@@ -56,8 +56,8 @@ def get_backend(version=None):
     :raises GLib.GError: if unable to connect to UDisks dbus service.
     :raises ValueError: if the version is invalid
 
-    If ``version`` has a false truth value, try to connect to UDisks1 and
-    fall back to UDisks2 if not available.
+    If ``version`` has a false truth value, try to connect to UDisks2 and
+    fall back to UDisks1 if not available.
     """
     if not version:
         try:
