@@ -18,6 +18,9 @@ as CDs or flash drives from userspace. Its features include:
 
 All features can be indidually enabled or disabled.
 
+**NOTE:** support for udisks1 and python2 is deprecated and will be
+discontinued in the next major version of udiskie.
+
 .. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
 
 - `Documentation`_

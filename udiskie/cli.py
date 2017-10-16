@@ -12,6 +12,7 @@ from __future__ import print_function
 # import udiskie.depend first - for side effects!
 from .depend import has_Notify, has_Gtk, _in_X
 
+import sys
 import inspect
 import logging.config
 import traceback
@@ -34,6 +35,15 @@ __all__ = [
     'Mount',
     'Umount',
 ]
+
+
+def deprecation_warning(text):
+    """Show a deprecation warning."""
+    # NOTE: not using `warnings.warn(text, DeprecationWarning)`, because that
+    # requires starting the python interpreter to be started with `-Wd`, which
+    # in turn shows more warnings about removal of Gtk.StatusIcon.
+    log = logging.getLogger("udiskie.DeprecationWarning")
+    log.warning(_("Deprecation warning: {}", text))
 
 
 @Coroutine.from_generator_function
@@ -60,6 +70,9 @@ def get_backend(version=None):
     elif version == 1:
         import udiskie.udisks1
         daemon = yield udiskie.udisks1.Daemon.create()
+        deprecation_warning(_(
+            'Using UDisks1. Support will be discontinued '
+            'in the next major version of udiskie.'))
     elif version == 2:
         import udiskie.udisks2
         daemon = yield udiskie.udisks2.Daemon.create()
@@ -215,6 +228,11 @@ class _EntryPoint(object):
         self.config = config
         self.options = options
         self.exit_status = 0
+        if sys.version_info < (3,5):
+            deprecation_warning(_(
+                "Running on python {}.{}. The next major version of udiskie "
+                "will require at least python 3.5!",
+                *sys.version_info[:2]))
 
     def program_options(self, args):
         """
