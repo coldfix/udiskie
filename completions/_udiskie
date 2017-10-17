@@ -3,8 +3,9 @@
 
 function _udiskie
 {
-  local state ret=1
+  local context curcontext="$curcontext" line state ret=1
   local args tmp
+  typeset -A opt_args
 
   args=(
     '(- *)'{-h,--help}"[show help]"
@@ -28,16 +29,25 @@ function _udiskie
     {-m,--menu}"[set behaviour for tray menu]:traymenu:(flat nested)"
     '(--no-password-cache)'--password-cache"[set timeout for passwords of encrypted devices to N minutes]:minutes"
     '(--password-cache)'--no-password-cache"[don't cache passwords for encrypted devices]"
-    '(-P)'{-p,--password-prompt}"[Command for password retrieval]:passwordialog:(builtin\\:gui builtin\\:cli)"
+    '(-P)'{-p,--password-prompt}"[Command for password retrieval]:passwordialog:->pprompt"
     '(-p)'{-P,--no-password-prompt}"[Disable unlocking]"
-    '(-F)'{-f,--file-manager}"[set program for browsing directories]:filemanager"
+    '(-F)'{-f,--file-manager}"[set program for browsing directories]:filemanager:_path_commands"
     '(-f)'{-F,--no-file-manager}"[disable browsing]"
     '(--no-notify-command)'--notify-command"[execute this command on events]:minutes"
     '(--notify-command)'--no-notify-command"[don't execute event handler]"
   )
   _arguments -C -s "$args[@]" && ret=0
 
+  case $state in
+    pprompt)
+      _alternative \
+        'builtins:builtin prompt:(builtin:cli builtin:gui)' \
+        'commands:command name:_path_commands' \
+        && ret=0
+      ;;
+  esac
+
   return ret
 }
 
-_udiskie
+_udiskie "$@"

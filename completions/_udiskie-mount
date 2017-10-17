@@ -3,8 +3,9 @@
 
 function _udiskie-mount
 {
-  local state ret=1
+  local context curcontext="$curcontext" line state ret=1
   local args tmp
+  typeset -A opt_args
 
   args=(
     '(- *)'{-h,--help}"[show help]"
@@ -20,26 +21,29 @@ function _udiskie-mount
     '(-R)'{-r,--recursive}"[recursively add devices]"
     '(-r)'{-R,--no-recursive}"[disable recursive mounting]"
     {-o,--options}"[set filesystem options]:file system option"
-    '(-P)'{-p,--password-prompt}"[Command for password retrieval]:passwordialog:(builtin:gui builtin:cli)"
+    '(-P)'{-p,--password-prompt}"[Command for password retrieval]:passwordialog:->pprompt"
     '(-p)'{-P,--no-password-prompt}"[Disable unlocking]"
     '*:dev or dir:->udevordir'
   )
   _arguments -C -s "$args[@]" && ret=0
 
   case "$state" in
+    pprompt)
+      _alternative \
+        'builtins:builtin prompt:(builtin:cli builtin:gui)' \
+        'commands:command name:_path_commands' \
+        && ret=0
+      ;;
 
-  udevordir)
-    local dev_tmp mp_tmp
-
-    dev_tmp=( $(udiskie-info -a) )
-
-    _alternative \
-      'device-paths: device path:_canonical_paths -A dev_tmp -N device-paths device\ path' \
-      && ret=0
-
-  ;;
+    udevordir)
+      local dev_tmp mp_tmp
+      dev_tmp=( $(udiskie-info -a) )
+      _alternative \
+        'device-paths: device path:_canonical_paths -A dev_tmp -N device-paths device\ path' \
+        && ret=0
+      ;;
   esac
   return ret
 }
 
-_udiskie-mount
+_udiskie-mount "$@"
