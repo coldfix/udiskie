@@ -25,7 +25,7 @@ function _udiskie
     '(-T -s)'{-t,--tray}"[show tray icon]"
     '(-T -t)'{-s,--smart-tray}"[auto hide tray icon]"
     '(-t -s)'{-T,--no-tray}"[disable tray icon]"
-    {-m,--menu}"[set behaviour for tray menu]:traymenu:(flat smart nested)"
+    {-m,--menu}"[set behaviour for tray menu]:traymenu:(flat nested)"
     '(--no-password-cache)'--password-cache"[set timeout for passwords of encrypted devices to N minutes]:minutes"
     '(--password-cache)'--no-password-cache"[don't cache passwords for encrypted devices]"
     '(-P)'{-p,--password-prompt}"[Command for password retrieval]:passwordialog:(builtin\\:gui builtin\\:cli)"
