@@ -224,8 +224,9 @@ class DeviceCommand(object):
                         'Unknown device attribute {!r} in format string: {!r}',
                         kwd, arg))
 
+    # NOTE: *ignored swallows `allow_keyfile`
     @Coroutine.from_generator_function
-    def __call__(self, device):
+    def __call__(self, device, *ignored):
         """
         Invoke the subprocess to ask the user to enter a password for unlocking
         the specified device.
