@@ -1,6 +1,16 @@
 CHANGELOG
 ---------
 
+1.7.2
+~~~~~
+Date: 18.10.2017
+
+- officially deprecate udisks1
+- officially deprecate python2 (want python >= 3.5)
+- fix startup crash on py2
+- fix exception when inserting LUKS device if ``--password-prompt`` or udisks1 is used
+- fix minor problem with zsh autocompletion
+
 1.7.1
 ~~~~~
 Date: 02.10.2017
