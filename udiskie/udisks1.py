@@ -379,7 +379,6 @@ class Device(BaseDevice):
     set_autoclear = delete
 
     loop_support = False
-    keyfile_support = False
 
     # ----------------------------------------
     # derived properties
@@ -462,6 +461,8 @@ class Daemon(Emitter):
     def __iter__(self):
         """Iterate over all devices."""
         return (self[object_path] for object_path in self.paths())
+
+    keyfile_support = False
 
     def __getitem__(self, object_path):
         return self.get(object_path)
