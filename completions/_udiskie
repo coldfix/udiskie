@@ -28,7 +28,7 @@ function _udiskie
     {-m,--menu}"[set behaviour for tray menu]:traymenu:(flat smart nested)"
     '(--no-password-cache)'--password-cache"[set timeout for passwords of encrypted devices to N minutes]:minutes"
     '(--password-cache)'--no-password-cache"[don't cache passwords for encrypted devices]"
-    '(-P)'{-p,--password-prompt}"[Command for password retrieval]:passwordialog:(builtin:gui builtin:cli)"
+    '(-P)'{-p,--password-prompt}"[Command for password retrieval]:passwordialog:(builtin\\:gui builtin\\:cli)"
     '(-p)'{-P,--no-password-prompt}"[Disable unlocking]"
     '(-F)'{-f,--file-manager}"[set program for browsing directories]:filemanager"
     '(-f)'{-F,--no-file-manager}"[disable browsing]"
