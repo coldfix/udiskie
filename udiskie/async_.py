@@ -35,6 +35,18 @@ __all__ = [
 ]
 
 
+def pack(*values):
+    """Unpack a return tuple to a yield expression return value."""
+    # Schizophrenic returns from asyncs. Inspired by
+    # gi.overrides.Gio.DBusProxy.
+    if len(values) == 0:
+        return None
+    elif len(values) == 1:
+        return values[0]
+    else:
+        return values
+
+
 class Async(object):
 
     """
@@ -79,9 +91,10 @@ class Async(object):
         # TODO: handle Async callbacks:
         return [fn(*args) for fn in callbacks]
 
+    # accept multiple values for convenience (for now!):
     def callback(self, *values):
         """Signal successful completion."""
-        self._finish(self.callbacks, *values)
+        self._finish(self.callbacks, pack(*values))
 
     def errback(self, exception, formatted):
         """Signal unsuccessful completion."""
@@ -149,8 +162,8 @@ class Return(object):
 
     """Wraps a return value from a coroutine."""
 
-    def __init__(self, *values):
-        self.values = values
+    def __init__(self, value=None):
+        self.value = value
 
 
 def call_func(fn, *args):
@@ -244,9 +257,9 @@ class Coroutine(Async):
             thing.errbacks.append(self._throw)
         elif isinstance(thing, Return):
             self._generator.close()
-            # self.callback(*thing.values)
+            # self.callback(thing.value)
             # to shorten stack trace use instead:
-            run_soon(self.callback, *thing.values)
+            run_soon(self.callback, thing.value)
         else:
             # the protocol is easy to do wrong, therefore we better do not
             # silently ignore any errors!
@@ -255,25 +268,14 @@ class Coroutine(Async):
                  "Expecting either an Async or a Return.")
                 .format(self._generator, thing))
 
-    def _send(self, *values):
+    def _send(self, value):
         """
         Interact with the coroutine by sending a value.
 
         Set the return value of the current `yield` expression to the
         specified value and resume control flow inside the coroutine.
         """
-        self._interact(self._generator.send, self._pack(*values))
-
-    def _pack(self, *values):
-        """Unpack a return tuple to a yield expression return value."""
-        # Schizophrenic returns from yield expressions. Inspired by
-        # gi.overrides.Gio.DBusProxy.
-        if len(values) == 0:
-            return None
-        elif len(values) == 1:
-            return values[0]
-        else:
-            return values
+        self._interact(self._generator.send, value)
 
     def _throw(self, exc, fmt):
         """
