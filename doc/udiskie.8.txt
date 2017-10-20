@@ -21,7 +21,7 @@ Synopsis
 
 Description
 -----------
-*udiskie* is a front-end for UDisks written in python. Its main purpose is automatically mounting removable media, such as CDs or flash drives. It has optional mount notifications, a GTK tray icon and user level CLIs for manual mount and unmount operations. The media will be mounted in a new directory under '/media' or '/run/media/USER/', using the device name if possible.
+*udiskie* is an udisks2 front-end written in python. Its main purpose is automatically mounting removable media, such as CDs or flash drives. It has optional mount notifications, a GTK tray icon and user level CLIs for manual mount and unmount operations. The media will be mounted in a new directory under '/media' or '/run/media/USER/', using the device name if possible.
 
 
 Common options
@@ -37,15 +37,6 @@ Common options
 
 *-q, \--quiet*::
 	Quiet output.
-
-*-0, \--udisks-auto*::
-	Auto discover UDisks version (default). Prefers UDisks2 if both are available.
-
-*-1, \--use-udisks1*::
-	Use UDisks1 as DBus backend.
-
-*-2, \--use-udisks2*::
-	Use UDisks2 as DBus backend.
 
 *-c FILE, \--config=FILE*::
 	Specify config file.
@@ -189,10 +180,6 @@ The file '.config/udiskie/config.yml' can be used to configure defaults for comm
 
 program_options:
   # Configure defaults for command line options
-
-  udisks_version:   2       # [int] Specify the version of udisks
-                            # to be used. Set to 0 to use automatic
-                            # discovery.
 
   tray:             auto    # [bool] Enable the tray icon. "auto"
                             # means auto-hide the tray icon when

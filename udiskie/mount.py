@@ -140,12 +140,7 @@ class Mounter(object):
         self._browser = browser
         self._cache = cache
         self._log = logging.getLogger(__name__)
-        try:
-            # propagate error messages to UDisks1 daemon for 'Job failed'
-            # notifications.
-            self._set_error = self.udisks.set_error
-        except AttributeError:
-            self._set_error = lambda device, action, message: None
+        self._set_error = lambda device, action, message: None
 
     def _error(self, fn, device, err):
         message = exc_message(err)
@@ -618,9 +613,6 @@ class Mounter(object):
             return device
         if not os.path.isfile(image):
             self._log.error(_('not setting up {0}: not a file', image))
-            return None
-        if not self.udisks.loop_support:
-            self._log.error(_('not setting up {0}: unsupported in UDisks1', image))
             return None
         self._log.debug(_('setting up {0}', image))
         fd = os.open(image, os.O_RDONLY)

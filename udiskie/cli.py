@@ -8,7 +8,6 @@ setuptools entry points.
 # import udiskie.depend first - for side effects!
 from .depend import has_Notify, has_Gtk, _in_X
 
-import sys
 import inspect
 import logging.config
 import traceback
@@ -18,11 +17,10 @@ import gbulb
 
 from docopt import docopt, DocoptExit
 
-from gi.repository import GLib
-
 import udiskie
 import udiskie.config
 import udiskie.mount
+import udiskie.udisks2
 from .async_ import AsyncList
 from .common import extend, ObjDictView
 from .locale import _
@@ -33,49 +31,6 @@ __all__ = [
     'Mount',
     'Umount',
 ]
-
-
-def deprecation_warning(text):
-    """Show a deprecation warning."""
-    # NOTE: not using `warnings.warn(text, DeprecationWarning)`, because that
-    # requires starting the python interpreter to be started with `-Wd`, which
-    # in turn shows more warnings about removal of Gtk.StatusIcon.
-    log = logging.getLogger("udiskie.DeprecationWarning")
-    log.warning(_("Deprecation warning: {}", text))
-
-
-async def get_backend(version=None):
-    """
-    Return UDisks service.
-
-    :param int version: requested UDisks backend version
-    :returns: UDisks service wrapper object
-    :raises GLib.GError: if unable to connect to UDisks dbus service.
-    :raises ValueError: if the version is invalid
-
-    If ``version`` has a false truth value, try to connect to UDisks2 and
-    fall back to UDisks1 if not available.
-    """
-    if not version:
-        try:
-            daemon = await get_backend(2)
-        except GLib.GError:
-            log = logging.getLogger(__name__)
-            log.warning(_('Failed to connect UDisks2 dbus service..\n'
-                          'Falling back to UDisks1.'))
-            daemon = await get_backend(1)
-    elif version == 1:
-        import udiskie.udisks1
-        daemon = await udiskie.udisks1.Daemon.create()
-        deprecation_warning(_(
-            'Using UDisks1. Support will be discontinued '
-            'in the next major version of udiskie.'))
-    elif version == 2:
-        import udiskie.udisks2
-        daemon = await udiskie.udisks2.Daemon.create()
-    else:
-        raise ValueError(_("UDisks version not supported: {0}!", version))
-    return daemon
 
 
 class Choice(object):
@@ -151,17 +106,12 @@ class _EntryPoint(object):
 
     option_defaults = {
         'log_level': logging.INFO,
-        'udisks_version': None,
     }
 
     option_rules = {
         'log_level': Choice({
             '--verbose': logging.DEBUG,
             '--quiet': logging.ERROR}),
-        'udisks_version': Choice({
-            '--udisks-auto': 0,
-            '--use-udisks1': 1,
-            '--use-udisks2': 2}),
     }
 
     usage_remarks = _("""
@@ -225,11 +175,6 @@ class _EntryPoint(object):
         self.config = config
         self.options = options
         self.exit_status = 0
-        if sys.version_info < (3,5):
-            deprecation_warning(_(
-                "Running on python {}.{}. The next major version of udiskie "
-                "will require at least python 3.5!",
-                *sys.version_info[:2]))
 
     def program_options(self, args):
         """
@@ -299,7 +244,7 @@ class _EntryPoint(object):
     async def _start_async_tasks(self):
         """Start asynchronous operations."""
         try:
-            self.udisks = await get_backend(self.options['udisks_version'])
+            self.udisks = await udiskie.udisks2.Daemon.create()
             results = await self._init()
             if not all(results):
                 self.exit_status = 1
@@ -352,10 +297,6 @@ class Daemon(_EntryPoint):
 
         -v, --verbose                           Increase verbosity (DEBUG)
         -q, --quiet                             Decrease verbosity
-
-        -0, --udisks-auto                       Auto discover UDisks version
-        -1, --use-udisks1                       Use UDisks1 as backend
-        -2, --use-udisks2                       Use UDisks2 as backend
 
         -h, --help                              Show this help
         -V, --version                           Show version information

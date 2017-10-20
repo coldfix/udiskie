@@ -4,7 +4,7 @@ udiskie
 
 |Version| |License|
 
-*udiskie* is a UDisks_ front-end that allows to manage removeable media such
+*udiskie* is a udisks2_ front-end that allows to manage removeable media such
 as CDs or flash drives from userspace. Its features include:
 
 - automount removable media
@@ -13,19 +13,16 @@ as CDs or flash drives from userspace. Its features include:
 - command line tools for manual un-/mounting
 - LUKS encrypted devices
 - unlocking with keyfiles (requires udisks 2.6.4)
-- loop devices (mounting iso archives, requires UDisks2)
+- loop devices (mounting iso archives)
 - password caching (requires python keyutils 0.3)
 
 All features can be indidually enabled or disabled.
 
-**NOTE:** support for python2 has been removed. If you need a version of
-udiskie that supports python2, please check out the ``1.7.X`` releases or the
-``maint-1.7`` branch.
+**NOTE:** support for python2 and udisks1 have been removed. If you need a
+version of udiskie that supports python2, please check out the ``1.7.X``
+releases or the ``maint-1.7`` branch.
 
-**NOTE:** support for udisks1 and python2 is deprecated and will be
-discontinued in the next major version of udiskie.
-
-.. _UDisks: http://www.freedesktop.org/wiki/Software/udisks
+.. _udisks2: http://www.freedesktop.org/wiki/Software/udisks
 
 - `Documentation`_
 

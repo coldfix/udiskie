@@ -6,8 +6,7 @@ Requires UDisks2 2.1.1 as described here:
 
     http://udisks.freedesktop.org/docs/latest
 
-This wraps the DBus API of Udisks2 providing a common interface with the
-udisks1 module.
+This wraps the DBus API of Udisks2.
 """
 
 from copy import copy, deepcopy
@@ -15,7 +14,7 @@ import logging
 
 from gi.repository import GLib
 
-from .common import Emitter, AttrDictView, decode_ay, BaseDevice
+from .common import Emitter, AttrDictView, decode_ay, samefile, sameuuid
 from .dbus import connect_service, MethodsProxy, DBusCallWithFdList, DBusCall
 from .locale import _
 
@@ -111,7 +110,7 @@ class PropertiesNotAvailable(object):
 # Device wrapper
 # ----------------------------------------
 
-class Device(BaseDevice):
+class Device(object):
 
     """
     Proxy class for UDisks2 devices.
@@ -127,6 +126,18 @@ class Device(BaseDevice):
         self.object_path = object_path
         self._P = property_hub
         self._M = method_hub
+
+    def __str__(self):
+        """Show as object_path."""
+        return self.object_path
+
+    def __eq__(self, other):
+        """Comparison by object_path."""
+        return self.object_path == str(other)
+
+    def __ne__(self, other):
+        """Comparison by object_path."""
+        return not (self == other)
 
     # availability of interfaces
     @property
@@ -527,17 +538,82 @@ class Device(BaseDevice):
             })
         )
 
-    loop_support = True
-
     # ----------------------------------------
     # derived properties
     # ----------------------------------------
+
+    def is_file(self, path):
+        """Comparison by mount and device file path."""
+        return (samefile(path, self.device_file) or
+                samefile(path, self.loop_file) or
+                any(samefile(path, mp) for mp in self.mount_paths) or
+                sameuuid(path, self.id_uuid) or
+                sameuuid(path, self.partition_uuid))
 
     @property
     def parent_object_path(self):
         return (self._P.Partition.Table
                 or self._P.Block.CryptoBackingDevice
                 or '/')
+
+    @property
+    def mount_path(self):
+        """Return any mount path."""
+        try:
+            return self.mount_paths[0]
+        except IndexError:
+            return ''
+
+    @property
+    def in_use(self):
+        """Check whether this device is in use, i.e. mounted or unlocked."""
+        if self.is_mounted or self.is_unlocked:
+            return True
+        if self.is_partition_table:
+            for device in self._daemon:
+                if device.partition_slave == self and device.in_use:
+                    return True
+        return False
+
+    @property
+    def ui_id_label(self):
+        """Label of the unlocked partition or the device itself."""
+        return (self.luks_cleartext_holder or self).id_label
+
+    @property
+    def ui_id_uuid(self):
+        """UUID of the unlocked partition or the device itself."""
+        return (self.luks_cleartext_holder or self).id_uuid
+
+    @property
+    def ui_device_presentation(self):
+        """Path of the crypto backing device or the device itself."""
+        return (self.luks_cleartext_slave or self).device_presentation
+
+    @property
+    def ui_label(self):
+        """UI string identifying the partition if possible."""
+        return ': '.join(filter(None, [
+            self.ui_device_presentation,
+            self.ui_id_label or self.ui_id_uuid or self.drive_label
+        ]))
+
+    @property
+    def ui_device_label(self):
+        """UI string identifying the device (drive) if toplevel."""
+        return ': '.join(filter(None, [
+            self.ui_device_presentation,
+            self.loop_file or
+            self.drive_label or self.ui_id_label or self.ui_id_uuid
+        ]))
+
+    @property
+    def drive_label(self):
+        """Return drive label."""
+        return ' '.join(filter(None, [
+            self.drive_vendor,
+            self.drive_model,
+        ]))
 
 
 # ----------------------------------------
