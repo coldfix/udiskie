@@ -55,103 +55,71 @@ else:
         raise ValueError("Unknown variant type: {}!".format(v.get_type_string()))
 
 
-class DBusCall(Async):
-
+def DBusCall(proxy, method_name, signature, args, flags=0, timeout_msec=-1):
     """
-    Asynchronously call a DBus method.
+    Asynchronously call the specified method on a DBus proxy object.
+
+    :param Gio.DBusProxy proxy:
+    :param str method_name:
+    :param str signature:
+    :param tuple args:
+    :param int flags:
+    :param int timeout_msec:
     """
-
-    def __init__(self,
-                 proxy,
-                 method_name,
-                 signature,
-                 args,
-                 flags=0,
-                 timeout_msec=-1):
-        """
-        Asynchronously call the specified method on a DBus proxy object.
-
-        :param Gio.DBusProxy proxy:
-        :param str method_name:
-        :param str signature:
-        :param tuple args:
-        :param int flags:
-        :param int timeout_msec:
-        """
-        cancellable = None
-        user_data = None
-        proxy.call(
-            method_name,
-            GLib.Variant(signature, tuple(args)),
-            flags,
-            timeout_msec,
-            cancellable,
-            self._callback,
-            user_data,
-        )
-
-    @gio_callback
-    def _callback(self, proxy, result, user_data):
-        """
-        Handle call result.
-
-        :param Gio.DBusProxy proxy:
-        :param Gio.AsyncResult result:
-        :param user_data: unused
-        """
-        value = proxy.call_finish(result)
-        return pack(*unpack_variant(value))
+    future = Async()
+    cancellable = None
+    user_data = None
+    proxy.call(
+        method_name,
+        GLib.Variant(signature, tuple(args)),
+        flags,
+        timeout_msec,
+        cancellable,
+        partial(_DBusCall_callback, future),
+        user_data,
+    )
+    return future
 
 
-class DBusCallWithFdList(Async):
+@gio_callback
+def _DBusCall_callback(proxy, result, user_data):
+    value = proxy.call_finish(result)
+    return pack(*unpack_variant(value))
 
+
+def DBusCallWithFdList(proxy, method_name, signature, args, fds, flags=0,
+                       timeout_msec=-1):
     """
-    Asynchronously call a DBus method.
+    Asynchronously call the specified method on a DBus proxy object.
+
+    :param Gio.DBusProxy proxy:
+    :param str method_name:
+    :param str signature:
+    :param tuple args:
+    :param int flags:
+    :param int timeout_msec:
     """
+    future = Async()
+    cancellable = None
+    user_data = None
+    fd_list = Gio.UnixFDList.new_from_array(fds)
+    proxy.call_with_unix_fd_list(
+        method_name,
+        GLib.Variant(signature, tuple(args)),
+        flags,
+        timeout_msec,
+        fd_list,
+        cancellable,
+        partial(_DBusCallWithFdList_callback, future),
+        user_data,
+    )
+    return future
 
-    def __init__(self,
-                 proxy,
-                 method_name,
-                 signature,
-                 args,
-                 fds,
-                 flags=0,
-                 timeout_msec=-1):
-        """
-        Asynchronously call the specified method on a DBus proxy object.
 
-        :param Gio.DBusProxy proxy:
-        :param str method_name:
-        :param str signature:
-        :param tuple args:
-        :param int flags:
-        :param int timeout_msec:
-        """
-        cancellable = None
-        user_data = None
-        fd_list = Gio.UnixFDList.new_from_array(fds)
-        proxy.call_with_unix_fd_list(
-            method_name,
-            GLib.Variant(signature, tuple(args)),
-            flags,
-            timeout_msec,
-            fd_list,
-            cancellable,
-            self._callback,
-            user_data,
-        )
-
-    @gio_callback
-    def _callback(self, proxy, result, user_data):
-        """
-        Handle call result.
-
-        :param Gio.DBusProxy proxy:
-        :param Gio.AsyncResult result:
-        :param user_data: unused
-        """
-        value, fds = proxy.call_with_unix_fd_list_finish(result)
-        return pack(*unpack_variant(value))
+@gio_callback
+def _DBusCallWithFdList_callback(proxy, result, user_data):
+    value, fds = proxy.call_with_unix_fd_list_finish(result)
+    return pack(*unpack_variant(value))
 
 
 class InterfaceProxy(object):
@@ -307,40 +275,18 @@ class ObjectProxy(object):
         yield Return(result)
 
 
-class DBusCallback(object):
-
-    def __init__(self, handler):
-        """Store reference to handler."""
-        self._handler = handler
-
-    def __call__(self,
-                 connection,
-                 sender_name,
-                 object_path,
-                 interface_name,
-                 signal_name,
-                 parameters,
-                 *user_data):
-        """Call handler unpacked signal parameters."""
-        return self._handler(*unpack_variant(parameters))
+def DBusCallback(connection, sender_name, object_path,
+                 interface_name, signal_name, parameters,
+                 handler):
+    """Call handler unpacked signal parameters."""
+    return handler(*unpack_variant(parameters))
 
 
-class DBusCallbackWithObjectPath(object):
-
-    def __init__(self, handler):
-        """Store reference to handler."""
-        self._handler = handler
-
-    def __call__(self,
-                 connection,
-                 sender_name,
-                 object_path,
-                 interface_name,
-                 signal_name,
-                 parameters,
-                 *user_data):
-        """Call handler with object_path and unpacked signal parameters."""
-        return self._handler(object_path, *unpack_variant(parameters))
+def DBusCallbackWithObjectPath(connection, sender_name, object_path,
+                               interface_name, signal_name, parameters,
+                               handler):
+    """Call handler with object_path and unpacked signal parameters."""
+    return handler(object_path, *unpack_variant(parameters))
 
 
 class BusProxy(object):
@@ -383,10 +329,7 @@ class BusProxy(object):
         :param str object_path: object path or ``None``
         :param handler: callback
         """
-        if object_path:
-            callback = DBusCallback(handler)
-        else:
-            callback = DBusCallbackWithObjectPath(handler)
+        callback = DBusCallback if object_path else DBusCallbackWithObjectPath
         return self.connection.signal_subscribe(
             self.bus_name,
             interface,
@@ -395,7 +338,7 @@ class BusProxy(object):
             None,
             Gio.DBusSignalFlags.NONE,
             callback,
-            None,
+            handler,
         )
 
     def disconnect(self, subscription_id):
@@ -405,94 +348,62 @@ class BusProxy(object):
         self.connection.signal_unsubscribe(subscription_id)
 
 
-class DBusProxyNew(Async):
-
+def DBusProxyNew(connection, flags, info, name, object_path, interface_name):
     """
-    Asynchronously call a DBus method.
+    Asynchronously call the specified method on a DBus proxy object.
     """
-
-    def __init__(self,
-                 connection,
-                 flags,
-                 info,
-                 name,
-                 object_path,
-                 interface_name):
-        """
-        Asynchronously call the specified method on a DBus proxy object.
-        """
-        cancellable = None
-        user_data = None
-        Gio.DBusProxy.new(
-            connection,
-            flags,
-            info,
-            name,
-            object_path,
-            interface_name,
-            cancellable,
-            self._callback,
-            user_data,
-        )
-
-    @gio_callback
-    def _callback(self, proxy, result, user_data):
-        """
-        Handle call result.
-
-        :param Gio.DBusProxy proxy:
-        :param Gio.AsyncResult result:
-        :param user_data: unused
-        """
-        value = Gio.DBusProxy.new_finish(result)
-        if value is None:
-            raise RuntimeError("Failed to connect DBus object!")
-        return value
+    future = Async()
+    cancellable = None
+    user_data = None
+    Gio.DBusProxy.new(
+        connection,
+        flags,
+        info,
+        name,
+        object_path,
+        interface_name,
+        cancellable,
+        partial(_DBusProxyNew_callback, future),
+        user_data,
+    )
+    return future
 
 
-class DBusProxyNewForBus(Async):
+@gio_callback
+def _DBusProxyNew_callback(proxy, result, user_data):
+    value = Gio.DBusProxy.new_finish(result)
+    if value is None:
+        raise RuntimeError("Failed to connect DBus object!")
+    return value
 
+
+def DBusProxyNewForBus(bus_type, flags, info, name, object_path, interface_name):
     """
-    Asynchronously call a DBus method.
+    Asynchronously call the specified method on a DBus proxy object.
     """
+    future = Async()
+    cancellable = None
+    user_data = None
+    Gio.DBusProxy.new_for_bus(
+        bus_type,
+        flags,
+        info,
+        name,
+        object_path,
+        interface_name,
+        cancellable,
+        partial(_DBusProxyNewForBus_callback, future),
+        user_data,
+    )
+    return future
 
-    def __init__(self,
-                 bus_type,
-                 flags,
-                 info,
-                 name,
-                 object_path,
-                 interface_name):
-        """
-        Asynchronously call the specified method on a DBus proxy object.
-        """
-        cancellable = None
-        user_data = None
-        Gio.DBusProxy.new_for_bus(
-            bus_type,
-            flags,
-            info,
-            name,
-            object_path,
-            interface_name,
-            cancellable,
-            self._callback,
-            user_data,
-        )
 
-    @gio_callback
-    def _callback(self, proxy, result, user_data):
-        """
-        Handle call result.
-
-        :param Gio.DBusProxy proxy:
-        :param Gio.AsyncResult result:
-        :param user_data: unused
-        """
-        value = Gio.DBusProxy.new_for_bus_finish(result)
-        if value is None:
-            raise RuntimeError("Failed to connect DBus object!")
-        return value
+@gio_callback
+def _DBusProxyNewForBus_callback(proxy, result, user_data):
+    value = Gio.DBusProxy.new_for_bus_finish(result)
+    if value is None:
+        raise RuntimeError("Failed to connect DBus object!")
+    return value
 
 
 @Coroutine.from_generator_function

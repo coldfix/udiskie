@@ -306,7 +306,7 @@ class Coroutine(Async):
 def gio_callback(extract_result):
     def callback(self, *args):
         try:
-            value = extract_result(self, *args)
+            value = extract_result(*args)
         except Exception as e:
             self.errback(e, format_exc())
         else:
@@ -314,35 +314,35 @@ def gio_callback(extract_result):
     return callback
 
 
-class Subprocess(Async):
-
+def Subprocess(argv):
     """
     An Async task that represents a subprocess. If successful, the task's
     result is set to the collected STDOUT of the subprocess.
 
     :raises subprocess.CalledProcessError: if the subprocess returns a non-zero exit code
     """
+    future = Async()
+    process = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
+    stdin_buf = None
+    cancellable = None
+    user_data = process
+    process.communicate_utf8_async(
+        stdin_buf,
+        cancellable,
+        partial(_Subprocess_callback, future),
+        user_data)
+    return future
 
-    def __init__(self, argv):
-        self.p = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
-        stdin_buf = None
-        cancellable = None
-        user_data = None
-        self.p.communicate_utf8_async(
-            stdin_buf,
-            cancellable,
-            self._callback,
-            user_data)
 
-    @gio_callback
-    def _callback(self, source_object, result, user_data):
-        success, stdout, stderr = self.p.communicate_utf8_finish(result)
-        if not success:
-            raise RuntimeError("Subprocess did not exit normally!")
-        exit_code = self.p.get_exit_status()
-        if exit_code != 0:
-            raise CalledProcessError(
-                "Subprocess returned a non-zero exit-status!",
-                exit_code,
-                stdout)
-        return stdout
+@gio_callback
+def _Subprocess_callback(proxy, result, process):
+    success, stdout, stderr = process.communicate_utf8_finish(result)
+    if not success:
+        raise RuntimeError("Subprocess did not exit normally!")
+    exit_code = process.get_exit_status()
+    if exit_code != 0:
+        raise CalledProcessError(
+            "Subprocess returned a non-zero exit-status!",
+            exit_code,
+            stdout)
+    return stdout
