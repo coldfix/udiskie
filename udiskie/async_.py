@@ -35,6 +35,18 @@ __all__ = [
 ]
 
 
+def pack(*values):
+    """Unpack a return tuple to a yield expression return value."""
+    # Schizophrenic returns from asyncs. Inspired by
+    # gi.overrides.Gio.DBusProxy.
+    if len(values) == 0:
+        return None
+    elif len(values) == 1:
+        return values[0]
+    else:
+        return values
+
+
 class Async(object):
 
     """
@@ -79,9 +91,10 @@ class Async(object):
         # TODO: handle Async callbacks:
         return [fn(*args) for fn in callbacks]
 
+    # accept multiple values for convenience (for now!):
     def callback(self, *values):
         """Signal successful completion."""
-        self._finish(self.callbacks, *values)
+        self._finish(self.callbacks, pack(*values))
 
     def errback(self, exception, formatted):
         """Signal unsuccessful completion."""
@@ -149,8 +162,8 @@ class Return(object):
 
     """Wraps a return value from a coroutine."""
 
-    def __init__(self, *values):
-        self.values = values
+    def __init__(self, value=None):
+        self.value = value
 
 
 def call_func(fn, *args):
@@ -244,9 +257,9 @@ class Coroutine(Async):
             thing.errbacks.append(self._throw)
         elif isinstance(thing, Return):
             self._generator.close()
-            # self.callback(*thing.values)
+            # self.callback(thing.value)
             # to shorten stack trace use instead:
-            run_soon(self.callback, *thing.values)
+            run_soon(self.callback, thing.value)
         else:
             # the protocol is easy to do wrong, therefore we better do not
             # silently ignore any errors!
@@ -255,25 +268,14 @@ class Coroutine(Async):
                  "Expecting either an Async or a Return.")
                 .format(self._generator, thing))
 
-    def _send(self, *values):
+    def _send(self, value):
         """
         Interact with the coroutine by sending a value.
 
         Set the return value of the current `yield` expression to the
         specified value and resume control flow inside the coroutine.
         """
-        self._interact(self._generator.send, self._pack(*values))
-
-    def _pack(self, *values):
-        """Unpack a return tuple to a yield expression return value."""
-        # Schizophrenic returns from yield expressions. Inspired by
-        # gi.overrides.Gio.DBusProxy.
-        if len(values) == 0:
-            return None
-        elif len(values) == 1:
-            return values[0]
-        else:
-            return values
+        self._interact(self._generator.send, value)
 
     def _throw(self, exc, fmt):
         """
@@ -301,38 +303,46 @@ class Coroutine(Async):
             self._recv(value)
 
 
-class Subprocess(Async):
+def gio_callback(extract_result):
+    def callback(self, *args):
+        try:
+            value = extract_result(*args)
+        except Exception as e:
+            self.errback(e, format_exc())
+        else:
+            self.callback(value)
+    return callback
 
+
+def Subprocess(argv):
     """
     An Async task that represents a subprocess. If successful, the task's
     result is set to the collected STDOUT of the subprocess.
 
     :raises subprocess.CalledProcessError: if the subprocess returns a non-zero exit code
     """
+    future = Async()
+    process = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
+    stdin_buf = None
+    cancellable = None
+    user_data = process
+    process.communicate_utf8_async(
+        stdin_buf,
+        cancellable,
+        partial(_Subprocess_callback, future),
+        user_data)
+    return future
 
-    def __init__(self, argv):
-        self.p = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
-        stdin_buf = None
-        cancellable = None
-        user_data = None
-        self.p.communicate_utf8_async(
-            stdin_buf,
-            cancellable,
-            self._callback,
-            user_data)
 
-    def _callback(self, source_object, result, user_data):
-        try:
-            success, stdout, stderr = self.p.communicate_utf8_finish(result)
-            if not success:
-                raise RuntimeError("Subprocess did not exit normally!")
-            exit_code = self.p.get_exit_status()
-            if exit_code != 0:
-                raise CalledProcessError(
-                    "Subprocess returned a non-zero exit-status!",
-                    exit_code,
-                    stdout)
-        except Exception as e:
-            self.errback(e, format_exc())
-        else:
-            self.callback(stdout)
+@gio_callback
+def _Subprocess_callback(proxy, result, process):
+    success, stdout, stderr = process.communicate_utf8_finish(result)
+    if not success:
+        raise RuntimeError("Subprocess did not exit normally!")
+    exit_code = process.get_exit_status()
+    if exit_code != 0:
+        raise CalledProcessError(
+            "Subprocess returned a non-zero exit-status!",
+            exit_code,
+            stdout)
+    return stdout
