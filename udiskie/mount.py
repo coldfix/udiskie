@@ -762,23 +762,6 @@ class Mounter(object):
         propagate_ignored(root)
         return device_nodes
 
-    def get_device_tree_filtered(self):
-        """Get a tree of all handleable devices."""
-        root = self.get_device_tree()['/']
-        # remove ignored devices from the structure:
-        def filter_handled(node):
-            node.children[:] = [
-                descendant
-                for child in node.children
-                for descendant in filter_handled(child)
-            ]
-            if node.ignored:
-                return node.children
-            else:
-                return [dev]
-        filter_handled(root)
-        return root
-
 
 class DevNode:
 
