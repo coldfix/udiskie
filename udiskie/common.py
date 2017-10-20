@@ -1,5 +1,5 @@
 """
-Common DBus utilities.
+Common utilities.
 """
 
 import os.path

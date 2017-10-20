@@ -54,7 +54,7 @@ def gio_callback(extract_result):
     return callback
 
 
-def Subprocess(argv):
+def exec_subprocess(argv):
     """
     An Async task that represents a subprocess. If successful, the task's
     result is set to the collected STDOUT of the subprocess.
@@ -68,14 +68,14 @@ def Subprocess(argv):
     process.communicate_utf8_async(
         stdin_buf,
         cancellable,
-        _Subprocess_callback,
+        _exec_subprocess_result,
         future,
         process)
     return future
 
 
 @gio_callback
-def _Subprocess_callback(proxy, result, process):
+def _exec_subprocess_result(proxy, result, process):
     success, stdout, stderr = process.communicate_utf8_finish(result)
     if not success:
         raise RuntimeError("Subprocess did not exit normally!")

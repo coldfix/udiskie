@@ -14,8 +14,8 @@ import logging
 
 from gi.repository import GLib
 
+import udiskie.dbus as dbus
 from .common import Emitter, AttrDictView, decode_ay, samefile, sameuuid
-from .dbus import connect_service, MethodsProxy, DBusCallWithFdList, DBusCall
 from .locale import _
 
 __all__ = ['Daemon']
@@ -74,7 +74,7 @@ class MethodHub(object):
 
     def __getattr__(self, key):
         """Return a MethodsProxy for the requested interface."""
-        return MethodsProxy(self._object_proxy, Interface[key])
+        return dbus.MethodsProxy(self._object_proxy, Interface[key])
 
 
 class PropertyHub(object):
@@ -715,7 +715,7 @@ class Daemon(Emitter):
     @classmethod
     async def create(cls):
         service = (cls.BusName, cls.ObjectPath, cls.Interface)
-        proxy = await connect_service(*service)
+        proxy = await dbus.connect_service(*service)
         version = await cls.get_version()
         daemon = cls(proxy, version)
         await daemon._sync()
@@ -726,8 +726,8 @@ class Daemon(Emitter):
         service = (cls.BusName,
                    '/org/freedesktop/UDisks2/Manager',
                    Interface['Properties'])
-        manager = await connect_service(*service)
-        version = await DBusCall(manager._proxy, 'Get', '(ss)', (
+        manager = await dbus.connect_service(*service)
+        version = await dbus.call(manager._proxy, 'Get', '(ss)', (
             Interface['Manager'], 'Version'))
         return version
 
@@ -735,8 +735,8 @@ class Daemon(Emitter):
         service = (self.BusName,
                    '/org/freedesktop/UDisks2/Manager',
                    Interface['Manager'])
-        manager = await connect_service(*service)
-        object_path = await DBusCallWithFdList(
+        manager = await dbus.connect_service(*service)
+        object_path = await dbus.call_with_fd_list(
             manager._proxy, 'LoopSetup', '(ha{sv})',
             (0, filter_opt({
                 'auth.no_user_interaction': ('b', options.get('auth.no_user_interaction')),

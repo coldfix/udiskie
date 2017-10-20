@@ -15,7 +15,7 @@ import string
 import subprocess
 import sys
 
-from .async_ import Subprocess
+from .async_ import exec_subprocess
 from .locale import _
 from .common import AttrDictView
 from .config import DeviceFilter
@@ -233,7 +233,7 @@ class DeviceCommand(object):
         fake_dev = AttrDictView(attrs)
         argv = [arg.format(fake_dev, **attrs) for arg in self.argv]
         try:
-            stdout = await Subprocess(argv)
+            stdout = await exec_subprocess(argv)
         except subprocess.CalledProcessError:
             return None
         return stdout.rstrip('\n')
