@@ -1,16 +1,8 @@
 language: python
 
-# Restrict testing to system native python versions.
-# This means that binary distributions can be used for the dependencies.
-# Travis runs on Ubuntu 12.04 LTS currently. :(
 python:
-  - "2.7"
-  - "3.4"       # trusty's native python3 version
-  # - "pypy"
+  - "3.5"
 
-# Build inside docker containers instead of virtual machines. These are
-# faster, start quicker and support caching. Only downside: sudo is not
-# supported.
 sudo: false
 
 # Dependencies can be installed as follows. This works only for packages
@@ -18,13 +10,16 @@ sudo: false
 addons:
   apt:
     packages:
-    - python-gobject
-    - python3-gi
     - libkeyutils-dev
+# NOTE: Travis currently runs tests on Ubuntu 14.04 (trusty) whose native
+# python3 distribution is py34. This means that we do not have access to
+# adequate system packages for use with `--system-site-packages`:
+#   - python-gobject
+#   - python3-gi
 
 # Inherit system site packages for use in virtualenv:
-virtualenv:
-  system_site_packages: true
+# virtualenv:
+#   system_site_packages: true
 
 # Setup (performed within virtualenv)
 install:
