@@ -15,7 +15,7 @@ import string
 import subprocess
 import sys
 
-from .async_ import Async, Subprocess
+from .async_ import Subprocess
 from .locale import _
 from .common import AttrDictView
 from .config import DeviceFilter
@@ -75,7 +75,7 @@ dialog_definition = r"""
 """
 
 
-class Dialog(Async):
+class Dialog(asyncio.Future):
 
     _ACTIVE_INSTANCES = []
 

@@ -21,7 +21,6 @@ import udiskie
 import udiskie.config
 import udiskie.mount
 import udiskie.udisks2
-from .async_ import AsyncList
 from .common import extend, ObjDictView
 from .locale import _
 
@@ -434,7 +433,7 @@ class Daemon(_EntryPoint):
             self.automounter.activate()
             tasks.append(self.mounter.add_all())
 
-        return AsyncList(tasks)
+        return asyncio.gather(*tasks)
 
     def _load_notify(self):
         import udiskie.notify
@@ -569,7 +568,7 @@ class Mount(_EntryPoint):
                      for path in options['<device>']]
         else:
             tasks = [mounter.add_all(recursive=recursive)]
-        return AsyncList(tasks)
+        return asyncio.gather(*tasks)
 
 
 class Umount(_EntryPoint):
@@ -649,7 +648,7 @@ class Umount(_EntryPoint):
                      for path in options['<device>']]
         else:
             tasks = [mounter.remove_all(**strategy)]
-        return AsyncList(tasks)
+        return asyncio.gather(*tasks)
 
 
 def _parse_filter(spec):
@@ -751,4 +750,4 @@ class Info(_EntryPoint):
             if matcher.match(device):
                 print(format_output(device))
 
-        return AsyncList([])
+        return asyncio.gather()

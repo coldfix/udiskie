@@ -7,7 +7,6 @@ import asyncio
 from gi.repository import Gio
 from gi.repository import Gtk
 
-from .async_ import Async
 from .common import setdefault, DaemonBase
 from .locale import _
 from .mount import Action, prune_empty_node
@@ -336,7 +335,7 @@ class TrayIcon(object):
         self._menu = menumaker
         self._conn_left = None
         self._conn_right = None
-        self.task = Async()
+        self.task = asyncio.Future()
         menumaker._quit_action = self.destroy
 
     def destroy(self):

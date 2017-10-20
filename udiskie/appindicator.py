@@ -5,7 +5,7 @@ Status icon using AppIndicator3.
 from gi.repository import Gtk
 from gi.repository import AppIndicator3
 
-from udiskie.async_ import Async
+import asyncio
 
 
 class AppIndicatorIcon(object):
@@ -29,7 +29,7 @@ class AppIndicatorIcon(object):
         dbusmenuserver = self._indicator.get_property('dbus-menu-server')
         self._dbusmenuitem = dbusmenuserver.get_property('root-node')
         self._conn = self._dbusmenuitem.connect('about-to-show', self._on_show)
-        self.task = Async()
+        self.task = asyncio.Future()
         menumaker._quit_action = self.destroy
         # Populate menu initially, so libdbusmenu does not ignore the
         # 'about-to-show':

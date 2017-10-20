@@ -2,6 +2,8 @@
 Mount utilities.
 """
 
+import asyncio
+
 from distutils.spawn import find_executable
 from collections import namedtuple
 from functools import partial
@@ -9,7 +11,7 @@ import inspect
 import logging
 import os
 
-from .async_ import AsyncList, to_coro
+from .async_ import to_coro
 from .common import wraps, setdefault, exc_message
 from .config import IgnoreDevice, match_config
 from .locale import _
@@ -356,7 +358,7 @@ class Mounter(object):
                 for dev in self.get_all_handleable()
                 if dev.is_partition and dev.partition_slave == device
             ]
-            results = await AsyncList(tasks)
+            results = await asyncio.gather(*tasks)
             success = all(results)
         else:
             self._log.info(_('not adding {0}: unhandled device', device))
@@ -396,7 +398,7 @@ class Mounter(object):
                 for dev in self.get_all_handleable()
                 if dev.is_partition and dev.partition_slave == device
             ]
-            results = await AsyncList(tasks)
+            results = await asyncio.gather(*tasks)
             success = all(results)
         else:
             self._log.debug(_('not adding {0}: unhandled device', device))
@@ -433,7 +435,7 @@ class Mounter(object):
                 for child in self.get_all_handleable()
                 if _is_parent_of(device, child)
             ]
-            results = await AsyncList(tasks)
+            results = await asyncio.gather(*tasks)
             success = all(results)
         else:
             self._log.info(_('not removing {0}: unhandled device', device))
@@ -483,7 +485,7 @@ class Mounter(object):
                 for child in self.get_all_handleable()
                 if _is_parent_of(device, child)
             ]
-            results = await AsyncList(tasks)
+            results = await asyncio.gather(*tasks)
             success = all(results)
         else:
             self._log.debug(_('not removing {0}: unhandled device', device))
@@ -563,7 +565,7 @@ class Mounter(object):
         """
         tasks = [self.auto_add(device, recursive=recursive)
                  for device in self.get_all_handleable_leaves()]
-        results = await AsyncList(tasks)
+        results = await asyncio.gather(*tasks)
         success = all(results)
         return success
 
@@ -580,7 +582,7 @@ class Mounter(object):
         kw = dict(force=True, detach=detach, eject=eject, lock=lock)
         tasks = [self.auto_remove(device, **kw)
                  for device in self.get_all_handleable_roots()]
-        results = await AsyncList(tasks)
+        results = await asyncio.gather(*tasks)
         success = all(results)
         return success
 

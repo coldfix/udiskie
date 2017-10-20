@@ -2,13 +2,6 @@
 This module defines the protocol used for asynchronous operations in udiskie.
 """
 
-# NOTE: neither AsyncList nor Coroutine save references to the active tasks!
-# Although this would create a reference cycle (coro->task->callbacks->coro),
-# the garbage collector can generally detect the cycle and delete the involved
-# objects anyway (there is usually no independent reference to the coroutine).
-# So you must take care to increase the reference-count of all active tasks
-# manually.
-
 import asyncio
 
 from functools import wraps
@@ -18,8 +11,9 @@ from gi.repository import Gio
 
 
 __all__ = [
-    'Async',
-    'AsyncList',
+    'pack',
+    'to_coro',
+    'run_bg',
 ]
 
 
@@ -35,9 +29,6 @@ def pack(*values):
         return values
 
 
-Async = asyncio.Future
-
-
 def to_coro(func):
     @wraps(func)
     async def coro(*args, **kwargs):
@@ -50,10 +41,6 @@ def run_bg(func):
     def runner(*args, **kwargs):
         return asyncio.ensure_future(func(*args, **kwargs))
     return runner
-
-
-def AsyncList(tasks):
-    return asyncio.gather(*tasks)
 
 
 def gio_callback(extract_result):
@@ -74,7 +61,7 @@ def Subprocess(argv):
 
     :raises subprocess.CalledProcessError: if the subprocess returns a non-zero exit code
     """
-    future = Async()
+    future = asyncio.Future()
     process = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
     stdin_buf = None
     cancellable = None
