@@ -92,9 +92,9 @@ class Async(object):
         return [fn(*args) for fn in callbacks]
 
     # accept multiple values for convenience (for now!):
-    def callback(self, *values):
+    def callback(self, value):
         """Signal successful completion."""
-        self._finish(self.callbacks, pack(*values))
+        self._finish(self.callbacks, value)
 
     def errback(self, exception, formatted):
         """Signal unsuccessful completion."""
@@ -137,9 +137,9 @@ class AsyncList(Async):
                 for i in range(self._num_tasks)
             ])
 
-    def _subtask_result(self, idx, *args):
+    def _subtask_result(self, idx, value):
         """Receive a result from a single subtask."""
-        self._set_subtask_result(idx, AsyncResult(True, *args))
+        self._set_subtask_result(idx, AsyncResult(True, value))
 
     def _subtask_error(self, idx, error, fmt):
         """Receive an error from a single subtask."""
@@ -295,7 +295,7 @@ class Coroutine(Async):
             value = func(*args)
         except StopIteration:
             self._generator.close()
-            self.callback()
+            self.callback(None)
         except Exception as e:
             self._generator.close()
             self.errback(e, format_exc())

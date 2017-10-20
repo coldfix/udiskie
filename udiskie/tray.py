@@ -344,7 +344,7 @@ class TrayIcon(object):
 
     def destroy(self):
         self.show(False)
-        self.task.callback()
+        self.task.callback(None)
 
     def _create_statusicon(self):
         """Return a new Gtk.StatusIcon."""
