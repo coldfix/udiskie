@@ -13,6 +13,9 @@ import inspect
 import logging.config
 import traceback
 
+import asyncio
+import gbulb
+
 from docopt import docopt, DocoptExit
 
 from gi.repository import GLib
@@ -20,7 +23,7 @@ from gi.repository import GLib
 import udiskie
 import udiskie.config
 import udiskie.mount
-from .async_ import AsyncList, Coroutine, Return, RunForever
+from .async_ import AsyncList
 from .common import extend, ObjDictView
 from .locale import _
 
@@ -41,8 +44,7 @@ def deprecation_warning(text):
     log.warning(_("Deprecation warning: {}", text))
 
 
-@Coroutine.from_generator_function
-def get_backend(version=None):
+async def get_backend(version=None):
     """
     Return UDisks service.
 
@@ -56,24 +58,24 @@ def get_backend(version=None):
     """
     if not version:
         try:
-            daemon = yield get_backend(2)
+            daemon = await get_backend(2)
         except GLib.GError:
             log = logging.getLogger(__name__)
             log.warning(_('Failed to connect UDisks2 dbus service..\n'
                           'Falling back to UDisks1.'))
-            daemon = yield get_backend(1)
+            daemon = await get_backend(1)
     elif version == 1:
         import udiskie.udisks1
-        daemon = yield udiskie.udisks1.Daemon.create()
+        daemon = await udiskie.udisks1.Daemon.create()
         deprecation_warning(_(
             'Using UDisks1. Support will be discontinued '
             'in the next major version of udiskie.'))
     elif version == 2:
         import udiskie.udisks2
-        daemon = yield udiskie.udisks2.Daemon.create()
+        daemon = await udiskie.udisks2.Daemon.create()
     else:
         raise ValueError(_("UDisks version not supported: {0}!", version))
-    yield Return(daemon)
+    return daemon
 
 
 class Choice(object):
@@ -175,6 +177,7 @@ class _EntryPoint(object):
 
         :param list argv: command line parameters
         """
+        gbulb.install(gtk=True)
         # parse program options (retrieve log level and config file name):
         args = docopt(self.usage, version=self.name + ' ' + self.version)
         default_opts = self.option_defaults
@@ -285,27 +288,26 @@ class _EntryPoint(object):
         :returns: exit code
         :rtype: int
         """
-        self.mainloop = GLib.MainLoop()
-        self._start_async_tasks()
+        self.mainloop = asyncio.get_event_loop()
         try:
-            self.mainloop.run()
+            self.mainloop.run_until_complete(
+                self._start_async_tasks())
             return self.exit_status
         except KeyboardInterrupt:
             return 1
 
-    @Coroutine.from_generator_function
-    def _start_async_tasks(self):
+    async def _start_async_tasks(self):
         """Start asynchronous operations."""
         try:
-            self.udisks = yield get_backend(self.options['udisks_version'])
-            results = yield self._init()
+            self.udisks = await get_backend(self.options['udisks_version'])
+            results = await self._init()
             if not all(results):
                 self.exit_status = 1
         except Exception:
             self.exit_status = 1
             # Print the stack trace only up to the current level:
             traceback.print_exc()
-        self.mainloop.quit()
+        self.mainloop.stop()
 
 
 class Component(object):
@@ -486,7 +488,7 @@ class Daemon(_EntryPoint):
             self.statusicon.activate()
             tasks.append(self.statusicon.instance._icon.task)
         else:
-            tasks.append(RunForever)
+            tasks.append(asyncio.Future())
         if options['automount']:
             self.automounter.activate()
             tasks.append(self.mounter.add_all())

@@ -9,7 +9,7 @@ import inspect
 import logging
 import os
 
-from .async_ import AsyncList, Coroutine, Return
+from .async_ import AsyncList, to_coro
 from .common import wraps, setdefault, exc_message
 from .config import IgnoreDevice, match_config
 from .locale import _
@@ -22,11 +22,6 @@ __all__ = ['Mounter']
 # execution.
 
 
-@Coroutine.from_generator_function
-def _False():
-    yield Return(False)
-
-
 def _find_device(fn):
     """
     Decorator for Mounter methods taking a Device as their first argument.
@@ -35,43 +30,43 @@ def _find_device(fn):
     handling (logging).
     """
     @wraps(fn)
-    def wrapper(self, device_or_path, *args, **kwargs):
+    async def wrapper(self, device_or_path, *args, **kwargs):
         try:
             device = self.udisks.find(device_or_path)
         except ValueError as e:
             self._log.error(exc_message(e))
-            return _False()
-        return Coroutine(fn(self, device, *args, **kwargs))
+            return False
+        return await fn(self, device, *args, **kwargs)
     return wrapper
 
 
 def _find_device_auto_losetup(fn):
-    @Coroutine.from_generator_function
-    def wrapper(self, device_or_path, *args, **kwargs):
+    async def wrapper(self, device_or_path, *args, **kwargs):
         try:
             try:
                 device = self.udisks.find(device_or_path)
             except ValueError as e:
                 if not os.path.isfile(device_or_path):
                     raise
-                device = yield self.losetup(device_or_path)
+                device = await self.losetup(device_or_path)
                 bound = inspect.getcallargs(fn, self, device, *args, **kwargs)
                 if bound.get('recursive') is False:
-                    yield Return(device)
+                    return device
         except Exception as e:
             self._log.error(exc_message(e))
-            yield Return(False)
-        result = yield Coroutine(fn(self, device, *args, **kwargs))
-        yield Return(result)
+            return False
+        return await fn(self, device, *args, **kwargs)
     return wrapper
 
 
 def _sets_async_error(fn):
     @wraps(fn)
-    def wrapper(self, device, *args, **kwargs):
-        async_ = fn(self, device, *args, **kwargs)
-        async_.errbacks.append(partial(self._error, fn, device))
-        return async_
+    async def wrapper(self, device, *args, **kwargs):
+        try:
+            return await fn(self, device, *args, **kwargs)
+        except Exception as e:
+            self._error(fn, device, e)
+            return False
     return wrapper
 
 
@@ -81,10 +76,11 @@ def _suppress_error(fn):
     errors happen in sub-functions in which errors ARE logged.
     """
     @wraps(fn)
-    def wrapper(self, device, *args, **kwargs):
-        async_ = fn(self, device, *args, **kwargs)
-        async_.errbacks.append(lambda *args: True)
-        return async_
+    async def wrapper(self, device, *args, **kwargs):
+        try:
+            return await fn(self, device, *args, **kwargs)
+        except Exception:
+            return False
     return wrapper
 
 
@@ -151,7 +147,7 @@ class Mounter(object):
         except AttributeError:
             self._set_error = lambda device, action, message: None
 
-    def _error(self, fn, device, err, fmt):
+    def _error(self, fn, device, err):
         message = exc_message(err)
         self._log.error(_('failed to {0} {1}: {2}',
                           fn.__name__, device, message))
@@ -160,7 +156,7 @@ class Mounter(object):
 
     @_sets_async_error
     @_find_device
-    def browse(self, device):
+    async def browse(self, device):
         """
         Browse device.
 
@@ -170,19 +166,19 @@ class Mounter(object):
         """
         if not device.is_mounted:
             self._log.error(_("not browsing {0}: not mounted", device))
-            yield Return(False)
+            return False
         if not self._browser:
             self._log.error(_("not browsing {0}: no program", device))
-            yield Return(False)
+            return False
         self._log.debug(_('opening {0} on {0.mount_paths[0]}', device))
         self._browser(device.mount_paths[0])
         self._log.info(_('opened {0} on {0.mount_paths[0]}', device))
-        yield Return(True)
+        return True
 
     # mount/unmount
     @_sets_async_error
     @_find_device
-    def mount(self, device):
+    async def mount(self, device):
         """
         Mount the device if not already mounted.
 
@@ -192,17 +188,17 @@ class Mounter(object):
         """
         if not self.is_handleable(device) or not device.is_filesystem:
             self._log.warn(_('not mounting {0}: unhandled device', device))
-            yield Return(False)
+            return False
         if device.is_mounted:
             self._log.info(_('not mounting {0}: already mounted', device))
-            yield Return(True)
+            return True
         options = match_config(self._config, device, 'options', None)
         kwargs = dict(options=options)
         self._log.debug(_('mounting {0} with {1}', device, kwargs))
         self._check_device_before_mount(device)
-        mount_path = yield device.mount(**kwargs)
+        mount_path = await device.mount(**kwargs)
         self._log.info(_('mounted {0} on {1}', device, mount_path))
-        yield Return(True)
+        return True
 
     def _check_device_before_mount(self, device):
         if device.id_type == 'ntfs' and not find_executable('ntfs-3g'):
@@ -213,7 +209,7 @@ class Mounter(object):
 
     @_sets_async_error
     @_find_device
-    def unmount(self, device):
+    async def unmount(self, device):
         """
         Unmount a Device if mounted.
 
@@ -223,19 +219,19 @@ class Mounter(object):
         """
         if not self.is_handleable(device) or not device.is_filesystem:
             self._log.warn(_('not unmounting {0}: unhandled device', device))
-            yield Return(False)
+            return False
         if not device.is_mounted:
             self._log.info(_('not unmounting {0}: not mounted', device))
-            yield Return(True)
+            return True
         self._log.debug(_('unmounting {0}', device))
-        yield device.unmount()
+        await device.unmount()
         self._log.info(_('unmounted {0}', device))
-        yield Return(True)
+        return True
 
     # unlock/lock (LUKS)
     @_sets_async_error
     @_find_device
-    def unlock(self, device):
+    async def unlock(self, device):
         """
         Unlock the device if not already unlocked.
 
@@ -245,72 +241,70 @@ class Mounter(object):
         """
         if not self.is_handleable(device) or not device.is_crypto:
             self._log.warn(_('not unlocking {0}: unhandled device', device))
-            yield Return(False)
+            return False
         if device.is_unlocked:
             self._log.info(_('not unlocking {0}: already unlocked', device))
-            yield Return(True)
+            return True
         if not self._prompt:
             self._log.error(_('not unlocking {0}: no password prompt', device))
-            yield Return(False)
-        unlocked = yield self._unlock_from_cache(device)
+            return False
+        unlocked = await self._unlock_from_cache(device)
         if unlocked:
-            yield Return(True)
-        unlocked = yield self._unlock_from_keyfile(device)
+            return True
+        unlocked = await self._unlock_from_keyfile(device)
         if unlocked:
-            yield Return(True)
-        password = yield self._prompt(device, self.udisks.keyfile_support)
+            return True
+        password = await self._prompt(device, self.udisks.keyfile_support)
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))
-            yield Return(False)
+            return False
         if isinstance(password, bytes):
             self._log.debug(_('unlocking {0} using keyfile', device))
-            yield device.unlock_keyfile(password)
+            await device.unlock_keyfile(password)
         else:
             self._log.debug(_('unlocking {0}', device))
-            yield device.unlock(password)
+            await device.unlock(password)
         self._update_cache(device, password)
         self._log.info(_('unlocked {0}', device))
-        yield Return(True)
+        return True
 
-    @Coroutine.from_generator_function
-    def _unlock_from_cache(self, device):
+    async def _unlock_from_cache(self, device):
         if not self._cache:
-            yield Return(False)
+            return False
         try:
             password = self._cache[device]
         except KeyError:
-            yield Return(False)
+            return False
         self._log.debug(_('unlocking {0} using cached password', device))
         try:
-            yield device.unlock(password)
+            await device.unlock(password)
         except Exception:
             self._log.debug(_('failed to unlock {0} using cached password', device))
-            yield Return(False)
+            return False
         self._log.info(_('unlocked {0} using cached password', device))
-        yield Return(True)
+        return True
 
-    @Coroutine.from_generator_function
-    def _unlock_from_keyfile(self, device):
+    async def _unlock_from_keyfile(self, device):
         if not self.udisks.keyfile_support:
-            yield Return(False)
+            return False
         filename = match_config(self._config, device, 'keyfile', None)
         if filename is None:
             self._log.debug(_('No matching keyfile rule for {}.', device))
-            yield Return(False)
+            return False
         try:
             with open(filename, 'rb') as f:
                 keyfile = f.read()
         except IOError:
             self._log.warn(_('configured keyfile for {0} not found', device))
-            yield Return(False)
+            return False
         self._log.debug(_('unlocking {0} using keyfile {1}', device, filename))
         try:
-            yield device.unlock_keyfile(keyfile)
+            await device.unlock_keyfile(keyfile)
         except Exception:
             self._log.debug(_('failed to unlock {0} using keyfile', device))
-            yield Return(False)
+            return False
         self._log.info(_('unlocked {0} using keyfile', device))
-        yield Return(True)
+        return True
 
     def _update_cache(self, device, password):
         if not self._cache:
@@ -325,7 +319,7 @@ class Mounter(object):
 
     @_sets_async_error
     @_find_device
-    def lock(self, device):
+    async def lock(self, device):
         """
         Lock device if unlocked.
 
@@ -335,19 +329,19 @@ class Mounter(object):
         """
         if not self.is_handleable(device) or not device.is_crypto:
             self._log.warn(_('not locking {0}: unhandled device', device))
-            yield Return(False)
+            return False
         if not device.is_unlocked:
             self._log.info(_('not locking {0}: not unlocked', device))
-            yield Return(True)
+            return True
         self._log.debug(_('locking {0}', device))
-        yield device.lock()
+        await device.lock()
         self._log.info(_('locked {0}', device))
-        yield Return(True)
+        return True
 
     # add/remove (unlock/lock or mount/unmount)
     @_suppress_error
     @_find_device_auto_losetup
-    def add(self, device, recursive=None):
+    async def add(self, device, recursive=None):
         """
         Mount or unlock the device depending on its type.
 
@@ -357,13 +351,13 @@ class Mounter(object):
         :rtype: bool
         """
         if device.is_filesystem:
-            success = yield self.mount(device)
+            success = await self.mount(device)
         elif device.is_crypto:
-            success = yield self.unlock(device)
+            success = await self.unlock(device)
             if success and recursive:
-                yield self.udisks._sync()
+                await self.udisks._sync()
                 device = self.udisks[device.object_path]
-                success = yield self.add(
+                success = await self.add(
                     device.luks_cleartext_holder,
                     recursive=True)
         elif (recursive
@@ -374,16 +368,16 @@ class Mounter(object):
                 for dev in self.get_all_handleable()
                 if dev.is_partition and dev.partition_slave == device
             ]
-            results = yield AsyncList(tasks)
+            results = await AsyncList(tasks)
             success = all(results)
         else:
             self._log.info(_('not adding {0}: unhandled device', device))
-            yield Return(False)
-        yield Return(success)
+            return False
+        return success
 
     @_suppress_error
     @_find_device_auto_losetup
-    def auto_add(self, device, recursive=None):
+    async def auto_add(self, device, recursive=None):
         """
         Automatically attempt to mount or unlock a device, but be quiet if the
         device is not supported.
@@ -398,14 +392,14 @@ class Mounter(object):
             pass
         elif device.is_filesystem:
             if not device.is_mounted:
-                success = yield self.mount(device)
+                success = await self.mount(device)
         elif device.is_crypto:
             if self._prompt and not device.is_unlocked:
-                success = yield self.unlock(device)
+                success = await self.unlock(device)
             if success and recursive:
-                yield self.udisks._sync()
+                await self.udisks._sync()
                 device = self.udisks[device.object_path]
-                success = yield self.auto_add(
+                success = await self.auto_add(
                     device.luks_cleartext_holder,
                     recursive=True)
         elif recursive and device.is_partition_table:
@@ -414,15 +408,15 @@ class Mounter(object):
                 for dev in self.get_all_handleable()
                 if dev.is_partition and dev.partition_slave == device
             ]
-            results = yield AsyncList(tasks)
+            results = await AsyncList(tasks)
             success = all(results)
         else:
             self._log.debug(_('not adding {0}: unhandled device', device))
-        yield Return(success)
+        return success
 
     @_suppress_error
     @_find_device
-    def remove(self, device, force=False, detach=False, eject=False,
+    async def remove(self, device, force=False, detach=False, eject=False,
                lock=False):
         """
         Unmount or lock the device depending on device type.
@@ -437,11 +431,11 @@ class Mounter(object):
         """
         if device.is_filesystem:
             if device.is_mounted or not device.is_loop or detach is False:
-                success = yield self.unmount(device)
+                success = await self.unmount(device)
         elif device.is_crypto:
             if force and device.is_unlocked:
-                yield self.auto_remove(device.luks_cleartext_holder, force=True)
-            success = yield self.lock(device)
+                await self.auto_remove(device.luks_cleartext_holder, force=True)
+            success = await self.lock(device)
         elif (force
               and (device.is_partition_table or device.is_drive)
               and self.is_handleable(device)):
@@ -451,7 +445,7 @@ class Mounter(object):
                 for child in self.get_all_handleable()
                 if _is_parent_of(device, child)
             ]
-            results = yield AsyncList(tasks)
+            results = await AsyncList(tasks)
             success = all(results)
         else:
             self._log.info(_('not removing {0}: unhandled device', device))
@@ -459,18 +453,18 @@ class Mounter(object):
         # if these operations work, everything is fine, we can return True:
         if lock and device.is_luks_cleartext:
             device = device.luks_cleartext_slave
-            success = yield self.lock(device)
+            success = await self.lock(device)
         if eject:
-            success = yield self.eject(device)
+            success = await self.eject(device)
         if (detach or detach is None) and device.is_loop:
-            success = yield self.delete(device, remove=False)
+            success = await self.delete(device, remove=False)
         elif detach:
-            success = yield self.detach(device)
-        yield Return(success)
+            success = await self.detach(device)
+        return success
 
     @_suppress_error
     @_find_device
-    def auto_remove(self, device, force=False, detach=False, eject=False,
+    async def auto_remove(self, device, force=False, detach=False, eject=False,
                     lock=False):
         """
         Unmount or lock the device depending on device type.
@@ -488,12 +482,12 @@ class Mounter(object):
             pass
         elif device.is_filesystem:
             if device.is_mounted:
-                success = yield self.unmount(device)
+                success = await self.unmount(device)
         elif device.is_crypto:
             if force and device.is_unlocked:
-                yield self.auto_remove(device.luks_cleartext_holder, force=True)
+                await self.auto_remove(device.luks_cleartext_holder, force=True)
             if device.is_unlocked:
-                success = yield self.lock(device)
+                success = await self.lock(device)
         elif force and (device.is_partition_table or device.is_drive):
             kw = dict(force=True, detach=detach, eject=eject, lock=lock)
             tasks = [
@@ -501,26 +495,26 @@ class Mounter(object):
                 for child in self.get_all_handleable()
                 if _is_parent_of(device, child)
             ]
-            results = yield AsyncList(tasks)
+            results = await AsyncList(tasks)
             success = all(results)
         else:
             self._log.debug(_('not removing {0}: unhandled device', device))
         # if these operations work, everything is fine, we can return True:
         if lock and device.is_luks_cleartext:
             device = device.luks_cleartext_slave
-            success = yield self.lock(device)
+            success = await self.lock(device)
         if eject and device.has_media:
-            success = yield self.eject(device)
+            success = await self.eject(device)
         if (detach or detach is None) and device.is_loop:
-            success = yield self.delete(device, remove=False)
+            success = await self.delete(device, remove=False)
         elif detach and device.is_detachable:
-            success = yield self.detach(device)
-        yield Return(success)
+            success = await self.detach(device)
+        return success
 
     # eject/detach device
     @_sets_async_error
     @_find_device
-    def eject(self, device, force=False):
+    async def eject(self, device, force=False):
         """
         Eject a device after unmounting all its mounted filesystems.
 
@@ -531,23 +525,23 @@ class Mounter(object):
         """
         if not self.is_handleable(device):
             self._log.warn(_('not ejecting {0}: unhandled device'))
-            yield Return(False)
+            return False
         drive = device.drive
         if not (drive.is_drive and drive.is_ejectable):
             self._log.warn(_('not ejecting {0}: drive not ejectable', drive))
-            yield Return(False)
+            return False
         if force:
             # Can't autoremove 'device.drive', because that will be filtered
             # due to block=False:
-            yield self.auto_remove(device.root, force=True)
+            await self.auto_remove(device.root, force=True)
         self._log.debug(_('ejecting {0}', device))
-        yield drive.eject()
+        await drive.eject()
         self._log.info(_('ejected {0}', device))
-        yield Return(True)
+        return True
 
     @_sets_async_error
     @_find_device
-    def detach(self, device, force=False):
+    async def detach(self, device, force=False):
         """
         Detach a device after unmounting all its mounted filesystems.
 
@@ -558,21 +552,20 @@ class Mounter(object):
         """
         if not self.is_handleable(device):
             self._log.warn(_('not detaching {0}: unhandled device', device))
-            yield Return(False)
+            return False
         drive = device.root
         if not drive.is_detachable:
             self._log.warn(_('not detaching {0}: drive not detachable', drive))
-            yield Return(False)
+            return False
         if force:
-            yield self.auto_remove(drive, force=True)
+            await self.auto_remove(drive, force=True)
         self._log.debug(_('detaching {0}', device))
-        yield drive.detach()
+        await drive.detach()
         self._log.info(_('detached {0}', device))
-        yield Return(True)
+        return True
 
     # mount_all/unmount_all
-    @Coroutine.from_generator_function
-    def add_all(self, recursive=False):
+    async def add_all(self, recursive=False):
         """
         Add all handleable devices that available at start.
 
@@ -582,12 +575,11 @@ class Mounter(object):
         """
         tasks = [self.auto_add(device, recursive=recursive)
                  for device in self.get_all_handleable_leaves()]
-        results = yield AsyncList(tasks)
+        results = await AsyncList(tasks)
         success = all(results)
-        yield Return(success)
+        return success
 
-    @Coroutine.from_generator_function
-    def remove_all(self, detach=False, eject=False, lock=False):
+    async def remove_all(self, detach=False, eject=False, lock=False):
         """
         Remove all filesystems handleable by udiskie.
 
@@ -600,13 +592,12 @@ class Mounter(object):
         kw = dict(force=True, detach=detach, eject=eject, lock=lock)
         tasks = [self.auto_remove(device, **kw)
                  for device in self.get_all_handleable_roots()]
-        results = yield AsyncList(tasks)
+        results = await AsyncList(tasks)
         success = all(results)
-        yield Return(success)
+        return success
 
     # loop devices
-    @Coroutine.from_generator_function
-    def losetup(self, image,
+    async def losetup(self, image,
                 read_only=True, offset=None, size=None, no_part_scan=None):
         """
         Setup a loop device.
@@ -624,16 +615,16 @@ class Mounter(object):
             pass
         else:
             self._log.info(_('not setting up {0}: already up', device))
-            yield Return(device)
+            return device
         if not os.path.isfile(image):
             self._log.error(_('not setting up {0}: not a file', image))
-            yield Return(None)
+            return None
         if not self.udisks.loop_support:
             self._log.error(_('not setting up {0}: unsupported in UDisks1', image))
-            yield Return(None)
+            return None
         self._log.debug(_('setting up {0}', image))
         fd = os.open(image, os.O_RDONLY)
-        device = yield self.udisks.loop_setup(fd, {
+        device = await self.udisks.loop_setup(fd, {
             'offset': offset,
             'size': size,
             'read-only': read_only,
@@ -641,11 +632,11 @@ class Mounter(object):
         })
         self._log.info(_('set up {0} as {1}', image,
                          device.device_presentation))
-        yield Return(device)
+        return device
 
     @_sets_async_error
     @_find_device
-    def delete(self, device, remove=True):
+    async def delete(self, device, remove=True):
         """
         Detach the loop device.
 
@@ -656,13 +647,13 @@ class Mounter(object):
         """
         if not self.is_handleable(device) or not device.is_loop:
             self._log.warn(_('not deleting {0}: unhandled device', device))
-            yield Return(False)
+            return False
         if remove:
-            yield self.auto_remove(device, force=True)
+            await self.auto_remove(device, force=True)
         self._log.debug(_('deleting {0}', device))
-        yield device.delete()
+        await device.delete()
         self._log.info(_('deleted {0}', device))
-        yield Return(True)
+        return True
 
     # iterate devices
     def is_handleable(self, device):
@@ -839,7 +830,7 @@ class DeviceActions(object):
             'lock': partial(mounter.remove, force=True),
             'eject': partial(mounter.eject, force=True),
             'detach': partial(mounter.detach, force=True),
-            'forget_password': mounter.forget_password,
+            'forget_password': to_coro(mounter.forget_password),
             'delete': mounter.delete,
         })
 

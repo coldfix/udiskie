@@ -38,7 +38,7 @@ class AppIndicatorIcon(object):
     def destroy(self):
         self.show(False)
         self._dbusmenuitem.disconnect(self._conn)
-        self.task.callback(None)
+        self.task.set_result(True)
 
     @property
     def visible(self):

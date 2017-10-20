@@ -15,11 +15,9 @@ import logging
 
 from gi.repository import GLib
 
-from .common import (Emitter, samefile, sameuuid, AttrDictView, decode_ay,
-                     BaseDevice)
+from .common import Emitter, AttrDictView, decode_ay, BaseDevice
 from .dbus import connect_service, MethodsProxy, DBusCallWithFdList, DBusCall
 from .locale import _
-from .async_ import Coroutine, Return
 
 __all__ = ['Daemon']
 
@@ -631,40 +629,38 @@ class Daemon(Emitter):
 
     def _sync(self):
         """Synchronize state."""
-        def update_objects(objects):
+        def update_objects(future):
+            objects = future.result()
             self._objects = objects
         update = self._proxy.call('GetManagedObjects', '()')
-        update.callbacks.append(update_objects)
+        update.add_done_callback(update_objects)
         return update
 
     @classmethod
-    @Coroutine.from_generator_function
-    def create(cls):
+    async def create(cls):
         service = (cls.BusName, cls.ObjectPath, cls.Interface)
-        proxy = yield connect_service(*service)
-        version = yield cls.get_version()
+        proxy = await connect_service(*service)
+        version = await cls.get_version()
         daemon = cls(proxy, version)
-        yield daemon._sync()
-        yield Return(daemon)
+        await daemon._sync()
+        return daemon
 
     @classmethod
-    @Coroutine.from_generator_function
-    def get_version(cls):
+    async def get_version(cls):
         service = (cls.BusName,
                    '/org/freedesktop/UDisks2/Manager',
                    Interface['Properties'])
-        manager = yield connect_service(*service)
-        version = yield DBusCall(manager._proxy, 'Get', '(ss)', (
+        manager = await connect_service(*service)
+        version = await DBusCall(manager._proxy, 'Get', '(ss)', (
             Interface['Manager'], 'Version'))
-        yield Return(version)
+        return version
 
-    @Coroutine.from_generator_function
-    def loop_setup(self, fd, options):
+    async def loop_setup(self, fd, options):
         service = (self.BusName,
                    '/org/freedesktop/UDisks2/Manager',
                    Interface['Manager'])
-        manager = yield connect_service(*service)
-        object_path = yield DBusCallWithFdList(
+        manager = await connect_service(*service)
+        object_path = await DBusCallWithFdList(
             manager._proxy, 'LoopSetup', '(ha{sv})',
             (0, filter_opt({
                 'auth.no_user_interaction': ('b', options.get('auth.no_user_interaction')),
@@ -675,8 +671,8 @@ class Daemon(Emitter):
             })),
             [fd],
         )
-        yield self._sync()
-        yield Return(self[object_path])
+        await self._sync()
+        return self[object_path]
 
     loop_support = True
 

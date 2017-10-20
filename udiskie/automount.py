@@ -3,6 +3,7 @@ Automount utility.
 """
 
 from .common import DaemonBase
+from .async_ import run_bg
 
 
 __all__ = ['AutoMounter']
@@ -29,8 +30,8 @@ class AutoMounter(DaemonBase):
         self._mounter = mounter
         self.events = {
             'device_changed': self.device_changed,
-            'device_added': self._mounter.auto_add,
-            'media_added': self._mounter.auto_add,
+            'device_added': run_bg(self._mounter.auto_add),
+            'media_added': run_bg(self._mounter.auto_add),
         }
 
     def device_changed(self, old_state, new_state):
@@ -45,4 +46,4 @@ class AutoMounter(DaemonBase):
         if (self._mounter.is_addable(new_state)
                 and not self._mounter.is_addable(old_state)
                 and not self._mounter.is_removable(old_state)):
-            self._mounter.auto_add(new_state)
+            run_bg(self._mounter.auto_add)(new_state)

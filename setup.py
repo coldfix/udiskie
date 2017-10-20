@@ -194,6 +194,7 @@ setup(
     install_requires=[
         'PyYAML',
         'docopt',
+        'gbulb',
         # Currently not building out of the box:
         # 'PyGObject',
     ],
@@ -211,9 +212,8 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: End Users/Desktop',
         'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'License :: OSI Approved :: MIT License',
         'Topic :: Desktop Environment',
         'Topic :: Software Development',

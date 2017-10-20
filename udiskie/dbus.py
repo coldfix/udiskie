@@ -2,14 +2,12 @@
 Common DBus utilities.
 """
 
-import sys
 from functools import partial
 
 from gi.repository import Gio
 from gi.repository import GLib
 
-from .async_ import Async, Coroutine, Return, gio_callback, pack
-from .common import format_exc
+from .async_ import Async, gio_callback, pack
 
 
 __all__ = [
@@ -38,21 +36,20 @@ def DBusCall(proxy, method_name, signature, args, flags=0, timeout_msec=-1):
     """
     future = Async()
     cancellable = None
-    user_data = None
     proxy.call(
         method_name,
         GLib.Variant(signature, tuple(args)),
         flags,
         timeout_msec,
         cancellable,
-        partial(_DBusCall_callback, future),
-        user_data,
+        _DBusCall_callback,
+        future,
     )
     return future
 
 
 @gio_callback
-def _DBusCall_callback(proxy, result, user_data):
+def _DBusCall_callback(proxy, result):
     value = proxy.call_finish(result)
     return pack(*unpack_variant(value))
 
@@ -71,7 +68,6 @@ def DBusCallWithFdList(proxy, method_name, signature, args, fds, flags=0,
     """
     future = Async()
     cancellable = None
-    user_data = None
     fd_list = Gio.UnixFDList.new_from_array(fds)
     proxy.call_with_unix_fd_list(
         method_name,
@@ -80,14 +76,14 @@ def DBusCallWithFdList(proxy, method_name, signature, args, fds, flags=0,
         timeout_msec,
         fd_list,
         cancellable,
-        partial(_DBusCallWithFdList_callback, future),
-        user_data,
+        _DBusCallWithFdList_callback,
+        future,
     )
     return future
 
 
 @gio_callback
-def _DBusCallWithFdList_callback(proxy, result, user_data):
+def _DBusCallWithFdList_callback(proxy, result):
     value, fds = proxy.call_with_unix_fd_list_finish(result)
     return pack(*unpack_variant(value))
 
@@ -199,8 +195,7 @@ class ObjectProxy(object):
             interface_name=name,
         )
 
-    @Coroutine.from_generator_function
-    def get_interface(self, name):
+    async def get_interface(self, name):
         """
         Get an interface proxy for this Dbus object.
 
@@ -208,13 +203,12 @@ class ObjectProxy(object):
         :returns: a proxy object for the other interface
         :rtype: InterfaceProxy
         """
-        proxy = yield self._get_interface(name)
-        yield Return(InterfaceProxy(proxy))
+        proxy = await self._get_interface(name)
+        return InterfaceProxy(proxy)
 
-    @Coroutine.from_generator_function
-    def get_property_interface(self, interface_name=None):
-        proxy = yield self._get_interface(PropertiesProxy.Interface)
-        yield Return(PropertiesProxy(proxy, interface_name))
+    async def get_property_interface(self, interface_name=None):
+        proxy = await self._get_interface(PropertiesProxy.Interface)
+        return PropertiesProxy(proxy, interface_name)
 
     @property
     def bus(self):
@@ -238,11 +232,10 @@ class ObjectProxy(object):
         object_path = self.object_path
         return self.bus.connect(interface, event, object_path, handler)
 
-    @Coroutine.from_generator_function
-    def call(self, interface_name, method_name, signature='()', *args):
-        proxy = yield self.get_interface(interface_name)
-        result = yield proxy.call(method_name, signature, *args)
-        yield Return(result)
+    async def call(self, interface_name, method_name, signature='()', *args):
+        proxy = await self.get_interface(interface_name)
+        result = await proxy.call(method_name, signature, *args)
+        return result
 
 
 def DBusCallback(connection, sender_name, object_path,
@@ -324,7 +317,6 @@ def DBusProxyNew(connection, flags, info, name, object_path, interface_name):
     """
     future = Async()
     cancellable = None
-    user_data = None
     Gio.DBusProxy.new(
         connection,
         flags,
@@ -333,14 +325,14 @@ def DBusProxyNew(connection, flags, info, name, object_path, interface_name):
         object_path,
         interface_name,
         cancellable,
-        partial(_DBusProxyNew_callback, future),
-        user_data,
+        _DBusProxyNew_callback,
+        future,
     )
     return future
 
 
 @gio_callback
-def _DBusProxyNew_callback(proxy, result, user_data):
+def _DBusProxyNew_callback(proxy, result):
     value = Gio.DBusProxy.new_finish(result)
     if value is None:
         raise RuntimeError("Failed to connect DBus object!")
@@ -353,7 +345,6 @@ def DBusProxyNewForBus(bus_type, flags, info, name, object_path, interface_name)
     """
     future = Async()
     cancellable = None
-    user_data = None
     Gio.DBusProxy.new_for_bus(
         bus_type,
         flags,
@@ -362,22 +353,21 @@ def DBusProxyNewForBus(bus_type, flags, info, name, object_path, interface_name)
         object_path,
         interface_name,
         cancellable,
-        partial(_DBusProxyNewForBus_callback, future),
-        user_data,
+        _DBusProxyNewForBus_callback,
+        future,
     )
     return future
 
 
 @gio_callback
-def _DBusProxyNewForBus_callback(proxy, result, user_data):
+def _DBusProxyNewForBus_callback(proxy, result):
     value = Gio.DBusProxy.new_for_bus_finish(result)
     if value is None:
         raise RuntimeError("Failed to connect DBus object!")
     return value
 
 
-@Coroutine.from_generator_function
-def connect_service(bus_name, object_path, interface):
+async def connect_service(bus_name, object_path, interface):
     """
     Connect to the service object on DBus.
 
@@ -385,7 +375,7 @@ def connect_service(bus_name, object_path, interface):
     :rtype: InterfaceProxy
     :raises BusException: if unable to connect to service.
     """
-    proxy = yield DBusProxyNewForBus(
+    proxy = await DBusProxyNewForBus(
         Gio.BusType.SYSTEM,
         Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES |
         Gio.DBusProxyFlags.DO_NOT_CONNECT_SIGNALS,
@@ -394,7 +384,7 @@ def connect_service(bus_name, object_path, interface):
         object_path=object_path,
         interface_name=interface,
     )
-    yield Return(InterfaceProxy(proxy))
+    return InterfaceProxy(proxy)
 
 
 class MethodsProxy(object):

@@ -2,10 +2,12 @@
 Tray icon for udiskie.
 """
 
+import asyncio
+
 from gi.repository import Gio
 from gi.repository import Gtk
 
-from .async_ import Async, Coroutine, Return
+from .async_ import Async
 from .common import setdefault, DaemonBase
 from .locale import _
 from .mount import Action, prune_empty_node
@@ -139,7 +141,7 @@ class UdiskieMenu(object):
         self._daemon = daemon
         self._mounter = daemon.mounter
         self._actions = actions
-        self._quit_action = daemon.mainloop.quit
+        self._quit_action = daemon.mainloop.stop
         self.flat = flat
 
     def __call__(self, menu, extended):
@@ -162,7 +164,7 @@ class UdiskieMenu(object):
             menu.append(self._menuitem(
                 _('Mount disc image'),
                 self._icons.get_icon('losetup', Gtk.IconSize.MENU),
-                lambda _: self._losetup()
+                lambda _: asyncio.ensure_future(self._losetup())
             ))
             menu.append(Gtk.SeparatorMenuItem())
         menu.append(self._menuitem(
@@ -186,19 +188,18 @@ class UdiskieMenu(object):
                 lambda _: self._quit_action()
             ))
 
-    @Coroutine.from_generator_function
-    def _losetup(self):
+    async def _losetup(self):
         dialog = Gtk.FileChooserDialog(
             _('Open disc image'), None,
             Gtk.FileChooserAction.OPEN,
             (_('Open'), Gtk.ResponseType.OK,
              _('Cancel'), Gtk.ResponseType.CANCEL))
         dialog.show_all()
-        response = yield Dialog(dialog)
+        response = await Dialog(dialog)
         dialog.hide()
         if response != Gtk.ResponseType.OK:
             return
-        yield self._mounter.losetup(dialog.get_filename())
+        await self._mounter.losetup(dialog.get_filename())
 
     def detect(self):
         """
@@ -225,7 +226,7 @@ class UdiskieMenu(object):
 
     def _create_menu_items(self, menu, items):
         def make_action_callback(node):
-            return lambda _: node.action()
+            return lambda _: asyncio.ensure_future(node.action())
         for node in items:
             if isinstance(node, Action):
                 menu.append(self._menuitem(
@@ -340,7 +341,7 @@ class TrayIcon(object):
 
     def destroy(self):
         self.show(False)
-        self.task.callback(None)
+        self.task.set_result(True)
 
     def _create_statusicon(self):
         """Return a new Gtk.StatusIcon."""

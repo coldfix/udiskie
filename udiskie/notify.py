@@ -3,6 +3,7 @@ Notification utility.
 """
 
 import logging
+import asyncio
 
 from gi.repository import GLib
 
@@ -236,7 +237,7 @@ class Notify(DaemonBase):
         Note, this only works with some libnotify services.
         """
         def on_action_click(notification, action, *user_data):
-            callback(*args)
+            asyncio.ensure_future(callback(*args))
         try:
             # this is the correct signature for Notify-0.7, the last argument
             # being 'user_data':

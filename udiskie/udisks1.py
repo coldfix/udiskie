@@ -13,15 +13,16 @@ udisks2 module.
 guarantee the accessibilityy of device properties in between operations.
 """
 
+import asyncio
+
 from collections import defaultdict
 import logging
 import os.path
 
 from gi.repository import GLib
 
-from .async_ import AsyncList, Coroutine, Return
-from .common import (Emitter, samefile, sameuuid, AttrDictView, wraps,
-                     NullDevice, BaseDevice)
+from .async_ import AsyncList
+from .common import Emitter, AttrDictView, wraps, NullDevice, BaseDevice
 from .dbus import connect_service, MethodsProxy, DBusCall
 from .locale import _
 
@@ -426,9 +427,8 @@ class EventQueue(object):
             return
         self._execing = True
         func, args, kwargs = self._waiting.pop()
-        coroutine = Coroutine(func(*args, **kwargs))
-        coroutine.errbacks.append(self.pop)
-        coroutine.callbacks.append(self.pop)
+        coroutine = asyncio.ensure_future(func(*args, **kwargs))
+        coroutine.add_done_callback(self.pop)
 
 
 class Daemon(Emitter):
@@ -522,24 +522,22 @@ class Daemon(Emitter):
         proxy.connect('DeviceJobChanged', self._device_job_changed)
 
     @classmethod
-    @Coroutine.from_generator_function
-    def create(cls):
+    async def create(cls):
         service = (cls.BusName, cls.ObjectPath, cls.Interface)
-        proxy = yield connect_service(*service)
-        version = yield cls.get_version()
+        proxy = await connect_service(*service)
+        version = await cls.get_version()
         daemon = cls(proxy, version)
-        yield daemon._sync()
-        yield Return(daemon)
+        await daemon._sync()
+        return daemon
 
     @classmethod
-    @Coroutine.from_generator_function
-    def get_version(cls):
+    async def get_version(cls):
         service = (cls.BusName, cls.ObjectPath,
                    'org.freedesktop.DBus.Properties')
-        manager = yield connect_service(*service)
-        version = yield DBusCall(manager._proxy, 'Get', '(ss)', (
+        manager = await connect_service(*service)
+        version = await DBusCall(manager._proxy, 'Get', '(ss)', (
             cls.Interface, 'DaemonVersion'))
-        yield Return(version)
+        return version
 
     def loop_setup(self, fd, options):
         raise NotImplementedError("UDisks1 does not support LoopSetup!")
@@ -561,33 +559,31 @@ class Daemon(Emitter):
         self._log.debug(_("+++ {0}: {1}", event, device))
         super(Daemon, self).trigger(event, device, *args)
 
-    @Coroutine.from_generator_function
-    def update(self, object_path):
-        device = yield self._get_updated_device(object_path)
+    async def update(self, object_path):
+        device = await self._get_updated_device(object_path)
         if device is not None:
             self._devices[object_path] = device
-        yield Return(device)
+        return device
 
-    @Coroutine.from_generator_function
-    def _get_updated_device(self, object_path):
+    async def _get_updated_device(self, object_path):
         obj = self._proxy.object.bus.get_object(object_path)
         try:
             prop_prox = self._property_proxy[object_path]
         except KeyError:
-            prop_prox = yield obj.get_property_interface(Device.Interface)
+            prop_prox = await obj.get_property_interface(Device.Interface)
             self._property_proxy[object_path] = prop_prox
 
         try:
-            properties = yield prop_prox.GetAll()
+            properties = await prop_prox.GetAll()
         except GLib.GError:
             self._invalidate(object_path)
-            yield Return(None)
+            return None
             # TODO: return something useful? (NullDevice)
         else:
             itfc_prox = MethodsProxy(obj, Device.Interface)
             device = Device(self, object_path,
                             AttrDictView(properties), itfc_prox)
-            yield Return(device)
+            return device
 
     # special methods
     def set_error(self, device, action, message):
@@ -615,10 +611,10 @@ class Daemon(Emitter):
 
     # UDisks event listeners
     @_keep_async_event_order
-    def _device_changed(self, object_path):
+    async def _device_changed(self, object_path):
         """Internal method."""
         old_state = self[object_path]
-        new_state = yield self.update(object_path)
+        new_state = await self.update(object_path)
         if not old_state:
             if new_state:
                 self.trigger('device_added', new_state)
@@ -638,7 +634,7 @@ class Daemon(Emitter):
     # NOTE: it seems the UDisks1 documentation for DeviceJobChanged is
     # fatally incorrect!
     @_keep_async_event_order
-    def _device_job_changed(self,
+    async def _device_job_changed(self,
                             object_path,
                             job_in_progress,
                             job_id,
@@ -666,7 +662,7 @@ class Daemon(Emitter):
             self._jobs[object_path] = action
         else:
             del self._jobs[object_path]
-            device = yield self._get_updated_device(object_path)
+            device = await self._get_updated_device(object_path)
             if self._check_action_success[action](device):
                 event = self._event_by_action[action]
                 self.trigger(event, device)
@@ -706,12 +702,10 @@ class Daemon(Emitter):
     }
 
     # internal state keeping
-    @Coroutine.from_generator_function
-    def _sync(self):
+    async def _sync(self):
         """Cache all device states."""
-        object_pathes = yield self._proxy.call('EnumerateDevices', '()')
-        yield AsyncList(map(self.update, object_pathes))
-        yield Return()
+        object_pathes = await self._proxy.call('EnumerateDevices', '()')
+        await AsyncList(map(self.update, object_pathes))
 
     def _invalidate(self, object_path):
         """Flag the device invalid. This removes it from the iteration."""

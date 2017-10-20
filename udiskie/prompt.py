@@ -4,6 +4,8 @@ User prompt utility.
 
 from udiskie.depend import has_Gtk, require_Gtk
 
+import asyncio
+
 from distutils.spawn import find_executable
 import getpass
 import logging
@@ -13,7 +15,7 @@ import string
 import subprocess
 import sys
 
-from .async_ import Async, Coroutine, Return, Subprocess
+from .async_ import Async, Subprocess
 from .locale import _
 from .common import AttrDictView
 from .config import DeviceFilter
@@ -78,6 +80,7 @@ class Dialog(Async):
     _ACTIVE_INSTANCES = []
 
     def __init__(self, dialog):
+        super().__init__()
         self._dialog = dialog
         self._dialog.connect("response", self._result_handler)
         self._dialog.show()
@@ -91,7 +94,7 @@ class Dialog(Async):
         self._ACTIVE_INSTANCES.append(self)
 
     def _result_handler(self, dialog, response):
-        self.callback(response)
+        self.set_result(response)
         dialog.hide()
         dialog.destroy()
         self._ACTIVE_INSTANCES.remove(self)
@@ -142,8 +145,7 @@ class PasswordDialog(Dialog):
         return self.entry.get_text()
 
 
-@Coroutine.from_generator_function
-def password_dialog(title, message, allow_keyfile):
+async def password_dialog(title, message, allow_keyfile):
     """
     Show a Gtk password dialog.
 
@@ -154,11 +156,11 @@ def password_dialog(title, message, allow_keyfile):
     :raises RuntimeError: if Gtk can not be properly initialized
     """
     dialog = PasswordDialog(title, message, allow_keyfile)
-    response = yield dialog
+    response = await dialog
     if response == Gtk.ResponseType.OK:
-        yield Return(dialog.get_text())
+        return dialog.get_text()
     else:
-        yield Return(None)
+        return None
 
 
 def get_password_gui(device, allow_keyfile=False):
@@ -170,16 +172,15 @@ def get_password_gui(device, allow_keyfile=False):
         return None
 
 
-@Coroutine.from_generator_function
-def get_password_tty(device, allow_keyfile=False):
+async def get_password_tty(device, allow_keyfile=False):
     """Get the password to unlock a device from terminal."""
     # TODO: make this a TRUE async
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
-        yield Return(getpass.getpass(text))
+        return getpass.getpass(text)
     except EOFError:
         print("")
-        yield Return(None)
+        return None
 
 
 class DeviceCommand(object):
@@ -219,9 +220,9 @@ class DeviceCommand(object):
                         'Unknown device attribute {!r} in format string: {!r}',
                         kwd, arg))
 
+    # TODO: ensure_future
     # NOTE: *ignored swallows `allow_keyfile`
-    @Coroutine.from_generator_function
-    def __call__(self, device, *ignored):
+    async def __call__(self, device, *ignored):
         """
         Invoke the subprocess to ask the user to enter a password for unlocking
         the specified device.
@@ -232,10 +233,13 @@ class DeviceCommand(object):
         fake_dev = AttrDictView(attrs)
         argv = [arg.format(fake_dev, **attrs) for arg in self.argv]
         try:
-            stdout = yield Subprocess(argv)
+            stdout = await Subprocess(argv)
         except subprocess.CalledProcessError:
-            yield Return(None)
-        yield Return(stdout.rstrip('\n'))
+            return None
+        return stdout.rstrip('\n')
+
+    def exec(self, device):
+        return asyncio.ensure_future(self(device))
 
 
 def password(password_command):
@@ -305,4 +309,4 @@ def notify_command(command_format, mounter):
                   'device_locked', 'device_unlocked',
                   'device_added', 'device_removed',
                   'job_failed']:
-        udisks.connect(event, DeviceCommand(command_format, event=event))
+        udisks.connect(event, DeviceCommand(command_format, event=event).exec)
