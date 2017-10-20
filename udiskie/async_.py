@@ -303,6 +303,17 @@ class Coroutine(Async):
             self._recv(value)
 
 
+def gio_callback(extract_result):
+    def callback(self, *args):
+        try:
+            value = extract_result(self, *args)
+        except Exception as e:
+            self.errback(e, format_exc())
+        else:
+            self.callback(value)
+    return callback
+
+
 class Subprocess(Async):
 
     """
@@ -323,18 +334,15 @@ class Subprocess(Async):
             self._callback,
             user_data)
 
+    @gio_callback
     def _callback(self, source_object, result, user_data):
-        try:
-            success, stdout, stderr = self.p.communicate_utf8_finish(result)
-            if not success:
-                raise RuntimeError("Subprocess did not exit normally!")
-            exit_code = self.p.get_exit_status()
-            if exit_code != 0:
-                raise CalledProcessError(
-                    "Subprocess returned a non-zero exit-status!",
-                    exit_code,
-                    stdout)
-        except Exception as e:
-            self.errback(e, format_exc())
-        else:
-            self.callback(stdout)
+        success, stdout, stderr = self.p.communicate_utf8_finish(result)
+        if not success:
+            raise RuntimeError("Subprocess did not exit normally!")
+        exit_code = self.p.get_exit_status()
+        if exit_code != 0:
+            raise CalledProcessError(
+                "Subprocess returned a non-zero exit-status!",
+                exit_code,
+                stdout)
+        return stdout

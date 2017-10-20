@@ -11,7 +11,7 @@ from functools import partial
 from gi.repository import Gio
 from gi.repository import GLib
 
-from .async_ import Async, Coroutine, Return
+from .async_ import Async, Coroutine, Return, gio_callback, pack
 from .common import format_exc
 
 
@@ -90,6 +90,7 @@ class DBusCall(Async):
             user_data,
         )
 
+    @gio_callback
     def _callback(self, proxy, result, user_data):
         """
         Handle call result.
@@ -98,12 +99,8 @@ class DBusCall(Async):
         :param Gio.AsyncResult result:
         :param user_data: unused
         """
-        try:
-            value = proxy.call_finish(result)
-        except Exception as e:
-            self.errback(e, format_exc())
-        else:
-            self.callback(*unpack_variant(value))
+        value = proxy.call_finish(result)
+        return pack(*unpack_variant(value))
 
 
 class DBusCallWithFdList(Async):
@@ -144,6 +141,7 @@ class DBusCallWithFdList(Async):
             user_data,
         )
 
+    @gio_callback
     def _callback(self, proxy, result, user_data):
         """
         Handle call result.
@@ -152,12 +150,8 @@ class DBusCallWithFdList(Async):
         :param Gio.AsyncResult result:
         :param user_data: unused
         """
-        try:
-            value, fds = proxy.call_with_unix_fd_list_finish(result)
-        except Exception as e:
-            self.errback(e, format_exc())
-        else:
-            self.callback(*unpack_variant(value))
+        value, fds = proxy.call_with_unix_fd_list_finish(result)
+        return pack(*unpack_variant(value))
 
 
 class InterfaceProxy(object):
@@ -441,6 +435,7 @@ class DBusProxyNew(Async):
             user_data,
         )
 
+    @gio_callback
     def _callback(self, proxy, result, user_data):
         """
         Handle call result.
@@ -449,14 +444,10 @@ class DBusProxyNew(Async):
         :param Gio.AsyncResult result:
         :param user_data: unused
         """
-        try:
-            value = Gio.DBusProxy.new_finish(result)
-            if value is None:
-                raise RuntimeError("Failed to connect DBus object!")
-        except Exception as e:
-            self.errback(e, format_exc())
-        else:
-            self.callback(value)
+        value = Gio.DBusProxy.new_finish(result)
+        if value is None:
+            raise RuntimeError("Failed to connect DBus object!")
+        return value
 
 
 class DBusProxyNewForBus(Async):
@@ -489,6 +480,7 @@ class DBusProxyNewForBus(Async):
             user_data,
         )
 
+    @gio_callback
     def _callback(self, proxy, result, user_data):
         """
         Handle call result.
@@ -497,14 +489,10 @@ class DBusProxyNewForBus(Async):
         :param Gio.AsyncResult result:
         :param user_data: unused
         """
-        try:
-            value = Gio.DBusProxy.new_for_bus_finish(result)
-            if value is None:
-                raise RuntimeError("Failed to connect DBus object!")
-        except Exception as e:
-            self.errback(e, format_exc())
-        else:
-            self.callback(value)
+        value = Gio.DBusProxy.new_for_bus_finish(result)
+        if value is None:
+            raise RuntimeError("Failed to connect DBus object!")
+        return value
 
 
 @Coroutine.from_generator_function
