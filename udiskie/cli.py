@@ -506,10 +506,6 @@ class Mount(_EntryPoint):
         -v, --verbose                           Increase verbosity (DEBUG)
         -q, --quiet                             Decrease verbosity
 
-        -0, --udisks-auto                       Auto discover UDisks version
-        -1, --use-udisks1                       Use UDisks1 as backend
-        -2, --use-udisks2                       Use UDisks2 as backend
-
         -h, --help                              Show this help
         -V, --version                           Show version information
 
@@ -586,10 +582,6 @@ class Umount(_EntryPoint):
 
         -v, --verbose               Increase verbosity (DEBUG)
         -q, --quiet                 Decrease verbosity
-
-        -0, --udisks-auto           Auto discover UDisks version
-        -1, --use-udisks1           Use UDisks1 as backend
-        -2, --use-udisks2           Use UDisks2 as backend
 
         -h, --help                  Show this help
         -V, --version               Show version information
@@ -679,10 +671,6 @@ class Info(_EntryPoint):
 
         -v, --verbose               Increase verbosity (DEBUG)
         -q, --quiet                 Decrease verbosity
-
-        -0, --udisks-auto           Auto discover UDisks version
-        -1, --use-udisks1           Use UDisks1 as backend
-        -2, --use-udisks2           Use UDisks2 as backend
 
         -h, --help                  Show this help
         -V, --version               Show version information
