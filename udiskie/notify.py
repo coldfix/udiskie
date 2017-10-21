@@ -7,7 +7,7 @@ import logging
 from gi.repository import GLib
 
 from .async_ import run_bg
-from .common import exc_message, DaemonBase
+from .common import exc_message, DaemonBase, format_exc
 from .mount import DeviceActions
 from .locale import _
 
@@ -229,6 +229,7 @@ class Notify(DaemonBase):
             # udiskie's logic useless by raising an exception before the
             # automount handler gets invoked.
             self._log.error(_("Failed to show notification: {0}", exc_message(exc)))
+            self._log.debug(format_exc())
 
     def _add_action(self, notification, action, label, callback, *args):
         """

@@ -3,6 +3,8 @@ Common utilities.
 """
 
 import os.path
+import sys
+import traceback
 
 
 __all__ = [
@@ -15,6 +17,7 @@ __all__ = [
     'extend',
     'decode_ay',
     'exc_message',
+    'format_exc',
 ]
 
 
@@ -184,3 +187,11 @@ def exc_message(exc):
     """Get an exception message."""
     message = getattr(exc, 'message', None)
     return message or str(exc)
+
+
+def format_exc(*exc_info):
+    """Show exception with a *full* traceback."""
+    typ, exc, tb = exc_info or sys.exc_info()
+    error = traceback.format_exception(typ, exc, tb)
+    stack = traceback.format_stack(tb.tb_frame.f_back)
+    return error[0] + "".join(stack + error[1:])

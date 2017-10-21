@@ -12,7 +12,7 @@ import logging
 import os
 
 from .async_ import to_coro
-from .common import wraps, setdefault, exc_message
+from .common import wraps, setdefault, exc_message, format_exc
 from .config import IgnoreDevice, match_config
 from .locale import _
 
@@ -37,6 +37,7 @@ def _find_device(fn):
             device = self.udisks.find(device_or_path)
         except ValueError as e:
             self._log.error(exc_message(e))
+            self._log.debug(format_exc())
             return False
         return await fn(self, device, *args, **kwargs)
     return wrapper
@@ -56,6 +57,7 @@ def _find_device_auto_losetup(fn):
                     return device
         except Exception as e:
             self._log.error(exc_message(e))
+            self._log.debug(format_exc())
             return False
         return await fn(self, device, *args, **kwargs)
     return wrapper
@@ -69,6 +71,7 @@ def _sets_async_error(fn):
         except Exception as e:
             self._log.error(_('failed to {0} {1}: {2}',
                               fn.__name__, device, exc_message(e)))
+            self._log.debug(format_exc())
             return False
     return wrapper
 
@@ -83,6 +86,7 @@ def _suppress_error(fn):
         try:
             return await fn(self, device, *args, **kwargs)
         except Exception:
+            self._log.debug(format_exc())
             return False
     return wrapper
 
@@ -264,12 +268,14 @@ class Mounter(object):
         try:
             password = self._cache[device]
         except KeyError:
+            self._log.debug(format_exc())
             return False
         self._log.debug(_('unlocking {0} using cached password', device))
         try:
             await device.unlock(password)
         except Exception:
             self._log.debug(_('failed to unlock {0} using cached password', device))
+            self._log.debug(format_exc())
             return False
         self._log.info(_('unlocked {0} using cached password', device))
         return True
@@ -285,13 +291,14 @@ class Mounter(object):
             with open(filename, 'rb') as f:
                 keyfile = f.read()
         except IOError:
-            self._log.warn(_('configured keyfile for {0} not found', device))
+            self._log.warn(_('keyfile for {0} not found: {1}', device, filename))
             return False
         self._log.debug(_('unlocking {0} using keyfile {1}', device, filename))
         try:
             await device.unlock_keyfile(keyfile)
         except Exception:
             self._log.debug(_('failed to unlock {0} using keyfile', device))
+            self._log.debug(format_exc())
             return False
         self._log.info(_('unlocked {0} using keyfile', device))
         return True
