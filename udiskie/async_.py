@@ -2,14 +2,8 @@
 This module defines the protocol used for asynchronous operations in udiskie.
 """
 
-# NOTE: neither AsyncList nor Coroutine save references to the active tasks!
-# Although this would create a reference cycle (coro->task->callbacks->coro),
-# the garbage collector can generally detect the cycle and delete the involved
-# objects anyway (there is usually no independent reference to the coroutine).
-# So you must take care to increase the reference-count of all active tasks
-# manually.
-
 import asyncio
+import traceback
 
 from functools import wraps
 from subprocess import CalledProcessError
@@ -18,8 +12,9 @@ from gi.repository import Gio
 
 
 __all__ = [
-    'Async',
-    'AsyncList',
+    'pack',
+    'to_coro',
+    'run_bg',
 ]
 
 
@@ -35,9 +30,6 @@ def pack(*values):
         return values
 
 
-Async = asyncio.Future
-
-
 def to_coro(func):
     @wraps(func)
     async def coro(*args, **kwargs):
@@ -48,12 +40,17 @@ def to_coro(func):
 def run_bg(func):
     @wraps(func)
     def runner(*args, **kwargs):
-        return asyncio.ensure_future(func(*args, **kwargs))
+        future = asyncio.ensure_future(func(*args, **kwargs))
+        future.add_done_callback(show_traceback)
+        return future
     return runner
 
 
-def AsyncList(tasks):
-    return asyncio.gather(*tasks)
+def show_traceback(future):
+    try:
+        future.result()
+    except Exception:
+        traceback.print_exc()
 
 
 def gio_callback(extract_result):
@@ -67,28 +64,28 @@ def gio_callback(extract_result):
     return callback
 
 
-def Subprocess(argv):
+def exec_subprocess(argv):
     """
     An Async task that represents a subprocess. If successful, the task's
     result is set to the collected STDOUT of the subprocess.
 
     :raises subprocess.CalledProcessError: if the subprocess returns a non-zero exit code
     """
-    future = Async()
+    future = asyncio.Future()
     process = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
     stdin_buf = None
     cancellable = None
     process.communicate_utf8_async(
         stdin_buf,
         cancellable,
-        _Subprocess_callback,
+        _exec_subprocess_result,
         future,
         process)
     return future
 
 
 @gio_callback
-def _Subprocess_callback(proxy, result, process):
+def _exec_subprocess_result(proxy, result, process):
     success, stdout, stderr = process.communicate_utf8_finish(result)
     if not success:
         raise RuntimeError("Subprocess did not exit normally!")

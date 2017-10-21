@@ -3,11 +3,11 @@ Notification utility.
 """
 
 import logging
-import asyncio
 
 from gi.repository import GLib
 
-from .common import exc_message, DaemonBase
+from .async_ import run_bg
+from .common import exc_message, DaemonBase, format_exc
 from .mount import DeviceActions
 from .locale import _
 
@@ -229,6 +229,7 @@ class Notify(DaemonBase):
             # udiskie's logic useless by raising an exception before the
             # automount handler gets invoked.
             self._log.error(_("Failed to show notification: {0}", exc_message(exc)))
+            self._log.debug(format_exc())
 
     def _add_action(self, notification, action, label, callback, *args):
         """
@@ -236,8 +237,7 @@ class Notify(DaemonBase):
 
         Note, this only works with some libnotify services.
         """
-        def on_action_click(notification, action, *user_data):
-            asyncio.ensure_future(callback(*args))
+        on_action_click = run_bg(lambda *_: callback(*args))
         try:
             # this is the correct signature for Notify-0.7, the last argument
             # being 'user_data':

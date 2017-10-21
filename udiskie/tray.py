@@ -7,7 +7,7 @@ import asyncio
 from gi.repository import Gio
 from gi.repository import Gtk
 
-from .async_ import Async
+from .async_ import run_bg
 from .common import setdefault, DaemonBase
 from .locale import _
 from .mount import Action, prune_empty_node
@@ -163,7 +163,7 @@ class UdiskieMenu(object):
         menu.append(self._menuitem(
             _('Mount disc image'),
             self._icons.get_icon('losetup', Gtk.IconSize.MENU),
-            lambda _: asyncio.ensure_future(self._losetup())
+            run_bg(lambda _: self._losetup())
         ))
         menu.append(Gtk.SeparatorMenuItem())
         menu.append(self._menuitem(
@@ -225,7 +225,7 @@ class UdiskieMenu(object):
 
     def _create_menu_items(self, menu, items):
         def make_action_callback(node):
-            return lambda _: asyncio.ensure_future(node.action())
+            return run_bg(lambda _: node.action())
         for node in items:
             if isinstance(node, Action):
                 menu.append(self._menuitem(
@@ -335,7 +335,7 @@ class TrayIcon(object):
         self._menu = menumaker
         self._conn_left = None
         self._conn_right = None
-        self.task = Async()
+        self.task = asyncio.Future()
         menumaker._quit_action = self.destroy
 
     def destroy(self):
