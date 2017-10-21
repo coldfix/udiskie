@@ -5,10 +5,11 @@ This module defines the protocol used for asynchronous operations in udiskie.
 import asyncio
 import traceback
 
-from functools import wraps
 from subprocess import CalledProcessError
 
 from gi.repository import Gio
+
+from .common import wraps
 
 
 __all__ = [
