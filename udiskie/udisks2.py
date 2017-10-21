@@ -661,7 +661,7 @@ class Daemon(Emitter):
                 self._log.debug(_('found device owning "{0}": "{1}"',
                                   path, device))
                 return device
-        raise ValueError(_('no device found owning "{0}"', path))
+        raise FileNotFoundError(_('no device found owning "{0}"', path))
 
     def __init__(self, proxy, version):
 

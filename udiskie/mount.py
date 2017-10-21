@@ -7,7 +7,6 @@ import asyncio
 from distutils.spawn import find_executable
 from collections import namedtuple
 from functools import partial
-import inspect
 import logging
 import os
 
@@ -23,47 +22,7 @@ __all__ = ['Mounter']
 # TODO: add / remove / XXX_all should make proper use of the asynchronous
 # execution.
 
-
-def _find_device(fn):
-    """
-    Decorator for Mounter methods taking a Device as their first argument.
-
-    Enables to pass the path name as first argument and does some common error
-    handling (logging).
-    """
-    @wraps(fn)
-    async def wrapper(self, device_or_path, *args, **kwargs):
-        try:
-            device = self.udisks.find(device_or_path)
-        except ValueError as e:
-            self._log.error(exc_message(e))
-            self._log.debug(format_exc())
-            return False
-        return await fn(self, device, *args, **kwargs)
-    return wrapper
-
-
-def _find_device_auto_losetup(fn):
-    async def wrapper(self, device_or_path, *args, **kwargs):
-        try:
-            try:
-                device = self.udisks.find(device_or_path)
-            except ValueError as e:
-                if not os.path.isfile(device_or_path):
-                    raise
-                device = await self.losetup(device_or_path)
-                bound = inspect.getcallargs(fn, self, device, *args, **kwargs)
-                if bound.get('recursive') is False:
-                    return device
-        except Exception as e:
-            self._log.error(exc_message(e))
-            self._log.debug(format_exc())
-            return False
-        return await fn(self, device, *args, **kwargs)
-    return wrapper
-
-
-def _sets_async_error(fn):
+def _error_boundary(fn):
     @wraps(fn)
     async def wrapper(self, device, *args, **kwargs):
         try:
@@ -71,21 +30,6 @@ def _sets_async_error(fn):
         except Exception as e:
             self._log.error(_('failed to {0} {1}: {2}',
                               fn.__name__, device, exc_message(e)))
-            self._log.debug(format_exc())
-            return False
-    return wrapper
-
-
-def _suppress_error(fn):
-    """
-    Prevent errors in this function from being shown. This is OK, since all
-    errors happen in sub-functions in which errors ARE logged.
-    """
-    @wraps(fn)
-    async def wrapper(self, device, *args, **kwargs):
-        try:
-            return await fn(self, device, *args, **kwargs)
-        except Exception:
             self._log.debug(format_exc())
             return False
     return wrapper
@@ -148,8 +92,21 @@ class Mounter(object):
         self._cache = cache
         self._log = logging.getLogger(__name__)
 
-    @_sets_async_error
-    @_find_device
+    def _find_device(self, device_or_path):
+        """Find device object from path."""
+        return self.udisks.find(device_or_path)
+
+    async def _find_device_losetup(self, device_or_path):
+        try:
+            device = self.udisks.find(device_or_path)
+            return device, False
+        except FileNotFoundError as e:
+            if not os.path.isfile(device_or_path):
+                raise
+        device = await self.losetup(device_or_path)
+        return device, True
+
+    @_error_boundary
     async def browse(self, device):
         """
         Browse device.
@@ -158,6 +115,7 @@ class Mounter(object):
         :returns: success
         :rtype: bool
         """
+        device = self._find_device(device)
         if not device.is_mounted:
             self._log.error(_("not browsing {0}: not mounted", device))
             return False
@@ -170,8 +128,7 @@ class Mounter(object):
         return True
 
     # mount/unmount
-    @_sets_async_error
-    @_find_device
+    @_error_boundary
     async def mount(self, device):
         """
         Mount the device if not already mounted.
@@ -180,6 +137,7 @@ class Mounter(object):
         :returns: whether the device is mounted.
         :rtype: bool
         """
+        device = self._find_device(device)
         if not self.is_handleable(device) or not device.is_filesystem:
             self._log.warn(_('not mounting {0}: unhandled device', device))
             return False
@@ -201,8 +159,7 @@ class Mounter(object):
                 "Please install 'ntfs-3g' if you experience problems or the "
                 "device is readonly."))
 
-    @_sets_async_error
-    @_find_device
+    @_error_boundary
     async def unmount(self, device):
         """
         Unmount a Device if mounted.
@@ -211,6 +168,7 @@ class Mounter(object):
         :returns: whether the device is unmounted
         :rtype: bool
         """
+        device = self._find_device(device)
         if not self.is_handleable(device) or not device.is_filesystem:
             self._log.warn(_('not unmounting {0}: unhandled device', device))
             return False
@@ -223,8 +181,7 @@ class Mounter(object):
         return True
 
     # unlock/lock (LUKS)
-    @_sets_async_error
-    @_find_device
+    @_error_boundary
     async def unlock(self, device):
         """
         Unlock the device if not already unlocked.
@@ -233,6 +190,7 @@ class Mounter(object):
         :returns: whether the device is unlocked
         :rtype: bool
         """
+        device = self._find_device(device)
         if not self.is_handleable(device) or not device.is_crypto:
             self._log.warn(_('not unlocking {0}: unhandled device', device))
             return False
@@ -314,8 +272,7 @@ class Mounter(object):
         except KeyError:
             pass
 
-    @_sets_async_error
-    @_find_device
+    @_error_boundary
     async def lock(self, device):
         """
         Lock device if unlocked.
@@ -324,6 +281,7 @@ class Mounter(object):
         :returns: whether the device is locked
         :rtype: bool
         """
+        device = self._find_device(device)
         if not self.is_handleable(device) or not device.is_crypto:
             self._log.warn(_('not locking {0}: unhandled device', device))
             return False
@@ -336,8 +294,7 @@ class Mounter(object):
         return True
 
     # add/remove (unlock/lock or mount/unmount)
-    @_suppress_error
-    @_find_device_auto_losetup
+    @_error_boundary
     async def add(self, device, recursive=None):
         """
         Mount or unlock the device depending on its type.
@@ -347,6 +304,9 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
+        device, created = await self._find_device_losetup(device)
+        if created and recursive is False:
+            return device
         if device.is_filesystem:
             success = await self.mount(device)
         elif device.is_crypto:
@@ -372,8 +332,7 @@ class Mounter(object):
             return False
         return success
 
-    @_suppress_error
-    @_find_device_auto_losetup
+    @_error_boundary
     async def auto_add(self, device, recursive=None):
         """
         Automatically attempt to mount or unlock a device, but be quiet if the
@@ -384,6 +343,9 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
+        device, created = await self._find_device_losetup(device)
+        if created and recursive is False:
+            return device
         success = True
         if not self.is_automount(device):
             pass
@@ -411,8 +373,7 @@ class Mounter(object):
             self._log.debug(_('not adding {0}: unhandled device', device))
         return success
 
-    @_suppress_error
-    @_find_device
+    @_error_boundary
     async def remove(self, device, force=False, detach=False, eject=False,
                lock=False):
         """
@@ -426,6 +387,7 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
+        device = self._find_device(device)
         if device.is_filesystem:
             if device.is_mounted or not device.is_loop or detach is False:
                 success = await self.unmount(device)
@@ -459,8 +421,7 @@ class Mounter(object):
             success = await self.detach(device)
         return success
 
-    @_suppress_error
-    @_find_device
+    @_error_boundary
     async def auto_remove(self, device, force=False, detach=False, eject=False,
                     lock=False):
         """
@@ -474,6 +435,7 @@ class Mounter(object):
         :returns: whether all attempted operations succeeded
         :rtype: bool
         """
+        device = self._find_device(device)
         success = True
         if not self.is_handleable(device):
             pass
@@ -509,8 +471,7 @@ class Mounter(object):
         return success
 
     # eject/detach device
-    @_sets_async_error
-    @_find_device
+    @_error_boundary
     async def eject(self, device, force=False):
         """
         Eject a device after unmounting all its mounted filesystems.
@@ -520,6 +481,7 @@ class Mounter(object):
         :returns: whether the operation succeeded
         :rtype: bool
         """
+        device = self._find_device(device)
         if not self.is_handleable(device):
             self._log.warn(_('not ejecting {0}: unhandled device'))
             return False
@@ -536,8 +498,7 @@ class Mounter(object):
         self._log.info(_('ejected {0}', device))
         return True
 
-    @_sets_async_error
-    @_find_device
+    @_error_boundary
     async def detach(self, device, force=False):
         """
         Detach a device after unmounting all its mounted filesystems.
@@ -547,6 +508,7 @@ class Mounter(object):
         :returns: whether the operation succeeded
         :rtype: bool
         """
+        device = self._find_device(device)
         if not self.is_handleable(device):
             self._log.warn(_('not detaching {0}: unhandled device', device))
             return False
@@ -608,7 +570,7 @@ class Mounter(object):
         """
         try:
             device = self.udisks.find(image)
-        except ValueError:
+        except FileNotFoundError:
             pass
         else:
             self._log.info(_('not setting up {0}: already up', device))
@@ -628,8 +590,7 @@ class Mounter(object):
                          device.device_presentation))
         return device
 
-    @_sets_async_error
-    @_find_device
+    @_error_boundary
     async def delete(self, device, remove=True):
         """
         Detach the loop device.
@@ -639,6 +600,7 @@ class Mounter(object):
         :returns: whether the loop device is deleted
         :rtype: bool
         """
+        device = self._find_device(device)
         if not self.is_handleable(device) or not device.is_loop:
             self._log.warn(_('not deleting {0}: unhandled device', device))
             return False
