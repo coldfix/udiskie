@@ -3,6 +3,7 @@ This module defines the protocol used for asynchronous operations in udiskie.
 """
 
 import asyncio
+import traceback
 
 from functools import wraps
 from subprocess import CalledProcessError
@@ -39,8 +40,17 @@ def to_coro(func):
 def run_bg(func):
     @wraps(func)
     def runner(*args, **kwargs):
-        return asyncio.ensure_future(func(*args, **kwargs))
+        future = asyncio.ensure_future(func(*args, **kwargs))
+        future.add_done_callback(show_traceback)
+        return future
     return runner
+
+
+def show_traceback(future):
+    try:
+        future.result()
+    except Exception:
+        traceback.print_exc()
 
 
 def gio_callback(extract_result):

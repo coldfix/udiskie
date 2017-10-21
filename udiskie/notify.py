@@ -3,10 +3,10 @@ Notification utility.
 """
 
 import logging
-import asyncio
 
 from gi.repository import GLib
 
+from .async_ import run_bg
 from .common import exc_message, DaemonBase
 from .mount import DeviceActions
 from .locale import _
@@ -236,8 +236,7 @@ class Notify(DaemonBase):
 
         Note, this only works with some libnotify services.
         """
-        def on_action_click(notification, action, *user_data):
-            asyncio.ensure_future(callback(*args))
+        on_action_click = run_bg(lambda *_: callback(*args))
         try:
             # this is the correct signature for Notify-0.7, the last argument
             # being 'user_data':

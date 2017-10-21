@@ -15,7 +15,7 @@ import string
 import subprocess
 import sys
 
-from .async_ import exec_subprocess
+from .async_ import exec_subprocess, run_bg
 from .locale import _
 from .common import AttrDictView
 from .config import DeviceFilter
@@ -220,7 +220,6 @@ class DeviceCommand(object):
                         'Unknown device attribute {!r} in format string: {!r}',
                         kwd, arg))
 
-    # TODO: ensure_future
     # NOTE: *ignored swallows `allow_keyfile`
     async def __call__(self, device, *ignored):
         """
@@ -237,9 +236,6 @@ class DeviceCommand(object):
         except subprocess.CalledProcessError:
             return None
         return stdout.rstrip('\n')
-
-    def exec(self, device):
-        return asyncio.ensure_future(self(device))
 
 
 def password(password_command):
@@ -309,4 +305,4 @@ def notify_command(command_format, mounter):
                   'device_locked', 'device_unlocked',
                   'device_added', 'device_removed',
                   'job_failed']:
-        udisks.connect(event, DeviceCommand(command_format, event=event).exec)
+        udisks.connect(event, run_bg(DeviceCommand(command_format, event=event)))
