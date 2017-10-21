@@ -100,7 +100,7 @@ class _EntryPoint(object):
     Concrete implementations need to implement :meth:`run` and extend
     :meth:`finalize_options` to be usable with :meth:`main`. Furthermore
     the docstring of any concrete implementation must be usable with
-    docopt. :ivar:`name` must be set to the name of the CLI utility.
+    docopt.
     """
 
     option_defaults = {
@@ -128,7 +128,7 @@ class _EntryPoint(object):
         """
         gbulb.install(gtk=True)
         # parse program options (retrieve log level and config file name):
-        args = docopt(self.usage, version=self.name + ' ' + self.version)
+        args = docopt(self.usage, version='udiskie ' + self.version)
         default_opts = self.option_defaults
         program_opts = self.program_options(args)
         # initialize logging configuration:
@@ -210,11 +210,6 @@ class _EntryPoint(object):
     def usage(self):
         """Get the full usage string."""
         return inspect.cleandoc(self.__doc__ + self.usage_remarks)
-
-    @property
-    def name(self):
-        """Get the name of the CLI utility."""
-        raise NotImplementedError()
 
     def _init(self):
         """
@@ -328,8 +323,6 @@ class Daemon(_EntryPoint):
         -f PROGRAM, --file-manager PROGRAM      Set program for browsing
         -F, --no-file-manager                   Disable browsing
     """
-
-    name = 'udiskie'
 
     option_defaults = extend(_EntryPoint.option_defaults, {
         'automount': True,
@@ -521,8 +514,6 @@ class Mount(_EntryPoint):
         -P, --no-password-prompt                Disable unlocking
     """
 
-    name = 'udiskie-mount'
-
     option_defaults = extend(_EntryPoint.option_defaults, {
         'recursive': None,
         'options': None,
@@ -601,8 +592,6 @@ class Umount(_EntryPoint):
         -l, --lock                  Lock device after unmounting
         -L, --no-lock               Don't lock device
     """
-
-    name = 'udiskie-umount'
 
     option_defaults = extend(_EntryPoint.option_defaults, {
         'detach': None,
@@ -686,8 +675,6 @@ class Info(_EntryPoint):
         -f FILT, --filter FILT      Print only devices that match the given
                                     filter.
     """
-
-    name = 'udiskie-info'
 
     option_defaults = extend(_EntryPoint.option_defaults, {
         'output': '',
