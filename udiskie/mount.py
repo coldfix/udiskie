@@ -849,7 +849,7 @@ class DeviceActions(object):
             yield 'eject'
         if device.is_detachable:
             yield 'detach'
-        if device.is_loop and device.loop_support:
+        if device.is_loop:
             yield 'delete'
 
     def _device_node(self, device):

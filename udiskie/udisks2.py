@@ -750,8 +750,6 @@ class Daemon(Emitter):
         await self._sync()
         return self[object_path]
 
-    loop_support = True
-
     # UDisks2 interface
     def paths(self):
         return self._objects.keys()

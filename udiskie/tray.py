@@ -160,13 +160,12 @@ class UdiskieMenu(object):
     def _insert_options(self, menu):
         """Add configuration options to menu."""
         menu.append(Gtk.SeparatorMenuItem())
-        if self._mounter.udisks.loop_support:
-            menu.append(self._menuitem(
-                _('Mount disc image'),
-                self._icons.get_icon('losetup', Gtk.IconSize.MENU),
-                lambda _: asyncio.ensure_future(self._losetup())
-            ))
-            menu.append(Gtk.SeparatorMenuItem())
+        menu.append(self._menuitem(
+            _('Mount disc image'),
+            self._icons.get_icon('losetup', Gtk.IconSize.MENU),
+            lambda _: asyncio.ensure_future(self._losetup())
+        ))
+        menu.append(Gtk.SeparatorMenuItem())
         menu.append(self._menuitem(
             _("Enable automounting"),
             icon=None,
