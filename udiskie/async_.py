@@ -5,9 +5,8 @@ This module defines the protocol used for asynchronous operations in udiskie.
 import asyncio
 import traceback
 
-from subprocess import CalledProcessError
-
-from gi.repository import Gio
+from subprocess import CalledProcessError, PIPE
+from asyncio.subprocess import create_subprocess_exec
 
 from .common import wraps
 
@@ -65,32 +64,17 @@ def gio_callback(extract_result):
     return callback
 
 
-def exec_subprocess(argv):
+async def exec_subprocess(argv):
     """
     An Async task that represents a subprocess. If successful, the task's
     result is set to the collected STDOUT of the subprocess.
 
     :raises subprocess.CalledProcessError: if the subprocess returns a non-zero exit code
     """
-    future = asyncio.Future()
-    process = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
-    stdin_buf = None
-    cancellable = None
-    process.communicate_utf8_async(
-        stdin_buf,
-        cancellable,
-        _exec_subprocess_result,
-        future,
-        process)
-    return future
-
-
-@gio_callback
-def _exec_subprocess_result(proxy, result, process):
-    success, stdout, stderr = process.communicate_utf8_finish(result)
-    if not success:
-        raise RuntimeError("Subprocess did not exit normally!")
-    exit_code = process.get_exit_status()
+    process = await create_subprocess_exec(*argv, stdout=PIPE)
+    stdout, stderr = await process.communicate()
+    stdout = stdout.decode('utf-8')
+    exit_code = await process.wait()
     if exit_code != 0:
         raise CalledProcessError(
             "Subprocess returned a non-zero exit-status!",

@@ -29,3 +29,6 @@ pip-log.txt
 .coverage
 .tox
 nosetests.xml
+
+# backup files
+lang/*~

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-27 10:13+0200\n"
+"POT-Creation-Date: 2017-10-21 21:29+0200\n"
 "PO-Revision-Date: 2014-07-17 19:27+0200\n"
 "Last-Translator: Thomas Gläßle <t_glaessle@gmx.de>\n"
 "Language-Team: English t_glaesle@gmx.de\n"
@@ -12,20 +12,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../udiskie/prompt.py:132 ../udiskie/prompt.py:143
+#: ../udiskie/prompt.py:168 ../udiskie/prompt.py:178
 #, python-brace-format
 msgid "Enter password for {0.device_presentation}: "
 msgstr "Enter password for {0.device_presentation}: "
 
-#: ../udiskie/prompt.py:176
+#: ../udiskie/prompt.py:211
 msgid "Positional field in format string {!r} is deprecated."
 msgstr ""
 
-#: ../udiskie/prompt.py:185
+#: ../udiskie/prompt.py:220
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr ""
 
-#: ../udiskie/prompt.py:241
+#: ../udiskie/prompt.py:276
 #, fuzzy
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
@@ -34,452 +34,459 @@ msgstr ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "b' option."
 
-#: ../udiskie/udisks1.py:480 ../udiskie/udisks2.py:589
-#, python-brace-format
-msgid "found device owning \"{0}\": \"{1}\""
-msgstr "found device owning \"{0}\": \"{1}\""
-
-#: ../udiskie/udisks1.py:483 ../udiskie/udisks2.py:592
-#, python-brace-format
-msgid "no device found owning \"{0}\""
-msgstr "no device found owning \"{0}\""
-
-#: ../udiskie/udisks1.py:506 ../udiskie/udisks2.py:611
-#, python-brace-format
-msgid "Daemon version: {0}"
-msgstr ""
-
-#: ../udiskie/udisks1.py:564 ../udiskie/udisks2.py:702
-#, python-brace-format
-msgid "+++ {0}: {1}"
-msgstr "+++ {0}: {1}"
-
-#: ../udiskie/udisks1.py:680
-#, python-brace-format
-msgid "{0} operation failed for device: {1}"
-msgstr "{0} operation failed for device: {1}"
-
-#: ../udiskie/config.py:128
+#: ../udiskie/config.py:112
 msgid "Unknown matching attribute: {!r}"
 msgstr "Unknown matching attribute: {!r}"
 
-#: ../udiskie/config.py:130
+#: ../udiskie/config.py:114
 #, python-brace-format
 msgid "{0} created"
 msgstr "{0} created"
 
-#: ../udiskie/config.py:133
+#: ../udiskie/config.py:117
 msgid "{0}(match={1!r}, value={2!r})"
 msgstr "{0}(match={1!r}, value={2!r})"
 
-#: ../udiskie/config.py:159
+#: ../udiskie/config.py:143
 #, fuzzy
 msgid "{0}(match={1!r}, {2}={3!r}) used for {4}"
 msgstr "{0}(match={1!r}, value={2!r})"
 
-#: ../udiskie/config.py:247
+#: ../udiskie/config.py:231
 #, python-brace-format
 msgid "Failed to read config file: {0}"
 msgstr ""
 
-#: ../udiskie/config.py:250
+#: ../udiskie/config.py:234
 #, fuzzy
 msgid "Failed to read {0!r}: {1}"
 msgstr "failed to {0} {1}: {2}"
 
-#: ../udiskie/depend.py:46
+#: ../udiskie/depend.py:43
 msgid ""
 "Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
 msgstr ""
 
-#: ../udiskie/depend.py:52
+#: ../udiskie/depend.py:49
 msgid "X server not connected!"
 msgstr "X server not connected!"
 
-#: ../udiskie/mount.py:158
+#: ../udiskie/mount.py:31
 #, python-brace-format
 msgid "failed to {0} {1}: {2}"
 msgstr "failed to {0} {1}: {2}"
 
-#: ../udiskie/mount.py:174
+#: ../udiskie/mount.py:120
 #, python-brace-format
 msgid "not browsing {0}: not mounted"
 msgstr "not browsing {0}: not mounted"
 
-#: ../udiskie/mount.py:177
+#: ../udiskie/mount.py:123
 #, python-brace-format
 msgid "not browsing {0}: no program"
 msgstr "not browsing {0}: no program"
 
-#: ../udiskie/mount.py:179
+#: ../udiskie/mount.py:125
 #, python-brace-format
 msgid "opening {0} on {0.mount_paths[0]}"
 msgstr "opening {0} on {0.mount_paths[0]}"
 
-#: ../udiskie/mount.py:181
+#: ../udiskie/mount.py:127
 #, python-brace-format
 msgid "opened {0} on {0.mount_paths[0]}"
 msgstr "opened {0} on {0.mount_paths[0]}"
 
-#: ../udiskie/mount.py:196
+#: ../udiskie/mount.py:142
 #, python-brace-format
 msgid "not mounting {0}: unhandled device"
 msgstr "not mounting {0}: unhandled device"
 
-#: ../udiskie/mount.py:199
+#: ../udiskie/mount.py:145
 #, python-brace-format
 msgid "not mounting {0}: already mounted"
 msgstr "not mounting {0}: already mounted"
 
-#: ../udiskie/mount.py:203
+#: ../udiskie/mount.py:149
 #, python-brace-format
 msgid "mounting {0} with {1}"
 msgstr "mounting {0} with {1}"
 
-#: ../udiskie/mount.py:205
+#: ../udiskie/mount.py:152
 #, python-brace-format
 msgid "mounted {0} on {1}"
 msgstr "mounted {0} on {1}"
 
-#: ../udiskie/mount.py:219
+#: ../udiskie/mount.py:158
+msgid ""
+"Mounting NTFS device with default driver.\n"
+"Please install 'ntfs-3g' if you experience problems or the device is "
+"readonly."
+msgstr ""
+
+#: ../udiskie/mount.py:173
 #, python-brace-format
 msgid "not unmounting {0}: unhandled device"
 msgstr "not unmounting {0}: unhandled device"
 
-#: ../udiskie/mount.py:222
+#: ../udiskie/mount.py:176
 #, python-brace-format
 msgid "not unmounting {0}: not mounted"
 msgstr "not unmounting {0}: not mounted"
 
-#: ../udiskie/mount.py:224
+#: ../udiskie/mount.py:178
 #, python-brace-format
 msgid "unmounting {0}"
 msgstr "unmounting {0}"
 
-#: ../udiskie/mount.py:226
+#: ../udiskie/mount.py:180
 #, python-brace-format
 msgid "unmounted {0}"
 msgstr "unmounted {0}"
 
-#: ../udiskie/mount.py:241
+#: ../udiskie/mount.py:195
 #, python-brace-format
 msgid "not unlocking {0}: unhandled device"
 msgstr "not unlocking {0}: unhandled device"
 
-#: ../udiskie/mount.py:244
+#: ../udiskie/mount.py:198
 #, python-brace-format
 msgid "not unlocking {0}: already unlocked"
 msgstr "not unlocking {0}: already unlocked"
 
-#: ../udiskie/mount.py:247
+#: ../udiskie/mount.py:201
 #, python-brace-format
 msgid "not unlocking {0}: no password prompt"
 msgstr "not unlocking {0}: no password prompt"
 
-#: ../udiskie/mount.py:257
+#: ../udiskie/mount.py:211
 #, python-brace-format
 msgid "not unlocking {0}: cancelled by user"
 msgstr "not unlocking {0}: cancelled by user"
 
-#: ../udiskie/mount.py:259
+#: ../udiskie/mount.py:214
+#, fuzzy, python-brace-format
+msgid "unlocking {0} using keyfile"
+msgstr "not unlocking {0}: no password prompt"
+
+#: ../udiskie/mount.py:217
 #, python-brace-format
 msgid "unlocking {0}"
 msgstr "unlocking {0}"
 
-#: ../udiskie/mount.py:262
+#: ../udiskie/mount.py:220
 #, python-brace-format
 msgid "unlocked {0}"
 msgstr "unlocked {0}"
 
-#: ../udiskie/mount.py:273
+#: ../udiskie/mount.py:231
 #, fuzzy, python-brace-format
 msgid "unlocking {0} using cached password"
 msgstr "not unlocking {0}: no password prompt"
 
-#: ../udiskie/mount.py:277
+#: ../udiskie/mount.py:235
 #, python-brace-format
 msgid "failed to unlock {0} using cached password"
 msgstr ""
 
-#: ../udiskie/mount.py:279
+#: ../udiskie/mount.py:238
 #, python-brace-format
 msgid "unlocked {0} using cached password"
 msgstr ""
 
-#: ../udiskie/mount.py:293
-#, python-brace-format
-msgid "configured keyfile for {0} not found"
+#: ../udiskie/mount.py:246
+msgid "No matching keyfile rule for {}."
 msgstr ""
 
-#: ../udiskie/mount.py:295
+#: ../udiskie/mount.py:252
+#, fuzzy, python-brace-format
+msgid "keyfile for {0} not found: {1}"
+msgstr "Device not found: {0}"
+
+#: ../udiskie/mount.py:254
 #, fuzzy, python-brace-format
 msgid "unlocking {0} using keyfile {1}"
 msgstr "not unlocking {0}: no password prompt"
 
-#: ../udiskie/mount.py:299
+#: ../udiskie/mount.py:258
 #, python-brace-format
 msgid "failed to unlock {0} using keyfile"
 msgstr ""
 
-#: ../udiskie/mount.py:301
+#: ../udiskie/mount.py:261
 #, fuzzy, python-brace-format
 msgid "unlocked {0} using keyfile"
 msgstr "unlocked {0}"
 
-#: ../udiskie/mount.py:326
+#: ../udiskie/mount.py:286
 #, python-brace-format
 msgid "not locking {0}: unhandled device"
 msgstr "not locking {0}: unhandled device"
 
-#: ../udiskie/mount.py:329
+#: ../udiskie/mount.py:289
 #, python-brace-format
 msgid "not locking {0}: not unlocked"
 msgstr "not locking {0}: not unlocked"
 
-#: ../udiskie/mount.py:331
+#: ../udiskie/mount.py:291
 #, python-brace-format
 msgid "locking {0}"
 msgstr "locking {0}"
 
-#: ../udiskie/mount.py:333
+#: ../udiskie/mount.py:293
 #, python-brace-format
 msgid "locked {0}"
 msgstr "locked {0}"
 
-#: ../udiskie/mount.py:369 ../udiskie/mount.py:409
+#: ../udiskie/mount.py:331 ../udiskie/mount.py:373
 #, python-brace-format
 msgid "not adding {0}: unhandled device"
 msgstr "not adding {0}: unhandled device"
 
-#: ../udiskie/mount.py:446 ../udiskie/mount.py:496
+#: ../udiskie/mount.py:410 ../udiskie/mount.py:460
 #, python-brace-format
 msgid "not removing {0}: unhandled device"
 msgstr "not removing {0}: unhandled device"
 
-#: ../udiskie/mount.py:522
+#: ../udiskie/mount.py:486
 #, python-brace-format
 msgid "not ejecting {0}: unhandled device"
 msgstr "not ejecting {0}: unhandled device"
 
-#: ../udiskie/mount.py:526
+#: ../udiskie/mount.py:490
 #, python-brace-format
 msgid "not ejecting {0}: drive not ejectable"
 msgstr "not ejecting {0}: drive not ejectable"
 
-#: ../udiskie/mount.py:532
+#: ../udiskie/mount.py:496
 #, python-brace-format
 msgid "ejecting {0}"
 msgstr "ejecting {0}"
 
-#: ../udiskie/mount.py:534
+#: ../udiskie/mount.py:498
 #, python-brace-format
 msgid "ejected {0}"
 msgstr "ejected {0}"
 
-#: ../udiskie/mount.py:549
+#: ../udiskie/mount.py:513
 #, python-brace-format
 msgid "not detaching {0}: unhandled device"
 msgstr "not detaching {0}: unhandled device"
 
-#: ../udiskie/mount.py:553
+#: ../udiskie/mount.py:517
 #, python-brace-format
 msgid "not detaching {0}: drive not detachable"
 msgstr "not detaching {0}: drive not detachable"
 
-#: ../udiskie/mount.py:557
+#: ../udiskie/mount.py:521
 #, python-brace-format
 msgid "detaching {0}"
 msgstr "detaching {0}"
 
-#: ../udiskie/mount.py:559
+#: ../udiskie/mount.py:523
 #, python-brace-format
 msgid "detached {0}"
 msgstr "detached {0}"
 
-#: ../udiskie/mount.py:615
+#: ../udiskie/mount.py:576
 #, fuzzy, python-brace-format
 msgid "not setting up {0}: already up"
 msgstr "not mounting {0}: already mounted"
 
-#: ../udiskie/mount.py:618
+#: ../udiskie/mount.py:579
 #, fuzzy, python-brace-format
 msgid "not setting up {0}: not a file"
 msgstr "not ejecting {0}: drive not ejectable"
 
-#: ../udiskie/mount.py:621
-#, python-brace-format
-msgid "not setting up {0}: unsupported in UDisks1"
-msgstr ""
-
-#: ../udiskie/mount.py:623
+#: ../udiskie/mount.py:581
 #, fuzzy, python-brace-format
 msgid "setting up {0}"
 msgstr "ejecting {0}"
 
-#: ../udiskie/mount.py:631
+#: ../udiskie/mount.py:589
 #, python-brace-format
 msgid "set up {0} as {1}"
 msgstr ""
 
-#: ../udiskie/mount.py:647
+#: ../udiskie/mount.py:605
 #, fuzzy, python-brace-format
 msgid "not deleting {0}: unhandled device"
 msgstr "not ejecting {0}: unhandled device"
 
-#: ../udiskie/mount.py:651
+#: ../udiskie/mount.py:609
 #, fuzzy, python-brace-format
 msgid "deleting {0}"
 msgstr "ejecting {0}"
 
-#: ../udiskie/mount.py:653
+#: ../udiskie/mount.py:611
 #, fuzzy, python-brace-format
 msgid "deleted {0}"
 msgstr "ejected {0}"
 
-#: ../udiskie/mount.py:809
+#: ../udiskie/mount.py:750
 #, python-brace-format
 msgid "Browse {0}"
 msgstr "Browse {0}"
 
-#: ../udiskie/mount.py:810
+#: ../udiskie/mount.py:751
 #, python-brace-format
 msgid "Mount {0}"
 msgstr "Mount {0}"
 
-#: ../udiskie/mount.py:811
+#: ../udiskie/mount.py:752
 #, python-brace-format
 msgid "Unmount {0}"
 msgstr "Unmount {0}"
 
-#: ../udiskie/mount.py:812
+#: ../udiskie/mount.py:753
 #, python-brace-format
 msgid "Unlock {0}"
 msgstr "Unlock {0}"
 
-#: ../udiskie/mount.py:813
+#: ../udiskie/mount.py:754
 #, python-brace-format
 msgid "Lock {0}"
 msgstr "Lock {0}"
 
-#: ../udiskie/mount.py:814
+#: ../udiskie/mount.py:755
 #, fuzzy, python-brace-format
 msgid "Eject {1}"
 msgstr "Eject {0}"
 
-#: ../udiskie/mount.py:815
+#: ../udiskie/mount.py:756
 #, fuzzy, python-brace-format
 msgid "Unpower {1}"
 msgstr "Unpower {0}"
 
-#: ../udiskie/mount.py:816
+#: ../udiskie/mount.py:757
 #, python-brace-format
 msgid "Clear password for {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:817
+#: ../udiskie/mount.py:758
 #, fuzzy, python-brace-format
 msgid "Detach {0}"
 msgstr "detached {0}"
 
-#: ../udiskie/tray.py:167
+#: ../udiskie/udisks2.py:661
+#, python-brace-format
+msgid "found device owning \"{0}\": \"{1}\""
+msgstr "found device owning \"{0}\": \"{1}\""
+
+#: ../udiskie/udisks2.py:664
+#, python-brace-format
+msgid "no device found owning \"{0}\""
+msgstr "no device found owning \"{0}\""
+
+#: ../udiskie/udisks2.py:683
+#, python-brace-format
+msgid "Daemon version: {0}"
+msgstr ""
+
+#: ../udiskie/udisks2.py:688
+#, python-brace-format
+msgid "Keyfile support: {0}"
+msgstr ""
+
+#: ../udiskie/udisks2.py:771
+#, python-brace-format
+msgid "+++ {0}: {1}"
+msgstr "+++ {0}: {1}"
+
+#: ../udiskie/tray.py:164
 msgid "Mount disc image"
 msgstr ""
 
-#: ../udiskie/tray.py:173
+#: ../udiskie/tray.py:170
 msgid "Enable automounting"
 msgstr ""
 
-#: ../udiskie/tray.py:179
+#: ../udiskie/tray.py:176
 msgid "Enable notifications"
 msgstr ""
 
-#: ../udiskie/tray.py:188
+#: ../udiskie/tray.py:185
 msgid "Quit"
 msgstr "Quit"
 
-#: ../udiskie/tray.py:196
+#: ../udiskie/tray.py:192
 msgid "Open disc image"
 msgstr ""
 
-#: ../udiskie/tray.py:198
+#: ../udiskie/tray.py:194
 msgid "Open"
 msgstr ""
 
-#: ../udiskie/tray.py:199
+#: ../udiskie/tray.py:195
 msgid "Cancel"
 msgstr ""
 
-#: ../udiskie/tray.py:247
-msgid "Invalid node!"
-msgstr "Invalid node!"
-
-#: ../udiskie/tray.py:249
+#: ../udiskie/tray.py:244
 msgid "No external devices"
 msgstr ""
 
-#: ../udiskie/tray.py:353
+#: ../udiskie/tray.py:348
 msgid "udiskie"
 msgstr "udiskie"
 
-#: ../udiskie/notify.py:68
+#: ../udiskie/notify.py:66
 msgid "Browse directory"
 msgstr "Browse directory"
 
-#: ../udiskie/notify.py:72
+#: ../udiskie/notify.py:70
 msgid "Device mounted"
 msgstr "Device mounted"
 
-#: ../udiskie/notify.py:73
+#: ../udiskie/notify.py:71
 #, fuzzy, python-brace-format
 msgid "{0.ui_label} mounted on {0.mount_paths[0]}"
 msgstr "{0.id_label} mounted on {0.mount_paths[0]}"
 
-#: ../udiskie/notify.py:87
+#: ../udiskie/notify.py:85
 msgid "Device unmounted"
 msgstr "Device unmounted"
 
-#: ../udiskie/notify.py:88
+#: ../udiskie/notify.py:86
 #, fuzzy, python-brace-format
 msgid "{0.ui_label} unmounted"
 msgstr "{0.id_label} unmounted"
 
-#: ../udiskie/notify.py:101
+#: ../udiskie/notify.py:99
 msgid "Device locked"
 msgstr "Device locked"
 
-#: ../udiskie/notify.py:102
+#: ../udiskie/notify.py:100
 #, python-brace-format
 msgid "{0.device_presentation} locked"
 msgstr "{0.device_presentation} locked"
 
-#: ../udiskie/notify.py:115
+#: ../udiskie/notify.py:113
 msgid "Device unlocked"
 msgstr "Device unlocked"
 
-#: ../udiskie/notify.py:116
+#: ../udiskie/notify.py:114
 #, python-brace-format
 msgid "{0.device_presentation} unlocked"
 msgstr "{0.device_presentation} unlocked"
 
-#: ../udiskie/notify.py:153
+#: ../udiskie/notify.py:151
 msgid "Device added"
 msgstr "Device added"
 
-#: ../udiskie/notify.py:154
+#: ../udiskie/notify.py:152
 #, python-brace-format
 msgid "device appeared on {0.device_presentation}"
 msgstr "device appeared on {0.device_presentation}"
 
-#: ../udiskie/notify.py:177
+#: ../udiskie/notify.py:175
 msgid "Device removed"
 msgstr "Device removed"
 
-#: ../udiskie/notify.py:178
+#: ../udiskie/notify.py:176
 #, python-brace-format
 msgid "device disappeared on {0.device_presentation}"
 msgstr "device disappeared on {0.device_presentation}"
 
-#: ../udiskie/notify.py:191
+#: ../udiskie/notify.py:189
 #, python-brace-format
 msgid ""
 "failed to {0} {1}:\n"
@@ -488,44 +495,30 @@ msgstr ""
 "failed to {0} {1}:\n"
 "{2}"
 
-#: ../udiskie/notify.py:193
+#: ../udiskie/notify.py:191
 #, python-brace-format
 msgid "failed to {0} device {1}."
 msgstr "failed to {0} device {1}."
 
-#: ../udiskie/notify.py:199
+#: ../udiskie/notify.py:197
 msgid "Retry"
 msgstr "Retry"
 
-#: ../udiskie/notify.py:202
+#: ../udiskie/notify.py:200
 msgid "Job failed"
 msgstr "Job failed"
 
-#: ../udiskie/notify.py:233
+#: ../udiskie/notify.py:231
 #, python-brace-format
 msgid "Failed to show notification: {0}"
 msgstr ""
 
-#: ../udiskie/cli.py:57
-#, fuzzy
-msgid ""
-"Failed to connect UDisks2 dbus service..\n"
-"Falling back to UDisks1."
-msgstr ""
-"Failed to connect UDisks1 dbus service..\n"
-"Falling back to UDisks2 [experimental]."
-
-#: ../udiskie/cli.py:67
-#, python-brace-format
-msgid "UDisks version not supported: {0}!"
-msgstr "UDisks version not supported: {0}!"
-
-#: ../udiskie/cli.py:82
+#: ../udiskie/cli.py:46
 #, python-brace-format
 msgid "These options are mutually exclusive: {0}"
 msgstr "These options are mutually exclusive: {0}"
 
-#: ../udiskie/cli.py:157
+#: ../udiskie/cli.py:116
 msgid ""
 "\n"
 "    Note, that the options in the individual groups are mutually exclusive.\n"
@@ -541,17 +534,17 @@ msgstr ""
 "    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
 "    "
 
-#: ../udiskie/cli.py:182
+#: ../udiskie/cli.py:141
 #, python-format
 msgid "%(message)s"
 msgstr "%(message)s"
 
-#: ../udiskie/cli.py:183
+#: ../udiskie/cli.py:142
 #, python-format
 msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 
-#: ../udiskie/cli.py:436
+#: ../udiskie/cli.py:383
 msgid ""
 "Typelib for 'libnotify' is not available. Possible causes include:\n"
 "\t- libnotify is not installed\n"
@@ -561,13 +554,13 @@ msgid ""
 "Starting udiskie without notifications."
 msgstr ""
 
-#: ../udiskie/cli.py:446
+#: ../udiskie/cli.py:393
 msgid ""
 "Not run within X session. \n"
 "Starting udiskie without tray icon.\n"
 msgstr ""
 
-#: ../udiskie/cli.py:453
+#: ../udiskie/cli.py:400
 msgid ""
 "Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
 "\t- GTK3 is not installed\n"
@@ -576,11 +569,25 @@ msgid ""
 "Starting udiskie without tray icon.\n"
 msgstr ""
 
+#~ msgid "{0} operation failed for device: {1}"
+#~ msgstr "{0} operation failed for device: {1}"
+
+#~ msgid "Invalid node!"
+#~ msgstr "Invalid node!"
+
+#, fuzzy
+#~ msgid ""
+#~ "Failed to connect UDisks2 dbus service..\n"
+#~ "Falling back to UDisks1."
+#~ msgstr ""
+#~ "Failed to connect UDisks1 dbus service..\n"
+#~ "Falling back to UDisks2 [experimental]."
+
+#~ msgid "UDisks version not supported: {0}!"
+#~ msgstr "UDisks version not supported: {0}!"
+
 #~ msgid "{0} used for {1}"
 #~ msgstr "{0} used for {1}"
-
-#~ msgid "Device not found: {0}"
-#~ msgstr "Device not found: {0}"
 
 #~ msgid "Interface {0!r} not available for {1}"
 #~ msgstr "Interface {0!r} not available for {1}"
