@@ -65,7 +65,8 @@ def _sets_async_error(fn):
         try:
             return await fn(self, device, *args, **kwargs)
         except Exception as e:
-            self._error(fn, device, e)
+            self._log.error(_('failed to {0} {1}: {2}',
+                              fn.__name__, device, exc_message(e)))
             return False
     return wrapper
 
@@ -140,14 +141,6 @@ class Mounter(object):
         self._browser = browser
         self._cache = cache
         self._log = logging.getLogger(__name__)
-        self._set_error = lambda device, action, message: None
-
-    def _error(self, fn, device, err):
-        message = exc_message(err)
-        self._log.error(_('failed to {0} {1}: {2}',
-                          fn.__name__, device, message))
-        self._set_error(device, fn.__name__, message)
-        return True
 
     @_sets_async_error
     @_find_device
