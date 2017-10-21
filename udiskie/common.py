@@ -190,8 +190,7 @@ def exc_message(exc):
 
 
 def format_exc(*exc_info):
-    """Show exception with a *full* traceback."""
+    """Show exception with traceback."""
     typ, exc, tb = exc_info or sys.exc_info()
     error = traceback.format_exception(typ, exc, tb)
-    stack = traceback.format_stack(tb.tb_frame.f_back)
-    return error[0] + "".join(stack + error[1:])
+    return "".join(error)
