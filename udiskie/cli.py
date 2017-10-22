@@ -173,7 +173,6 @@ class _EntryPoint(object):
         # initialize instance variables
         self.config = config
         self.options = options
-        self.exit_status = 0
 
     def program_options(self, args):
         """
@@ -229,9 +228,8 @@ class _EntryPoint(object):
         """
         self.mainloop = asyncio.get_event_loop()
         try:
-            self.mainloop.run_until_complete(
+            return self.mainloop.run_until_complete(
                 self._start_async_tasks())
-            return self.exit_status
         except KeyboardInterrupt:
             return 1
 
@@ -240,13 +238,10 @@ class _EntryPoint(object):
         try:
             self.udisks = await udiskie.udisks2.Daemon.create()
             results = await self._init()
-            if not all(results):
-                self.exit_status = 1
+            return 0 if all(results) else 1
         except Exception:
-            self.exit_status = 1
-            # Print the stack trace only up to the current level:
             traceback.print_exc()
-        self.mainloop.stop()
+            return 1
 
 
 class Component(object):
