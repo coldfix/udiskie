@@ -65,6 +65,7 @@ def call_with_fd_list(proxy, method_name, signature, args, fds, flags=0,
     :param str method_name:
     :param str signature:
     :param tuple args:
+    :param list fds:
     :param int flags:
     :param int timeout_msec:
     """
@@ -95,12 +96,7 @@ class InterfaceProxy(object):
     """
     DBus proxy object for a specific interface.
 
-    Provides attribute accessors to properties and methods of a DBus
-    interface on a DBus object.
-
     :ivar str object_path: object path of the DBus object
-    :ivar PropertiesProxy property: attribute access to DBus properties
-    :ivar Gio.DBusProxy method: attribute access to DBus methods
     :ivar Gio.DBusProxy _proxy: underlying proxy object
     """
 
@@ -109,32 +105,20 @@ class InterfaceProxy(object):
         Initialize property and method attribute accessors for the interface.
 
         :param Gio.DBusProxy proxy: accessed object
-        :param str interface: accessed interface
         """
         self._proxy = proxy
         self.object_path = proxy.get_object_path()
 
     @property
     def object(self):
-        """
-        Get a proxy for the underlying object.
-
-        :rtype: ObjectProxy
-        """
+        """Get an ObjectProxy instanec for the underlying object."""
         proxy = self._proxy
         return ObjectProxy(proxy.get_connection(),
                            proxy.get_name(),
                            proxy.get_object_path())
 
     def connect(self, event, handler):
-        """
-        Connect to a DBus signal.
-
-        :param str event: event name
-        :param handler: callback
-        :returns: subscription id
-        :rtype: int
-        """
+        """Connect to a DBus signal, returns subscription id (int)."""
         interface = self._proxy.get_interface_name()
         return self.object.connect(interface, event, handler)
 
@@ -157,13 +141,7 @@ class PropertiesProxy(InterfaceProxy):
 
 class ObjectProxy(object):
 
-    """
-    Simple proxy class for a DBus object.
-
-    :param Gio.DBusConnection connection:
-    :param str bus_name:
-    :param str object_path:
-    """
+    """Simple proxy class for a DBus object."""
 
     def __init__(self, connection, bus_name, object_path):
         """
@@ -180,13 +158,7 @@ class ObjectProxy(object):
         self.object_path = object_path
 
     def _get_interface(self, name):
-        """
-        Get a Gio native interface proxy for this Dbus object.
-
-        :param str name: interface name
-        :returns: a proxy object for the other interface
-        :rtype: Gio.DBusProxy
-        """
+        """Get a Future(Gio.DBusProxy) for the specified interface."""
         return proxy_new(
             self.connection,
             Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES |
@@ -198,13 +170,7 @@ class ObjectProxy(object):
         )
 
     async def get_interface(self, name):
-        """
-        Get an interface proxy for this Dbus object.
-
-        :param str name: interface name
-        :returns: a proxy object for the other interface
-        :rtype: InterfaceProxy
-        """
+        """Get an InterfaceProxy for the specified interface."""
         proxy = await self._get_interface(name)
         return InterfaceProxy(proxy)
 
@@ -214,23 +180,11 @@ class ObjectProxy(object):
 
     @property
     def bus(self):
-        """
-        Get a proxy object for the underlying bus.
-
-        :rtype: BusProxy
-        """
+        """Get a BusProxy for the underlying bus."""
         return BusProxy(self.connection, self.bus_name)
 
     def connect(self, interface, event, handler):
-        """
-        Connect to a DBus signal.
-
-        :param str interface: interface name
-        :param str event: event name
-        :param handler: callback
-        :returns: subscription id
-        :rtype: int
-        """
+        """Connect to a DBus signal. Returns subscription id (int)."""
         object_path = self.object_path
         return self.bus.connect(interface, event, object_path, handler)
 
@@ -262,23 +216,14 @@ class BusProxy(object):
         self.bus_name = bus_name
 
     def get_object(self, object_path):
-        """
-        Get a object representing the specified object.
-
-        :param str object_path: object path
-        :returns: a simple representative for the object
-        :rtype: ObjectProxy
-        """
+        """Get an ObjectProxy representing the specified object."""
         return ObjectProxy(self.connection, self.bus_name, object_path)
 
     def connect(self, interface, event, object_path, handler):
         """
-        Connect to a DBus signal.
-
-        :param str interface: interface name
-        :param str event: event name
-        :param str object_path: object path or ``None``
-        :param handler: callback
+        Connect to a DBus signal. If ``object_path`` is None, subscribe for
+        all objects and invoke the callback with the object_path as its first
+        argument.
         """
         if object_path:
             def callback(connection, sender_name, object_path,
@@ -299,16 +244,12 @@ class BusProxy(object):
         )
 
     def disconnect(self, subscription_id):
-        """
-        Disconnect a DBus signal subscription.
-        """
+        """Disconnect a DBus signal subscription."""
         self.connection.signal_unsubscribe(subscription_id)
 
 
 def proxy_new(connection, flags, info, name, object_path, interface_name):
-    """
-    Asynchronously call the specified method on a DBus proxy object.
-    """
+    """Asynchronously call the specified method on a DBus proxy object."""
     future = asyncio.Future()
     cancellable = None
     Gio.DBusProxy.new(
@@ -334,9 +275,7 @@ def _proxy_new_result(proxy, result):
 
 
 def proxy_new_for_bus(bus_type, flags, info, name, object_path, interface_name):
-    """
-    Asynchronously call the specified method on a DBus proxy object.
-    """
+    """Asynchronously call the specified method on a DBus proxy object."""
     future = asyncio.Future()
     cancellable = None
     Gio.DBusProxy.new_for_bus(
@@ -362,13 +301,7 @@ def _proxy_new_for_bus_result(proxy, result):
 
 
 async def connect_service(bus_name, object_path, interface):
-    """
-    Connect to the service object on DBus.
-
-    :returns: new proxy object for the service
-    :rtype: InterfaceProxy
-    :raises BusException: if unable to connect to service.
-    """
+    """Connect to the service object on DBus, return InterfaceProxy."""
     proxy = await proxy_new_for_bus(
         Gio.BusType.SYSTEM,
         Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES |

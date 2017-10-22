@@ -149,18 +149,14 @@ async def password_dialog(title, message, allow_keyfile):
     """
     Show a Gtk password dialog.
 
-    :param str title:
-    :param str message:
     :returns: the password or ``None`` if the user aborted the operation
-    :rtype: str
     :raises RuntimeError: if Gtk can not be properly initialized
     """
     dialog = PasswordDialog(title, message, allow_keyfile)
     response = await dialog
     if response == Gtk.ResponseType.OK:
         return dialog.get_text()
-    else:
-        return None
+    return None
 
 
 def get_password_gui(device, allow_keyfile=False):
@@ -239,11 +235,7 @@ class DeviceCommand(object):
 
 
 def password(password_command):
-    """
-    Create a password prompt function.
-
-    :param bool hint_gui: whether a GUI input dialog should be preferred
-    """
+    """Create a password prompt function."""
     gui = lambda: has_Gtk()          and get_password_gui
     tty = lambda: sys.stdin.isatty() and get_password_tty
     if password_command == 'builtin:gui':
@@ -258,13 +250,7 @@ def password(password_command):
 
 def browser(browser_name='xdg-open'):
 
-    """
-    Create a browse-directory function.
-
-    :param str browser_name: file manager program name
-    :returns: one-parameter open function
-    :rtype: callable
-    """
+    """Create a browse-directory function."""
 
     if not browser_name:
         return None

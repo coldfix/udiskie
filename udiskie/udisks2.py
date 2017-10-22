@@ -364,9 +364,7 @@ class Device(object):
 
     @property
     def root(self):
-        """
-        Get the top level block device in the ancestry of this device.
-        """
+        """Get the top level block device in the ancestry of this device."""
         drive = self.drive
         for device in self._daemon:
             if device.is_drive:

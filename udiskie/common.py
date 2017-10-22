@@ -9,7 +9,6 @@ import traceback
 
 __all__ = [
     'wraps',
-    'check_call',
     'Emitter',
     'samefile',
     'sameuuid',
@@ -27,59 +26,28 @@ except ImportError:
     from functools import wraps
 
 
-def check_call(exc_type, func, *args):
-    try:
-        func(*args)
-        return True
-    except exc_type:
-        return False
-
-
 class Emitter(object):
 
-    """
-    Event emitter class.
-
-    Provides a simple event engine featuring a known finite set of events.
-    """
+    """Simple event emitter for a known finite set of events."""
 
     def __init__(self, event_names=(), *args, **kwargs):
-        """
-        Initialize with empty lists of event handlers.
-
-        :param iterable event_names: names of known events.
-        """
+        """Initialize with empty lists of event handlers."""
         super(Emitter, self).__init__(*args, **kwargs)
         self._event_handlers = {}
         for evt in event_names:
             self._event_handlers[evt] = []
 
     def trigger(self, event, *args):
-        """
-        Trigger event handlers.
-
-        :param str event: event name
-        :param *args: event parameters
-        """
+        """Trigger event by name."""
         for handler in self._event_handlers[event]:
             handler(*args)
 
     def connect(self, event, handler):
-        """
-        Connect an event handler.
-
-        :param str event: event name
-        :param callable handler: event handler
-        """
+        """Connect an event handler."""
         self._event_handlers[event].append(handler)
 
     def disconnect(self, event, handler):
-        """
-        Disconnect an event handler.
-
-        :param str event: event name
-        :param callable handler: event handler
-        """
+        """Disconnect an event handler."""
         self._event_handlers[event].remove(handler)
 
 
@@ -97,12 +65,7 @@ def sameuuid(a, b):
 
 
 def setdefault(self, other):
-    """
-    Merge two dictionaries like .update() but don't overwrite values.
-
-    :param dict self: updated dict
-    :param dict other: default values to be inserted
-    """
+    """Like .update() but values in self take priority."""
     for k, v in other.items():
         self.setdefault(k, v)
 

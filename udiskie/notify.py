@@ -36,9 +36,9 @@ class Notify(DaemonBase):
         """
         Initialize notifier and connect to service.
 
-        :param notify: notification service module (pynotify or notify2)
+        :param notify: notification service module (gi.repository.Notify)
         :param mounter: Mounter object
-        :param dict timeout: timeouts
+        :param dict timeout: dictionary with timeouts for notifications
         """
         self._notify = notify
         self._mounter = mounter
@@ -56,11 +56,7 @@ class Notify(DaemonBase):
 
     # event handlers:
     def device_mounted(self, device):
-        """
-        Show 'Device mounted' notification with 'Browse directory' button.
-
-        :param device: device object
-        """
+        """Show mount notification for specified device object."""
         if not self._mounter.is_handleable(device):
             return
         browse_action = ('browse', _('Browse directory'),
@@ -73,11 +69,7 @@ class Notify(DaemonBase):
             self._mounter._browser and browse_action)
 
     def device_unmounted(self, device):
-        """
-        Show 'Device unmounted' notification.
-
-        :param device: device object
-        """
+        """Show unmount notification for specified device object."""
         if not self._mounter.is_handleable(device):
             return
         self._show_notification(
@@ -87,11 +79,7 @@ class Notify(DaemonBase):
             device.icon_name)
 
     def device_locked(self, device):
-        """
-        Show 'Device locked' notification.
-
-        :param device: device object
-        """
+        """Show lock notification for specified device object."""
         if not self._mounter.is_handleable(device):
             return
         self._show_notification(
@@ -101,11 +89,7 @@ class Notify(DaemonBase):
             device.icon_name)
 
     def device_unlocked(self, device):
-        """
-        Show 'Device unlocked' notification.
-
-        :param device: device object
-        """
+        """Show unlock notification for specified device object."""
         if not self._mounter.is_handleable(device):
             return
         self._show_notification(
@@ -115,11 +99,7 @@ class Notify(DaemonBase):
             device.icon_name)
 
     def device_added(self, device):
-        """
-        Show 'Device added' notification.
-
-        :param device: device object
-        """
+        """Show discovery notification for specified device object."""
         if not self._mounter.is_handleable(device):
             return
         if self._has_actions('device_added'):
@@ -161,11 +141,7 @@ class Notify(DaemonBase):
         return actions
 
     def device_removed(self, device):
-        """
-        Show 'Device removed' notification.
-
-        :param device: device object
-        """
+        """Show removal notification for specified device object."""
         if not self._mounter.is_handleable(device):
             return
         device_file = device.device_presentation
@@ -177,11 +153,7 @@ class Notify(DaemonBase):
                 device.icon_name)
 
     def job_failed(self, device, action, message):
-        """
-        Show 'Job failed' notification with 'Retry' button.
-
-        :param device: device object
-        """
+        """Show 'Job failed' notification with 'Retry' button."""
         if not self._mounter.is_handleable(device):
             return
         device_file = device.device_presentation or device.object_path
@@ -211,7 +183,7 @@ class Notify(DaemonBase):
         :param str summary: notification title
         :param str message: notification body
         :param str icon: icon name
-        :param dict action: parameters to :meth:`_add_action`
+        :param actions: each item is a tuple with parameters for _add_action
         """
         notification = self._notify(summary, message, icon)
         timeout = self._get_timeout(event)
@@ -246,42 +218,24 @@ class Notify(DaemonBase):
             # this is the signature for some older version, I don't know what
             # the last argument is for.
             notification.add_action(action, label, on_action_click, None, None)
-        # pynotify does not store hard references to the notification
+        # gi.Notify does not store hard references to the notification
         # objects. When a signal is received and the notification does not
         # exist anymore, no handller will be called. Therefore, we need to
         # prevent these notifications from being destroyed by storing
-        # references (note, notify2 doesn't need this):
+        # references:
         notification.connect('closed', self._notifications.remove)
         self._notifications.append(notification)
 
     def _enabled(self, event):
-        """
-        Check if the notification for an event is enabled.
-
-        :param str event: event name
-        :returns: if the event notification is enabled
-        :rtype: bool
-        """
+        """Check if the notification for an event is enabled."""
         return self._get_timeout(event) not in (None, False)
 
     def _get_timeout(self, event):
-        """
-        Get the timeout for an event from the config.
-
-        :param str event: event name
-        :returns: timeout in seconds
-        :rtype: int, float or NoneType
-        """
+        """Get the timeout for an event from the config or None."""
         return self._timeout.get(event, self._default)
 
     def _action_enabled(self, event, action):
-        """
-        Check if an action for a notification is enabled.
-
-        :param str event: event name
-        :param str action: action name
-        :rtype: bool
-        """
+        """Check if an action for a notification is enabled."""
         event_actions = self._aconfig.get(event)
         if event_actions is None:
             return True
@@ -290,8 +244,6 @@ class Notify(DaemonBase):
         return action in event_actions
 
     def _has_actions(self, event):
-        """
-        Check if a notification type has any enabled actions.
-        """
+        """Check if a notification type has any enabled actions."""
         event_actions = self._aconfig.get(event)
         return event_actions is None or bool(event_actions)

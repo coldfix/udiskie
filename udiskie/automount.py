@@ -18,15 +18,12 @@ class AutoMounter(DaemonBase):
     mounts newly discovered external devices. Instances are constructed with
     a Mounter object, like so:
 
-    >>> AutoMounter(Mounter(udisks=Daemon()))
+    >>> automounter = AutoMounter(Mounter(udisks=Daemon()))
+    >>> automounter.activate()
     """
 
     def __init__(self, mounter):
-        """
-        Store mounter as member variable and connect to the underlying udisks.
-
-        :param Mounter mounter: mounter object
-        """
+        """Store mounter as member variable."""
         self._mounter = mounter
         self.events = {
             'device_changed': self.device_changed,
@@ -35,12 +32,7 @@ class AutoMounter(DaemonBase):
         }
 
     def device_changed(self, old_state, new_state):
-        """
-        Mount newly mountable devices.
-
-        :param Device old_state: before change
-        :param Device new_state: after change
-        """
+        """Mount newly mountable devices."""
         # udisks2 sometimes adds empty devices and later updates them - which
         # makes is_external become true at a time later than device_added:
         if (self._mounter.is_addable(new_state)

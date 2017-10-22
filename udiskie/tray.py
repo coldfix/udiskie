@@ -73,7 +73,6 @@ class Icons(object):
 
         :param str icon_id: udiskie internal icon id
         :returns: the icon name to be used
-        :rtype: str
         """
         icon_theme = Gtk.IconTheme.get_default()
         for name in self._icon_names[icon_id]:
@@ -87,8 +86,7 @@ class Icons(object):
 
         :param str icon_id: udiskie internal icon id
         :param GtkIconSize size: requested size
-        :returns: the loaded icon
-        :rtype: Gtk.Image
+        :returns: the loaded Gtk.Image
         """
         return Gtk.Image.new_from_gicon(self.get_gicon(icon_id), size)
 
@@ -98,8 +96,7 @@ class Icons(object):
 
         :param str icon_id: udiskie internal icon id
         :param GtkIconSize size: requested size
-        :returns: the loaded icon
-        :rtype: Gio.Icon
+        :returns: the loaded Gio.Icon
         """
         return Gio.ThemedIcon.new_from_names(self._icon_names[icon_id])
 
@@ -145,11 +142,7 @@ class UdiskieMenu(object):
         self.flat = flat
 
     def __call__(self, menu, extended):
-        """
-        Populate the menu with udiskie mount operations.
-
-        :param Gtk.Menu menu:
-        """
+        """Populate the Gtk.Menu with udiskie mount operations."""
         # create actions items
         flat = self.flat and not extended
         self._create_menu_items(menu, self._prepare_menu(self.detect(), flat))
@@ -216,8 +209,7 @@ class UdiskieMenu(object):
         Create a menu from the given node.
 
         :param list items: list of menu items
-        :returns: a new menu object holding all items of the node
-        :rtype: Gtk.Menu
+        :returns: a new Gtk.Menu object holding all items of the node
         """
         menu = Gtk.Menu()
         self._create_menu_items(menu, items)
@@ -289,8 +281,7 @@ class UdiskieMenu(object):
         Prepare the menu hierarchy from the given device tree.
 
         :param Device node: root node of device hierarchy
-        :returns: menu hierarchy
-        :rtype: list
+        :returns: menu hierarchy as list
         """
         if flat is None:
             flat = self.flat

@@ -82,12 +82,7 @@ class DeviceFilter(object):
     ]
 
     def __init__(self, match):
-        """
-        Construct an instance.
-
-        :param dict match: device attributes
-        :param list value: value
-        """
+        """Construct from dict of device matching attributes."""
         self._log = logging.getLogger(__name__)
         self._match = match = match.copy()
         self._values = {}
@@ -120,11 +115,7 @@ class DeviceFilter(object):
                  self._values)
 
     def match(self, device):
-        """
-        Check if the device matches this filter.
-
-        :param Device device: device to be checked
-        """
+        """Check if the device object matches this filter."""
         return all(match_value(getattr(device, k), v)
                    for k, v in self._match.items())
 
@@ -133,9 +124,7 @@ class DeviceFilter(object):
 
     def value(self, kind, device):
         """
-        Get the associated value.
-
-        :param Device device: matched device
+        Get the value for the device object associated with this filter.
 
         If :meth:`match` is False for the device, the return value of this
         method is undefined.
@@ -153,7 +142,6 @@ class MountOptions(DeviceFilter):
     """Associate a list of mount options to matched devices."""
 
     def __init__(self, config_item):
-        """Parse the MountOptions filter from the config item."""
         config_item.setdefault('options', None)
         super(MountOptions, self).__init__(config_item)
 
@@ -163,7 +151,6 @@ class IgnoreDevice(DeviceFilter):
     """Associate a boolean ignore flag to matched devices."""
 
     def __init__(self, config_item):
-        """Parse the IgnoreDevice filter from the config item."""
         config_item.setdefault('ignore', True)
         super(IgnoreDevice, self).__init__(config_item)
 
@@ -172,9 +159,10 @@ def match_config(filters, device, kind, default):
     """
     Matches devices against multiple :class:`DeviceFilter`s.
 
-    :param default: default value
     :param list filters: device filters
     :param Device device: device to be mounted
+    :param str kind: value kind
+    :param default: default value
     :returns: value of the first matching filter
     """
     if device is None:
@@ -190,20 +178,12 @@ class Config(object):
     """Udiskie config in memory representation."""
 
     def __init__(self, data):
-        """
-        Initialize with preparsed data object.
-
-        :param ConfigParser data: config file accessor
-        """
+        """Initialize with preparsed data dict."""
         self._data = data or {}
 
     @classmethod
     def default_pathes(cls):
-        """
-        Return the default config file pathes.
-
-        :rtype: list
-        """
+        """Return the default config file pathes as a list."""
         try:
             from xdg.BaseDirectory import xdg_config_home as config_home
         except ImportError:
@@ -214,11 +194,8 @@ class Config(object):
     @classmethod
     def from_file(cls, path=None):
         """
-        Read config file.
+        Read YAML config file. Returns Config object.
 
-        :param str path: YAML config file name
-        :returns: configuration object
-        :rtype: Config
         :raises IOError: if the path does not exist
         """
         # None => use default

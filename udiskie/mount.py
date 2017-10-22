@@ -109,11 +109,10 @@ class Mounter(object):
     @_error_boundary
     async def browse(self, device):
         """
-        Browse device.
+        Launch file manager on the mount path of the specified device.
 
         :param device: device object, block device path or mount path
-        :returns: success
-        :rtype: bool
+        :returns: whether the program was successfully launched.
         """
         device = self._find_device(device)
         if not device.is_mounted:
@@ -135,7 +134,6 @@ class Mounter(object):
 
         :param device: device object, block device path or mount path
         :returns: whether the device is mounted.
-        :rtype: bool
         """
         device = self._find_device(device)
         if not self.is_handleable(device) or not device.is_filesystem:
@@ -166,7 +164,6 @@ class Mounter(object):
 
         :param device: device object, block device path or mount path
         :returns: whether the device is unmounted
-        :rtype: bool
         """
         device = self._find_device(device)
         if not self.is_handleable(device) or not device.is_filesystem:
@@ -188,7 +185,6 @@ class Mounter(object):
 
         :param device: device object, block device path or mount path
         :returns: whether the device is unlocked
-        :rtype: bool
         """
         device = self._find_device(device)
         if not self.is_handleable(device) or not device.is_crypto:
@@ -279,7 +275,6 @@ class Mounter(object):
 
         :param device: device object, block device path or mount path
         :returns: whether the device is locked
-        :rtype: bool
         """
         device = self._find_device(device)
         if not self.is_handleable(device) or not device.is_crypto:
@@ -302,7 +297,6 @@ class Mounter(object):
         :param device: device object, block device path or mount path
         :param bool recursive: recursively mount and unlock child devices
         :returns: whether all attempted operations succeeded
-        :rtype: bool
         """
         device, created = await self._find_device_losetup(device)
         if created and recursive is False:
@@ -341,7 +335,6 @@ class Mounter(object):
         :param device: device object, block device path or mount path
         :param bool recursive: recursively mount and unlock child devices
         :returns: whether all attempted operations succeeded
-        :rtype: bool
         """
         device, created = await self._find_device_losetup(device)
         if created and recursive is False:
@@ -385,7 +378,6 @@ class Mounter(object):
         :param bool eject: remove media from the root drive
         :param bool lock: lock the associated LUKS cleartext slave
         :returns: whether all attempted operations succeeded
-        :rtype: bool
         """
         device = self._find_device(device)
         if device.is_filesystem:
@@ -433,7 +425,6 @@ class Mounter(object):
         :param bool eject: remove media from the root drive
         :param bool lock: lock the associated LUKS cleartext slave
         :returns: whether all attempted operations succeeded
-        :rtype: bool
         """
         device = self._find_device(device)
         success = True
@@ -479,7 +470,6 @@ class Mounter(object):
         :param device: device object, block device path or mount path
         :param bool force: remove child devices before trying to eject
         :returns: whether the operation succeeded
-        :rtype: bool
         """
         device = self._find_device(device)
         if not self.is_handleable(device):
@@ -506,7 +496,6 @@ class Mounter(object):
         :param device: device object, block device path or mount path
         :param bool force: remove child devices before trying to detach
         :returns: whether the operation succeeded
-        :rtype: bool
         """
         device = self._find_device(device)
         if not self.is_handleable(device):
@@ -530,7 +519,6 @@ class Mounter(object):
 
         :param bool recursive: recursively mount and unlock child devices
         :returns: whether all attempted operations succeeded
-        :rtype: bool
         """
         tasks = [self.auto_add(device, recursive=recursive)
                  for device in self.get_all_handleable_leaves()]
@@ -546,7 +534,6 @@ class Mounter(object):
         :param bool eject: remove media from the root drive
         :param bool lock: lock the associated LUKS cleartext slave
         :returns: whether all attempted operations succeeded
-        :rtype: bool
         """
         kw = dict(force=True, detach=detach, eject=eject, lock=lock)
         tasks = [self.auto_remove(device, **kw)
@@ -598,7 +585,6 @@ class Mounter(object):
         :param device: device object, block device path or mount path
         :param bool remove: whether to unmount the partition etc.
         :returns: whether the loop device is deleted
-        :rtype: bool
         """
         device = self._find_device(device)
         if not self.is_handleable(device) or not device.is_loop:
@@ -619,7 +605,6 @@ class Mounter(object):
 
         :param device: device object, block device path or mount path
         :returns: handleability
-        :rtype: bool
 
         Currently this just means that the device is removable and holds a
         filesystem or the device is a LUKS encrypted volume.
@@ -639,9 +624,7 @@ class Mounter(object):
         return match_config(self._config, device, 'ignore', False)
 
     def is_addable(self, device):
-        """
-        Check if device can be added with ``auto_add``.
-        """
+        """Check if device can be added with ``auto_add``."""
         if not self.is_automount(device):
             return False
         if device.is_filesystem:
@@ -655,9 +638,7 @@ class Mounter(object):
         return False
 
     def is_removable(self, device):
-        """
-        Check if device can be removed with ``auto_remove``.
-        """
+        """Check if device can be removed with ``auto_remove``."""
         if not self.is_handleable(device):
             return False
         if device.is_filesystem:
@@ -671,12 +652,7 @@ class Mounter(object):
         return False
 
     def get_all_handleable(self):
-        """
-        Enumerate all handleable devices currently known to udisks.
-
-        :returns: handleable devices
-        :rtype: list
-        """
+        """Get list of all known handleable devices."""
         nodes = self.get_device_tree()
         return [node.device
                 for node in sorted(nodes.values(), key=DevNode._sort_key)
@@ -778,8 +754,7 @@ class DeviceActions(object):
         Detect all currently known devices.
 
         :param str root_device: object path of root device to return
-        :returns: root of device hierarchy
-        :rtype: Device
+        :returns: root node of device hierarchy
         """
         root = Device(None, [], None, "", [])
         device_nodes = dict(map(self._device_node,

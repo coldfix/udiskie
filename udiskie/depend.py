@@ -8,11 +8,18 @@ import logging
 
 from gi import require_version
 
-from .common import check_call
 from .locale import _
 
 require_version('Gio', '2.0')
 require_version('GLib', '2.0')
+
+
+def check_call(exc_type, func, *args):
+    try:
+        func(*args)
+        return True
+    except exc_type:
+        return False
 
 
 def check_version(package, version):

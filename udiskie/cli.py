@@ -97,10 +97,11 @@ class _EntryPoint(object):
     """
     Abstract base class for program entry points.
 
-    Concrete implementations need to implement :meth:`run` and extend
-    :meth:`finalize_options` to be usable with :meth:`main`. Furthermore
-    the docstring of any concrete implementation must be usable with
-    docopt.
+    Implementations need to
+
+    - implement :meth:`_init`
+    - provide a docstring
+    - extend :cvar:`option_defaults` and :cvar:`option_rules`.
     """
 
     option_defaults = {
@@ -121,11 +122,7 @@ class _EntryPoint(object):
     """)
 
     def __init__(self, argv=None):
-        """
-        Parse command line options, read config and initialize members.
-
-        :param list argv: command line parameters
-        """
+        """Parse command line options, read config and initialize members."""
         gbulb.install(gtk=True)
         # parse program options (retrieve log level and config file name):
         args = docopt(self.usage, version='udiskie ' + self.version)
@@ -175,13 +172,7 @@ class _EntryPoint(object):
         self.options = options
 
     def program_options(self, args):
-        """
-        Fully initialize Daemon object.
-
-        :param dict args: arguments as parsed by docopt
-        :returns: options from command line
-        :rtype: dict
-        """
+        """Get program options from docopt parsed options."""
         options = {}
         for name, rule in self.option_rules.items():
             val = rule(args)
@@ -191,41 +182,25 @@ class _EntryPoint(object):
 
     @classmethod
     def main(cls, argv=None):
-        """
-        Run program.
-
-        :param list argv: command line parameters
-        :returns: program exit code
-        :rtype: int
-        """
+        """Run program. Returns program exit code."""
         return cls(argv).run()
 
     @property
     def version(self):
-        """Get the version from setuptools metadata."""
+        """Version from setuptools metadata."""
         return udiskie.__version__
 
     @property
     def usage(self):
-        """Get the full usage string."""
+        """Full usage string."""
         return inspect.cleandoc(self.__doc__ + self.usage_remarks)
 
     def _init(self):
-        """
-        Fully initialize Daemon object.
-
-        :returns: the main application task
-        :rtype: Async
-        """
+        """Return the application main task as Future."""
         raise NotImplementedError()
 
     def run(self):
-        """
-        Run the main loop.
-
-        :returns: exit code
-        :rtype: int
-        """
+        """Run the main loop. Returns exit code."""
         self.mainloop = asyncio.get_event_loop()
         try:
             return self.mainloop.run_until_complete(
@@ -347,8 +322,6 @@ class Daemon(_EntryPoint):
     })
 
     def _init(self):
-
-        """Implements _EntryPoint._init."""
 
         import udiskie.prompt
 
@@ -525,8 +498,6 @@ class Mount(_EntryPoint):
 
     def _init(self):
 
-        """Implements _EntryPoint._init."""
-
         import udiskie.prompt
 
         config = self.config
@@ -606,8 +577,6 @@ class Umount(_EntryPoint):
 
     def _init(self):
 
-        """Implements _EntryPoint._init."""
-
         config = self.config
         options = self.options
 
@@ -684,8 +653,6 @@ class Info(_EntryPoint):
     })
 
     def _init(self):
-
-        """Implements _EntryPoint._init."""
 
         config = self.config
         options = self.options
