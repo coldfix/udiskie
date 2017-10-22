@@ -1,6 +1,16 @@
 CHANGELOG
 ---------
 
+2.0.0
+~~~~~
+Date: (TBD)
+
+- require python >= 3.5
+- remove python2 support
+- remove udisks1 support (and corresponding command line options)
+- use asyncio+gbulb internally
+- internal refactoring and simplifications
+
 1.7.2
 ~~~~~
 Date: 18.10.2017
