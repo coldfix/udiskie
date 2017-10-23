@@ -77,27 +77,16 @@ dialog_definition = r"""
 
 class Dialog(asyncio.Future):
 
-    _ACTIVE_INSTANCES = []
-
     def __init__(self, dialog):
         super().__init__()
         self._dialog = dialog
         self._dialog.connect("response", self._result_handler)
         self._dialog.show()
-        # The connected signal is stored in the dialog, therefore creating a
-        # reference cycle (self->dialog->handler->self) that does not protect
-        # against garbage collection. Therefore, if the garbage collector gets
-        # invoked, the `Dialog` instance and its members are deleted. When the
-        # `_result_handler` is invoked, a new (empty) list of  `callbacks` is
-        # created - and the original handlers never get invoked. Hence, we
-        # need to increase the reference count manually:
-        self._ACTIVE_INSTANCES.append(self)
 
     def _result_handler(self, dialog, response):
         self.set_result(response)
         dialog.hide()
         dialog.destroy()
-        self._ACTIVE_INSTANCES.remove(self)
 
 
 class PasswordDialog(Dialog):
