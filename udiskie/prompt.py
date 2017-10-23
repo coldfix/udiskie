@@ -122,6 +122,12 @@ class PasswordDialog(Dialog):
         self.dialog.show_all()
         super(PasswordDialog, self).__init__(self.dialog)
 
+    def _result_handler(self, dialog, response):
+        # Need to save text now, afterwards `self.entry` will be destroyed and
+        # yield empty text:
+        self.content = self.get_text()
+        super()._result_handler(dialog, response)
+
     def on_open_keyfile(self, button):
         dialog = Gtk.FileChooserDialog(
             "Open a keyfile to unlock the LUKS device", self.dialog,
