@@ -5,7 +5,11 @@ udiskie
 |Version| |License|
 
 *udiskie* is a udisks2_ front-end that allows to manage removeable media such
-as CDs or flash drives from userspace. Its features include:
+as CDs or flash drives from userspace.
+
+|Screenshot|
+
+Its features include:
 
 - automount removable media
 - notifications
@@ -60,3 +64,7 @@ releases or the ``maint-1.7`` branch.
 .. |License| image::   https://img.shields.io/pypi/l/udiskie.svg
    :target:            https://github.com/coldfix/udiskie/blob/master/COPYING
    :alt:               License: MIT
+
+.. |Screenshot| image:: https://raw.githubusercontent.com/coldfix/udiskie/screenshot/screenshot.png
+   :target:             https://raw.githubusercontent.com/coldfix/udiskie/screenshot/screenshot.png
+   :alt:                Screenshot
