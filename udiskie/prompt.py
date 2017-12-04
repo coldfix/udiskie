@@ -174,7 +174,7 @@ async def get_password_tty(device, allow_keyfile=False):
         return None
 
 
-class DeviceCommand(object):
+class DeviceCommand:
 
     """
     Launcher that starts user-defined password prompts. The command can be

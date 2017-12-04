@@ -64,7 +64,7 @@ Interface = {
 # Internal helper classes
 # ----------------------------------------
 
-class MethodHub(object):
+class MethodHub:
 
     """Provide MethodsProxies for queried interfaces of a DBus object."""
 
@@ -77,7 +77,7 @@ class MethodHub(object):
         return dbus.MethodsProxy(self._object_proxy, Interface[key])
 
 
-class PropertyHub(object):
+class PropertyHub:
 
     """Provide attribute accessors for queried interfaces of a DBus object."""
 
@@ -94,7 +94,7 @@ class PropertyHub(object):
             return PropertiesNotAvailable()
 
 
-class PropertiesNotAvailable(object):
+class PropertiesNotAvailable:
 
     """Null class for properties of an unavailable interface."""
 
@@ -110,7 +110,7 @@ class PropertiesNotAvailable(object):
 # Device wrapper
 # ----------------------------------------
 
-class Device(object):
+class Device:
 
     """
     Proxy class for UDisks2 devices.

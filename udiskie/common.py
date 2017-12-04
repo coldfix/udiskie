@@ -26,7 +26,7 @@ except ImportError:
     from functools import wraps
 
 
-class Emitter(object):
+class Emitter:
 
     """Simple event emitter for a known finite set of events."""
 
@@ -81,7 +81,7 @@ def extend(a, b):
 # udisks.Device helper classes
 # ----------------------------------------
 
-class AttrDictView(object):
+class AttrDictView:
 
     """Provide attribute access view to a dictionary."""
 
@@ -95,7 +95,7 @@ class AttrDictView(object):
             raise AttributeError
 
 
-class ObjDictView(object):
+class ObjDictView:
 
     """Provide dict-like access view to the attributes of an object."""
 
@@ -112,7 +112,7 @@ class ObjDictView(object):
         raise KeyError("Unknown key: {}".format(key))
 
 
-class DaemonBase(object):
+class DaemonBase:
 
     active = False
 

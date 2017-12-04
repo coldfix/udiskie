@@ -33,7 +33,7 @@ def match_value(value, pattern):
     return lower(value) == lower(pattern)
 
 
-class DeviceFilter(object):
+class DeviceFilter:
 
     """Associate a certain value to matching devices."""
 
@@ -173,7 +173,7 @@ def match_config(filters, device, kind, default):
     return next(matches, default)
 
 
-class Config(object):
+class Config:
 
     """Udiskie config in memory representation."""
 

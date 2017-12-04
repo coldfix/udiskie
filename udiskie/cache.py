@@ -5,7 +5,7 @@ Utility for temporarily caching passwords.
 import keyutils
 
 
-class PasswordCache(object):
+class PasswordCache:
 
     def __init__(self, timeout):
         self.timeout = timeout

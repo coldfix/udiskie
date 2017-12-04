@@ -8,7 +8,7 @@ import time
 from udiskie.cache import PasswordCache
 
 
-class TestDev(object):
+class TestDev:
 
     def __init__(self, id_uuid):
         self.id_uuid = id_uuid

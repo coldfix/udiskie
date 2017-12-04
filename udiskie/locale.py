@@ -8,7 +8,7 @@ import gettext
 __all__ = ['_']
 
 
-class Translator(object):
+class Translator:
 
     """
     Simple translation and message formatting utility.

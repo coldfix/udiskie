@@ -49,7 +49,7 @@ def _get_parent(device):
     return device.partition_slave or device.luks_cleartext_slave
 
 
-class Mounter(object):
+class Mounter:
 
     """
     Mount utility.
@@ -720,7 +720,7 @@ Device = namedtuple('Device', ['root', 'branches', 'device', 'label', 'methods']
 Action = namedtuple('Action', ['method', 'device', 'label', 'action'])
 
 
-class DeviceActions(object):
+class DeviceActions:
 
     _labels = {
         'browse': _('Browse {0}'),

@@ -32,7 +32,7 @@ __all__ = [
 ]
 
 
-class Choice(object):
+class Choice:
 
     """Mapping of command line arguments to option values."""
 
@@ -60,7 +60,7 @@ def Switch(name):
                    '--no-' + name: False})
 
 
-class Value(object):
+class Value:
 
     """Option which is given as value of a command line argument."""
 
@@ -73,7 +73,7 @@ class Value(object):
         return args[self._name]
 
 
-class OptionalValue(object):
+class OptionalValue:
 
     def __init__(self, name):
         """Set argument name."""
@@ -92,7 +92,7 @@ class SelectLevel(logging.Filter):
         return record.levelno == self.level
 
 
-class _EntryPoint(object):
+class _EntryPoint:
 
     """
     Abstract base class for program entry points.
@@ -219,7 +219,7 @@ class _EntryPoint(object):
             return 1
 
 
-class Component(object):
+class Component:
 
     def __init__(self, create):
         self.create = create

@@ -91,7 +91,7 @@ def _call_with_fd_list_result(proxy, result):
     return pack(*unpack_variant(value))
 
 
-class InterfaceProxy(object):
+class InterfaceProxy:
 
     """
     DBus proxy object for a specific interface.
@@ -139,7 +139,7 @@ class PropertiesProxy(InterfaceProxy):
                          interface_name or self.interface_name)
 
 
-class ObjectProxy(object):
+class ObjectProxy:
 
     """Simple proxy class for a DBus object."""
 
@@ -194,7 +194,7 @@ class ObjectProxy(object):
         return result
 
 
-class BusProxy(object):
+class BusProxy:
 
     """
     Simple proxy class for a connected bus.
@@ -314,7 +314,7 @@ async def connect_service(bus_name, object_path, interface):
     return InterfaceProxy(proxy)
 
 
-class MethodsProxy(object):
+class MethodsProxy:
 
     """Provide methods as attributes for one interface of a DBus object."""
 

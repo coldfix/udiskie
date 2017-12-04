@@ -8,7 +8,7 @@ from gi.repository import AppIndicator3
 import asyncio
 
 
-class AppIndicatorIcon(object):
+class AppIndicatorIcon:
 
     """
     Show status icon using AppIndicator as backend. Replaces

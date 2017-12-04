@@ -17,7 +17,7 @@ from .prompt import Dialog
 __all__ = ['UdiskieMenu', 'TrayIcon']
 
 
-class MenuFolder(object):
+class MenuFolder:
 
     def __init__(self, label, items):
         self.label = label
@@ -33,7 +33,7 @@ class MenuSection(MenuFolder): pass
 class SubMenu(MenuFolder): pass
 
 
-class Icons(object):
+class Icons:
 
     """Encapsulates the responsibility to load icons."""
 
@@ -101,7 +101,7 @@ class Icons(object):
         return Gio.ThemedIcon.new_from_names(self._icon_names[icon_id])
 
 
-class UdiskieMenu(object):
+class UdiskieMenu:
 
     """
     Builder for udiskie menus.
@@ -305,7 +305,7 @@ class UdiskieMenu(object):
         return items
 
 
-class TrayIcon(object):
+class TrayIcon:
 
     """Default TrayIcon class."""
 

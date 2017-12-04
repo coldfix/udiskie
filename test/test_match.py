@@ -15,7 +15,7 @@ import gc
 from udiskie.config import Config, match_config
 
 
-class TestDev(object):
+class TestDev:
 
     def __init__(self, object_path, id_type, id_uuid):
         self.object_path = object_path
