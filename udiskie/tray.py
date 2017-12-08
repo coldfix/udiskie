@@ -67,37 +67,20 @@ class Icons:
             if isinstance(v, str):
                 self._icon_names[k] = [v]
 
-    def get_icon_name(self, icon_id):
-        """
-        Try to determine the name of the icon that should be used.
-
-        :param str icon_id: udiskie internal icon id
-        :returns: the icon name to be used
-        """
+    def get_icon_name(self, icon_id: str) -> str:
+        """Lookup the system icon name from udisie-internal id."""
         icon_theme = Gtk.IconTheme.get_default()
         for name in self._icon_names[icon_id]:
             if icon_theme.has_icon(name):
                 return name
         return 'not-available'
 
-    def get_icon(self, icon_id, size):
-        """
-        Load icon dynamically.
-
-        :param str icon_id: udiskie internal icon id
-        :param GtkIconSize size: requested size
-        :returns: the loaded Gtk.Image
-        """
+    def get_icon(self, icon_id: str, size: "GtkIconSize") -> "Gtk.Image":
+        """Load Gtk.Image from udiskie-internal id."""
         return Gtk.Image.new_from_gicon(self.get_gicon(icon_id), size)
 
-    def get_gicon(self, icon_id):
-        """
-        Lookup the GTK icon name corresponding to the specified internal id.
-
-        :param str icon_id: udiskie internal icon id
-        :param GtkIconSize size: requested size
-        :returns: the loaded Gio.Icon
-        """
+    def get_gicon(self, icon_id: str) -> "Gio.Icon":
+        """Lookup Gio.Icon from udiskie-internal id."""
         return Gio.ThemedIcon.new_from_names(self._icon_names[icon_id])
 
 
@@ -194,12 +177,7 @@ class UdiskieMenu:
         await self._mounter.losetup(dialog.get_filename())
 
     def detect(self):
-        """
-        Detect all currently known devices.
-
-        :returns: root of device hierarchy
-        :rtype: Device
-        """
+        """Detect all currently known devices. Returns the root device."""
         root = self._actions.detect()
         prune_empty_node(root, set())
         return root

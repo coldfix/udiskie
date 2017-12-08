@@ -51,7 +51,7 @@ class Emitter:
         self._event_handlers[event].remove(handler)
 
 
-def samefile(a, b):
+def samefile(a: str, b: str) -> bool:
     """Check if two pathes represent the same file."""
     try:
         return os.path.samefile(a, b)
@@ -59,18 +59,18 @@ def samefile(a, b):
         return os.path.normpath(a) == os.path.normpath(b)
 
 
-def sameuuid(a, b):
+def sameuuid(a: str, b: str) -> bool:
     """Compare two UUIDs."""
     return a and b and a.lower() == b.lower()
 
 
-def setdefault(self, other):
+def setdefault(self: dict, other: dict):
     """Like .update() but values in self take priority."""
     for k, v in other.items():
         self.setdefault(k, v)
 
 
-def extend(a, b):
+def extend(a: dict, b: dict) -> dict:
     """Merge two dicts and return a new dict. Much like subclassing works."""
     res = a.copy()
     res.update(b)
