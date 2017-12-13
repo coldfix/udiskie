@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+1.7.3
+~~~~~
+Date: 13.12.2017
+
+- temporary workaround for udisks2.7 requiring ``filesystem-mount-system``
+  when trying to mount a LUKS cleartext device diretcly after unlocking
+
 1.7.2
 ~~~~~
 Date: 18.10.2017
