@@ -339,6 +339,8 @@ class Mounter:
         device, created = await self._find_device_losetup(device)
         if created and recursive is False:
             return device
+        if device.is_luks_cleartext and self.udisks.version_info >= (2,7,0):
+            await asyncio.sleep(1.5)    # temporary workaround for #153, unreliable
         success = True
         if not self.is_automount(device):
             pass
