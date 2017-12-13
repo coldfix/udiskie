@@ -6,13 +6,6 @@ It is based on ideas from "Twisted" and the "yield from" expression in
 python3, but more lightweight (incomplete) and compatible with python2.
 """
 
-# NOTE: neither AsyncList nor Coroutine save references to the active tasks!
-# Although this would create a reference cycle (coro->task->callbacks->coro),
-# the garbage collector can generally detect the cycle and delete the involved
-# objects anyway (there is usually no independent reference to the coroutine).
-# So you must take care to increase the reference-count of all active tasks
-# manually.
-
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -35,6 +28,15 @@ __all__ = [
 ]
 
 
+# NOTE: neither AsyncList nor Coroutine save references to the active tasks!
+# Although this would create a reference cycle (coro->task->callbacks->coro),
+# the garbage collector can generally detect the cycle and delete the involved
+# objects anyway (there is usually no independent reference to the coroutine).
+# So we must take care to increase the reference-count of all active tasks
+# manually:
+ACTIVE_TASKS = set()
+
+
 class Async(object):
 
     """
@@ -48,9 +50,6 @@ class Async(object):
 
     The task is started on initialization, but most not finish immediately.
 
-    Tasks must take care to increase their reference count on their own in
-    order not to be deleted until completion.
-
     Success/error exit is signaled to the observer by calling exactly one of
     `self.callback(value)` or `self.errback(exception)` when the operation
     finishes.
@@ -59,6 +58,9 @@ class Async(object):
     """
 
     done = False
+
+    def __init__(self):
+        ACTIVE_TASKS.add(self)
 
     @cachedproperty
     def callbacks(self):
@@ -75,6 +77,7 @@ class Async(object):
         if self.done:
             # TODO: more output
             raise RuntimeError("Async already finished!")
+        ACTIVE_TASKS.remove(self)
         self.done = True
         # TODO: handle Async callbacks:
         return [fn(*args) for fn in callbacks]
@@ -90,12 +93,6 @@ class Async(object):
             print(formatted, file=sys.stderr)
 
 
-# Making this object a global is important to prevent garbage collection which
-# could cause the waiting function to be de-reference-counted and henceforth
-# destroyed as well.
-RunForever = Async()
-
-
 class AsyncList(Async):
 
     """
@@ -106,6 +103,7 @@ class AsyncList(Async):
 
     def __init__(self, tasks):
         """Create an AsyncList from a list of Asyncs."""
+        super(AsyncList, self).__init__()
         tasks = list(tasks)
         self._results = {}
         self._num_tasks = len(tasks)
@@ -232,6 +230,7 @@ class Coroutine(Async):
         """
         Create and start a `Coroutine` task from the specified generator.
         """
+        super(Coroutine, self).__init__()
         self._generator = generator
         # TODO: cancellable tasks (generator.close() -> GeneratorExit)?
         run_soon(self._interact, next, self._generator)
@@ -317,6 +316,7 @@ class Subprocess(Async):
     """
 
     def __init__(self, argv):
+        super(Subprocess, self).__init__()
         self.p = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
         stdin_buf = None
         cancellable = None

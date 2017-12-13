@@ -83,6 +83,7 @@ class Dialog(Async):
     _ACTIVE_INSTANCES = []
 
     def __init__(self, dialog):
+        super(Dialog, self).__init__()
         self._dialog = dialog
         self._dialog.connect("response", self._result_handler)
         self._dialog.show()

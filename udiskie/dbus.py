@@ -78,6 +78,7 @@ class DBusCall(Async):
         :param int flags:
         :param int timeout_msec:
         """
+        super(DBusCall, self).__init__()
         cancellable = None
         user_data = None
         proxy.call(
@@ -130,6 +131,7 @@ class DBusCallWithFdList(Async):
         :param int flags:
         :param int timeout_msec:
         """
+        super(DBusCallWithFdList, self).__init__()
         cancellable = None
         user_data = None
         fd_list = Gio.UnixFDList.new_from_array(fds)
@@ -427,6 +429,7 @@ class DBusProxyNew(Async):
         """
         Asynchronously call the specified method on a DBus proxy object.
         """
+        super(DBusProxyNew, self).__init__()
         cancellable = None
         user_data = None
         Gio.DBusProxy.new(
@@ -475,6 +478,7 @@ class DBusProxyNewForBus(Async):
         """
         Asynchronously call the specified method on a DBus proxy object.
         """
+        super(DBusProxyNewForBus, self).__init__()
         cancellable = None
         user_data = None
         Gio.DBusProxy.new_for_bus(

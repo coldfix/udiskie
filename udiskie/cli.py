@@ -25,7 +25,7 @@ import udiskie
 import udiskie.config
 import udiskie.mount
 import udiskie.compat
-from .async_ import AsyncList, Coroutine, Return, RunForever
+from .async_ import AsyncList, Coroutine, Return
 from .common import extend, str2unicode, ObjDictView
 from .locale import _
 
@@ -492,7 +492,7 @@ class Daemon(_EntryPoint):
             self.statusicon.activate()
             tasks.append(self.statusicon.instance._icon.task)
         else:
-            tasks.append(RunForever)
+            tasks.append(Async())
         if options['automount']:
             self.automounter.activate()
             tasks.append(self.mounter.add_all())
