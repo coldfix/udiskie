@@ -12,7 +12,7 @@ import inspect
 import logging
 import os
 
-from .async_ import AsyncList, Coroutine, Return
+from .async_ import AsyncList, Coroutine, Return, sleep
 from .common import wraps, setdefault, exc_message
 from .config import IgnoreDevice, match_config
 from .locale import _
@@ -397,6 +397,8 @@ class Mounter(object):
         :rtype: bool
         """
         success = True
+        if device.is_luks_cleartext and self.udisks.version_info >= (2,7,0):
+            yield sleep(1.5)    # temporary workaround for #153, unreliable...
         if not self.is_automount(device):
             pass
         elif device.is_filesystem:

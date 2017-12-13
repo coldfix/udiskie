@@ -170,6 +170,12 @@ def run_soon(fn, *args):
     GLib.idle_add(call_func, fn, *args)
 
 
+def sleep(seconds):
+    future = Async()
+    GLib.timeout_add(int(seconds*1000), future.callback, True)
+    return future
+
+
 class Coroutine(Async):
 
     """
