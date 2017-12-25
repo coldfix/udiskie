@@ -172,7 +172,7 @@ class UdiskieMenu:
         with Dialog(gtk_dialog) as dialog:
             response = await dialog
             if response == Gtk.ResponseType.OK:
-                await self._mounter.losetup(dialog._dialog.get_filename())
+                await self._mounter.losetup(dialog.window.get_filename())
 
     def detect(self):
         """Detect all currently known devices. Returns the root device."""

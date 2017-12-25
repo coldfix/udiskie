@@ -77,21 +77,21 @@ dialog_definition = r"""
 
 class Dialog(asyncio.Future):
 
-    def __init__(self, dialog):
+    def __init__(self, window):
         super().__init__()
-        self._dialog = dialog
-        self._dialog.connect("response", self._result_handler)
-        self._dialog.show()
+        self.window = window
+        self.window.connect("response", self._result_handler)
+        self.window.show_all()
 
-    def _result_handler(self, dialog, response):
+    def _result_handler(self, window, response):
         self.set_result(response)
 
     def __enter__(self):
         return self
 
     def __exit__(self, *exc_info):
-        self._dialog.hide()
-        self._dialog.destroy()
+        self.window.hide()
+        self.window.destroy()
 
 
 class PasswordDialog(Dialog):
@@ -103,22 +103,21 @@ class PasswordDialog(Dialog):
         Gtk = require_Gtk()
         builder = Gtk.Builder.new()
         builder.add_from_string(dialog_definition)
-        self.dialog = builder.get_object('entry_dialog')
+        window = builder.get_object('entry_dialog')
         self.entry = builder.get_object('entry')
         if allow_keyfile:
             button = Gtk.Button('Open keyfile…')
             button.connect('clicked', self.on_open_keyfile)
-            self.dialog.get_action_area().pack_end(button, False, False, 10)
+            window.get_action_area().pack_end(button, False, False, 10)
 
         label = builder.get_object('message')
         label.set_label(message)
-        self.dialog.set_title(title)
-        self.dialog.show_all()
-        super(PasswordDialog, self).__init__(self.dialog)
+        window.set_title(title)
+        super(PasswordDialog, self).__init__(window)
 
     def on_open_keyfile(self, button):
         dialog = Gtk.FileChooserDialog(
-            "Open a keyfile to unlock the LUKS device", self.dialog,
+            "Open a keyfile to unlock the LUKS device", self.window,
             Gtk.FileChooserAction.OPEN,
             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
              Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
@@ -129,7 +128,7 @@ class PasswordDialog(Dialog):
         if response == Gtk.ResponseType.OK:
             with open(dialog.get_filename(), 'rb') as f:
                 self.content = f.read()
-            self.dialog.response(response)
+            self.window.response(response)
         dialog.hide()
         dialog.destroy()
 
