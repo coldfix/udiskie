@@ -35,23 +35,28 @@ dialog_definition = r"""
       <object class="GtkBox" id="entry_box">
         <property name="spacing">6</property>
         <property name="border_width">6</property>
+        <property name="visible">True</property>
         <child>
           <object class="GtkLabel" id="message">
             <property name="xalign">0</property>
+            <property name="visible">True</property>
           </object>
         </child>
         <child>
           <object class="GtkEntry" id="entry">
             <property name="visibility">False</property>
             <property name="activates_default">True</property>
+            <property name="visible">True</property>
           </object>
         </child>
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="action_box">
+            <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="cancel_button">
                 <property name="label">gtk-cancel</property>
                 <property name="use_stock">True</property>
+                <property name="visible">True</property>
               </object>
             </child>
             <child>
@@ -60,6 +65,7 @@ dialog_definition = r"""
                 <property name="use_stock">True</property>
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
+                <property name="visible">True</property>
               </object>
             </child>
           </object>
@@ -81,7 +87,7 @@ class Dialog(asyncio.Future):
         super().__init__()
         self.window = window
         self.window.connect("response", self._result_handler)
-        self.window.show_all()
+        self.window.show()
 
     def _result_handler(self, window, response):
         self.set_result(response)
@@ -107,6 +113,7 @@ class PasswordDialog(Dialog):
         self.entry = builder.get_object('entry')
         if allow_keyfile:
             button = Gtk.Button('Open keyfile…')
+            button.set_visible(True)
             button.connect('clicked', run_bg(self.on_open_keyfile))
             window.get_action_area().pack_end(button, False, False, 10)
 
