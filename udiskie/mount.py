@@ -202,7 +202,12 @@ class Mounter:
         unlocked = await self._unlock_from_keyfile(device)
         if unlocked:
             return True
-        password = await self._prompt(device, self.udisks.keyfile_support)
+        options = dict(allow_keyfile=self.udisks.keyfile_support,
+                       allow_cache=self._cache is not None)
+        password = await self._prompt(device, options)
+        # password can be: None, str, or udiskie.prompt.PasswordResult
+        cache_hint = getattr(password, 'cache_hint', None)
+        password = getattr(password, 'password', password)
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))
             return False
@@ -212,7 +217,7 @@ class Mounter:
         else:
             self._log.debug(_('unlocking {0}', device))
             await device.unlock(password)
-        self._update_cache(device, password)
+        self._update_cache(device, password, cache_hint)
         self._log.info(_('unlocked {0}', device))
         return True
 
@@ -257,10 +262,12 @@ class Mounter:
         self._log.info(_('unlocked {0} using keyfile', device))
         return True
 
-    def _update_cache(self, device, password):
+    def _update_cache(self, device, password, cache_hint):
         if not self._cache:
             return
-        self._cache[device] = password
+        # TODO: could allow numeric cache_hint (=timeout)…
+        if cache_hint or cache_hint is None:
+            self._cache[device] = password
 
     def forget_password(self, device):
         try:

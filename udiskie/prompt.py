@@ -56,6 +56,12 @@ dialog_definition = r"""
             <property name="visible">True</property>
           </object>
         </child>
+        <child>
+          <object class="GtkCheckButton" id="remember">
+            <property name="label">Remember password</property>
+            <property name="visible">False</property>
+          </object>
+        </child>
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="action_box">
             <property name="visible">True</property>
@@ -113,11 +119,17 @@ class Dialog(asyncio.Future):
         self.window.destroy()
 
 
+class PasswordResult:
+    def __init__(self, password=None, cache_hint=None):
+        self.password = password
+        self.cache_hint = cache_hint
+
+
 class PasswordDialog(Dialog):
 
     content = None
 
-    def __init__(self, title, message, allow_keyfile):
+    def __init__(self, title, message, options):
         global Gtk
         Gtk = require_Gtk()
         builder = Gtk.Builder.new()
@@ -129,10 +141,16 @@ class PasswordDialog(Dialog):
         show_password.set_label(_('Show password'))
         show_password.connect('clicked', self.on_show_password)
 
+        allow_keyfile = options.get('allow_keyfile')
         keyfile_button = builder.get_object('keyfile_button')
         keyfile_button.set_label(_('Open keyfile…'))
         keyfile_button.set_visible(allow_keyfile)
         keyfile_button.connect('clicked', run_bg(self.on_open_keyfile))
+
+        allow_cache = options.get('allow_cache')
+        self.use_cache = builder.get_object('remember')
+        self.use_cache.set_label(_('Remember password'))
+        self.use_cache.set_visible(allow_cache)
 
         label = builder.get_object('message')
         label.set_label(message)
@@ -162,30 +180,31 @@ class PasswordDialog(Dialog):
         return self.entry.get_text()
 
 
-async def password_dialog(title, message, allow_keyfile):
+async def password_dialog(title, message, options):
     """
     Show a Gtk password dialog.
 
     :returns: the password or ``None`` if the user aborted the operation
     :raises RuntimeError: if Gtk can not be properly initialized
     """
-    with PasswordDialog(title, message, allow_keyfile) as dialog:
+    with PasswordDialog(title, message, options) as dialog:
         response = await dialog
         if response == Gtk.ResponseType.OK:
-            return dialog.get_text()
+            return PasswordResult(dialog.get_text(),
+                                  dialog.use_cache.get_active())
         return None
 
 
-def get_password_gui(device, allow_keyfile=False):
+def get_password_gui(device, options):
     """Get the password to unlock a device from GUI."""
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
-        return password_dialog('udiskie', text, allow_keyfile)
+        return password_dialog('udiskie', text, options)
     except RuntimeError:
         return None
 
 
-async def get_password_tty(device, allow_keyfile=False):
+async def get_password_tty(device, options):
     """Get the password to unlock a device from terminal."""
     # TODO: make this a TRUE async
     text = _('Enter password for {0.device_presentation}: ', device)
@@ -233,8 +252,7 @@ class DeviceCommand:
                         'Unknown device attribute {!r} in format string: {!r}',
                         kwd, arg))
 
-    # NOTE: *ignored swallows `allow_keyfile`
-    async def __call__(self, device, *ignored):
+    async def __call__(self, device):
         """
         Invoke the subprocess to ask the user to enter a password for unlocking
         the specified device.
@@ -250,6 +268,10 @@ class DeviceCommand:
             return None
         return stdout.rstrip('\n')
 
+    async def password(self, device, options):
+        text = await self(device)
+        return PasswordResult(text)
+
 
 def password(password_command):
     """Create a password prompt function."""
@@ -260,7 +282,7 @@ def password(password_command):
     elif password_command == 'builtin:tty':
         return tty() or gui()
     elif password_command:
-        return DeviceCommand(password_command)
+        return DeviceCommand(password_command).password
     else:
         return None
 
