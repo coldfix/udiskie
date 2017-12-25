@@ -25,7 +25,10 @@ def object_kind(object_path):
     """
     Parse the kind of object from an UDisks2 object path.
 
-    Example: /org/freedesktop/UDisks2/block_devices/sdb1 => device
+    Example:
+        /org/freedesktop/UDisks2/block_devices/sdb1 => device
+        /org/freedesktop/UDisks2/drives/WDC_WD...   => drive
+        /org/freedesktop/UDisks2/jobs/5             => job
     """
     try:
         return {

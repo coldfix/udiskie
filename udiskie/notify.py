@@ -220,7 +220,7 @@ class Notify(DaemonBase):
             notification.add_action(action, label, on_action_click, None, None)
         # gi.Notify does not store hard references to the notification
         # objects. When a signal is received and the notification does not
-        # exist anymore, no handller will be called. Therefore, we need to
+        # exist anymore, no handler will be called. Therefore, we need to
         # prevent these notifications from being destroyed by storing
         # references:
         notification.connect('closed', self._notifications.remove)
