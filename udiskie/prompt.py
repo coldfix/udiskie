@@ -120,6 +120,7 @@ class PasswordDialog(Dialog):
         label = builder.get_object('message')
         label.set_label(message)
         window.set_title(title)
+        window.set_keep_above(True)
         super(PasswordDialog, self).__init__(window)
 
     async def on_open_keyfile(self, button):

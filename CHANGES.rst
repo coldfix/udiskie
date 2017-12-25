@@ -10,6 +10,7 @@ Date: (TBD)
 - remove udisks1 support (and corresponding command line options)
 - use asyncio+gbulb internally
 - internal refactoring and simplifications
+- keep password dialogs on top
 
 1.7.2
 ~~~~~
