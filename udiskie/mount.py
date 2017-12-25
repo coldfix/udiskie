@@ -226,7 +226,7 @@ class Mounter:
             return False
         self._log.debug(_('unlocking {0} using cached password', device))
         try:
-            await device.unlock(password)
+            await device.unlock_keyfile(password)
         except Exception:
             self._log.debug(_('failed to unlock {0} using cached password', device))
             self._log.debug(format_exc())

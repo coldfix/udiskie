@@ -35,13 +35,15 @@ class PasswordCache:
         key_id = self._key_id(device)
         self._touch(key_id)
         try:
-            return keyutils.read_key(key_id).decode('utf-8')
+            return keyutils.read_key(key_id)
         except keyutils.Error:
             raise KeyError("Key not cached!")
 
     def __setitem__(self, device, value):
         key = self._key(device)
-        key_id = keyutils.add_key(key, value.encode('utf-8'), self.keyring)
+        if isinstance(value, str):
+            value = value.encode('utf-8')
+        key_id = keyutils.add_key(key, value, self.keyring)
         self._touch(key_id)
 
     def __delitem__(self, device):
