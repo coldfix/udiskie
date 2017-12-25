@@ -122,6 +122,7 @@ class PasswordDialog(Dialog):
         label = builder.get_object('message')
         label.set_label(message)
         self.dialog.set_title(title)
+        self.dialog.set_keep_above(True)
         self.dialog.show_all()
         super(PasswordDialog, self).__init__(self.dialog)
 
