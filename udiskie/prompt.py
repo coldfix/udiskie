@@ -107,7 +107,7 @@ class PasswordDialog(Dialog):
         self.entry = builder.get_object('entry')
         if allow_keyfile:
             button = Gtk.Button('Open keyfile…')
-            button.connect('clicked', self.on_open_keyfile)
+            button.connect('clicked', run_bg(self.on_open_keyfile))
             window.get_action_area().pack_end(button, False, False, 10)
 
         label = builder.get_object('message')
@@ -115,22 +115,18 @@ class PasswordDialog(Dialog):
         window.set_title(title)
         super(PasswordDialog, self).__init__(window)
 
-    def on_open_keyfile(self, button):
-        dialog = Gtk.FileChooserDialog(
+    async def on_open_keyfile(self, button):
+        gtk_dialog = Gtk.FileChooserDialog(
             "Open a keyfile to unlock the LUKS device", self.window,
             Gtk.FileChooserAction.OPEN,
             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
              Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
-        dialog.connect("response", self.on_select_keyfile)
-        dialog.show_all()
-
-    def on_select_keyfile(self, dialog, response):
-        if response == Gtk.ResponseType.OK:
-            with open(dialog.get_filename(), 'rb') as f:
-                self.content = f.read()
-            self.window.response(response)
-        dialog.hide()
-        dialog.destroy()
+        with Dialog(gtk_dialog) as dialog:
+            response = await dialog
+            if response == Gtk.ResponseType.OK:
+                with open(dialog.window.get_filename(), 'rb') as f:
+                    self.content = f.read()
+                self.window.response(response)
 
     def get_text(self):
         if self.content is not None:
