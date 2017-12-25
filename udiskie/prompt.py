@@ -85,8 +85,13 @@ class Dialog(asyncio.Future):
 
     def _result_handler(self, dialog, response):
         self.set_result(response)
-        dialog.hide()
-        dialog.destroy()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc_info):
+        self._dialog.hide()
+        self._dialog.destroy()
 
 
 class PasswordDialog(Dialog):
@@ -110,12 +115,6 @@ class PasswordDialog(Dialog):
         self.dialog.set_title(title)
         self.dialog.show_all()
         super(PasswordDialog, self).__init__(self.dialog)
-
-    def _result_handler(self, dialog, response):
-        # Need to save text now, afterwards `self.entry` will be destroyed and
-        # yield empty text:
-        self.content = self.get_text()
-        super()._result_handler(dialog, response)
 
     def on_open_keyfile(self, button):
         dialog = Gtk.FileChooserDialog(
@@ -147,11 +146,11 @@ async def password_dialog(title, message, allow_keyfile):
     :returns: the password or ``None`` if the user aborted the operation
     :raises RuntimeError: if Gtk can not be properly initialized
     """
-    dialog = PasswordDialog(title, message, allow_keyfile)
-    response = await dialog
-    if response == Gtk.ResponseType.OK:
-        return dialog.get_text()
-    return None
+    with PasswordDialog(title, message, allow_keyfile) as dialog:
+        response = await dialog
+        if response == Gtk.ResponseType.OK:
+            return dialog.get_text()
+        return None
 
 
 def get_password_gui(device, allow_keyfile=False):

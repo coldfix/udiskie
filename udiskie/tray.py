@@ -164,17 +164,15 @@ class UdiskieMenu:
             ))
 
     async def _losetup(self):
-        dialog = Gtk.FileChooserDialog(
+        gtk_dialog = Gtk.FileChooserDialog(
             _('Open disc image'), None,
             Gtk.FileChooserAction.OPEN,
             (_('Open'), Gtk.ResponseType.OK,
              _('Cancel'), Gtk.ResponseType.CANCEL))
-        dialog.show_all()
-        response = await Dialog(dialog)
-        dialog.hide()
-        if response != Gtk.ResponseType.OK:
-            return
-        await self._mounter.losetup(dialog.get_filename())
+        with Dialog(gtk_dialog) as dialog:
+            response = await dialog
+            if response == Gtk.ResponseType.OK:
+                await self._mounter.losetup(dialog._dialog.get_filename())
 
     def detect(self):
         """Detect all currently known devices. Returns the root device."""
