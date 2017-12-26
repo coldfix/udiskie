@@ -107,19 +107,22 @@ class Dialog(asyncio.Future):
         self._enter_count = 0
         self.window = window
         self.window.connect("response", self._result_handler)
-        self.window.show()
 
     def _result_handler(self, window, response):
         self.set_result(response)
 
     def __enter__(self):
         self._enter_count += 1
+        self._awaken()
         return self
 
     def __exit__(self, *exc_info):
         self._enter_count -= 1
         if self._enter_count == 0:
             self._cleanup()
+
+    def _awaken(self):
+        self.window.present()
 
     def _cleanup(self):
         self.window.hide()
@@ -143,9 +146,9 @@ class PasswordDialog(Dialog):
             return cls.INSTANCES[key]
         return cls(key, title, message, options)
 
-    def __enter__(self):
+    def _awaken(self):
         self.INSTANCES[self.key] = self
-        super().__enter__()
+        super()._awaken()
 
     def _cleanup(self):
         del self.INSTANCES[self.key]
