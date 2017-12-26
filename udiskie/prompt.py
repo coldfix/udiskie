@@ -35,23 +35,28 @@ dialog_definition = r"""
       <object class="GtkBox" id="entry_box">
         <property name="spacing">6</property>
         <property name="border_width">6</property>
+        <property name="visible">True</property>
         <child>
           <object class="GtkLabel" id="message">
             <property name="xalign">0</property>
+            <property name="visible">True</property>
           </object>
         </child>
         <child>
           <object class="GtkEntry" id="entry">
             <property name="visibility">False</property>
             <property name="activates_default">True</property>
+            <property name="visible">True</property>
           </object>
         </child>
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="action_box">
+            <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="cancel_button">
                 <property name="label">gtk-cancel</property>
                 <property name="use_stock">True</property>
+                <property name="visible">True</property>
               </object>
             </child>
             <child>
@@ -60,6 +65,7 @@ dialog_definition = r"""
                 <property name="use_stock">True</property>
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
+                <property name="visible">True</property>
               </object>
             </child>
           </object>
@@ -77,16 +83,21 @@ dialog_definition = r"""
 
 class Dialog(asyncio.Future):
 
-    def __init__(self, dialog):
+    def __init__(self, window):
         super().__init__()
-        self._dialog = dialog
-        self._dialog.connect("response", self._result_handler)
-        self._dialog.show()
+        self.window = window
+        self.window.connect("response", self._result_handler)
+        self.window.show()
 
-    def _result_handler(self, dialog, response):
+    def _result_handler(self, window, response):
         self.set_result(response)
-        dialog.hide()
-        dialog.destroy()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc_info):
+        self.window.hide()
+        self.window.destroy()
 
 
 class PasswordDialog(Dialog):
@@ -98,41 +109,31 @@ class PasswordDialog(Dialog):
         Gtk = require_Gtk()
         builder = Gtk.Builder.new()
         builder.add_from_string(dialog_definition)
-        self.dialog = builder.get_object('entry_dialog')
+        window = builder.get_object('entry_dialog')
         self.entry = builder.get_object('entry')
         if allow_keyfile:
             button = Gtk.Button('Open keyfile…')
-            button.connect('clicked', self.on_open_keyfile)
-            self.dialog.get_action_area().pack_end(button, False, False, 10)
+            button.set_visible(True)
+            button.connect('clicked', run_bg(self.on_open_keyfile))
+            window.get_action_area().pack_end(button, False, False, 10)
 
         label = builder.get_object('message')
         label.set_label(message)
-        self.dialog.set_title(title)
-        self.dialog.show_all()
-        super(PasswordDialog, self).__init__(self.dialog)
+        window.set_title(title)
+        super(PasswordDialog, self).__init__(window)
 
-    def _result_handler(self, dialog, response):
-        # Need to save text now, afterwards `self.entry` will be destroyed and
-        # yield empty text:
-        self.content = self.get_text()
-        super()._result_handler(dialog, response)
-
-    def on_open_keyfile(self, button):
-        dialog = Gtk.FileChooserDialog(
-            "Open a keyfile to unlock the LUKS device", self.dialog,
+    async def on_open_keyfile(self, button):
+        gtk_dialog = Gtk.FileChooserDialog(
+            "Open a keyfile to unlock the LUKS device", self.window,
             Gtk.FileChooserAction.OPEN,
             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
              Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
-        dialog.connect("response", self.on_select_keyfile)
-        dialog.show_all()
-
-    def on_select_keyfile(self, dialog, response):
-        if response == Gtk.ResponseType.OK:
-            with open(dialog.get_filename(), 'rb') as f:
-                self.content = f.read()
-            self.dialog.response(response)
-        dialog.hide()
-        dialog.destroy()
+        with Dialog(gtk_dialog) as dialog:
+            response = await dialog
+            if response == Gtk.ResponseType.OK:
+                with open(dialog.window.get_filename(), 'rb') as f:
+                    self.content = f.read()
+                self.window.response(response)
 
     def get_text(self):
         if self.content is not None:
@@ -147,11 +148,11 @@ async def password_dialog(title, message, allow_keyfile):
     :returns: the password or ``None`` if the user aborted the operation
     :raises RuntimeError: if Gtk can not be properly initialized
     """
-    dialog = PasswordDialog(title, message, allow_keyfile)
-    response = await dialog
-    if response == Gtk.ResponseType.OK:
-        return dialog.get_text()
-    return None
+    with PasswordDialog(title, message, allow_keyfile) as dialog:
+        response = await dialog
+        if response == Gtk.ResponseType.OK:
+            return dialog.get_text()
+        return None
 
 
 def get_password_gui(device, allow_keyfile=False):
