@@ -49,6 +49,13 @@ dialog_definition = r"""
             <property name="visible">True</property>
           </object>
         </child>
+        <child>
+          <object class="GtkCheckButton" id="show_password">
+            <property name="label">Show password</property>
+            <property name="active">False</property>
+            <property name="visible">True</property>
+          </object>
+        </child>
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="action_box">
             <property name="visible">True</property>
@@ -118,6 +125,10 @@ class PasswordDialog(Dialog):
         window = builder.get_object('entry_dialog')
         self.entry = builder.get_object('entry')
 
+        show_password = builder.get_object('show_password')
+        show_password.set_label(_('Show password'))
+        show_password.connect('clicked', self.on_show_password)
+
         keyfile_button = builder.get_object('keyfile_button')
         keyfile_button.set_label(_('Open keyfile…'))
         keyfile_button.set_visible(allow_keyfile)
@@ -128,6 +139,9 @@ class PasswordDialog(Dialog):
         window.set_title(title)
         window.set_keep_above(True)
         super(PasswordDialog, self).__init__(window)
+
+    def on_show_password(self, button):
+        self.entry.set_visibility(button.get_active())
 
     async def on_open_keyfile(self, button):
         gtk_dialog = Gtk.FileChooserDialog(
