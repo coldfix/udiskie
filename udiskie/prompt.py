@@ -191,22 +191,14 @@ class DeviceCommand:
         self.extra = extra.copy()
         # obtain a list of used fields names
         formatter = string.Formatter()
-        field_name = re.compile('(\d*\.)?(\w+)')
-        self.used_attrs = []
+        self.used_attrs = set()
         for arg in self.argv:
-            for text, name, spec, conv in formatter.parse(arg):
-                if name is None:
+            for text, kwd, spec, conv in formatter.parse(arg):
+                if kwd is None:
                     continue
-                pos, kwd = field_name.match(name).groups()
-                if pos is not None:
-                    logging.getLogger(__name__).warn(
-                        _('Positional field in format string {!r} is deprecated.', arg))
-                # check used field names
-                if kwd in self.used_attrs or kwd in self.extra:
-                    continue
-                if kwd in DeviceFilter.VALID_PARAMETERS:
-                    self.used_attrs.append(kwd)
-                else:
+                self.used_attrs.add(kwd)
+                if kwd not in DeviceFilter.VALID_PARAMETERS and \
+                        kwd not in self.extra:
                     self.extra[kwd] = None
                     logging.getLogger(__name__).error(_(
                         'Unknown device attribute {!r} in format string: {!r}',
@@ -222,7 +214,7 @@ class DeviceCommand:
         attrs.update(self.extra)
         # for backward compatibility provide positional argument:
         fake_dev = AttrDictView(attrs)
-        argv = [arg.format(fake_dev, **attrs) for arg in self.argv]
+        argv = [arg.format(**attrs) for arg in self.argv]
         try:
             stdout = await exec_subprocess(argv)
         except subprocess.CalledProcessError:
