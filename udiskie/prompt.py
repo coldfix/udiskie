@@ -68,6 +68,12 @@ dialog_definition = r"""
                 <property name="visible">True</property>
               </object>
             </child>
+            <child>
+              <object class="GtkButton" id="keyfile_button">
+                <property name="label">Open keyfile…</property>
+                <property name="visible">False</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>
@@ -111,11 +117,11 @@ class PasswordDialog(Dialog):
         builder.add_from_string(dialog_definition)
         window = builder.get_object('entry_dialog')
         self.entry = builder.get_object('entry')
-        if allow_keyfile:
-            button = Gtk.Button(_('Open keyfile…'))
-            button.set_visible(True)
-            button.connect('clicked', run_bg(self.on_open_keyfile))
-            window.get_action_area().pack_end(button, False, False, 10)
+
+        keyfile_button = builder.get_object('keyfile_button')
+        keyfile_button.set_label(_('Open keyfile…'))
+        keyfile_button.set_visible(allow_keyfile)
+        keyfile_button.connect('clicked', run_bg(self.on_open_keyfile))
 
         label = builder.get_object('message')
         label.set_label(message)
