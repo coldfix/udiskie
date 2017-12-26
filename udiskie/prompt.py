@@ -148,9 +148,11 @@ class PasswordDialog(Dialog):
         keyfile_button.connect('clicked', run_bg(self.on_open_keyfile))
 
         allow_cache = options.get('allow_cache')
+        cache_hint = options.get('cache_hint')
         self.use_cache = builder.get_object('remember')
         self.use_cache.set_label(_('Remember password'))
         self.use_cache.set_visible(allow_cache)
+        self.use_cache.set_active(cache_hint)
 
         label = builder.get_object('message')
         label.set_label(message)

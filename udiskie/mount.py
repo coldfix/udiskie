@@ -63,11 +63,8 @@ class Mounter:
     should always be passed as keyword arguments.
     """
 
-    def __init__(self, udisks,
-                 config=None,
-                 prompt=None,
-                 browser=None,
-                 cache=None):
+    def __init__(self, udisks, config=None, prompt=None, browser=None,
+                 cache=None, cache_hint=False):
         """
         Initialize mounter with the given defaults.
 
@@ -90,6 +87,7 @@ class Mounter:
         self._prompt = prompt
         self._browser = browser
         self._cache = cache
+        self._cache_hint = cache_hint
         self._log = logging.getLogger(__name__)
 
     def _find_device(self, device_or_path):
@@ -203,10 +201,11 @@ class Mounter:
         if unlocked:
             return True
         options = dict(allow_keyfile=self.udisks.keyfile_support,
-                       allow_cache=self._cache is not None)
+                       allow_cache=self._cache is not None,
+                       cache_hint=self._cache_hint)
         password = await self._prompt(device, options)
         # password can be: None, str, or udiskie.prompt.PasswordResult
-        cache_hint = getattr(password, 'cache_hint', None)
+        cache_hint = getattr(password, 'cache_hint', self._cache_hint)
         password = getattr(password, 'password', password)
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))

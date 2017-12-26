@@ -333,16 +333,19 @@ class Daemon(_EntryPoint):
         browser = udiskie.prompt.browser(options['file_manager'])
         cache = None
 
-        if options['password_cache'] is not False:
+        try:
             import udiskie.cache
             timeout = int(options['password_cache']) * 60
             cache = udiskie.cache.PasswordCache(timeout)
+        except ImportError:
+            cache = None
 
         self.mounter = udiskie.mount.Mounter(
             config=config.device_config,
             prompt=prompt,
             browser=browser,
             cache=cache,
+            cache_hint=options['password_cache'],
             udisks=self.udisks)
 
         # check component availability
