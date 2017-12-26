@@ -104,6 +104,7 @@ class Dialog(asyncio.Future):
 
     def __init__(self, window):
         super().__init__()
+        self._enter_count = 0
         self.window = window
         self.window.connect("response", self._result_handler)
         self.window.show()
@@ -112,9 +113,15 @@ class Dialog(asyncio.Future):
         self.set_result(response)
 
     def __enter__(self):
+        self._enter_count += 1
         return self
 
     def __exit__(self, *exc_info):
+        self._enter_count -= 1
+        if self._enter_count == 0:
+            self._cleanup()
+
+    def _cleanup(self):
         self.window.hide()
         self.window.destroy()
 
@@ -127,9 +134,25 @@ class PasswordResult:
 
 class PasswordDialog(Dialog):
 
+    INSTANCES = {}
     content = None
 
-    def __init__(self, title, message, options):
+    @classmethod
+    def create(cls, key, title, message, options):
+        if key in cls.INSTANCES:
+            return cls.INSTANCES[key]
+        return cls(key, title, message, options)
+
+    def __enter__(self):
+        self.INSTANCES[self.key] = self
+        super().__enter__()
+
+    def _cleanup(self):
+        del self.INSTANCES[self.key]
+        super()._cleanup()
+
+    def __init__(self, key, title, message, options):
+        self.key = key
         global Gtk
         Gtk = require_Gtk()
         builder = Gtk.Builder.new()
@@ -182,14 +205,14 @@ class PasswordDialog(Dialog):
         return self.entry.get_text()
 
 
-async def password_dialog(title, message, options):
+async def password_dialog(key, title, message, options):
     """
     Show a Gtk password dialog.
 
     :returns: the password or ``None`` if the user aborted the operation
     :raises RuntimeError: if Gtk can not be properly initialized
     """
-    with PasswordDialog(title, message, options) as dialog:
+    with PasswordDialog.create(key, title, message, options) as dialog:
         response = await dialog
         if response == Gtk.ResponseType.OK:
             return PasswordResult(dialog.get_text(),
@@ -201,7 +224,7 @@ def get_password_gui(device, options):
     """Get the password to unlock a device from GUI."""
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
-        return password_dialog('udiskie', text, options)
+        return password_dialog(device.id_uuid, 'udiskie', text, options)
     except RuntimeError:
         return None
 
