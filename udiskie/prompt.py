@@ -112,7 +112,7 @@ class PasswordDialog(Dialog):
         window = builder.get_object('entry_dialog')
         self.entry = builder.get_object('entry')
         if allow_keyfile:
-            button = Gtk.Button('Open keyfile…')
+            button = Gtk.Button(_('Open keyfile…'))
             button.set_visible(True)
             button.connect('clicked', run_bg(self.on_open_keyfile))
             window.get_action_area().pack_end(button, False, False, 10)
@@ -124,7 +124,7 @@ class PasswordDialog(Dialog):
 
     async def on_open_keyfile(self, button):
         gtk_dialog = Gtk.FileChooserDialog(
-            "Open a keyfile to unlock the LUKS device", self.window,
+            _("Open a keyfile to unlock the LUKS device"), self.window,
             Gtk.FileChooserAction.OPEN,
             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
              Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
