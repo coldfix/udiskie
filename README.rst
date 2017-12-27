@@ -65,6 +65,6 @@ releases or the ``maint-1.7`` branch.
    :target:            https://github.com/coldfix/udiskie/blob/master/COPYING
    :alt:               License: MIT
 
-.. |Screenshot| image:: https://raw.githubusercontent.com/coldfix/udiskie/screenshot/screenshot.png
-   :target:             https://raw.githubusercontent.com/coldfix/udiskie/screenshot/screenshot.png
+.. |Screenshot| image:: https://raw.githubusercontent.com/coldfix/udiskie/master/screenshot.png
+   :target:             https://raw.githubusercontent.com/coldfix/udiskie/master/screenshot.png
    :alt:                Screenshot
