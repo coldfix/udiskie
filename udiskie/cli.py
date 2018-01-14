@@ -123,7 +123,7 @@ class _EntryPoint:
 
     def __init__(self, argv=None):
         """Parse command line options, read config and initialize members."""
-        gbulb.install(gtk=True)
+        gbulb.install(gtk=_in_X and _has_Gtk)
         # parse program options (retrieve log level and config file name):
         args = docopt(self.usage, version='udiskie ' + self.version)
         default_opts = self.option_defaults
