@@ -200,7 +200,10 @@ setup(
     ],
     extras_require={
         'password-cache': [
-            'keyutils==0.3'
+            'keyutils==0.3',
+        ],
+        'config': [
+            'xdg',              # xdg.BaseDirectory.xdg_config_home
         ],
     },
     tests_require=[
