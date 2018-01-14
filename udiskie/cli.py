@@ -356,7 +356,7 @@ class Daemon(_EntryPoint):
             logging.getLogger(__name__).error(libnotify_not_available)
             options['notify'] = False
 
-        if options['tray'] and not has_Gtk(3) and not _in_X:
+        if options['tray'] and not _in_X:
             no_X_session = _(
                 "Not run within X session. "
                 "\nStarting udiskie without tray icon.\n")
