@@ -15,7 +15,7 @@ import string
 import subprocess
 import sys
 
-from .async_ import exec_subprocess, run_bg
+from .async_ import exec_subprocess, run_bg, run_in_executor, serial
 from .locale import _
 from .common import AttrDictView
 from .config import DeviceFilter
@@ -49,6 +49,19 @@ dialog_definition = r"""
             <property name="visible">True</property>
           </object>
         </child>
+        <child>
+          <object class="GtkCheckButton" id="show_password">
+            <property name="label">Show password</property>
+            <property name="active">False</property>
+            <property name="visible">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="remember">
+            <property name="label">Remember password</property>
+            <property name="visible">False</property>
+          </object>
+        </child>
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="action_box">
             <property name="visible">True</property>
@@ -68,6 +81,12 @@ dialog_definition = r"""
                 <property name="visible">True</property>
               </object>
             </child>
+            <child>
+              <object class="GtkButton" id="keyfile_button">
+                <property name="label">Open keyfile…</property>
+                <property name="visible">False</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>
@@ -85,54 +104,102 @@ class Dialog(asyncio.Future):
 
     def __init__(self, window):
         super().__init__()
+        self._enter_count = 0
         self.window = window
         self.window.connect("response", self._result_handler)
-        self.window.show()
 
     def _result_handler(self, window, response):
         self.set_result(response)
 
     def __enter__(self):
+        self._enter_count += 1
+        self._awaken()
         return self
 
     def __exit__(self, *exc_info):
+        self._enter_count -= 1
+        if self._enter_count == 0:
+            self._cleanup()
+
+    def _awaken(self):
+        self.window.present()
+
+    def _cleanup(self):
         self.window.hide()
         self.window.destroy()
 
 
+class PasswordResult:
+    def __init__(self, password=None, cache_hint=None):
+        self.password = password
+        self.cache_hint = cache_hint
+
+
 class PasswordDialog(Dialog):
 
+    INSTANCES = {}
     content = None
 
-    def __init__(self, title, message, allow_keyfile):
+    @classmethod
+    def create(cls, key, title, message, options):
+        if key in cls.INSTANCES:
+            return cls.INSTANCES[key]
+        return cls(key, title, message, options)
+
+    def _awaken(self):
+        self.INSTANCES[self.key] = self
+        super()._awaken()
+
+    def _cleanup(self):
+        del self.INSTANCES[self.key]
+        super()._cleanup()
+
+    def __init__(self, key, title, message, options):
+        self.key = key
         global Gtk
         Gtk = require_Gtk()
         builder = Gtk.Builder.new()
         builder.add_from_string(dialog_definition)
         window = builder.get_object('entry_dialog')
         self.entry = builder.get_object('entry')
-        if allow_keyfile:
-            button = Gtk.Button('Open keyfile…')
-            button.set_visible(True)
-            button.connect('clicked', run_bg(self.on_open_keyfile))
-            window.get_action_area().pack_end(button, False, False, 10)
+
+        show_password = builder.get_object('show_password')
+        show_password.set_label(_('Show password'))
+        show_password.connect('clicked', self.on_show_password)
+
+        allow_keyfile = options.get('allow_keyfile')
+        keyfile_button = builder.get_object('keyfile_button')
+        keyfile_button.set_label(_('Open keyfile…'))
+        keyfile_button.set_visible(allow_keyfile)
+        keyfile_button.connect('clicked', run_bg(self.on_open_keyfile))
+
+        allow_cache = options.get('allow_cache')
+        cache_hint = options.get('cache_hint')
+        self.use_cache = builder.get_object('remember')
+        self.use_cache.set_label(_('Remember password'))
+        self.use_cache.set_visible(allow_cache)
+        self.use_cache.set_active(cache_hint)
 
         label = builder.get_object('message')
         label.set_label(message)
         window.set_title(title)
+        window.set_keep_above(True)
         super(PasswordDialog, self).__init__(window)
+
+    def on_show_password(self, button):
+        self.entry.set_visibility(button.get_active())
 
     async def on_open_keyfile(self, button):
         gtk_dialog = Gtk.FileChooserDialog(
-            "Open a keyfile to unlock the LUKS device", self.window,
+            _("Open a keyfile to unlock the LUKS device"), self.window,
             Gtk.FileChooserAction.OPEN,
             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
              Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
         with Dialog(gtk_dialog) as dialog:
             response = await dialog
             if response == Gtk.ResponseType.OK:
-                with open(dialog.window.get_filename(), 'rb') as f:
-                    self.content = f.read()
+                self.content = await run_in_executor(read_file)(
+                    dialog.window.get_filename())
                 self.window.response(response)
 
     def get_text(self):
@@ -141,32 +208,39 @@ class PasswordDialog(Dialog):
         return self.entry.get_text()
 
 
-async def password_dialog(title, message, allow_keyfile):
+def read_file(filename, mode='rb'):
+    with open(filename, mode) as f:
+        return f.read()
+
+
+async def password_dialog(key, title, message, options):
     """
     Show a Gtk password dialog.
 
     :returns: the password or ``None`` if the user aborted the operation
     :raises RuntimeError: if Gtk can not be properly initialized
     """
-    with PasswordDialog(title, message, allow_keyfile) as dialog:
+    with PasswordDialog.create(key, title, message, options) as dialog:
         response = await dialog
         if response == Gtk.ResponseType.OK:
-            return dialog.get_text()
+            return PasswordResult(dialog.get_text(),
+                                  dialog.use_cache.get_active())
         return None
 
 
-def get_password_gui(device, allow_keyfile=False):
+def get_password_gui(device, options):
     """Get the password to unlock a device from GUI."""
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
-        return password_dialog('udiskie', text, allow_keyfile)
+        return password_dialog(device.id_uuid, 'udiskie', text, options)
     except RuntimeError:
         return None
 
 
-async def get_password_tty(device, allow_keyfile=False):
+@serial
+@run_in_executor
+def get_password_tty(device, options):
     """Get the password to unlock a device from terminal."""
-    # TODO: make this a TRUE async
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
         return getpass.getpass(text)
@@ -204,8 +278,7 @@ class DeviceCommand:
                         'Unknown device attribute {!r} in format string: {!r}',
                         kwd, arg))
 
-    # NOTE: *ignored swallows `allow_keyfile`
-    async def __call__(self, device, *ignored):
+    async def __call__(self, device):
         """
         Invoke the subprocess to ask the user to enter a password for unlocking
         the specified device.
@@ -221,6 +294,10 @@ class DeviceCommand:
             return None
         return stdout.rstrip('\n')
 
+    async def password(self, device, options):
+        text = await self(device)
+        return PasswordResult(text)
+
 
 def password(password_command):
     """Create a password prompt function."""
@@ -231,7 +308,7 @@ def password(password_command):
     elif password_command == 'builtin:tty':
         return tty() or gui()
     elif password_command:
-        return DeviceCommand(password_command)
+        return DeviceCommand(password_command).password
     else:
         return None
 

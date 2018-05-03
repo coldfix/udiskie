@@ -63,11 +63,8 @@ class Mounter:
     should always be passed as keyword arguments.
     """
 
-    def __init__(self, udisks,
-                 config=None,
-                 prompt=None,
-                 browser=None,
-                 cache=None):
+    def __init__(self, udisks, config=None, prompt=None, browser=None,
+                 cache=None, cache_hint=False):
         """
         Initialize mounter with the given defaults.
 
@@ -90,6 +87,7 @@ class Mounter:
         self._prompt = prompt
         self._browser = browser
         self._cache = cache
+        self._cache_hint = cache_hint
         self._log = logging.getLogger(__name__)
 
     def _find_device(self, device_or_path):
@@ -202,7 +200,13 @@ class Mounter:
         unlocked = await self._unlock_from_keyfile(device)
         if unlocked:
             return True
-        password = await self._prompt(device, self.udisks.keyfile_support)
+        options = dict(allow_keyfile=self.udisks.keyfile_support,
+                       allow_cache=self._cache is not None,
+                       cache_hint=self._cache_hint)
+        password = await self._prompt(device, options)
+        # password can be: None, str, or udiskie.prompt.PasswordResult
+        cache_hint = getattr(password, 'cache_hint', self._cache_hint)
+        password = getattr(password, 'password', password)
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))
             return False
@@ -212,7 +216,7 @@ class Mounter:
         else:
             self._log.debug(_('unlocking {0}', device))
             await device.unlock(password)
-        self._update_cache(device, password)
+        self._update_cache(device, password, cache_hint)
         self._log.info(_('unlocked {0}', device))
         return True
 
@@ -226,7 +230,7 @@ class Mounter:
             return False
         self._log.debug(_('unlocking {0} using cached password', device))
         try:
-            await device.unlock(password)
+            await device.unlock_keyfile(password)
         except Exception:
             self._log.debug(_('failed to unlock {0} using cached password', device))
             self._log.debug(format_exc())
@@ -257,10 +261,12 @@ class Mounter:
         self._log.info(_('unlocked {0} using keyfile', device))
         return True
 
-    def _update_cache(self, device, password):
+    def _update_cache(self, device, password, cache_hint):
         if not self._cache:
             return
-        self._cache[device] = password
+        # TODO: could allow numeric cache_hint (=timeout)…
+        if cache_hint or cache_hint is None:
+            self._cache[device] = password
 
     def forget_password(self, device):
         try:
