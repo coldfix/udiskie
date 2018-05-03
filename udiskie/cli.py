@@ -6,7 +6,7 @@ setuptools entry points.
 """
 
 # import udiskie.depend first - for side effects!
-from .depend import has_Notify, has_Gtk, _in_X
+from .depend import has_Notify, has_Gtk, _in_X, _has_Gtk
 
 import inspect
 import logging.config
