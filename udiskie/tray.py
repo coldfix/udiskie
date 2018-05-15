@@ -146,7 +146,7 @@ class UdiskieMenu(object):
         self._quit_action = daemon.mainloop.quit
         self.flat = flat
 
-    def __call__(self, menu, extended):
+    def __call__(self, menu, extended=True):
         """
         Populate the menu with udiskie mount operations.
 
