@@ -124,7 +124,7 @@ class UdiskieMenu:
         self._quit_action = daemon.mainloop.stop
         self.flat = flat
 
-    def __call__(self, menu, extended):
+    def __call__(self, menu, extended=True):
         """Populate the Gtk.Menu with udiskie mount operations."""
         # create actions items
         flat = self.flat and not extended
