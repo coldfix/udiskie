@@ -508,13 +508,13 @@ class Mount(_EntryPoint):
 
         device_config = config.device_config
         if options['options']:
-            device_config._filters.insert(0, udiskie.config.MountOptions({
+            device_config.insert(0, udiskie.config.MountOptions({
                 'options': [o.strip() for o in options['options'].split(',')],
             }))
 
         prompt = udiskie.prompt.password(options['password_prompt'])
         mounter = udiskie.mount.Mounter(
-            config=config.device_config,
+            config=device_config,
             prompt=prompt,
             udisks=self.udisks)
 
