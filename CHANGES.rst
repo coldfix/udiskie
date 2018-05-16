@@ -1,6 +1,15 @@
 CHANGELOG
 ---------
 
+1.7.4
+~~~~~
+Date: 17.05.2018
+
+- fix attribute error when using options in udiskie-mount (#159)
+- fix tray in appindicator mode (#156)
+- possibly fix non-deterministic bugs (due to garbage collection) by keeping
+  global reference to all active asyncs
+
 1.7.3
 ~~~~~
 Date: 13.12.2017
