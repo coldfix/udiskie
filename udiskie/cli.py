@@ -25,7 +25,7 @@ import udiskie
 import udiskie.config
 import udiskie.mount
 import udiskie.compat
-from .async_ import AsyncList, Coroutine, Return
+from .async_ import AsyncList, Coroutine, Return, Async
 from .common import extend, str2unicode, ObjDictView
 from .locale import _
 
