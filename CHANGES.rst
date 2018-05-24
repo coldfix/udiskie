@@ -1,6 +1,12 @@
 CHANGELOG
 ---------
 
+1.7.5
+~~~~~
+Date: 24.05.2018
+
+- fix "NameError: 'Async' is not defined" when starting without tray icon
+
 1.7.4
 ~~~~~
 Date: 17.05.2018
