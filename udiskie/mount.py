@@ -61,18 +61,18 @@ class Mounter:
     should always be passed as keyword arguments.
     """
 
-    def __init__(self, udisks, config=None, prompt=None, browser=None,
+    def __init__(self, udisks, config=None, unlock=None, browser=None,
                  terminal=None, cache=None, cache_hint=False):
         """
         Initialize mounter with the given defaults.
 
         :param udisks: udisks service object. May be a Sniffer or a Daemon.
         :param list config: list of :class:`DeviceFilter`
-        :param callable prompt: retrieve passwords for devices
+        :param callable unlock: unlock method for encrypted devices
         :param callable browser: open devices
         :param callable terminal: open devices in terminal
 
-        If prompt is None, device unlocking will not work.
+        If unlock is None, device unlocking will not work.
         If browser is None, browse will not work.
         """
         self.udisks = udisks
@@ -84,7 +84,7 @@ class Mounter:
             IgnoreDevice({'is_block': False, 'ignore': True}),
             IgnoreDevice({'is_external': False, 'ignore': True}),
             IgnoreDevice({'is_ignored': True, 'ignore': True})]
-        self._prompt = prompt
+        self._unlock_ui = unlock
         self._browser = browser
         self._terminal = terminal
         self._cache = cache
@@ -212,20 +212,17 @@ class Mounter:
         if device.is_unlocked:
             self._log.info(_('not unlocking {0}: already unlocked', device))
             return True
-        if not self._prompt:
-            self._log.error(_('not unlocking {0}: no password prompt', device))
+        if not self._unlock_ui:
+            self._log.error(_('not unlocking {0}: no unlock method', device))
             return False
-        unlocked = await self._unlock_from_cache(device)
-        if unlocked:
-            return True
-        unlocked = await self._unlock_from_keyfile(device)
-        if unlocked:
-            return True
-        options = dict(allow_keyfile=self.udisks.keyfile_support,
-                       allow_cache=self._cache is not None,
-                       cache_hint=self._cache_hint)
-        password = await self._prompt(device, options)
-        # password is either None or udiskie.prompt.PasswordResult:
+        return ((await self._unlock_from_cache(device)) or
+                (await self._unlock_from_keyfile(device)) or
+                (await self._unlock_ui(self, device)))
+
+    @_error_boundary
+    async def do_unlock(self, device, password, cache_hint=None):
+        if cache_hint is not None:
+            self._cache_hint = cache_hint
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))
             return False
@@ -237,9 +234,8 @@ class Mounter:
         else:
             self._log.debug(_('unlocking {0}', device))
             await device.unlock(password)
-        self._update_cache(device, password, cache_hint)
+        self._update_cache(device, password, self._cache_hint)
         self._log.info(_('unlocked {0}', device))
-        return True
 
     async def _unlock_from_cache(self, device):
         if not self._cache:
@@ -375,7 +371,7 @@ class Mounter:
             if not device.is_mounted:
                 success = await self.mount(device)
         elif device.is_crypto:
-            if self._prompt and not device.is_unlocked:
+            if self._unlock_ui and not device.is_unlocked:
                 success = await self.unlock(device)
             if success and recursive:
                 await self.udisks._sync()
@@ -660,7 +656,7 @@ class Mounter:
         if device.is_filesystem:
             return not device.is_mounted
         if device.is_crypto:
-            return self._prompt and not device.is_unlocked
+            return self._unlock_ui and not device.is_unlocked
         if device.is_partition_table:
             return any(self.is_addable(dev)
                        for dev in self.get_all_handleable()

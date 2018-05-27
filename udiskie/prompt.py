@@ -20,7 +20,7 @@ from .config import DeviceFilter
 
 Gtk = None
 
-__all__ = ['password', 'browser']
+__all__ = ['unlock', 'browser']
 
 
 dialog_definition = read_text(__package__, 'password_dialog.ui')
@@ -54,22 +54,16 @@ class Dialog(Future):
         self.window.destroy()
 
 
-class PasswordResult:
-    def __init__(self, password=None, cache_hint=None):
-        self.password = password
-        self.cache_hint = cache_hint
-
-
 class PasswordDialog(Dialog):
 
     INSTANCES = {}
     content = None
 
     @classmethod
-    def create(cls, key, title, message, options):
+    def create(cls, key):
         if key in cls.INSTANCES:
             return cls.INSTANCES[key]
-        return cls(key, title, message, options)
+        return cls(key)
 
     def _awaken(self):
         self.INSTANCES[self.key] = self
@@ -79,37 +73,40 @@ class PasswordDialog(Dialog):
         del self.INSTANCES[self.key]
         super()._cleanup()
 
-    def __init__(self, key, title, message, options):
+    def __init__(self, key):
         self.key = key
         global Gtk
         Gtk = require_Gtk()
-        builder = Gtk.Builder.new()
+        builder = self.builder = Gtk.Builder.new()
         builder.add_from_string(dialog_definition)
-        window = builder.get_object('entry_dialog')
+        window = self.window = builder.get_object('entry_dialog')
         self.entry = builder.get_object('entry')
 
         show_password = builder.get_object('show_password')
         show_password.set_label(_('Show password'))
         show_password.connect('clicked', self.on_show_password)
 
-        allow_keyfile = options.get('allow_keyfile')
-        keyfile_button = builder.get_object('keyfile_button')
+        keyfile_button = self.keyfile_button = builder.get_object('keyfile_button')
         keyfile_button.set_label(_('Open keyfile…'))
-        keyfile_button.set_visible(allow_keyfile)
         keyfile_button.connect('clicked', run_bg(self.on_open_keyfile))
 
-        allow_cache = options.get('allow_cache')
-        cache_hint = options.get('cache_hint')
         self.use_cache = builder.get_object('remember')
-        self.use_cache.set_label(_('Remember password'))
-        self.use_cache.set_visible(allow_cache)
-        self.use_cache.set_active(cache_hint)
+        self.label = builder.get_object('message')
 
-        label = builder.get_object('message')
-        label.set_label(message)
-        window.set_title(title)
         window.set_keep_above(True)
         super().__init__(window)
+
+    def set_keyfile_support(self, enabled):
+        self.keyfile_button.set_visible(enabled)
+
+    def set_cache_hint(self, enabled, checked):
+        self.use_cache.set_label(_('Remember password'))
+        self.use_cache.set_visible(enabled)
+        self.use_cache.set_active(checked)
+
+    def set_message(self, title, message):
+        self.window.set_title(title)
+        self.label.set_label(message)
 
     def on_show_password(self, button):
         self.entry.set_visibility(button.get_active())
@@ -133,31 +130,40 @@ class PasswordDialog(Dialog):
         return self.entry.get_text()
 
 
-async def password_dialog(key, title, message, options):
+async def unlock_dialog(mounter, device):
     """
     Show a Gtk password dialog.
 
     :returns: the password or ``None`` if the user aborted the operation
     :raises RuntimeError: if Gtk can not be properly initialized
     """
-    with PasswordDialog.create(key, title, message, options) as dialog:
+    key = device.id_uuid
+    message = _('Enter password for {0.device_presentation}: ', device)
+    title = 'udiskie'
+    allow_keyfile = mounter.udisks.keyfile_support
+    allow_cache = mounter._cache is not None
+    cache_hint = mounter._cache_hint
+    with PasswordDialog.create(key) as dialog:
+        dialog.set_keyfile_support(allow_keyfile)
+        dialog.set_cache_hint(allow_cache, cache_hint)
+        dialog.set_message(title, message)
         response = await dialog
-        if response == Gtk.ResponseType.OK:
-            return PasswordResult(dialog.get_text(),
-                                  dialog.use_cache.get_active())
-        return None
+        password = dialog.get_text()
+        cache_hint = dialog.use_cache.get_active()
+    if response == Gtk.ResponseType.OK:
+        return await mounter.do_unlock(device, password, cache_hint)
+    return None
 
 
-def get_password_gui(device, options):
-    """Get the password to unlock a device from GUI."""
-    text = _('Enter password for {0.device_presentation}: ', device)
+async def unlock_gui(mounter, device):
+    """Unlock a device using password input from GUI."""
     try:
-        return password_dialog(device.id_uuid, 'udiskie', text, options)
+        return await unlock_dialog(mounter, device)
     except RuntimeError:
         return None
 
 
-async def get_password_tty(device, options):
+async def get_password_tty(device):
     """Get the password to unlock a device from terminal."""
     # TODO: make this a TRUE async
     text = _('Enter password for {0.device_presentation}: ', device)
@@ -166,6 +172,12 @@ async def get_password_tty(device, options):
     except EOFError:
         print("")
         return None
+
+
+async def unlock_tty(mounter, device):
+    """Unlock device using TTY password prompt."""
+    password = await get_password_tty(device)
+    return await mounter.do_unlock(device, password)
 
 
 class DeviceCommand:
@@ -211,21 +223,22 @@ class DeviceCommand:
             return None
         return stdout.rstrip('\n')
 
-    async def password(self, device, options):
-        text = await self(device)
-        return PasswordResult(text)
+    async def unlock(self, mounter, device):
+        """Unlock device using password from external command."""
+        password = await self(device)
+        return await mounter.do_unlock(device, password)
 
 
-def password(password_command):
+def unlock(command):
     """Create a password prompt function."""
-    gui = lambda: has_Gtk() and get_password_gui
-    tty = lambda: sys.stdin.isatty() and get_password_tty
-    if password_command == 'builtin:gui':
+    gui = lambda: has_Gtk()          and unlock_gui
+    tty = lambda: sys.stdin.isatty() and unlock_tty
+    if command == 'builtin:gui':
         return gui() or tty()
-    elif password_command == 'builtin:tty':
+    elif command == 'builtin:tty':
         return tty() or gui()
-    elif password_command:
-        return DeviceCommand(password_command).password
+    elif command:
+        return DeviceCommand(command).unlock
     else:
         return None
 
