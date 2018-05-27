@@ -23,9 +23,7 @@ import os.path
 from gi.repository import GLib
 
 from .async_ import AsyncList, Coroutine, Return
-from .common import (Emitter, samefile, sameuuid, AttrDictView, wraps,
-                     NullDevice, BaseDevice)
-from .compat import fix_str_conversions
+from .common import Emitter, AttrDictView, wraps, NullDevice, BaseDevice
 from .dbus import connect_service, MethodsProxy, DBusCall
 from .locale import _
 

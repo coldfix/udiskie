@@ -18,8 +18,7 @@ import logging
 
 from gi.repository import GLib
 
-from .common import (Emitter, samefile, sameuuid, AttrDictView, decode_ay,
-                     BaseDevice)
+from .common import Emitter, AttrDictView, decode_ay, BaseDevice
 from .dbus import connect_service, MethodsProxy, DBusCallWithFdList, DBusCall
 from .locale import _
 from .async_ import Coroutine, Return

@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 from gi.repository import Gio
 from gi.repository import Gtk
 
-from .async_ import Async, Coroutine, Return
+from .async_ import Async, Coroutine
 from .common import setdefault, DaemonBase
 from .compat import basestring
 from .locale import _
