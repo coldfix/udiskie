@@ -8,10 +8,8 @@ python:
   - "3.4"       # trusty's native python3 version
   # - "pypy"
 
-# Build inside docker containers instead of virtual machines. These are
-# faster, start quicker and support caching. Only downside: sudo is not
-# supported.
-sudo: false
+# Need true virtual machine for keyutils (gives permission error on docker):
+sudo: true
 
 # Dependencies can be installed as follows. This works only for packages
 # whitelisted on https://github.com/travis-ci/apt-package-whitelist:
