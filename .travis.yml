@@ -3,7 +3,8 @@ language: python
 python:
   - "3.5"
 
-sudo: false
+# Need true virtual machine for keyutils (gives permission error on docker):
+sudo: true
 
 # Dependencies can be installed as follows. This works only for packages
 # whitelisted on https://github.com/travis-ci/apt-package-whitelist:
