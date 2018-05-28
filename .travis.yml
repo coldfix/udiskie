@@ -17,18 +17,13 @@ addons:
 # adequate system packages for use with `--system-site-packages`:
 #   - python-gobject
 #   - python3-gi
-
-# Inherit system site packages for use in virtualenv:
 # virtualenv:
 #   system_site_packages: true
 
-# Setup (performed within virtualenv)
 install:
-  # Check that package can be installed from source distribution:
   - pip install keyutils
   - python setup.py sdist
   - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
 
-# Actual tests:
 script:
   - nosetests
