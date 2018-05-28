@@ -29,7 +29,7 @@ class TestPasswordCache(unittest.TestCase):
         password = '{<}hëllo ωορλδ!{>}'
         cache = PasswordCache(1)
         cache[device] = password
-        self.assertEqual(cache[device], password)
+        self.assertEqual(cache[device], password.encode('utf-8'))
         time.sleep(1.5)
         with self.assertRaises(KeyError):
             _ = cache[device]
@@ -41,9 +41,9 @@ class TestPasswordCache(unittest.TestCase):
         cache = PasswordCache(3)
         cache[device] = password
         time.sleep(2)
-        self.assertEqual(cache[device], password)
+        self.assertEqual(cache[device], password.encode('utf-8'))
         time.sleep(2)
-        self.assertEqual(cache[device], password)
+        self.assertEqual(cache[device], password.encode('utf-8'))
         time.sleep(4)
         with self.assertRaises(KeyError):
             _ = cache[device]
@@ -54,7 +54,7 @@ class TestPasswordCache(unittest.TestCase):
         password = '{<}hëllo ωορλδ!{>}'
         cache = PasswordCache(0)
         cache[device] = password
-        self.assertEqual(cache[device], password)
+        self.assertEqual(cache[device], password.encode('utf-8'))
         del cache[device]
         with self.assertRaises(KeyError):
             _ = cache[device]
@@ -64,9 +64,9 @@ class TestPasswordCache(unittest.TestCase):
         password = '{<}hëllo ωορλδ!{>}'
         cache = PasswordCache(0)
         cache[device] = password
-        self.assertEqual(cache[device], password)
+        self.assertEqual(cache[device], password.encode('utf-8'))
         cache[device] = password * 2
-        self.assertEqual(cache[device], password*2)
+        self.assertEqual(cache[device], password.encode('utf-8')*2)
         del cache[device]
         with self.assertRaises(KeyError):
             _ = cache[device]
