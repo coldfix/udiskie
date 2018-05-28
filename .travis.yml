@@ -6,7 +6,6 @@ language: python
 python:
   - "2.7"
   - "3.4"       # trusty's native python3 version
-  # - "pypy"
 
 # Need true virtual machine for keyutils (gives permission error on docker):
 sudo: true
@@ -20,17 +19,13 @@ addons:
     - python3-gi
     - libkeyutils-dev
 
-# Inherit system site packages for use in virtualenv:
 virtualenv:
   system_site_packages: true
 
-# Setup (performed within virtualenv)
 install:
-  # Check that package can be installed from source distribution:
   - pip install keyutils
   - python setup.py sdist
   - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
 
-# Actual tests:
 script:
   - nosetests
