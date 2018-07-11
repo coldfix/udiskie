@@ -9,7 +9,6 @@ import asyncio
 from distutils.spawn import find_executable
 import getpass
 import logging
-import re
 import shlex
 import string
 import subprocess
@@ -17,7 +16,6 @@ import sys
 
 from .async_ import exec_subprocess, run_bg, run_in_executor, serial
 from .locale import _
-from .common import AttrDictView
 from .config import DeviceFilter
 
 Gtk = None
@@ -285,8 +283,6 @@ class DeviceCommand:
         """
         attrs = {attr: getattr(device, attr) for attr in self.used_attrs}
         attrs.update(self.extra)
-        # for backward compatibility provide positional argument:
-        fake_dev = AttrDictView(attrs)
         argv = [arg.format(**attrs) for arg in self.argv]
         try:
             stdout = await exec_subprocess(argv)
