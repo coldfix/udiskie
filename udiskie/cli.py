@@ -677,11 +677,9 @@ class Info(_EntryPoint):
                 return getattr(device, output)
         # new behaviour: format string
         else:
-            from string import Formatter
-            formatter = Formatter()
             def format_output(device):
                 view = ObjDictView(device, DeviceFilter.VALID_PARAMETERS)
-                return formatter.vformat(output, (), view)
+                return output.format_map(view)
 
         filters = [_parse_filter(spec) for spec in options['filter']]
         matcher = DeviceFilter(dict(filters))
