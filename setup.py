@@ -25,13 +25,13 @@ def check_dependency(package, version):
         __import__(package)
     except ImportError as e:
         # caused by either of the imports, probably the first
-        logging.warn("Missing runtime dependencies:\n\t" + str(e))
+        logging.warning("Missing runtime dependencies:\n\t" + str(e))
     except ValueError as e:
         # caused by the gi.require_version() statement
-        logging.warn("Missing runtime dependencies:\n\t" + str(e))
+        logging.warning("Missing runtime dependencies:\n\t" + str(e))
     except RuntimeError as e:
         # caused by the final __import__() statement
-        logging.warn("Bad runtime dependency:\n\t" + str(e))
+        logging.warning("Bad runtime dependency:\n\t" + str(e))
 
 
 check_dependency('gi.repository.Gio', '2.0')
@@ -108,7 +108,7 @@ class build_mo(Command):
             call(['msgfmt', po_filename, '-o', mo_filename])
         except OSError as e:
             # ignore failures since i18n support is optional:
-            logging.warn(e)
+            logging.warning(e)
 
 
 # NOTE: we want the install logic from *distutils* rather than the one from
@@ -137,7 +137,7 @@ class install(orig_install):
             call(['gtk-update-icon-cache', theme_base])
         except OSError as e:
             # ignore failures since the tray icon is an optional component:
-            logging.warn(e)
+            logging.warning(e)
 
 
 class install_data(orig_install_data):
