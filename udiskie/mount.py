@@ -289,6 +289,7 @@ class Mounter:
         if not device.is_unlocked:
             self._log.info(_('not locking {0}: not unlocked', device))
             return True
+        await self.unmount(device.luks_cleartext_holder)
         self._log.debug(_('locking {0}', device))
         await device.lock()
         self._log.info(_('locked {0}', device))
