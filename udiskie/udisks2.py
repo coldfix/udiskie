@@ -463,10 +463,7 @@ class Device:
         """Get wrapper to the unlocked luks cleartext device."""
         if not self.is_luks:
             return None
-        for device in self._daemon:
-            if device.luks_cleartext_slave == self:
-                return device
-        return None
+        return self._daemon[self._P.Encrypted.CleartextDevice]
 
     @property
     def is_unlocked(self):
