@@ -79,7 +79,8 @@ class Mounter:
         self.udisks = udisks
         self._config = (config or []) + [
             IgnoreDevice({'symlinks': '/dev/mapper/docker-*', 'ignore': True}),
-            IgnoreDevice({'symlinks': '/dev/disk/by-id/dm-name-docker-*', 'ignore': True}),
+            IgnoreDevice({'symlinks': '/dev/disk/by-id/dm-name-docker-*',
+                          'ignore': True}),
             IgnoreDevice({'is_loop': True, 'loop_file': '/*', 'ignore': False}),
             IgnoreDevice({'is_block': False, 'ignore': True}),
             IgnoreDevice({'is_external': False, 'ignore': True}),
@@ -345,7 +346,7 @@ class Mounter:
         device, created = await self._find_device_losetup(device)
         if created and recursive is False:
             return device
-        if device.is_luks_cleartext and self.udisks.version_info >= (2,7,0):
+        if device.is_luks_cleartext and self.udisks.version_info >= (2, 7, 0):
             await asyncio.sleep(1.5)    # temporary workaround for #153, unreliable
         success = True
         if not self.is_automount(device):
@@ -376,7 +377,7 @@ class Mounter:
 
     @_error_boundary
     async def remove(self, device, force=False, detach=False, eject=False,
-               lock=False):
+                     lock=False):
         """
         Unmount or lock the device depending on device type.
 
@@ -423,7 +424,7 @@ class Mounter:
 
     @_error_boundary
     async def auto_remove(self, device, force=False, detach=False, eject=False,
-                    lock=False):
+                          lock=False):
         """
         Unmount or lock the device depending on device type.
 
@@ -551,8 +552,8 @@ class Mounter:
         return success
 
     # loop devices
-    async def losetup(self, image,
-                read_only=True, offset=None, size=None, no_part_scan=None):
+    async def losetup(self, image, read_only=True, offset=None, size=None,
+                      no_part_scan=None):
         """
         Setup a loop device.
 
@@ -701,6 +702,7 @@ class Mounter:
         device_nodes['/'] = root
         for node in device_nodes.values():
             node.children.sort(key=DevNode._sort_key)
+
         # use parent as fallback, update top->down:
         def propagate_ignored(node):
             for child in node.children:

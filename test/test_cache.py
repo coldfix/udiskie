@@ -32,7 +32,7 @@ class TestPasswordCache(unittest.TestCase):
         self.assertEqual(cache[device], password.encode('utf-8'))
         time.sleep(1.5)
         with self.assertRaises(KeyError):
-            _ = cache[device]
+            cache[device]
 
     def test_touch(self):
         """Key access refreshes the timeout."""
@@ -46,7 +46,7 @@ class TestPasswordCache(unittest.TestCase):
         self.assertEqual(cache[device], password.encode('utf-8'))
         time.sleep(4)
         with self.assertRaises(KeyError):
-            _ = cache[device]
+            cache[device]
 
     def test_revoke(self):
         """A key can be deleted manually."""
@@ -57,7 +57,7 @@ class TestPasswordCache(unittest.TestCase):
         self.assertEqual(cache[device], password.encode('utf-8'))
         del cache[device]
         with self.assertRaises(KeyError):
-            _ = cache[device]
+            cache[device]
 
     def test_update(self):
         device = TestDev('DELTA')
@@ -69,7 +69,7 @@ class TestPasswordCache(unittest.TestCase):
         self.assertEqual(cache[device], password.encode('utf-8')*2)
         del cache[device]
         with self.assertRaises(KeyError):
-            _ = cache[device]
+            cache[device]
 
 
 if __name__ == '__main__':

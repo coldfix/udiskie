@@ -336,7 +336,7 @@ class Device:
         """Check if the device is external."""
         # NOTE: Checking for equality HintSystem==False returns False if the
         # property is resolved to a None value (interface not available).
-        if self._P.Block.HintSystem == False:
+        if self._P.Block.HintSystem == False:       # noqa: E712
             return True
         # NOTE: udisks2 seems to guess incorrectly in some cases. This
         # leads to HintSystem=True for unlocked devices. In order to show
@@ -685,7 +685,7 @@ class Daemon(Emitter):
 
         self.version = version
         self.version_info = tuple(map(int, version.split('.')))
-        self.keyfile_support = self.version_info >= (2,6,4)
+        self.keyfile_support = self.version_info >= (2, 6, 4)
         self._log.debug(_('Keyfile support: {0}', self.keyfile_support))
 
         self._proxy = proxy
@@ -740,7 +740,8 @@ class Daemon(Emitter):
         object_path = await dbus.call_with_fd_list(
             manager._proxy, 'LoopSetup', '(ha{sv})',
             (0, filter_opt({
-                'auth.no_user_interaction': ('b', options.get('auth.no_user_interaction')),
+                'auth.no_user_interaction': (
+                    'b', options.get('auth.no_user_interaction')),
                 'offset': ('t', options.get('offset')),
                 'size': ('t', options.get('size')),
                 'read-only': ('b', options.get('read-only')),

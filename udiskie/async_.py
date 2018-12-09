@@ -51,6 +51,7 @@ def serial(func):
     """Decorate a function of which there should only be a single task
     execution at a time."""
     lock = asyncio.Lock()
+
     @wraps(func)
     async def guarded(*args, **kwargs):
         with (await lock):
@@ -90,7 +91,8 @@ async def exec_subprocess(argv):
     An Async task that represents a subprocess. If successful, the task's
     result is set to the collected STDOUT of the subprocess.
 
-    :raises subprocess.CalledProcessError: if the subprocess returns a non-zero exit code
+    :raises subprocess.CalledProcessError: if the subprocess returns a non-zero
+                                           exit code
     """
     process = await create_subprocess_exec(*argv, stdout=PIPE)
     stdout, stderr = await process.communicate()

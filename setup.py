@@ -4,11 +4,9 @@ from distutils.command.install_data import install_data as orig_install_data
 from distutils.command.build import build as orig_build
 from distutils.util import convert_path
 
-# monkey-patch: use faster entry points!
-import fastentrypoints
+import fastentrypoints          # noqa: F401, import for side-effects!
 
 from subprocess import call
-import sys
 import logging
 from os import path, listdir
 from glob import glob
@@ -54,6 +52,7 @@ def exec_file(path):
     with open(convert_path(path), 'rb') as f:
         exec(f.read(), namespace, namespace)
     return namespace
+
 
 metadata = exec_file('udiskie/__init__.py')
 

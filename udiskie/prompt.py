@@ -297,7 +297,7 @@ class DeviceCommand:
 
 def password(password_command):
     """Create a password prompt function."""
-    gui = lambda: has_Gtk()          and get_password_gui
+    gui = lambda: has_Gtk() and get_password_gui
     tty = lambda: sys.stdin.isatty() and get_password_tty
     if password_command == 'builtin:gui':
         return gui() or tty()
@@ -344,7 +344,7 @@ def notify_command(command_format, mounter):
     event, device_file, device_id, device_size, drive, drive_label, id_label,
     id_type, id_usage, id_uuid, mount_path, root
 
-    :param str command_format: The command format string to run when an event occurs.
+    :param str command_format: command to run when an event occurs.
     :param mounter: Mounter object
     """
     udisks = mounter.udisks

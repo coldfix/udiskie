@@ -19,6 +19,8 @@ install:
   - pip install keyutils
   - python setup.py sdist
   - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
+  - pip install flake8
 
 script:
+  - flake8
   - nosetests

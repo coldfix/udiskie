@@ -86,8 +86,10 @@ class OptionalValue:
 
 
 class SelectLevel(logging.Filter):
+
     def __init__(self, level):
         self.level = level
+
     def filter(self, record):
         return record.levelno == self.level
 
@@ -136,7 +138,8 @@ class _EntryPoint:
             'disable_existing_loggers': False,
             'formatters': {
                 'plain':  {'format': _('%(message)s')},
-                'detail': {'format': _('%(levelname)s [%(asctime)s] %(name)s: %(message)s')},
+                'detail': {'format': _(
+                    '%(levelname)s [%(asctime)s] %(name)s: %(message)s')},
             },
             'filters': {
                 'info': {'()': 'udiskie.cli.SelectLevel', 'level': logging.INFO},
@@ -379,9 +382,9 @@ class Daemon(_EntryPoint):
         # start components
         tasks = []
 
-        self.notify         = Component(self._load_notify)
-        self.statusicon     = Component(self._load_statusicon)
-        self.automounter    = Component(self._load_automounter)
+        self.notify = Component(self._load_notify)
+        self.statusicon = Component(self._load_statusicon)
+        self.automounter = Component(self._load_automounter)
 
         if options['notify']:
             self.notify.activate()
