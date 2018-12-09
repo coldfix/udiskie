@@ -51,6 +51,7 @@ class DeviceFilter:
         'has_media',
         'device_file',
         'device_presentation',
+        'device_size',
         'device_id',
         'id_usage',
         'is_crypto',
