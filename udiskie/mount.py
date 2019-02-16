@@ -99,7 +99,7 @@ class Mounter:
         try:
             device = self.udisks.find(device_or_path)
             return device, False
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             if not os.path.isfile(device_or_path):
                 raise
         device = await self.losetup(device_or_path)
