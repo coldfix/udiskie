@@ -121,27 +121,6 @@ def run_bg(func):
     return runner
 
 
-def serial(func):
-    """Decorate a function of which there should only be a single task
-    execution at a time."""
-    lock = asyncio.Lock()
-
-    @wraps(func)
-    async def guarded(*args, **kwargs):
-        with (await lock):
-            return await func(*args, **kwargs)
-    return guarded
-
-
-def run_in_executor(func):
-    """Decorate a function to be executed in executor."""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        return asyncio.get_event_loop().run_in_executor(
-            None, partial(func, *args, **kwargs))
-    return wrapper
-
-
 def show_traceback(future):
     try:
         future.result()

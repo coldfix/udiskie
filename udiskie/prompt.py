@@ -14,7 +14,7 @@ import string
 import subprocess
 import sys
 
-from .async_ import exec_subprocess, run_bg, run_in_executor, serial
+from .async_ import exec_subprocess, run_bg
 from .locale import _
 from .config import DeviceFilter
 
@@ -230,10 +230,9 @@ def get_password_gui(device, options):
         return None
 
 
-@serial
-@run_in_executor
-def get_password_tty(device, options):
+async def get_password_tty(device, options):
     """Get the password to unlock a device from terminal."""
+    # TODO: make this a TRUE async
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
         return getpass.getpass(text)
