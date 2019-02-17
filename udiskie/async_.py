@@ -317,7 +317,10 @@ class Subprocess(Async):
 
     def __init__(self, argv):
         super(Subprocess, self).__init__()
-        self.p = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
+        self.p = Gio.Subprocess.new(
+            argv,
+            Gio.SubprocessFlags.STDOUT_PIPE |
+            Gio.SubprocessFlags.STDIN_INHERIT)
         stdin_buf = None
         cancellable = None
         user_data = None
