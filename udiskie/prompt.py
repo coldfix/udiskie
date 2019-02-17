@@ -196,19 +196,14 @@ class PasswordDialog(Dialog):
         with Dialog(gtk_dialog) as dialog:
             response = await dialog
             if response == Gtk.ResponseType.OK:
-                self.content = await run_in_executor(read_file)(
-                    dialog.window.get_filename())
+                with open(dialog.window.get_filename(), 'rb') as f:
+                    self.content = f.read()
                 self.window.response(response)
 
     def get_text(self):
         if self.content is not None:
             return self.content
         return self.entry.get_text()
-
-
-def read_file(filename, mode='rb'):
-    with open(filename, mode) as f:
-        return f.read()
 
 
 async def password_dialog(key, title, message, options):
