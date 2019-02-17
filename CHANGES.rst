@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+1.7.7
+~~~~~
+Date: 17.02.2019
+
+- keep password dialog always on top
+- fix stdin-based password prompts
+
 1.7.6
 ~~~~~
 Date: 17.02.2019
