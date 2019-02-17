@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+1.7.6
+~~~~~
+Date: 17.02.2019
+
+- add russian translations (thanks @mr-GreyWolf)
+- fixed deprecation warnings in setup.py (thanks @sealj553)
+
 1.7.5
 ~~~~~
 Date: 24.05.2018
