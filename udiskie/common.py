@@ -14,6 +14,7 @@ __all__ = [
     'sameuuid',
     'setdefault',
     'extend',
+    'cachedproperty',
     'decode_ay',
     'exc_message',
     'format_exc',
@@ -75,6 +76,20 @@ def extend(a: dict, b: dict) -> dict:
     res = a.copy()
     res.update(b)
     return res
+
+
+def cachedproperty(func):
+    """A memoize decorator for class properties."""
+    key = '_' + func.__name__
+    @wraps(func)
+    def get(self):
+        try:
+            return getattr(self, key)
+        except AttributeError:
+            val = func(self)
+            setattr(self, key, val)
+            return val
+    return property(get)
 
 
 # ----------------------------------------
