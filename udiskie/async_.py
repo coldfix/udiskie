@@ -23,13 +23,13 @@ __all__ = [
     'pack',
     'to_coro',
     'run_bg',
-    'Async',
-    'AsyncList',
+    'Future',
+    'gather',
     'Return',
     'Coroutine',
 ]
 
-# NOTE: neither AsyncList nor Coroutine save references to the active tasks!
+# NOTE: neither gather nor Coroutine save references to the active tasks!
 # Although this would create a reference cycle (coro->task->callbacks->coro),
 # the garbage collector can generally detect the cycle and delete the involved
 # objects anyway (there is usually no independent reference to the coroutine).
@@ -50,12 +50,12 @@ def pack(*values):
         return values
 
 
-class Async:
+class Future:
 
     """
     Base class for asynchronous operations.
 
-    One `Async' object represents an asynchronous operation. It allows for
+    One `Future' object represents an asynchronous operation. It allows for
     separate result and error handlers which can be set by appending to the
     `callbacks` and `errbacks` lists.
 
@@ -64,8 +64,8 @@ class Async:
     The task is started on initialization, but most not finish immediately.
 
     Success/error exit is signaled to the observer by calling exactly one of
-    `self.callback(value)` or `self.errback(exception)` when the operation
-    finishes.
+    `self.set_result(value)` or `self.set_exception(exception)` when the
+    operation finishes.
 
     For implementations, see :class:`Coroutine` and :class:`DBusCall`.
     """
@@ -89,18 +89,18 @@ class Async:
         """Set finished state and invoke specified callbacks [internal]."""
         if self.done:
             # TODO: more output
-            raise RuntimeError("Async already finished!")
+            raise RuntimeError("Future already finished!")
         ACTIVE_TASKS.remove(self)
         self.done = True
-        # TODO: handle Async callbacks:
+        # TODO: handle Future callbacks:
         return [fn(*args) for fn in callbacks]
 
     # accept multiple values for convenience (for now!):
-    def callback(self, value):
+    def set_result(self, value):
         """Signal successful completion."""
         self._finish(self.callbacks, value)
 
-    def errback(self, exception, formatted):
+    def set_exception(self, exception, formatted):
         """Signal unsuccessful completion."""
         was_handled = self._finish(self.errbacks, exception, formatted)
         if not any(was_handled):
@@ -133,7 +133,7 @@ def show_traceback(future):
         traceback.print_exc()
 
 
-class AsyncList(Async):
+class gather(Future):
 
     """
     Manages a collection of asynchronous tasks.
@@ -141,14 +141,14 @@ class AsyncList(Async):
     The callbacks are executed when all of the subtasks have completed.
     """
 
-    def __init__(self, tasks):
-        """Create an AsyncList from a list of Asyncs."""
+    def __init__(self, *tasks):
+        """Create from a list of `Future`-s."""
         super().__init__()
         tasks = list(tasks)
         self._results = {}
         self._num_tasks = len(tasks)
         if not tasks:
-            run_soon(self.callback, [])
+            run_soon(self.set_result, [])
         for idx, task in enumerate(tasks):
             task = ensure_future(task)
             task.callbacks.append(partial(self._subtask_result, idx))
@@ -158,7 +158,7 @@ class AsyncList(Async):
         """Set result of a single subtask."""
         self._results[idx] = result
         if len(self._results) == self._num_tasks:
-            self.callback([
+            self.set_result([
                 self._results[i]
                 for i in range(self._num_tasks)
             ])
@@ -210,18 +210,18 @@ def run_soon(fn, *args):
 
 
 def sleep(seconds):
-    future = Async()
-    GLib.timeout_add(int(seconds*1000), future.callback, True)
+    future = Future()
+    GLib.timeout_add(int(seconds*1000), future.set_result, True)
     return future
 
 
 def ensure_future(awaitable):
-    if isinstance(awaitable, Async):
+    if isinstance(awaitable, Future):
         return awaitable
     return Coroutine(iter(awaitable.__await__()))
 
 
-class Coroutine(Async):
+class Coroutine(Future):
 
     """
     A coroutine processes a sequence of asynchronous tasks.
@@ -232,16 +232,16 @@ class Coroutine(Async):
 
     Coroutines are scheduled for execution by just calling them. In that
     regard, they behave very similar to normal functions. The difference is,
-    that they return an Async object rather than a result. This object can
+    that they return an Future object rather than a result. This object can
     then be used to add result handler callbacks. The coroutine's code block
     will first be entered in a separate main loop iteration.
 
     Coroutines are implemented as generators using `yield` expressions to
     transfer control flow when performing asynchronous tasks. Coroutines may
-    yield zero or more `Async` tasks and one final `Return` value.
+    yield zero or more `Future` tasks and one final `Return` value.
 
     The code after a `yield` expression is executed only after the yielded
-    `Async` has finished. In case of successful completion, the result of the
+    `Future` has finished. In case of successful completion, the result of the
     asynchronous operation is returned. In case of an error, the exception is
     raised inside the generator. For example:
 
@@ -291,20 +291,20 @@ class Coroutine(Async):
         This function is called immediately after the generator suspends its
         own control flow by yielding a value.
         """
-        if isinstance(thing, Async):
+        if isinstance(thing, Future):
             thing.callbacks.append(self._send)
             thing.errbacks.append(self._throw)
         elif isinstance(thing, Return):
             self._generator.close()
-            # self.callback(thing.value)
+            # self.set_result(thing.value)
             # to shorten stack trace use instead:
-            run_soon(self.callback, thing.value)
+            run_soon(self.set_result, thing.value)
         else:
             # the protocol is easy to do wrong, therefore we better do not
             # silently ignore any errors!
             raise NotImplementedError(
                 ("Unexpected return value from function {!r}: {!r}.\n"
-                 "Expecting either an Async or a Return.")
+                 "Expecting either an Future or a Return.")
                 .format(self._generator, thing))
 
     def _send(self, value):
@@ -334,10 +334,10 @@ class Coroutine(Async):
             value = func(*args)
         except StopIteration:
             self._generator.close()
-            self.callback(None)
+            self.set_result(None)
         except Exception as e:
             self._generator.close()
-            self.errback(e, format_exc())
+            self.set_exception(e, format_exc())
         else:
             self._recv(value)
 
@@ -355,7 +355,7 @@ def gio_callback(extract_result):
 
 def exec_subprocess(argv):
     """
-    An Async task that represents a subprocess. If successful, the task's
+    An Future task that represents a subprocess. If successful, the task's
     result is set to the collected STDOUT of the subprocess.
 
     :raises subprocess.CalledProcessError: if the subprocess returns a non-zero
