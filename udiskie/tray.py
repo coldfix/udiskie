@@ -2,12 +2,10 @@
 Tray icon for udiskie.
 """
 
-import asyncio
-
 from gi.repository import Gio
 from gi.repository import Gtk
 
-from .async_ import run_bg
+from .async_ import run_bg, Future
 from .common import setdefault, DaemonBase
 from .locale import _
 from .mount import Action, prune_empty_node
@@ -125,7 +123,7 @@ class UdiskieMenu:
         self._daemon = daemon
         self._mounter = daemon.mounter
         self._actions = actions
-        self._quit_action = daemon.mainloop.stop
+        self._quit_action = daemon.mainloop.quit
         self.flat = flat
 
     def __call__(self, menu, extended=True):
@@ -306,7 +304,7 @@ class TrayIcon:
         self._menu = menumaker
         self._conn_left = None
         self._conn_right = None
-        self.task = asyncio.Future()
+        self.task = Future()
         menumaker._quit_action = self.destroy
 
     def destroy(self):

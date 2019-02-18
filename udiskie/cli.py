@@ -6,14 +6,13 @@ setuptools entry points.
 """
 
 # import udiskie.depend first - for side effects!
-from .depend import has_Notify, has_Gtk, _in_X, _has_Gtk
+from .depend import has_Notify, has_Gtk, _in_X
 
 import inspect
 import logging.config
 import traceback
 
-import asyncio
-import gbulb
+from gi.repository import GLib
 
 from docopt import docopt, DocoptExit
 
@@ -23,6 +22,7 @@ import udiskie.mount
 import udiskie.udisks2
 from .common import extend, ObjDictView
 from .locale import _
+from .async_ import Future, ensure_future, gather
 
 
 __all__ = [
@@ -125,7 +125,6 @@ class _EntryPoint:
 
     def __init__(self, argv=None):
         """Parse command line options, read config and initialize members."""
-        gbulb.install(gtk=_in_X and _has_Gtk)
         # parse program options (retrieve log level and config file name):
         args = docopt(self.usage, version='udiskie ' + self.version)
         default_opts = self.option_defaults
@@ -204,12 +203,18 @@ class _EntryPoint:
 
     def run(self):
         """Run the main loop. Returns exit code."""
-        self.mainloop = asyncio.get_event_loop()
+        self.exit_code = 1
+        self.mainloop = GLib.MainLoop()
         try:
-            return self.mainloop.run_until_complete(
-                self._start_async_tasks())
+            future = ensure_future(self._start_async_tasks())
+            future.callbacks.append(self.set_exit_code)
+            self.mainloop.run()
+            return self.exit_code
         except KeyboardInterrupt:
             return 1
+
+    def set_exit_code(self, exit_code):
+        self.exit_code = exit_code
 
     async def _start_async_tasks(self):
         """Start asynchronous operations."""
@@ -220,6 +225,8 @@ class _EntryPoint:
         except Exception:
             traceback.print_exc()
             return 1
+        finally:
+            self.mainloop.quit()
 
 
 class Component:
@@ -395,12 +402,12 @@ class Daemon(_EntryPoint):
             self.statusicon.activate()
             tasks.append(self.statusicon.instance._icon.task)
         else:
-            tasks.append(asyncio.Future())
+            tasks.append(Future())
         if options['automount']:
             self.automounter.activate()
             tasks.append(self.mounter.add_all())
 
-        return asyncio.gather(*tasks)
+        return gather(*tasks)
 
     def _load_notify(self):
         import udiskie.notify
@@ -527,7 +534,7 @@ class Mount(_EntryPoint):
                      for path in options['<device>']]
         else:
             tasks = [mounter.add_all(recursive=recursive)]
-        return asyncio.gather(*tasks)
+        return gather(*tasks)
 
 
 class Umount(_EntryPoint):
@@ -599,7 +606,7 @@ class Umount(_EntryPoint):
                      for path in options['<device>']]
         else:
             tasks = [mounter.remove_all(**strategy)]
-        return asyncio.gather(*tasks)
+        return gather(*tasks)
 
 
 def _parse_filter(spec):
@@ -691,4 +698,4 @@ class Info(_EntryPoint):
             if matcher.match(device):
                 print(format_output(device))
 
-        return asyncio.gather()
+        return gather()

@@ -6,9 +6,7 @@ It is based on ideas from "Twisted" and the "yield from" expression in
 python3, but more lightweight (incomplete) and compatible with python2.
 """
 
-import asyncio
 import traceback
-
 from functools import partial
 from subprocess import CalledProcessError
 
@@ -120,17 +118,8 @@ def to_coro(func):
 def run_bg(func):
     @wraps(func)
     def runner(*args, **kwargs):
-        future = asyncio.ensure_future(func(*args, **kwargs))
-        future.add_done_callback(show_traceback)
-        return future
+        return ensure_future(func(*args, **kwargs))
     return runner
-
-
-def show_traceback(future):
-    try:
-        future.result()
-    except Exception:
-        traceback.print_exc()
 
 
 class gather(Future):
@@ -361,7 +350,7 @@ def exec_subprocess(argv):
     :raises subprocess.CalledProcessError: if the subprocess returns a non-zero
                                            exit code
     """
-    future = asyncio.Future()
+    future = Future()
     process = Gio.Subprocess.new(
         argv,
         Gio.SubprocessFlags.STDOUT_PIPE |

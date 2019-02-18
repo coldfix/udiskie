@@ -4,8 +4,6 @@ User prompt utility.
 
 from udiskie.depend import has_Gtk, require_Gtk
 
-import asyncio
-
 from distutils.spawn import find_executable
 import getpass
 import logging
@@ -14,7 +12,7 @@ import string
 import subprocess
 import sys
 
-from .async_ import exec_subprocess, run_bg
+from .async_ import exec_subprocess, run_bg, Future
 from .locale import _
 from .config import DeviceFilter
 
@@ -98,7 +96,7 @@ dialog_definition = r"""
 """
 
 
-class Dialog(asyncio.Future):
+class Dialog(Future):
 
     def __init__(self, window):
         super().__init__()

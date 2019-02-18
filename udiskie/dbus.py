@@ -2,14 +2,12 @@
 Common DBus utilities.
 """
 
-import asyncio
-
 from functools import partial
 
 from gi.repository import Gio
 from gi.repository import GLib
 
-from .async_ import gio_callback, pack
+from .async_ import gio_callback, pack, Future
 
 
 __all__ = [
@@ -36,7 +34,7 @@ def call(proxy, method_name, signature, args, flags=0, timeout_msec=-1):
     :param int flags:
     :param int timeout_msec:
     """
-    future = asyncio.Future()
+    future = Future()
     cancellable = None
     proxy.call(
         method_name,
@@ -69,7 +67,7 @@ def call_with_fd_list(proxy, method_name, signature, args, fds, flags=0,
     :param int flags:
     :param int timeout_msec:
     """
-    future = asyncio.Future()
+    future = Future()
     cancellable = None
     fd_list = Gio.UnixFDList.new_from_array(fds)
     proxy.call_with_unix_fd_list(
@@ -250,7 +248,7 @@ class BusProxy:
 
 def proxy_new(connection, flags, info, name, object_path, interface_name):
     """Asynchronously call the specified method on a DBus proxy object."""
-    future = asyncio.Future()
+    future = Future()
     cancellable = None
     Gio.DBusProxy.new(
         connection,
@@ -276,7 +274,7 @@ def _proxy_new_result(proxy, result):
 
 def proxy_new_for_bus(bus_type, flags, info, name, object_path, interface_name):
     """Asynchronously call the specified method on a DBus proxy object."""
-    future = asyncio.Future()
+    future = Future()
     cancellable = None
     Gio.DBusProxy.new_for_bus(
         bus_type,

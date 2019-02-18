@@ -193,7 +193,6 @@ setup(
     install_requires=[
         'PyYAML',
         'docopt',
-        'gbulb',
         # Currently not building out of the box:
         # 'PyGObject',
     ],
