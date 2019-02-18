@@ -397,11 +397,11 @@ class UdiskieStatusIcon(DaemonBase):
         }
 
     def activate(self):
-        super(UdiskieStatusIcon, self).activate()
+        super().activate()
         self.update()
 
     def deactivate(self):
-        super(UdiskieStatusIcon, self).deactivate()
+        super().deactivate()
         self._icon.show(False)
 
     @property

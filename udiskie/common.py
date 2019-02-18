@@ -33,7 +33,7 @@ class Emitter:
 
     def __init__(self, event_names=(), *args, **kwargs):
         """Initialize with empty lists of event handlers."""
-        super(Emitter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._event_handlers = {}
         for evt in event_names:
             self._event_handlers[evt] = []

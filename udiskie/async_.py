@@ -50,7 +50,7 @@ def pack(*values):
         return values
 
 
-class Async(object):
+class Async:
 
     """
     Base class for asynchronous operations.
@@ -140,7 +140,7 @@ class AsyncList(Async):
 
     def __init__(self, tasks):
         """Create an AsyncList from a list of Asyncs."""
-        super(AsyncList, self).__init__()
+        super().__init__()
         tasks = list(tasks)
         self._results = {}
         self._num_tasks = len(tasks)
@@ -168,7 +168,7 @@ class AsyncList(Async):
         self._set_subtask_result(idx, AsyncResult(False, error, fmt))
 
 
-class AsyncResult(object):
+class AsyncResult:
 
     def __init__(self, success, *values):
         self.success = success
@@ -180,7 +180,7 @@ class AsyncResult(object):
     __nonzero__ = __bool__
 
 
-class Return(object):
+class Return:
 
     """Wraps a return value from a coroutine."""
 
@@ -267,7 +267,7 @@ class Coroutine(Async):
         """
         Create and start a `Coroutine` task from the specified generator.
         """
-        super(Coroutine, self).__init__()
+        super().__init__()
         self._generator = generator
         # TODO: cancellable tasks (generator.close() -> GeneratorExit)?
         run_soon(self._interact, next, self._generator)

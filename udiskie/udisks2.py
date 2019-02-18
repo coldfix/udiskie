@@ -678,7 +678,7 @@ class Daemon(Emitter):
                        'device_locked',
                        'device_changed',
                        'job_failed']
-        super(Daemon, self).__init__(event_names)
+        super().__init__(event_names)
 
         self._log = logging.getLogger(__name__)
         self._log.debug(_('Daemon version: {0}', version))
@@ -771,7 +771,7 @@ class Daemon(Emitter):
 
     def trigger(self, event, device, *args):
         self._log.debug(_("+++ {0}: {1}", event, device))
-        super(Daemon, self).trigger(event, device, *args)
+        super().trigger(event, device, *args)
 
     # add objects / interfaces
     def _interfaces_added(self, object_path, interfaces_and_properties):

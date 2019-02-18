@@ -131,7 +131,7 @@ class PropertiesProxy(InterfaceProxy):
     Interface = 'org.freedesktop.DBus.Properties'
 
     def __init__(self, proxy, interface_name=None):
-        super(PropertiesProxy, self).__init__(proxy)
+        super().__init__(proxy)
         self.interface_name = interface_name
 
     def GetAll(self, interface_name=None):

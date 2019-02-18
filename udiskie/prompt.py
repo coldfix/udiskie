@@ -182,7 +182,7 @@ class PasswordDialog(Dialog):
         label.set_label(message)
         window.set_title(title)
         window.set_keep_above(True)
-        super(PasswordDialog, self).__init__(window)
+        super().__init__(window)
 
     def on_show_password(self, button):
         self.entry.set_visibility(button.get_active())

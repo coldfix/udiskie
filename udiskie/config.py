@@ -144,7 +144,7 @@ class MountOptions(DeviceFilter):
 
     def __init__(self, config_item):
         config_item.setdefault('options', None)
-        super(MountOptions, self).__init__(config_item)
+        super().__init__(config_item)
 
 
 class IgnoreDevice(DeviceFilter):
@@ -153,7 +153,7 @@ class IgnoreDevice(DeviceFilter):
 
     def __init__(self, config_item):
         config_item.setdefault('ignore', True)
-        super(IgnoreDevice, self).__init__(config_item)
+        super().__init__(config_item)
 
 
 def match_config(filters, device, kind, default):
