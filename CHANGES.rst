@@ -6,13 +6,12 @@ CHANGELOG
 Date: (TBD)
 
 - require python >= 3.5
-- remove python2 support
-- remove udisks1 support (and corresponding command line options)
-- use asyncio+gbulb internally
+- drop python2 support
+- drop udisks1 support
+- drop command line options corresponding to udisks version selection (-1, -2)
+- use py35's ``async def`` functions internally to improve stack traces
 - internal refactoring and simplifications
-- improve password dialog:
-  - "show password" checkbox
-  - keep password on top
+- add "show password" checkbox in password dialog
 
 1.7.7
 ~~~~~
