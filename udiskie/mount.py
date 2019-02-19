@@ -2,15 +2,13 @@
 Mount utilities.
 """
 
-import asyncio
-
 from distutils.spawn import find_executable
 from collections import namedtuple
 from functools import partial
 import logging
 import os
 
-from .async_ import to_coro
+from .async_ import to_coro, gather, sleep
 from .common import wraps, setdefault, exc_message, format_exc
 from .config import IgnoreDevice, match_config
 from .locale import _
@@ -326,7 +324,7 @@ class Mounter:
                 for dev in self.get_all_handleable()
                 if dev.is_partition and dev.partition_slave == device
             ]
-            results = await asyncio.gather(*tasks)
+            results = await gather(*tasks)
             success = all(results)
         else:
             self._log.info(_('not adding {0}: unhandled device', device))
@@ -347,7 +345,7 @@ class Mounter:
         if created and recursive is False:
             return device
         if device.is_luks_cleartext and self.udisks.version_info >= (2, 7, 0):
-            await asyncio.sleep(1.5)    # temporary workaround for #153, unreliable
+            await sleep(1.5)    # temporary workaround for #153, unreliable
         success = True
         if not self.is_automount(device):
             pass
@@ -369,7 +367,7 @@ class Mounter:
                 for dev in self.get_all_handleable()
                 if dev.is_partition and dev.partition_slave == device
             ]
-            results = await asyncio.gather(*tasks)
+            results = await gather(*tasks)
             success = all(results)
         else:
             self._log.debug(_('not adding {0}: unhandled device', device))
@@ -405,7 +403,7 @@ class Mounter:
                 for child in self.get_all_handleable()
                 if _is_parent_of(device, child)
             ]
-            results = await asyncio.gather(*tasks)
+            results = await gather(*tasks)
             success = all(results)
         else:
             self._log.info(_('not removing {0}: unhandled device', device))
@@ -454,7 +452,7 @@ class Mounter:
                 for child in self.get_all_handleable()
                 if _is_parent_of(device, child)
             ]
-            results = await asyncio.gather(*tasks)
+            results = await gather(*tasks)
             success = all(results)
         else:
             self._log.debug(_('not removing {0}: unhandled device', device))
@@ -531,7 +529,7 @@ class Mounter:
         """
         tasks = [self.auto_add(device, recursive=recursive)
                  for device in self.get_all_handleable_leaves()]
-        results = await asyncio.gather(*tasks)
+        results = await gather(*tasks)
         success = all(results)
         return success
 
@@ -547,7 +545,7 @@ class Mounter:
         kw = dict(force=True, detach=detach, eject=eject, lock=lock)
         tasks = [self.auto_remove(device, **kw)
                  for device in self.get_all_handleable_roots()]
-        results = await asyncio.gather(*tasks)
+        results = await gather(*tasks)
         success = all(results)
         return success
 

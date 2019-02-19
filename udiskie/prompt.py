@@ -4,8 +4,6 @@ User prompt utility.
 
 from udiskie.depend import has_Gtk, require_Gtk
 
-import asyncio
-
 from distutils.spawn import find_executable
 import getpass
 import logging
@@ -14,7 +12,7 @@ import string
 import subprocess
 import sys
 
-from .async_ import exec_subprocess, run_bg, run_in_executor, serial
+from .async_ import exec_subprocess, run_bg, Future
 from .locale import _
 from .config import DeviceFilter
 
@@ -98,7 +96,7 @@ dialog_definition = r"""
 """
 
 
-class Dialog(asyncio.Future):
+class Dialog(Future):
 
     def __init__(self, window):
         super().__init__()
@@ -182,7 +180,7 @@ class PasswordDialog(Dialog):
         label.set_label(message)
         window.set_title(title)
         window.set_keep_above(True)
-        super(PasswordDialog, self).__init__(window)
+        super().__init__(window)
 
     def on_show_password(self, button):
         self.entry.set_visibility(button.get_active())
@@ -196,19 +194,14 @@ class PasswordDialog(Dialog):
         with Dialog(gtk_dialog) as dialog:
             response = await dialog
             if response == Gtk.ResponseType.OK:
-                self.content = await run_in_executor(read_file)(
-                    dialog.window.get_filename())
+                with open(dialog.window.get_filename(), 'rb') as f:
+                    self.content = f.read()
                 self.window.response(response)
 
     def get_text(self):
         if self.content is not None:
             return self.content
         return self.entry.get_text()
-
-
-def read_file(filename, mode='rb'):
-    with open(filename, mode) as f:
-        return f.read()
 
 
 async def password_dialog(key, title, message, options):
@@ -235,10 +228,9 @@ def get_password_gui(device, options):
         return None
 
 
-@serial
-@run_in_executor
-def get_password_tty(device, options):
+async def get_password_tty(device, options):
     """Get the password to unlock a device from terminal."""
+    # TODO: make this a TRUE async
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
         return getpass.getpass(text)

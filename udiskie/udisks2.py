@@ -678,7 +678,7 @@ class Daemon(Emitter):
                        'device_locked',
                        'device_changed',
                        'job_failed']
-        super(Daemon, self).__init__(event_names)
+        super().__init__(event_names)
 
         self._log = logging.getLogger(__name__)
         self._log.debug(_('Daemon version: {0}', version))
@@ -704,14 +704,9 @@ class Daemon(Emitter):
                     None,
                     self._job_completed)
 
-    def _sync(self):
+    async def _sync(self):
         """Synchronize state."""
-        def update_objects(future):
-            objects = future.result()
-            self._objects = objects
-        update = self._proxy.call('GetManagedObjects', '()')
-        update.add_done_callback(update_objects)
-        return update
+        self._objects = await self._proxy.call('GetManagedObjects', '()')
 
     @classmethod
     async def create(cls):
@@ -771,7 +766,7 @@ class Daemon(Emitter):
 
     def trigger(self, event, device, *args):
         self._log.debug(_("+++ {0}: {1}", event, device))
-        super(Daemon, self).trigger(event, device, *args)
+        super().trigger(event, device, *args)
 
     # add objects / interfaces
     def _interfaces_added(self, object_path, interfaces_and_properties):

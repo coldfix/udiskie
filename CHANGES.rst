@@ -6,13 +6,48 @@ CHANGELOG
 Date: (TBD)
 
 - require python >= 3.5
-- remove python2 support
-- remove udisks1 support (and corresponding command line options)
-- use asyncio+gbulb internally
+- drop python2 support
+- drop udisks1 support
+- drop command line options corresponding to udisks version selection (-1, -2)
+- use py35's ``async def`` functions internally to improve stack traces
 - internal refactoring and simplifications
-- improve password dialog:
-  - "show password" checkbox
-  - keep password on top
+- add "show password" checkbox in password dialog
+
+1.7.7
+~~~~~
+Date: 17.02.2019
+
+- keep password dialog always on top
+- fix stdin-based password prompts
+
+1.7.6
+~~~~~
+Date: 17.02.2019
+
+- add russian translations (thanks @mr-GreyWolf)
+- fixed deprecation warnings in setup.py (thanks @sealj553)
+
+1.7.5
+~~~~~
+Date: 24.05.2018
+
+- fix "NameError: 'Async' is not defined" when starting without tray icon
+
+1.7.4
+~~~~~
+Date: 17.05.2018
+
+- fix attribute error when using options in udiskie-mount (#159)
+- fix tray in appindicator mode (#156)
+- possibly fix non-deterministic bugs (due to garbage collection) by keeping
+  global reference to all active asyncs
+
+1.7.3
+~~~~~
+Date: 13.12.2017
+
+- temporary workaround for udisks2.7 requiring ``filesystem-mount-system``
+  when trying to mount a LUKS cleartext device diretcly after unlocking
 
 1.7.2
 ~~~~~
