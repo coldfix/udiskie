@@ -331,18 +331,11 @@ class Coroutine(Future):
             self._recv(value)
 
 
-def gio_callback(extract_result):
-    def callback(proxy, result, future, *args):
-        try:
-            value = extract_result(proxy, result, *args)
-        except Exception as e:
-            future.set_exception(e)
-        else:
-            future.set_result(value)
-    return callback
+def gio_callback(proxy, result, future):
+    future.set_result(result)
 
 
-def exec_subprocess(argv):
+async def exec_subprocess(argv):
     """
     An Future task that represents a subprocess. If successful, the task's
     result is set to the collected STDOUT of the subprocess.
@@ -358,16 +351,8 @@ def exec_subprocess(argv):
     stdin_buf = None
     cancellable = None
     process.communicate_utf8_async(
-        stdin_buf,
-        cancellable,
-        _exec_subprocess_result,
-        future,
-        process)
-    return future
-
-
-@gio_callback
-def _exec_subprocess_result(proxy, result, process):
+        stdin_buf, cancellable, gio_callback, future)
+    result = await future
     success, stdout, stderr = process.communicate_utf8_finish(result)
     if not success:
         raise RuntimeError("Subprocess did not exit normally!")

@@ -23,7 +23,7 @@ __all__ = [
 unpack_variant = GLib.Variant.unpack
 
 
-def call(proxy, method_name, signature, args, flags=0, timeout_msec=-1):
+async def call(proxy, method_name, signature, args, flags=0, timeout_msec=-1):
     """
     Asynchronously call the specified method on a DBus proxy object.
 
@@ -42,20 +42,16 @@ def call(proxy, method_name, signature, args, flags=0, timeout_msec=-1):
         flags,
         timeout_msec,
         cancellable,
-        _call_result,
+        gio_callback,
         future,
     )
-    return future
-
-
-@gio_callback
-def _call_result(proxy, result):
+    result = await future
     value = proxy.call_finish(result)
     return pack(*unpack_variant(value))
 
 
-def call_with_fd_list(proxy, method_name, signature, args, fds, flags=0,
-                      timeout_msec=-1):
+async def call_with_fd_list(proxy, method_name, signature, args, fds,
+                            flags=0, timeout_msec=-1):
     """
     Asynchronously call the specified method on a DBus proxy object.
 
@@ -77,14 +73,10 @@ def call_with_fd_list(proxy, method_name, signature, args, fds, flags=0,
         timeout_msec,
         fd_list,
         cancellable,
-        _call_with_fd_list_result,
+        gio_callback,
         future,
     )
-    return future
-
-
-@gio_callback
-def _call_with_fd_list_result(proxy, result):
+    result = await future
     value, fds = proxy.call_with_unix_fd_list_finish(result)
     return pack(*unpack_variant(value))
 
@@ -246,7 +238,7 @@ class BusProxy:
         self.connection.signal_unsubscribe(subscription_id)
 
 
-def proxy_new(connection, flags, info, name, object_path, interface_name):
+async def proxy_new(connection, flags, info, name, object_path, interface_name):
     """Asynchronously call the specified method on a DBus proxy object."""
     future = Future()
     cancellable = None
@@ -258,21 +250,18 @@ def proxy_new(connection, flags, info, name, object_path, interface_name):
         object_path,
         interface_name,
         cancellable,
-        _proxy_new_result,
+        gio_callback,
         future,
     )
-    return future
-
-
-@gio_callback
-def _proxy_new_result(proxy, result):
+    result = await future
     value = Gio.DBusProxy.new_finish(result)
     if value is None:
         raise RuntimeError("Failed to connect DBus object!")
     return value
 
 
-def proxy_new_for_bus(bus_type, flags, info, name, object_path, interface_name):
+async def proxy_new_for_bus(bus_type, flags, info, name, object_path,
+                            interface_name):
     """Asynchronously call the specified method on a DBus proxy object."""
     future = Future()
     cancellable = None
@@ -284,14 +273,10 @@ def proxy_new_for_bus(bus_type, flags, info, name, object_path, interface_name):
         object_path,
         interface_name,
         cancellable,
-        _proxy_new_for_bus_result,
+        gio_callback,
         future,
     )
-    return future
-
-
-@gio_callback
-def _proxy_new_for_bus_result(proxy, result):
+    result = await future
     value = Gio.DBusProxy.new_for_bus_finish(result)
     if value is None:
         raise RuntimeError("Failed to connect DBus object!")
