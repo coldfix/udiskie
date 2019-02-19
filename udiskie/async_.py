@@ -11,12 +11,11 @@ import traceback
 
 from functools import partial
 from subprocess import CalledProcessError
-import sys
 
 from gi.repository import GLib
 from gi.repository import Gio
 
-from .common import cachedproperty, wraps, format_exc
+from .common import cachedproperty, wraps
 
 
 __all__ = [
@@ -100,11 +99,12 @@ class Future:
         """Signal successful completion."""
         self._finish(self.callbacks, value)
 
-    def set_exception(self, exception, formatted):
+    def set_exception(self, exception):
         """Signal unsuccessful completion."""
-        was_handled = self._finish(self.errbacks, exception, formatted)
+        was_handled = self._finish(self.errbacks, exception)
         if not any(was_handled):
-            print(formatted, file=sys.stderr)
+            traceback.print_exception(
+                type(exception), exception, exception.__traceback__)
 
     def __await__(self):
         return (yield self)
@@ -167,9 +167,9 @@ class gather(Future):
         """Receive a result from a single subtask."""
         self._set_subtask_result(idx, AsyncResult(True, value))
 
-    def _subtask_error(self, idx, error, fmt):
+    def _subtask_error(self, idx, error):
         """Receive an error from a single subtask."""
-        self._set_subtask_result(idx, AsyncResult(False, error, fmt))
+        self._set_subtask_result(idx, AsyncResult(False, error))
 
 
 class AsyncResult:
@@ -316,7 +316,7 @@ class Coroutine(Future):
         """
         self._interact(self._generator.send, value)
 
-    def _throw(self, exc, fmt):
+    def _throw(self, exc):
         """
         Interact with the coroutine by raising an exception.
 
@@ -337,7 +337,7 @@ class Coroutine(Future):
             self.set_result(None)
         except Exception as e:
             self._generator.close()
-            self.set_exception(e, format_exc())
+            self.set_exception(e)
         else:
             self._recv(value)
 
