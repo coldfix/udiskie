@@ -106,6 +106,9 @@ class Async:
         if not any(was_handled):
             print(formatted, file=sys.stderr)
 
+    def __await__(self):
+        return (yield self)
+
 
 def to_coro(func):
     @wraps(func)
@@ -147,6 +150,7 @@ class AsyncList(Async):
         if not tasks:
             run_soon(self.callback, [])
         for idx, task in enumerate(tasks):
+            task = ensure_future(task)
             task.callbacks.append(partial(self._subtask_result, idx))
             task.errbacks.append(partial(self._subtask_error, idx))
 
@@ -209,6 +213,12 @@ def sleep(seconds):
     future = Async()
     GLib.timeout_add(int(seconds*1000), future.callback, True)
     return future
+
+
+def ensure_future(awaitable):
+    if isinstance(awaitable, Async):
+        return awaitable
+    return Coroutine(iter(awaitable.__await__()))
 
 
 class Coroutine(Async):
