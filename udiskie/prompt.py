@@ -99,7 +99,6 @@ dialog_definition = r"""
 class Dialog(Future):
 
     def __init__(self, window):
-        super().__init__()
         self._enter_count = 0
         self.window = window
         self.window.connect("response", self._result_handler)

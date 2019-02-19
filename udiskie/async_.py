@@ -68,9 +68,6 @@ class Future:
 
     done = False
 
-    def __init__(self):
-        ACTIVE_TASKS.add(self)
-
     @cachedproperty
     def callbacks(self):
         """Functions to be called on successful completion."""
@@ -86,7 +83,6 @@ class Future:
         if self.done:
             # TODO: more output
             raise RuntimeError("Future already finished!")
-        ACTIVE_TASKS.remove(self)
         self.done = True
         # TODO: handle Future callbacks:
         return [fn(*args) for fn in callbacks]
@@ -104,7 +100,11 @@ class Future:
                 type(exception), exception, exception.__traceback__)
 
     def __await__(self):
-        return (yield self)
+        ACTIVE_TASKS.add(self)
+        try:
+            return (yield self)
+        finally:
+            ACTIVE_TASKS.remove(self)
 
 
 def to_coro(func):
@@ -131,7 +131,6 @@ class gather(Future):
 
     def __init__(self, *tasks):
         """Create from a list of `Future`-s."""
-        super().__init__()
         tasks = list(tasks)
         self._results = {}
         self._num_tasks = len(tasks)
@@ -209,7 +208,6 @@ class Task(Future):
         """
         Create and start a `Task` task from the specified generator.
         """
-        super().__init__()
         self._generator = generator
         # TODO: cancellable tasks (generator.close() -> GeneratorExit)?
         run_soon(self._interact, next, self._generator)
