@@ -22,10 +22,10 @@ __all__ = [
     'run_bg',
     'Future',
     'gather',
-    'Coroutine',
+    'Task',
 ]
 
-# NOTE: neither gather nor Coroutine save references to the active tasks!
+# NOTE: neither gather nor Task save references to the active tasks!
 # Although this would create a reference cycle (coro->task->callbacks->coro),
 # the garbage collector can generally detect the cycle and delete the involved
 # objects anyway (there is usually no independent reference to the coroutine).
@@ -63,7 +63,7 @@ class Future:
     `self.set_result(value)` or `self.set_exception(exception)` when the
     operation finishes.
 
-    For implementations, see :class:`Coroutine` and :class:`DBusCall`.
+    For implementations, see :class:`Task` or :class:`Dialog`.
     """
 
     done = False
@@ -198,16 +198,16 @@ def sleep(seconds):
 def ensure_future(awaitable):
     if isinstance(awaitable, Future):
         return awaitable
-    return Coroutine(iter(awaitable.__await__()))
+    return Task(iter(awaitable.__await__()))
 
 
-class Coroutine(Future):
+class Task(Future):
 
     """Turns a generator into a Future."""
 
     def __init__(self, generator):
         """
-        Create and start a `Coroutine` task from the specified generator.
+        Create and start a `Task` task from the specified generator.
         """
         super().__init__()
         self._generator = generator
