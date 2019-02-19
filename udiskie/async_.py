@@ -25,12 +25,7 @@ __all__ = [
     'Task',
 ]
 
-# NOTE: neither gather nor Task save references to the active tasks!
-# Although this would create a reference cycle (coro->task->callbacks->coro),
-# the garbage collector can generally detect the cycle and delete the involved
-# objects anyway (there is usually no independent reference to the coroutine).
-# So we must take care to increase the reference-count of all active tasks
-# manually:
+
 ACTIVE_TASKS = set()
 
 
@@ -80,7 +75,6 @@ class Future:
         """Set finished state and invoke specified callbacks [internal]."""
         return [fn(*args) for fn in callbacks]
 
-    # accept multiple values for convenience (for now!):
     def set_result(self, value):
         """Signal successful completion."""
         self._finish(self.callbacks, value)
@@ -198,36 +192,22 @@ class Task(Future):
     """Turns a generator into a Future."""
 
     def __init__(self, generator):
-        """
-        Create and start a `Task` task from the specified generator.
-        """
+        """Create and start a ``Task`` from the specified generator."""
         self._generator = generator
-        # TODO: cancellable tasks (generator.close() -> GeneratorExit)?
         run_soon(self._interact, next, self._generator)
 
     def _send(self, value):
-        """
-        Interact with the coroutine by sending a value.
-
-        Set the return value of the current `yield` expression to the
-        specified value and resume control flow inside the coroutine.
-        """
+        """Resume the coroutine by returning ``value`` from the ``await``."""
         self._interact(self._generator.send, value)
 
     def _throw(self, exc):
-        """
-        Interact with the coroutine by raising an exception.
-
-        Transfer the control flow back to the coroutine by raising an
-        exception from the `yield` expression.
-        """
+        """Resume the coroutine by raising ``exc`` from the ``await``."""
         self._interact(self._generator.throw, exc)
         return True
 
     def _interact(self, func, *args):
-        """
-        Interact with the coroutine by performing the specified operation.
-        """
+        """Resume the coroutine by the specified method and process its
+        response."""
         try:
             value = func(*args)
         except StopIteration:
