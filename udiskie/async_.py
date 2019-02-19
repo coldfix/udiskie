@@ -66,8 +66,6 @@ class Future:
     For implementations, see :class:`Task` or :class:`Dialog`.
     """
 
-    done = False
-
     @cachedproperty
     def callbacks(self):
         """Functions to be called on successful completion."""
@@ -80,11 +78,6 @@ class Future:
 
     def _finish(self, callbacks, *args):
         """Set finished state and invoke specified callbacks [internal]."""
-        if self.done:
-            # TODO: more output
-            raise RuntimeError("Future already finished!")
-        self.done = True
-        # TODO: handle Future callbacks:
         return [fn(*args) for fn in callbacks]
 
     # accept multiple values for convenience (for now!):
