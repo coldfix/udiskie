@@ -704,14 +704,9 @@ class Daemon(Emitter):
                     None,
                     self._job_completed)
 
-    def _sync(self):
+    async def _sync(self):
         """Synchronize state."""
-        def update_objects(future):
-            objects = future.result()
-            self._objects = objects
-        update = self._proxy.call('GetManagedObjects', '()')
-        update.add_done_callback(update_objects)
-        return update
+        self._objects = await self._proxy.call('GetManagedObjects', '()')
 
     @classmethod
     async def create(cls):
