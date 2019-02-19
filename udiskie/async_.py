@@ -205,26 +205,6 @@ class Task(Future):
         # TODO: cancellable tasks (generator.close() -> GeneratorExit)?
         run_soon(self._interact, next, self._generator)
 
-    # TODO: shorten stack traces by inlining _recv / _interact ?
-
-    def _recv(self, thing):
-        """
-        Handle a value received from (yielded by) the generator.
-
-        This function is called immediately after the generator suspends its
-        own control flow by yielding a value.
-        """
-        if isinstance(thing, Future):
-            thing.callbacks.append(self._send)
-            thing.errbacks.append(self._throw)
-        else:
-            # the protocol is easy to do wrong, therefore we better do not
-            # silently ignore any errors!
-            raise NotImplementedError(
-                ("Unexpected return value from function {!r}: {!r}.\n"
-                 "Expecting either an Future.")
-                .format(self._generator, thing))
-
     def _send(self, value):
         """
         Interact with the coroutine by sending a value.
@@ -257,7 +237,9 @@ class Task(Future):
             self._generator.close()
             self.set_exception(e)
         else:
-            self._recv(value)
+            assert isinstance(value, Future)
+            value.callbacks.append(self._send)
+            value.errbacks.append(self._throw)
 
 
 def gio_callback(proxy, result, future):
