@@ -82,7 +82,7 @@ class Future:
     def set_exception(self, exception):
         """Signal unsuccessful completion."""
         was_handled = self._finish(self.errbacks, exception)
-        if not any(was_handled):
+        if not was_handled:
             traceback.print_exception(
                 type(exception), exception, exception.__traceback__)
 
@@ -194,20 +194,11 @@ class Task(Future):
     def __init__(self, generator):
         """Create and start a ``Task`` from the specified generator."""
         self._generator = generator
-        run_soon(self._interact, next, self._generator)
+        run_soon(self._resume, next, self._generator)
 
-    def _send(self, value):
-        """Resume the coroutine by returning ``value`` from the ``await``."""
-        self._interact(self._generator.send, value)
-
-    def _throw(self, exc):
-        """Resume the coroutine by raising ``exc`` from the ``await``."""
-        self._interact(self._generator.throw, exc)
-        return True
-
-    def _interact(self, func, *args):
-        """Resume the coroutine by the specified method and process its
-        response."""
+    def _resume(self, func, *args):
+        """Resume the coroutine by throwing a value or returning a value from
+        the ``await`` and handle further awaits."""
         try:
             value = func(*args)
         except StopIteration:
@@ -218,8 +209,8 @@ class Task(Future):
             self.set_exception(e)
         else:
             assert isinstance(value, Future)
-            value.callbacks.append(self._send)
-            value.errbacks.append(self._throw)
+            value.callbacks.append(partial(self._resume, self._generator.send))
+            value.errbacks.append(partial(self._resume, self._generator.throw))
 
 
 def gio_callback(proxy, result, future):
