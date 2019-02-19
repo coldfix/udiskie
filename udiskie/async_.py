@@ -22,16 +22,10 @@ __all__ = [
     'run_bg',
     'Future',
     'gather',
-    'Return',
-    'Coroutine',
+    'Task',
 ]
 
-# NOTE: neither gather nor Coroutine save references to the active tasks!
-# Although this would create a reference cycle (coro->task->callbacks->coro),
-# the garbage collector can generally detect the cycle and delete the involved
-# objects anyway (there is usually no independent reference to the coroutine).
-# So we must take care to increase the reference-count of all active tasks
-# manually:
+
 ACTIVE_TASKS = set()
 
 
@@ -64,13 +58,8 @@ class Future:
     `self.set_result(value)` or `self.set_exception(exception)` when the
     operation finishes.
 
-    For implementations, see :class:`Coroutine` and :class:`DBusCall`.
+    For implementations, see :class:`Task` or :class:`Dialog`.
     """
-
-    done = False
-
-    def __init__(self):
-        ACTIVE_TASKS.add(self)
 
     @cachedproperty
     def callbacks(self):
@@ -84,15 +73,8 @@ class Future:
 
     def _finish(self, callbacks, *args):
         """Set finished state and invoke specified callbacks [internal]."""
-        if self.done:
-            # TODO: more output
-            raise RuntimeError("Future already finished!")
-        ACTIVE_TASKS.remove(self)
-        self.done = True
-        # TODO: handle Future callbacks:
         return [fn(*args) for fn in callbacks]
 
-    # accept multiple values for convenience (for now!):
     def set_result(self, value):
         """Signal successful completion."""
         self._finish(self.callbacks, value)
@@ -100,12 +82,16 @@ class Future:
     def set_exception(self, exception):
         """Signal unsuccessful completion."""
         was_handled = self._finish(self.errbacks, exception)
-        if not any(was_handled):
+        if not was_handled:
             traceback.print_exception(
                 type(exception), exception, exception.__traceback__)
 
     def __await__(self):
-        return (yield self)
+        ACTIVE_TASKS.add(self)
+        try:
+            return (yield self)
+        finally:
+            ACTIVE_TASKS.remove(self)
 
 
 def to_coro(func):
@@ -132,7 +118,6 @@ class gather(Future):
 
     def __init__(self, *tasks):
         """Create from a list of `Future`-s."""
-        super().__init__()
         tasks = list(tasks)
         self._results = {}
         self._num_tasks = len(tasks)
@@ -173,14 +158,6 @@ class AsyncResult:
     __nonzero__ = __bool__
 
 
-class Return:
-
-    """Wraps a return value from a coroutine."""
-
-    def __init__(self, value=None):
-        self.value = value
-
-
 def call_func(fn, *args):
     """
     Call the function with the specified arguments but return None.
@@ -207,118 +184,21 @@ def sleep(seconds):
 def ensure_future(awaitable):
     if isinstance(awaitable, Future):
         return awaitable
-    return Coroutine(iter(awaitable.__await__()))
+    return Task(iter(awaitable.__await__()))
 
 
-class Coroutine(Future):
+class Task(Future):
 
-    """
-    A coroutine processes a sequence of asynchronous tasks.
-
-    Coroutines resemble non-atomic asynchronous operations. They merely
-    aggregate and operate on the results of zero or more asynchronous
-    subtasks.
-
-    Coroutines are scheduled for execution by just calling them. In that
-    regard, they behave very similar to normal functions. The difference is,
-    that they return an Future object rather than a result. This object can
-    then be used to add result handler callbacks. The coroutine's code block
-    will first be entered in a separate main loop iteration.
-
-    Coroutines are implemented as generators using `yield` expressions to
-    transfer control flow when performing asynchronous tasks. Coroutines may
-    yield zero or more `Future` tasks and one final `Return` value.
-
-    The code after a `yield` expression is executed only after the yielded
-    `Future` has finished. In case of successful completion, the result of the
-    asynchronous operation is returned. In case of an error, the exception is
-    raised inside the generator. For example:
-
-    >>> @Coroutine.from_generator_function
-    ... def foo(*args):
-    ...     # perform synchronous calculations here:
-    ...     other_args = f(args)
-    ...     try:
-    ...         # Invoke another asynchronous routine. Potentialy passes
-    ...         # control flow to main loop:
-    ...         result = yield subroutine(other_args)
-    ...     except ValueError:
-    ...         # Handle errors raised by the asynchronous subroutine. These
-    ...         # are sent here from the callback function.
-    ...         pass
-    ...     # `result` now contains the `Return` value of the sub-routine and
-    ...     # can be used for further calculations:
-    ...     value = g(result)
-    ...     # Set our own `Return` value. This must be the last statement:
-    ...     yield Return(value)
-    """
-
-    @classmethod
-    def from_generator_function(cls, generator_function):
-        """Turn a generator function into a coroutine function."""
-        @wraps(generator_function)
-        def coroutine_function(*args, **kwargs):
-            return cls(generator_function(*args, **kwargs))
-        coroutine_function.__func__ = generator_function
-        return coroutine_function
+    """Turns a generator into a Future."""
 
     def __init__(self, generator):
-        """
-        Create and start a `Coroutine` task from the specified generator.
-        """
-        super().__init__()
+        """Create and start a ``Task`` from the specified generator."""
         self._generator = generator
-        # TODO: cancellable tasks (generator.close() -> GeneratorExit)?
-        run_soon(self._interact, next, self._generator)
+        run_soon(self._resume, next, self._generator)
 
-    # TODO: shorten stack traces by inlining _recv / _interact ?
-
-    def _recv(self, thing):
-        """
-        Handle a value received from (yielded by) the generator.
-
-        This function is called immediately after the generator suspends its
-        own control flow by yielding a value.
-        """
-        if isinstance(thing, Future):
-            thing.callbacks.append(self._send)
-            thing.errbacks.append(self._throw)
-        elif isinstance(thing, Return):
-            self._generator.close()
-            # self.set_result(thing.value)
-            # to shorten stack trace use instead:
-            run_soon(self.set_result, thing.value)
-        else:
-            # the protocol is easy to do wrong, therefore we better do not
-            # silently ignore any errors!
-            raise NotImplementedError(
-                ("Unexpected return value from function {!r}: {!r}.\n"
-                 "Expecting either an Future or a Return.")
-                .format(self._generator, thing))
-
-    def _send(self, value):
-        """
-        Interact with the coroutine by sending a value.
-
-        Set the return value of the current `yield` expression to the
-        specified value and resume control flow inside the coroutine.
-        """
-        self._interact(self._generator.send, value)
-
-    def _throw(self, exc):
-        """
-        Interact with the coroutine by raising an exception.
-
-        Transfer the control flow back to the coroutine by raising an
-        exception from the `yield` expression.
-        """
-        self._interact(self._generator.throw, exc)
-        return True
-
-    def _interact(self, func, *args):
-        """
-        Interact with the coroutine by performing the specified operation.
-        """
+    def _resume(self, func, *args):
+        """Resume the coroutine by throwing a value or returning a value from
+        the ``await`` and handle further awaits."""
         try:
             value = func(*args)
         except StopIteration:
@@ -328,7 +208,9 @@ class Coroutine(Future):
             self._generator.close()
             self.set_exception(e)
         else:
-            self._recv(value)
+            assert isinstance(value, Future)
+            value.callbacks.append(partial(self._resume, self._generator.send))
+            value.errbacks.append(partial(self._resume, self._generator.throw))
 
 
 def gio_callback(proxy, result, future):
