@@ -119,6 +119,7 @@ class gather(Future):
     def __init__(self, *tasks):
         """Create from a list of `Future`-s."""
         tasks = list(tasks)
+        self._done = False
         self._results = {}
         self._num_tasks = len(tasks)
         if not tasks:
@@ -128,34 +129,19 @@ class gather(Future):
             task.callbacks.append(partial(self._subtask_result, idx))
             task.errbacks.append(partial(self._subtask_error, idx))
 
-    def _set_subtask_result(self, idx, result):
-        """Set result of a single subtask."""
-        self._results[idx] = result
+    def _subtask_result(self, idx, value):
+        """Receive a result from a single subtask."""
+        self._results[idx] = value
         if len(self._results) == self._num_tasks:
             self.set_result([
                 self._results[i]
                 for i in range(self._num_tasks)
             ])
 
-    def _subtask_result(self, idx, value):
-        """Receive a result from a single subtask."""
-        self._set_subtask_result(idx, AsyncResult(True, value))
-
     def _subtask_error(self, idx, error):
         """Receive an error from a single subtask."""
-        self._set_subtask_result(idx, AsyncResult(False, error))
-
-
-class AsyncResult:
-
-    def __init__(self, success, *values):
-        self.success = success
-        self.values = values
-
-    def __bool__(self):
-        return self.success and all(self.values)
-
-    __nonzero__ = __bool__
+        self.set_exception(error)
+        self.errbacks.clear()
 
 
 def call_func(fn, *args):
