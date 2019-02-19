@@ -22,7 +22,6 @@ __all__ = [
     'run_bg',
     'Future',
     'gather',
-    'Return',
     'Coroutine',
 ]
 
@@ -173,14 +172,6 @@ class AsyncResult:
     __nonzero__ = __bool__
 
 
-class Return:
-
-    """Wraps a return value from a coroutine."""
-
-    def __init__(self, value=None):
-        self.value = value
-
-
 def call_func(fn, *args):
     """
     Call the function with the specified arguments but return None.
@@ -212,55 +203,7 @@ def ensure_future(awaitable):
 
 class Coroutine(Future):
 
-    """
-    A coroutine processes a sequence of asynchronous tasks.
-
-    Coroutines resemble non-atomic asynchronous operations. They merely
-    aggregate and operate on the results of zero or more asynchronous
-    subtasks.
-
-    Coroutines are scheduled for execution by just calling them. In that
-    regard, they behave very similar to normal functions. The difference is,
-    that they return an Future object rather than a result. This object can
-    then be used to add result handler callbacks. The coroutine's code block
-    will first be entered in a separate main loop iteration.
-
-    Coroutines are implemented as generators using `yield` expressions to
-    transfer control flow when performing asynchronous tasks. Coroutines may
-    yield zero or more `Future` tasks and one final `Return` value.
-
-    The code after a `yield` expression is executed only after the yielded
-    `Future` has finished. In case of successful completion, the result of the
-    asynchronous operation is returned. In case of an error, the exception is
-    raised inside the generator. For example:
-
-    >>> @Coroutine.from_generator_function
-    ... def foo(*args):
-    ...     # perform synchronous calculations here:
-    ...     other_args = f(args)
-    ...     try:
-    ...         # Invoke another asynchronous routine. Potentialy passes
-    ...         # control flow to main loop:
-    ...         result = yield subroutine(other_args)
-    ...     except ValueError:
-    ...         # Handle errors raised by the asynchronous subroutine. These
-    ...         # are sent here from the callback function.
-    ...         pass
-    ...     # `result` now contains the `Return` value of the sub-routine and
-    ...     # can be used for further calculations:
-    ...     value = g(result)
-    ...     # Set our own `Return` value. This must be the last statement:
-    ...     yield Return(value)
-    """
-
-    @classmethod
-    def from_generator_function(cls, generator_function):
-        """Turn a generator function into a coroutine function."""
-        @wraps(generator_function)
-        def coroutine_function(*args, **kwargs):
-            return cls(generator_function(*args, **kwargs))
-        coroutine_function.__func__ = generator_function
-        return coroutine_function
+    """Turns a generator into a Future."""
 
     def __init__(self, generator):
         """
@@ -283,17 +226,12 @@ class Coroutine(Future):
         if isinstance(thing, Future):
             thing.callbacks.append(self._send)
             thing.errbacks.append(self._throw)
-        elif isinstance(thing, Return):
-            self._generator.close()
-            # self.set_result(thing.value)
-            # to shorten stack trace use instead:
-            run_soon(self.set_result, thing.value)
         else:
             # the protocol is easy to do wrong, therefore we better do not
             # silently ignore any errors!
             raise NotImplementedError(
                 ("Unexpected return value from function {!r}: {!r}.\n"
-                 "Expecting either an Future or a Return.")
+                 "Expecting either an Future.")
                 .format(self._generator, thing))
 
     def _send(self, value):
