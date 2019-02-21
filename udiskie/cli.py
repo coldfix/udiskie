@@ -438,6 +438,7 @@ class Daemon(_EntryPoint):
     def _load_statusicon(self):
         import udiskie.tray
         options = self.options
+        config = self.config
 
         if options['tray'] == 'auto':
             smart = True
@@ -456,7 +457,8 @@ class Daemon(_EntryPoint):
         else:
             raise ValueError("Invalid menu: %s" % (options['menu'],))
 
-        menu_maker = udiskie.tray.UdiskieMenu(self, icons, actions, flat)
+        menu_maker = udiskie.tray.UdiskieMenu(self, icons, actions, flat,
+                                              config.quickmenu_actions)
         if options['appindicator']:
             import udiskie.appindicator
             TrayIcon = udiskie.appindicator.AppIndicatorIcon

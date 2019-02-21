@@ -95,7 +95,8 @@ class UdiskieMenu:
     Objects of this class generate action menus when being called.
     """
 
-    def __init__(self, daemon, icons, actions, flat=True):
+    def __init__(self, daemon, icons, actions, flat=True,
+                 quickmenu_actions=None):
         """
         Initialize a new menu maker.
 
@@ -127,6 +128,20 @@ class UdiskieMenu:
         self._actions = actions
         self._quit_action = daemon.mainloop.quit
         self.flat = flat
+        # actions shown in the quick-menu ("flat", left-click):
+        self._quickmenu_actions = quickmenu_actions or [
+            'mount',
+            'browse',
+            'terminal',
+            'unlock',
+            'detach',
+            'delete',
+            # suppressed:
+            # 'unmount',    
+            # 'lock',
+            # 'eject',
+            # 'forget_password',
+        ]
 
     def __call__(self, menu, extended=True):
         """Populate the Gtk.Menu with udiskie mount operations."""
@@ -278,10 +293,16 @@ class UdiskieMenu:
                  for branch in node.branches
                  for item in self._collapse_device(branch, flat)
                  if item]
+        show_all = not flat or self._quickmenu_actions == 'all'
+        methods = node.methods if show_all else [
+            method
+            for method in node.methods
+            if method.method in self._quickmenu_actions
+        ]
         if flat:
-            items.extend(node.methods)
+            items.extend(methods)
         else:
-            items.append(MenuSection(None, node.methods))
+            items.append(MenuSection(None, methods))
         return items
 
 

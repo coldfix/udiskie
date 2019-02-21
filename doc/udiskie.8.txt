@@ -267,6 +267,10 @@ notifications:
   device_locked:    -1      # encrypted device was locked
   job_failed:       -1      # mount/unlock/.. has failed
 
+quickmenu_actions: [mount, unmount, unlock, terminal, detach, delete]
+  # List of actions to be shown in the quickmenu or the special value 'all'.
+  # The quickmenu is shown on left-click if using flat menu type.
+
 notification_actions:
   # Define which actions should be shown on notifications. Note that there
   # are currently only a limited set of actions available for each
