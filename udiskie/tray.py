@@ -137,7 +137,7 @@ class UdiskieMenu:
             'detach',
             'delete',
             # suppressed:
-            # 'unmount',    
+            # 'unmount',
             # 'lock',
             # 'eject',
             # 'forget_password',
