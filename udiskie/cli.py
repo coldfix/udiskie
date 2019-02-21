@@ -293,6 +293,9 @@ class Daemon(_EntryPoint):
         --password-cache MINUTES                Set password cache timeout
         --no-password-cache                     Disable password cache
 
+        -f PROGRAM, --file-manager PROGRAM      Set program for browsing
+        -F, --no-file-manager                   Disable browsing
+
         --terminal COMMAND                      Set terminal command line
                                                 (e.g. "termite -d")
         --no-terminal                           Disable terminal action
@@ -302,10 +305,6 @@ class Daemon(_EntryPoint):
 
         --notify-command COMMAND                Command to execute on events
         --no-notify-command                     Disable command notifications
-
-    Deprecated options:
-        -f PROGRAM, --file-manager PROGRAM      Set program for browsing
-        -F, --no-file-manager                   Disable browsing
     """
 
     option_defaults = extend(_EntryPoint.option_defaults, {

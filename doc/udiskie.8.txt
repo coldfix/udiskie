@@ -81,7 +81,7 @@ Daemon options
 	Disable tray icon (default).
 
 *-f PROGRAM, \--file-manager=PROGRAM*::
-	Set program to open mounted directories. Default is \'+xdg-open+'. Pass an empty string to disable this feature. This option is deprecated and will probably be replaced by a python commands file.
+	Set program to open mounted directories. Default is \'+xdg-open+'. Pass an empty string to disable this feature.
 
 *-F, \--no-file-manager*::
 	Disable browsing.
