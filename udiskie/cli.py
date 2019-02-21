@@ -293,6 +293,10 @@ class Daemon(_EntryPoint):
         --password-cache MINUTES                Set password cache timeout
         --no-password-cache                     Disable password cache
 
+        --terminal COMMAND                      Set terminal command line
+                                                (e.g. "termite -d")
+        --no-terminal                           Disable terminal action
+
         -p COMMAND, --password-prompt COMMAND   Command for password retrieval
         -P, --no-password-prompt                Disable unlocking
 
@@ -311,6 +315,7 @@ class Daemon(_EntryPoint):
         'menu': 'flat',
         'appindicator': False,
         'file_manager': 'xdg-open',
+        'terminal': '',
         'password_prompt': 'builtin:gui',
         'password_cache': False,
         'notify_command': None,
@@ -341,6 +346,7 @@ class Daemon(_EntryPoint):
         # prepare mounter object
         prompt = udiskie.prompt.password(options['password_prompt'])
         browser = udiskie.prompt.browser(options['file_manager'])
+        terminal = udiskie.prompt.browser(options['terminal'])
         cache = None
 
         try:
@@ -354,6 +360,7 @@ class Daemon(_EntryPoint):
             config=config.device_config,
             prompt=prompt,
             browser=browser,
+            terminal=terminal,
             cache=cache,
             cache_hint=options['password_cache'],
             udisks=self.udisks)

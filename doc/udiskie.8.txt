@@ -86,6 +86,12 @@ Daemon options
 *-F, \--no-file-manager*::
 	Disable browsing.
 
+*--terminal=PROGRAM*::
+	Set terminal command line to open mounted directories. Default is none! Pass an empty string to disable this feature.
+
+*--no-terminal*::
+	Disable terminal action.
+
 *-appindicator*::
 	Use AppIndicator3 for the status icon. Use this on Ubuntu/Unity if no icon is shown.
 
@@ -198,7 +204,11 @@ program_options:
 
   file_manager:     xdg-open
     # [string] Set program to open directories. It will be invoked
-    # with the folder path as its first command line argument.
+    # with the folder path as its last command line argument.
+
+  terminal:         'termite -d'
+    # [string] Set terminal command line to open directories. It will be
+    # invoked with thefolder path as its last command line argument.
 
   password_prompt: ["gnome-keyring-query", "get", "{id_uuid}"]
     # [string|list] Set command to retrieve passwords. If specified
@@ -274,6 +284,7 @@ icon_names:
 
   media:   [drive-removable-media, media-optical]
   browse:  [document-open, folder-open]
+  terminal: [terminal, terminator, xfce-terminal]
   mount:   [udiskie-mount]
   unmount: [udiskie-unmount]
   unlock:  [udiskie-unlock]

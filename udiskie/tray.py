@@ -48,6 +48,7 @@ class Icons:
             'media-flash',
         ],
         'browse': ['document-open', 'folder-open'],
+        'terminal': ['terminal', 'utilities-terminal'],
         'mount': ['udiskie-mount'],
         'unmount': ['udiskie-unmount'],
         'unlock': ['udiskie-unlock'],
@@ -108,6 +109,7 @@ class UdiskieMenu:
         ``actions`` dictionaries are:
 
             - browse    Open mount location
+            - terminal  Open mount location in terminal
             - mount     Mount a device
             - unmount   Unmount a device
             - unlock    Unlock a LUKS device

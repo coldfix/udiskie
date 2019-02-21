@@ -61,12 +61,15 @@ class Notify(DaemonBase):
             return
         browse_action = ('browse', _('Browse directory'),
                          self._mounter.browse, device)
+        terminal_action = ('terminal', _('Open terminal'),
+                           self._mounter.terminal, device)
         self._show_notification(
             'device_mounted',
             _('Device mounted'),
             _('{0.ui_label} mounted on {0.mount_paths[0]}', device),
             device.icon_name,
-            self._mounter._browser and browse_action)
+            self._mounter._browser and browse_action,
+            self._mounter._terminal and terminal_action)
 
     def device_unmounted(self, device):
         """Show unmount notification for specified device object."""
