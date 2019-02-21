@@ -147,8 +147,8 @@ class UdiskieMenu:
         menu.append(self._menuitem(
             _("Enable automounting"),
             icon=None,
-            onclick=lambda _: self._daemon.automounter.toggle(),
-            checked=self._daemon.automounter.active,
+            onclick=lambda _: self._daemon.automounter.toggle_on(),
+            checked=self._daemon.automounter.is_on(),
         ))
         menu.append(self._menuitem(
             _("Enable notifications"),

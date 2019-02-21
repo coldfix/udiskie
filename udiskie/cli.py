@@ -391,7 +391,7 @@ class Daemon(_EntryPoint):
 
         self.notify = Component(self._load_notify)
         self.statusicon = Component(self._load_statusicon)
-        self.automounter = Component(self._load_automounter)
+        self.automounter = self._load_automounter(options['automount'])
 
         if options['notify']:
             self.notify.activate()
@@ -404,7 +404,6 @@ class Daemon(_EntryPoint):
         else:
             tasks.append(Future())
         if options['automount']:
-            self.automounter.activate()
             tasks.append(self.mounter.add_all())
 
         return gather(*tasks)
@@ -459,9 +458,9 @@ class Daemon(_EntryPoint):
         trayicon = TrayIcon(menu_maker, icons)
         return udiskie.tray.UdiskieStatusIcon(trayicon, menu_maker, smart)
 
-    def _load_automounter(self):
+    def _load_automounter(self, automount):
         import udiskie.automount
-        return udiskie.automount.AutoMounter(self.mounter)
+        return udiskie.automount.AutoMounter(self.mounter, automount)
 
 
 class Mount(_EntryPoint):
