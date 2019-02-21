@@ -293,15 +293,18 @@ class Daemon(_EntryPoint):
         --password-cache MINUTES                Set password cache timeout
         --no-password-cache                     Disable password cache
 
+        -f PROGRAM, --file-manager PROGRAM      Set program for browsing
+        -F, --no-file-manager                   Disable browsing
+
+        --terminal COMMAND                      Set terminal command line
+                                                (e.g. "termite -d")
+        --no-terminal                           Disable terminal action
+
         -p COMMAND, --password-prompt COMMAND   Command for password retrieval
         -P, --no-password-prompt                Disable unlocking
 
         --notify-command COMMAND                Command to execute on events
         --no-notify-command                     Disable command notifications
-
-    Deprecated options:
-        -f PROGRAM, --file-manager PROGRAM      Set program for browsing
-        -F, --no-file-manager                   Disable browsing
     """
 
     option_defaults = extend(_EntryPoint.option_defaults, {
@@ -311,6 +314,7 @@ class Daemon(_EntryPoint):
         'menu': 'flat',
         'appindicator': False,
         'file_manager': 'xdg-open',
+        'terminal': '',
         'password_prompt': 'builtin:gui',
         'password_cache': False,
         'notify_command': None,
@@ -341,6 +345,7 @@ class Daemon(_EntryPoint):
         # prepare mounter object
         prompt = udiskie.prompt.password(options['password_prompt'])
         browser = udiskie.prompt.browser(options['file_manager'])
+        terminal = udiskie.prompt.browser(options['terminal'])
         cache = None
 
         try:
@@ -354,6 +359,7 @@ class Daemon(_EntryPoint):
             config=config.device_config,
             prompt=prompt,
             browser=browser,
+            terminal=terminal,
             cache=cache,
             cache_hint=options['password_cache'],
             udisks=self.udisks)
@@ -432,6 +438,7 @@ class Daemon(_EntryPoint):
     def _load_statusicon(self):
         import udiskie.tray
         options = self.options
+        config = self.config
 
         if options['tray'] == 'auto':
             smart = True
@@ -450,7 +457,8 @@ class Daemon(_EntryPoint):
         else:
             raise ValueError("Invalid menu: %s" % (options['menu'],))
 
-        menu_maker = udiskie.tray.UdiskieMenu(self, icons, actions, flat)
+        menu_maker = udiskie.tray.UdiskieMenu(self, icons, actions, flat,
+                                              config.quickmenu_actions)
         if options['appindicator']:
             import udiskie.appindicator
             TrayIcon = udiskie.appindicator.AppIndicatorIcon

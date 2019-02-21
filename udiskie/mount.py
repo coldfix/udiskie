@@ -62,7 +62,7 @@ class Mounter:
     """
 
     def __init__(self, udisks, config=None, prompt=None, browser=None,
-                 cache=None, cache_hint=False):
+                 terminal=None, cache=None, cache_hint=False):
         """
         Initialize mounter with the given defaults.
 
@@ -70,6 +70,7 @@ class Mounter:
         :param list config: list of :class:`DeviceFilter`
         :param callable prompt: retrieve passwords for devices
         :param callable browser: open devices
+        :param callable terminal: open devices in terminal
 
         If prompt is None, device unlocking will not work.
         If browser is None, browse will not work.
@@ -85,6 +86,7 @@ class Mounter:
             IgnoreDevice({'is_ignored': True, 'ignore': True})]
         self._prompt = prompt
         self._browser = browser
+        self._terminal = terminal
         self._cache = cache
         self._cache_hint = cache_hint
         self._log = logging.getLogger(__name__)
@@ -120,6 +122,26 @@ class Mounter:
             return False
         self._log.debug(_('opening {0} on {0.mount_paths[0]}', device))
         self._browser(device.mount_paths[0])
+        self._log.info(_('opened {0} on {0.mount_paths[0]}', device))
+        return True
+
+    @_error_boundary
+    async def terminal(self, device):
+        """
+        Launch terminal on the mount path of the specified device.
+
+        :param device: device object, block device path or mount path
+        :returns: whether the program was successfully launched.
+        """
+        device = self._find_device(device)
+        if not device.is_mounted:
+            self._log.error(_("not opening terminal {0}: not mounted", device))
+            return False
+        if not self._terminal:
+            self._log.error(_("not opening terminal {0}: no program", device))
+            return False
+        self._log.debug(_('opening {0} on {0.mount_paths[0]}', device))
+        self._terminal(device.mount_paths[0])
         self._log.info(_('opened {0} on {0.mount_paths[0]}', device))
         return True
 
@@ -732,6 +754,7 @@ class DeviceActions:
 
     _labels = {
         'browse': _('Browse {0}'),
+        'terminal': _('Hack on {0}'),
         'mount': _('Mount {0}'),
         'unmount': _('Unmount {0}'),
         'unlock': _('Unlock {0}'),
@@ -747,6 +770,7 @@ class DeviceActions:
         self._actions = _actions = actions.copy()
         setdefault(_actions, {
             'browse': mounter.browse,
+            'terminal': mounter.terminal,
             'mount': mounter.mount,
             'unmount': mounter.unmount,
             'unlock': mounter.unlock,
@@ -781,6 +805,8 @@ class DeviceActions:
             if device.is_mounted:
                 if self._mounter._browser:
                     yield 'browse'
+                if self._mounter._terminal:
+                    yield 'terminal'
                 yield 'unmount'
             else:
                 yield 'mount'

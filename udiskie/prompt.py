@@ -306,7 +306,8 @@ def browser(browser_name='xdg-open'):
 
     if not browser_name:
         return None
-    executable = find_executable(browser_name)
+    argv = shlex.split(browser_name)
+    executable = find_executable(argv[0])
     if executable is None:
         # Why not raise an exception? -I think it is more convenient (for
         # end users) to have a reasonable default, without enforcing it.
@@ -317,7 +318,7 @@ def browser(browser_name='xdg-open'):
         return None
 
     def browse(path):
-        return subprocess.Popen([executable, path])
+        return subprocess.Popen(argv + [path])
 
     return browse
 

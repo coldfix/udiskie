@@ -247,3 +247,8 @@ class Config:
     def notification_actions(self):
         """Get the notification actions dictionary from the config file."""
         return self._data.get('notification_actions', {}).copy()
+
+    @property
+    def quickmenu_actions(self):
+        """Get the set of actions to be shown in the quickmenu (left-click)."""
+        return self._data.get('quickmenu_actions', None)
