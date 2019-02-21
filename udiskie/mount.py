@@ -433,7 +433,8 @@ class Mounter:
         # if these operations work, everything is fine, we can return True:
         if lock and device.is_luks_cleartext:
             device = device.luks_cleartext_slave
-            success = await self.lock(device)
+            if self.is_handleable(device):
+                success = await self.lock(device)
         if eject:
             success = await self.eject(device)
         if (detach or detach is None) and device.is_loop:
