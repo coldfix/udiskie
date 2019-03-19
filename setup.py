@@ -13,30 +13,6 @@ from glob import glob
 import io
 
 
-# check availability of runtime dependencies
-def check_dependency(package, version):
-    """Issue a warning if the package is not available."""
-    try:
-        import gi
-        gi.require_version(package.rsplit('.')[-1], version)
-        __import__(package)
-    except ImportError as e:
-        # caused by either of the imports, probably the first
-        logging.warning("Missing runtime dependencies:\n\t" + str(e))
-    except ValueError as e:
-        # caused by the gi.require_version() statement
-        logging.warning("Missing runtime dependencies:\n\t" + str(e))
-    except RuntimeError as e:
-        # caused by the final __import__() statement
-        logging.warning("Bad runtime dependency:\n\t" + str(e))
-
-
-check_dependency('gi.repository.Gio', '2.0')
-check_dependency('gi.repository.GLib', '2.0')
-check_dependency('gi.repository.Gtk', '3.0')
-check_dependency('gi.repository.Notify', '0.7')
-
-
 # read long_description from README.rst
 long_description = None
 try:
