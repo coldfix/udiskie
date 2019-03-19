@@ -192,6 +192,7 @@ setup(
             'udiskie-info = udiskie.cli:Info.main',
         ],
     },
+    python_requires='>=2.7',
     install_requires=[
         'PyYAML',
         'docopt',
