@@ -2,7 +2,6 @@ from setuptools import setup, Command
 from setuptools.command.install import install as orig_install
 from distutils.command.install_data import install_data as orig_install_data
 from distutils.command.build import build as orig_build
-from distutils.util import convert_path
 
 import fastentrypoints          # noqa: F401, import for side-effects!
 
@@ -10,27 +9,6 @@ from subprocess import call
 import logging
 from os import path, listdir
 from glob import glob
-import io
-
-
-# read long_description from README.rst
-long_description = None
-try:
-    long_description = io.open('README.rst', encoding='utf-8').read()
-    long_description += '\n' + io.open('CHANGES.rst', encoding='utf-8').read()
-except IOError:
-    pass
-
-
-def exec_file(path):
-    """Execute a python file and return the `globals` dictionary."""
-    namespace = {}
-    with open(convert_path(path), 'rb') as f:
-        exec(f.read(), namespace, namespace)
-    return namespace
-
-
-metadata = exec_file('udiskie/__init__.py')
 
 
 # language files
@@ -133,70 +111,16 @@ class install_data(orig_install_data):
 
 
 setup(
-    name='udiskie',
-    version=metadata['__version__'],
-    description=metadata['__summary__'],
-    long_description=long_description,
-    author=metadata['__author__'],
-    author_email=metadata['__author_email__'],
-    maintainer=metadata['__maintainer__'],
-    maintainer_email=metadata['__maintainer_email__'],
-    url=metadata['__uri__'],
-    license=metadata['__license__'],
     cmdclass={
         'install': install,
         'install_data': install_data,
         'build': build,
         'build_mo': build_mo,
     },
-    packages=[
-        'udiskie',
-    ],
     data_files=[
         (path.join(theme_base, 'scalable', 'actions'), [
             path.join('icons', 'scalable', 'actions',
                       'udiskie-{0}.svg'.format(icon_name))
             for icon_name in icon_names])
-    ],
-    entry_points={
-        'console_scripts': [
-            'udiskie = udiskie.cli:Daemon.main',
-            'udiskie-mount = udiskie.cli:Mount.main',
-            'udiskie-umount = udiskie.cli:Umount.main',
-            'udiskie-info = udiskie.cli:Info.main',
-        ],
-    },
-    python_requires='>=3.5',
-    install_requires=[
-        'PyYAML',
-        'docopt',
-        # Currently not building out of the box:
-        # 'PyGObject',
-    ],
-    extras_require={
-        'password-cache': [
-            'keyutils==0.3',
-        ],
-        'config': [
-            'xdg',              # xdg.BaseDirectory.xdg_config_home
-        ],
-    },
-    tests_require=[
-    ],
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: Console',
-        'Environment :: X11 Applications :: GTK',
-        'Intended Audience :: Developers',
-        'Intended Audience :: End Users/Desktop',
-        'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'License :: OSI Approved :: MIT License',
-        'Topic :: Desktop Environment',
-        'Topic :: Software Development',
-        'Topic :: System :: Filesystems',
-        'Topic :: System :: Hardware',
-        'Topic :: Utilities',
     ],
 )
