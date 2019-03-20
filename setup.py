@@ -6,7 +6,7 @@ import fastentrypoints          # noqa: F401, import for side-effects!
 
 from subprocess import call
 import logging
-from os import path, listdir
+from os import path
 from glob import glob
 
 
@@ -21,7 +21,6 @@ comp_install_prefix = path.join('share', 'zsh', 'site-functions')
 
 # menu icons
 theme_base = path.join('share', 'icons', 'hicolor')
-icon_names = ['mount', 'unmount', 'lock', 'unlock', 'eject', 'detach']
 
 
 class build(orig_build):
@@ -99,14 +98,10 @@ data_files = [
 ]
 
 data_files += [
-    (path.join(theme_base, 'scalable', 'actions'), [
-        path.join('icons', 'scalable', 'actions',
-                  'udiskie-{0}.svg'.format(icon_name))
-        for icon_name in icon_names]),
-    (comp_install_prefix, [
-        path.join(comp_source_folder, cmd)
-        for cmd in listdir(comp_source_folder)
-    ]),
+    (path.join(theme_base, 'scalable', 'actions'),
+     glob(path.join('icons', 'scalable', 'actions', 'udiskie-*.svg'))),
+    (comp_install_prefix,
+     glob(path.join(comp_source_folder, '_*'))),
 ]
 
 setup(
