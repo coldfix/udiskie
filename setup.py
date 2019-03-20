@@ -2,12 +2,13 @@ from setuptools import setup, Command
 from setuptools.command.install import install as orig_install
 from distutils.command.build import build as orig_build
 
-import fastentrypoints          # noqa: F401, import for side-effects!
-
 from subprocess import call
 import logging
 from os import path
 from glob import glob
+
+import fastentrypoints
+fastentrypoints.monkey_patch()
 
 
 comp_files = glob('completions/_*')
