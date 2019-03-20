@@ -1,6 +1,5 @@
 from setuptools import setup, Command
 from setuptools.command.install import install as orig_install
-from distutils.command.install_data import install_data as orig_install_data
 from distutils.command.build import build as orig_build
 
 import fastentrypoints          # noqa: F401, import for side-effects!
@@ -92,35 +91,29 @@ class install(orig_install):
             logging.warning(e)
 
 
-class install_data(orig_install_data):
+data_files = [
+    (path.join(mo_install_prefix, lang, 'LC_MESSAGES'),
+     [path.join(mo_build_prefix, lang, 'LC_MESSAGES', 'udiskie.mo')])
+    for po_filename in glob(path.join(po_source_folder, '*.po'))
+    for lang in [path.splitext(path.split(po_filename)[1])[0]]
+]
 
-    def run(self):
-        """Add built translation files and then install data files."""
-        self.data_files += [
-            (path.join(mo_install_prefix, lang, 'LC_MESSAGES'),
-             [path.join(mo_build_prefix, lang, 'LC_MESSAGES', 'udiskie.mo')])
-            for lang in listdir(mo_build_prefix)
-        ]
-        self.data_files += [
-            (comp_install_prefix, [
-                path.join(comp_source_folder, cmd)
-                for cmd in listdir(comp_source_folder)
-            ])
-        ]
-        orig_install_data.run(self)
-
+data_files += [
+    (path.join(theme_base, 'scalable', 'actions'), [
+        path.join('icons', 'scalable', 'actions',
+                  'udiskie-{0}.svg'.format(icon_name))
+        for icon_name in icon_names]),
+    (comp_install_prefix, [
+        path.join(comp_source_folder, cmd)
+        for cmd in listdir(comp_source_folder)
+    ]),
+]
 
 setup(
     cmdclass={
         'install': install,
-        'install_data': install_data,
         'build': build,
         'build_mo': build_mo,
     },
-    data_files=[
-        (path.join(theme_base, 'scalable', 'actions'), [
-            path.join('icons', 'scalable', 'actions',
-                      'udiskie-{0}.svg'.format(icon_name))
-            for icon_name in icon_names])
-    ],
+    data_files=data_files,
 )
