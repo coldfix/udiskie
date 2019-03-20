@@ -10,17 +10,10 @@ from os import path
 from glob import glob
 
 
-# language files
-po_source_folder = 'lang'
-mo_build_prefix = path.join('build', 'locale')
-mo_install_prefix = path.join('share', 'locale')
-
-# completion files
-comp_source_folder = 'completions'
-comp_install_prefix = path.join('share', 'zsh', 'site-functions')
-
-# menu icons
-theme_base = path.join('share', 'icons', 'hicolor')
+comp_files = glob('completions/_*')
+icon_files = glob('icons/scalable/actions/udiskie-*.svg')
+languages  = [path.splitext(path.split(po_file)[1])[0]
+              for po_file in glob('lang/*.po')]
 
 
 class build(orig_build):
@@ -41,16 +34,13 @@ class build_mo(Command):
         pass
 
     def run(self):
-        for po_filename in glob(path.join(po_source_folder, '*.po')):
-            lang = path.splitext(path.split(po_filename)[1])[0]
-            mo_filename = path.join(mo_build_prefix, lang,
-                                    'LC_MESSAGES', 'udiskie.mo')
-            self.mkpath(path.dirname(mo_filename))
+        for lang in languages:
+            po_file = path.join('lang', lang + '.po')
+            mo_file = path.join('build/locale', lang, 'LC_MESSAGES/udiskie.mo')
+            self.mkpath(path.dirname(mo_file))
             self.make_file(
-                po_filename,
-                mo_filename,
-                self.make_mo,
-                [po_filename, mo_filename])
+                po_file, mo_file, self.make_mo,
+                [po_file, mo_file])
 
     def make_mo(self, po_filename, mo_filename):
         """Create a machine object (.mo) from a portable object (.po) file."""
@@ -84,24 +74,21 @@ class install(orig_install):
         """
         orig_install.run(self)
         try:
-            call(['gtk-update-icon-cache', theme_base])
+            call(['gtk-update-icon-cache', 'share/icons/hicolor'])
         except OSError as e:
             # ignore failures since the tray icon is an optional component:
             logging.warning(e)
 
 
 data_files = [
-    (path.join(mo_install_prefix, lang, 'LC_MESSAGES'),
-     [path.join(mo_build_prefix, lang, 'LC_MESSAGES', 'udiskie.mo')])
-    for po_filename in glob(path.join(po_source_folder, '*.po'))
-    for lang in [path.splitext(path.split(po_filename)[1])[0]]
+    (path.join('share/locale', lang, 'LC_MESSAGES'),
+     [path.join('build/locale', lang, 'LC_MESSAGES/udiskie.mo')])
+    for lang in languages
 ]
 
 data_files += [
-    (path.join(theme_base, 'scalable', 'actions'),
-     glob(path.join('icons', 'scalable', 'actions', 'udiskie-*.svg'))),
-    (comp_install_prefix,
-     glob(path.join(comp_source_folder, '_*'))),
+    ('share/icons/hicolor/scalable/actions', icon_files),
+    ('share/zsh/site-functions', comp_files),
 ]
 
 setup(
