@@ -51,17 +51,19 @@ class build_mo(Command):
             logging.warning(e)
 
 
-# NOTE: we want the install logic from *distutils* rather than the one from
-# *setuptools*. distutils does NOT automatically install dependencies. On the
-# other hand, setuptools fails to invoke the build commands properly before
-# trying to install and it puts the data files in the egg directory (we want
-# them in `sys.prefix` or similar).
 # NOTE: Subclassing the setuptools install command alters its behaviour to use
 # the distutils code. This is due to some really odd call-context checks in
 # the setuptools command.
-# NOTE: We need to subclass the setuptools install command rather than the
-# distutils command to make installing with pip from the source distribution
-# work.
+#
+# In fact this is desirable because distutils (correctly) installs data files
+# to `sys.prefix` whereas setuptools by default installs to the egg folder
+# (which is pretty much useless) and doesn't invoke build commands before
+# install. The only real drawback with the distutils behaviour is that it does
+# not automatically install dependencies, but we can easily live with that.
+#
+# Note further that we need to subclass the *setuptools* install command
+# rather than the *distutils* one to prevent errors when installing with pip
+# from the source distribution.
 class install(orig_install):
 
     """Custom install command used to update the gtk icon cache."""
