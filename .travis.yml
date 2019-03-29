@@ -18,8 +18,9 @@ addons:
 install:
   - python setup.py sdist bdist_wheel
   - pip install dist/*.whl keyutils
-  - pip install flake8
+  - pip install twine flake8
 
 script:
+  - twine check dist/*
   - flake8
   - nosetests
