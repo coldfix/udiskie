@@ -354,7 +354,7 @@ class Mounter:
         return success
 
     @_error_boundary
-    async def auto_add(self, device, recursive=None):
+    async def auto_add(self, device, recursive=None, automount=True):
         """
         Automatically attempt to mount or unlock a device, but be quiet if the
         device is not supported.
@@ -369,7 +369,7 @@ class Mounter:
         if device.is_luks_cleartext and self.udisks.version_info >= (2, 7, 0):
             await sleep(1.5)    # temporary workaround for #153, unreliable
         success = True
-        if not self.is_automount(device):
+        if not self.is_automount(device, automount):
             pass
         elif device.is_filesystem:
             if not device.is_mounted:
@@ -645,17 +645,17 @@ class Mounter:
             return self.is_handleable(_get_parent(device))
         return not ignored
 
-    def is_automount(self, device):
+    def is_automount(self, device, default=True):
         if not self.is_handleable(device):
             return False
-        return match_config(self._config, device, 'automount', True)
+        return match_config(self._config, device, 'automount', default)
 
     def _ignore_device(self, device):
         return match_config(self._config, device, 'ignore', False)
 
-    def is_addable(self, device):
+    def is_addable(self, device, automount=True):
         """Check if device can be added with ``auto_add``."""
-        if not self.is_automount(device):
+        if not self.is_automount(device, automount):
             return False
         if device.is_filesystem:
             return not device.is_mounted

@@ -22,14 +22,21 @@ class AutoMounter(DaemonBase):
     >>> automounter.activate()
     """
 
-    def __init__(self, mounter):
+    def __init__(self, mounter, automount=True):
         """Store mounter as member variable."""
         self._mounter = mounter
+        self._automount = automount
         self.events = {
             'device_changed': self.device_changed,
-            'device_added': run_bg(self._mounter.auto_add),
-            'media_added': run_bg(self._mounter.auto_add),
+            'device_added': self.auto_add,
+            'media_added': self.auto_add,
         }
+
+    def is_on(self):
+        return self._automount
+
+    def toggle_on(self):
+        self._automount = not self._automount
 
     def device_changed(self, old_state, new_state):
         """Mount newly mountable devices."""
@@ -38,4 +45,8 @@ class AutoMounter(DaemonBase):
         if (self._mounter.is_addable(new_state)
                 and not self._mounter.is_addable(old_state)
                 and not self._mounter.is_removable(old_state)):
-            run_bg(self._mounter.auto_add)(new_state)
+            self.auto_add(new_state)
+
+    @run_bg
+    def auto_add(self, device):
+        self._mounter.auto_add(device, default_auto=self._automount)
