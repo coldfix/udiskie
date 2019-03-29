@@ -1,26 +1,33 @@
 language: python
-
+dist: xenial
 python:
   - "3.5"
+  - "3.6"
+  - "3.7"
 
 addons:
   apt:
     packages:
     - libkeyutils-dev
-# NOTE: Travis currently runs tests on Ubuntu 14.04 (trusty) whose native
-# python3 distribution is py34. This means that we do not have access to
-# adequate system packages for use with `--system-site-packages`:
-#   - python-gobject
-#   - python3-gi
-# virtualenv:
-#   system_site_packages: true
+    - libgirepository1.0-dev
 
 install:
-  - pip install keyutils
-  - python setup.py sdist
-  - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
-  - pip install flake8
+  - python setup.py sdist bdist_wheel
+  - pip install dist/*.whl keyutils
+  - pip install twine flake8
 
 script:
+  - twine check dist/*
   - flake8
   - nosetests
+
+jobs:
+  include:
+    - stage: deploy
+      name: Upload release to PyPI
+      if: tag is present
+      script: twine upload dist/*
+      env:
+        - TWINE_USERNAME: coldfix-deploy
+        # TWINE_PASSWORD
+        - secure: "d8WYCQ56Se9Y9Z+GIwfLnMRgzfqiPm73XL8Cv3QBAeK/iyN8tsfoVknh5jqMv8ENwKVjuJ4jdCcNH4woW9aJQScPP7ZrOFBGGM+qOSZkCZZ4yOBtdU/oH0pb/eo5CmM/HeoszoZXzAjx3NDNFyQL9otIZNW2VnfBsfjTRgzMmW0="
