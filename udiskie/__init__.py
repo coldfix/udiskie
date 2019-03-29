@@ -1,13 +1,1 @@
-__title__ = 'udiskie'
-__version__ = '1.7.7'
-
-__summary__ = 'Removable disk automounter for udisks'
-__uri__ = 'https://github.com/coldfix/udiskie'
-
-__author__ = 'Byron Clark'
-__author_email__ = 'byron@theclarkfamily.name'
-__maintainer__ = 'Thomas Gläßle'
-__maintainer_email__ = 't_glaessle@gmx.de'
-
-__license__ = 'MIT'
-__copyright__ = '(c) 2010-2012 Byron Clark, (c) 2013-2019 Thomas Gläßle'
+__version__ = '2.0.0.dev0'
