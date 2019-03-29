@@ -16,9 +16,8 @@ addons:
 #   system_site_packages: true
 
 install:
-  - pip install keyutils
-  - python setup.py sdist
-  - pip install $(ls ./dist/*.tar.gz | sort -rV | head -n1)
+  - python setup.py sdist bdist_wheel
+  - pip install dist/*.whl keyutils
   - pip install flake8
 
 script:
