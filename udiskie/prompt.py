@@ -12,6 +12,8 @@ import string
 import subprocess
 import sys
 
+from importlib_resources import read_text
+
 from .async_ import exec_subprocess, run_bg, Future
 from .locale import _
 from .config import DeviceFilter
@@ -21,79 +23,7 @@ Gtk = None
 __all__ = ['password', 'browser']
 
 
-dialog_definition = r"""
-<interface>
-  <object class="GtkDialog" id="entry_dialog">
-    <property name="border_width">5</property>
-    <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="entry_box">
-        <property name="spacing">6</property>
-        <property name="border_width">6</property>
-        <property name="visible">True</property>
-        <child>
-          <object class="GtkLabel" id="message">
-            <property name="xalign">0</property>
-            <property name="visible">True</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkEntry" id="entry">
-            <property name="visibility">False</property>
-            <property name="activates_default">True</property>
-            <property name="visible">True</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="show_password">
-            <property name="label">Show password</property>
-            <property name="active">False</property>
-            <property name="visible">True</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="remember">
-            <property name="label">Remember password</property>
-            <property name="visible">False</property>
-          </object>
-        </child>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="action_box">
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkButton" id="cancel_button">
-                <property name="label">gtk-cancel</property>
-                <property name="use_stock">True</property>
-                <property name="visible">True</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="ok_button">
-                <property name="label">gtk-ok</property>
-                <property name="use_stock">True</property>
-                <property name="can_default">True</property>
-                <property name="has_default">True</property>
-                <property name="visible">True</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="keyfile_button">
-                <property name="label">Open keyfile…</property>
-                <property name="visible">False</property>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </child>
-    <action-widgets>
-      <action-widget response="-6">cancel_button</action-widget>
-      <action-widget response="-5">ok_button</action-widget>
-    </action-widgets>
-  </object>
-</interface>
-"""
+dialog_definition = read_text(__package__, 'password_dialog.ui')
 
 
 class Dialog(Future):

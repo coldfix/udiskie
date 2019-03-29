@@ -4,6 +4,7 @@ include doc/Makefile
 graft completions
 recursive-include icons *.svg
 recursive-include lang *.pot *.po
+recursive-include udiskie *.ui
 include CONTRIBUTORS COPYING LICENSE
 include README.rst CHANGES.rst
 include fastentrypoints.py
