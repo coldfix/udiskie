@@ -9,13 +9,7 @@ addons:
   apt:
     packages:
     - libkeyutils-dev
-# NOTE: Travis currently runs tests on Ubuntu 14.04 (trusty) whose native
-# python3 distribution is py34. This means that we do not have access to
-# adequate system packages for use with `--system-site-packages`:
-#   - python-gobject
-#   - python3-gi
-# virtualenv:
-#   system_site_packages: true
+    - libgirepository1.0-dev
 
 install:
   - python setup.py sdist bdist_wheel
