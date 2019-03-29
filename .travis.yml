@@ -24,3 +24,14 @@ script:
   - twine check dist/*
   - flake8
   - nosetests
+
+jobs:
+  include:
+    - stage: deploy
+      name: Upload release to PyPI
+      if: tag is present
+      script: twine upload dist/*
+      env:
+        - TWINE_USERNAME: coldfix-deploy
+        # TWINE_PASSWORD
+        - secure: "d8WYCQ56Se9Y9Z+GIwfLnMRgzfqiPm73XL8Cv3QBAeK/iyN8tsfoVknh5jqMv8ENwKVjuJ4jdCcNH4woW9aJQScPP7ZrOFBGGM+qOSZkCZZ4yOBtdU/oH0pb/eo5CmM/HeoszoZXzAjx3NDNFyQL9otIZNW2VnfBsfjTRgzMmW0="
