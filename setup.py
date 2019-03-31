@@ -10,7 +10,7 @@ from os import path
 from glob import glob
 
 
-comp_files = glob('completions/_*')
+comp_files = glob('completions/zsh/_*')
 icon_files = glob('icons/scalable/actions/udiskie-*.svg')
 languages  = [path.splitext(path.split(po_file)[1])[0]
               for po_file in glob('lang/*.po')]
