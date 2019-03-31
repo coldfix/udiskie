@@ -1,14 +1,13 @@
 from setuptools import setup, Command
+from setuptools.command.easy_install import ScriptWriter
 from setuptools.command.install import install as orig_install
 from distutils.command.build import build as orig_build
 
+from textwrap import dedent
 from subprocess import call
 import logging
 from os import path
 from glob import glob
-
-import fastentrypoints
-fastentrypoints.monkey_patch()
 
 
 comp_files = glob('completions/_*')
@@ -79,6 +78,33 @@ class install(orig_install):
             logging.warning(e)
 
 
+def fast_entrypoint_script_template():
+    """
+    Replacement for ``easy_install.ScriptWriter.template`` to generate faster
+    entry points that don't depend on and import pkg_resources.
+
+    NOTE: `pip install` already does the right thing (at least for pip 19.0)
+    without our help, but this is still needed for setuptools install, i.e.
+    ``python setup.py install`` or develop.
+    """
+    SCRIPT_TEMPLATE = dedent(r'''
+        # encoding: utf-8
+        import sys
+        from {ep.module_name} import {ep.attrs[0]}
+
+        if __name__ == '__main__':
+            sys.exit({func}())
+    ''').lstrip()
+
+    class ScriptTemplate(str):
+        def __mod__(self, context):
+            func = '.'.join(context['ep'].attrs)
+            return self.format(func=func, **context)
+
+    return ScriptTemplate(SCRIPT_TEMPLATE)
+
+
+ScriptWriter.template = fast_entrypoint_script_template()
 setup(
     cmdclass={
         'install': install,
