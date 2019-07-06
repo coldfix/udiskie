@@ -2,10 +2,10 @@ language: python
 
 # Restrict testing to system native python versions.
 # This means that binary distributions can be used for the dependencies.
-# Travis runs on Ubuntu 12.04 LTS currently. :(
+# Travis runs on Ubuntu 14.04 LTS currently. :(
 python:
   - "2.7"
-  - "3.4"       # trusty's native python3 version
+  - "3.5"       #  xenial's native python3 version
 
 addons:
   apt:
