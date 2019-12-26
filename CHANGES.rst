@@ -3,13 +3,13 @@ CHANGELOG
 
 2.0.0
 ~~~~~
-Date: (TBD)
+Date: 26.12.2019
 
 - require python >= 3.5
 - drop python2 support
 - drop udisks1 support
 - drop command line options corresponding to udisks version selection (-1, -2)
-- use py35's ``async def`` functions internally to improve stack traces
+- use py35's ``async def`` functions -- improving stack traces upon exception
 - internal refactoring and simplifications
 - add "show password" checkbox in password dialog
 
