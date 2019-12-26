@@ -38,7 +38,7 @@ function _udiskie
   case $state in
     pprompt)
       _alternative \
-        'builtins:builtin prompt:(builtin:cli builtin:gui)' \
+        'builtins:builtin prompt:(builtin:tty builtin:gui)' \
         'commands:command name:_path_commands' \
         && ret=0
       ;;
