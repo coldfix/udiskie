@@ -162,7 +162,7 @@ async def get_password_tty(device, options):
     # TODO: make this a TRUE async
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
-        return getpass.getpass(text)
+        return PasswordResult(getpass.getpass(text))
     except EOFError:
         print("")
         return None

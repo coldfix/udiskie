@@ -225,12 +225,12 @@ class Mounter:
                        allow_cache=self._cache is not None,
                        cache_hint=self._cache_hint)
         password = await self._prompt(device, options)
-        # password can be: None, str, or udiskie.prompt.PasswordResult
-        cache_hint = getattr(password, 'cache_hint', self._cache_hint)
-        password = getattr(password, 'password', password)
+        # password is either None or udiskie.prompt.PasswordResult:
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))
             return False
+        cache_hint = password.cache_hint
+        password = password.password
         if isinstance(password, bytes):
             self._log.debug(_('unlocking {0} using keyfile', device))
             await device.unlock_keyfile(password)
