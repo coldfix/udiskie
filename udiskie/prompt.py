@@ -12,7 +12,10 @@ import string
 import subprocess
 import sys
 
-from importlib_resources import read_text
+try:
+    from importlib.resources import read_text
+except ImportError:  # for Python<3.7
+    from importlib_resources import read_text
 
 from .async_ import exec_subprocess, run_bg, Future
 from .locale import _
