@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+2.0.1
+~~~~~
+Date: 28.12.2019
+
+- use ``importlib.resources`` directly on py3.7 and above, rather than
+  requiring ``importlib_resources`` as additional dependency
+
+
 2.0.0
 ~~~~~
 Date: 26.12.2019
