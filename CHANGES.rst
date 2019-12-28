@@ -13,12 +13,14 @@ Date: 26.12.2019
 - internal refactoring and simplifications
 - add "show password" checkbox in password dialog
 
+
 1.7.7
 ~~~~~
 Date: 17.02.2019
 
 - keep password dialog always on top
 - fix stdin-based password prompts
+
 
 1.7.6
 ~~~~~
@@ -27,11 +29,13 @@ Date: 17.02.2019
 - add russian translations (thanks @mr-GreyWolf)
 - fixed deprecation warnings in setup.py (thanks @sealj553)
 
+
 1.7.5
 ~~~~~
 Date: 24.05.2018
 
 - fix "NameError: 'Async' is not defined" when starting without tray icon
+
 
 1.7.4
 ~~~~~
@@ -42,12 +46,14 @@ Date: 17.05.2018
 - possibly fix non-deterministic bugs (due to garbage collection) by keeping
   global reference to all active asyncs
 
+
 1.7.3
 ~~~~~
 Date: 13.12.2017
 
 - temporary workaround for udisks2.7 requiring ``filesystem-mount-system``
   when trying to mount a LUKS cleartext device diretcly after unlocking
+
 
 1.7.2
 ~~~~~
@@ -59,6 +65,7 @@ Date: 18.10.2017
 - fix exception when inserting LUKS device if ``--password-prompt`` or udisks1 is used
 - fix minor problem with zsh autocompletion
 
+
 1.7.1
 ~~~~~
 Date: 02.10.2017
@@ -66,6 +73,7 @@ Date: 02.10.2017
 - add an "open keyfile" button to the password dialog
 - add warning if mounting device without ntfs-3g (#143)
 - fix problem with LVM devices
+
 
 1.7.0
 ~~~~~
@@ -77,6 +85,7 @@ Date: 26.03.2017
 - can configure ``automount`` per device using the new ``device_config`` [#107]
 - can configure keyfiles (requires udisks 2.6.4) [#66]
 - remove mailing list
+
 
 1.6.2
 ~~~~~
