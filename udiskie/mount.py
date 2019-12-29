@@ -247,7 +247,7 @@ class Mounter:
         try:
             password = self._cache[device]
         except KeyError:
-            self._log.debug(format_exc())
+            self._log.debug(_("no cached key for {0}", device))
             return False
         self._log.debug(_('unlocking {0} using cached password', device))
         try:
