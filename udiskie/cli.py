@@ -398,6 +398,7 @@ class Daemon(_EntryPoint):
         self.notify = Component(self._load_notify)
         self.statusicon = Component(self._load_statusicon)
         self.automounter = self._load_automounter(options['automount'])
+        self.automounter.activate()
 
         if options['notify']:
             self.notify.activate()

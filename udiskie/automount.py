@@ -49,4 +49,4 @@ class AutoMounter(DaemonBase):
 
     @run_bg
     def auto_add(self, device):
-        self._mounter.auto_add(device, default_auto=self._automount)
+        return self._mounter.auto_add(device, automount=self._automount)
