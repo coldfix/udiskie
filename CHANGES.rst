@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+2.0.2
+~~~~~
+Date: 30.12.2019
+
+- hotfix for automounting being broken since 2.0.0
+
+
 2.0.1
 ~~~~~
 Date: 28.12.2019
