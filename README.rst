@@ -20,7 +20,7 @@ Its features include:
 - loop devices (mounting iso archives)
 - password caching (requires python keyutils 0.3)
 
-All features can be indidually enabled or disabled.
+All features can be individually enabled or disabled.
 
 **NOTE:** support for python2 and udisks1 have been removed. If you need a
 version of udiskie that supports python2, please check out the ``1.7.X``
