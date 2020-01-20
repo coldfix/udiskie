@@ -3,6 +3,7 @@ User prompt utility.
 """
 
 from udiskie.depend import has_Gtk, require_Gtk
+from udiskie.common import is_utf8
 
 from distutils.spawn import find_executable
 import getpass
@@ -213,7 +214,11 @@ class DeviceCommand:
             stdout = await exec_subprocess(argv)
         except subprocess.CalledProcessError:
             return None
-        return stdout.rstrip('\n')
+        # Remove trailing newline for text answers, but not for binary
+        # keyfiles. This logic is a guess that may cause bugs for some users:(
+        if stdout.endswith(b'\n') and is_utf8(stdout):
+            stdout = stdout[:-1]
+        return stdout
 
     async def password(self, device, options):
         text = await self(device)

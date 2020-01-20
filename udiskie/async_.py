@@ -218,10 +218,11 @@ async def exec_subprocess(argv):
         Gio.SubprocessFlags.STDIN_INHERIT)
     stdin_buf = None
     cancellable = None
-    process.communicate_utf8_async(
+    process.communicate_async(
         stdin_buf, cancellable, gio_callback, future)
     result = await future
-    success, stdout, stderr = process.communicate_utf8_finish(result)
+    success, stdout, stderr = process.communicate_finish(result)
+    stdout = stdout.get_data()      # GLib.Bytes -> bytes
     if not success:
         raise RuntimeError("Subprocess did not exit normally!")
     exit_code = process.get_exit_status()

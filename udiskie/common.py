@@ -161,6 +161,15 @@ def decode_ay(ay):
         return bytearray(ay).rstrip(bytearray((0,))).decode('utf-8')
 
 
+def is_utf8(bs):
+    """Check if the given bytes string is utf-8 decodable."""
+    try:
+        bs.decode('utf-8')
+        return True
+    except UnicodeDecodeError:
+        return False
+
+
 def exc_message(exc):
     """Get an exception message."""
     message = getattr(exc, 'message', None)
