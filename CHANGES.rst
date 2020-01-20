@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+2.0.3
+~~~~~
+Date: 20.01.2020
+
+- fix exception when using non-device parameters with DeviceCommand
+  (e.g. in --notify-command)
+
+
 2.0.2
 ~~~~~
 Date: 30.12.2019
