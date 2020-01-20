@@ -192,7 +192,8 @@ class DeviceCommand:
             for text, kwd, spec, conv in formatter.parse(arg):
                 if kwd is None:
                     continue
-                self.used_attrs.add(kwd)
+                if kwd in DeviceFilter.VALID_PARAMETERS:
+                    self.used_attrs.add(kwd)
                 if kwd not in DeviceFilter.VALID_PARAMETERS and \
                         kwd not in self.extra:
                     self.extra[kwd] = None
