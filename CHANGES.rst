@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+2.0.4
+~~~~~
+Date: 21.01.2020
+
+- fix user commands that output non-utf8 data
+
+
 2.0.3
 ~~~~~
 Date: 20.01.2020
