@@ -200,7 +200,7 @@ class Notify(DaemonBase):
         except GLib.GError as exc:
             # Catch and log the exception. Starting udiskie with notifications
             # enabled while not having a notification service installed is a
-            # mistake too easy to be made, but it shoud not render the rest of
+            # mistake too easy to be made, but it should not render the rest of
             # udiskie's logic useless by raising an exception before the
             # automount handler gets invoked.
             self._log.error(_("Failed to show notification: {0}", exc_message(exc)))

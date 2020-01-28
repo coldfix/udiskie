@@ -227,7 +227,7 @@ device_config:
 
   # List of device option rules. Each item can match any combination of device
   # attributes. Additionally, it defines the resulting action (see below).
-  # Any rule can contain multliple filters (AND) and multiple actions.
+  # Any rule can contain multiple filters (AND) and multiple actions.
   # Only the first matching rule that defines a given action is used.
   # The rules defined here are simply prepended to the builtin device rules,
   # so that it is possible to completely overwrite the defaults by specifying

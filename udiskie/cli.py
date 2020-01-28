@@ -119,7 +119,7 @@ class _EntryPoint:
     usage_remarks = _("""
     Note, that the options in the individual groups are mutually exclusive.
 
-    The config file can be a JSON or preferrably a YAML file. For an
+    The config file can be a JSON or preferably a YAML file. For an
     example, see the MAN page (or doc/udiskie.8.txt in the repository).
     """)
 
