@@ -629,7 +629,7 @@ class Mounter:
 
     # iterate devices
     def is_handleable(self, device):
-        # TODO: handle pathes in first argument
+        # TODO: handle paths in first argument
         """
         Check whether this device should be handled by udiskie.
 

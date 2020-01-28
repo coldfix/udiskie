@@ -653,7 +653,7 @@ class Daemon(Emitter):
         Get a device proxy by device name or any mount path of the device.
 
         This searches through all accessible devices and compares device
-        path as well as mount pathes.
+        path as well as mount paths.
         """
         if isinstance(path, Device):
             return path

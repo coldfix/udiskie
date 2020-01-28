@@ -187,7 +187,7 @@ class Config:
 
     @classmethod
     def default_pathes(cls):
-        """Return the default config file pathes as a list."""
+        """Return the default config file paths as a list."""
         try:
             from xdg.BaseDirectory import xdg_config_home as config_home
         except ImportError:

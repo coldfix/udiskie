@@ -53,7 +53,7 @@ class Emitter:
 
 
 def samefile(a: str, b: str) -> bool:
-    """Check if two pathes represent the same file."""
+    """Check if two paths represent the same file."""
     try:
         return os.path.samefile(a, b)
     except OSError:
