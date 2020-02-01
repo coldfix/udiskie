@@ -169,12 +169,15 @@ def match_config(filters, device, kind, default):
     :param default: default value
     :returns: value of the first matching filter
     """
-    if device is None:
-        return default
-    matches = (f.value(kind, device)
-               for f in filters
-               if f.has_value(kind) and f.match(device))
-    return next(matches, default)
+    while device is not None:
+        matches = (f.value(kind, device)
+                   for f in filters
+                   if f.has_value(kind) and f.match(device))
+        try:
+            return next(matches)
+        except StopIteration:
+            device = device.partition_slave or device.luks_cleartext_slave
+    return default
 
 
 class Config:

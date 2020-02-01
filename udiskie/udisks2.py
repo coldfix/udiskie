@@ -334,24 +334,12 @@ class Device:
     @property
     def is_external(self):
         """Check if the device is external."""
-        # NOTE: Checking for equality HintSystem==False returns False if the
-        # property is resolved to a None value (interface not available).
-        if self._P.Block.HintSystem == False:       # noqa: E712
-            return True
-        # NOTE: udisks2 seems to guess incorrectly in some cases. This
-        # leads to HintSystem=True for unlocked devices. In order to show
-        # the device anyway, it needs to be recursively checked if any
-        # parent device is recognized as external.
-        if self.is_luks_cleartext and self.luks_cleartext_slave.is_external:
-            return True
-        if self.is_partition and self.partition_slave.is_external:
-            return True
-        return False
+        return not self.is_systeminternal if self.is_toplevel else None
 
     @property
     def is_systeminternal(self):
         """Check if the device is internal."""
-        return not self.is_external
+        return bool(self._P.Block.HintSystem) if self.is_toplevel else None
 
     @property
     def drive(self):

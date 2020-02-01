@@ -42,11 +42,6 @@ def _is_parent_of(parent, child):
     return False
 
 
-def _get_parent(device):
-    """Return the container device or ``None``."""
-    return device.partition_slave or device.luks_cleartext_slave
-
-
 class Mounter:
 
     """
@@ -639,11 +634,7 @@ class Mounter:
         Currently this just means that the device is removable and holds a
         filesystem or the device is a LUKS encrypted volume.
         """
-        ignored = self._ignore_device(device)
-        # propagate handleability of parent devices:
-        if ignored is None and device is not None:
-            return self.is_handleable(_get_parent(device))
-        return not ignored
+        return not self._ignore_device(device)
 
     def is_automount(self, device, default=True):
         if not self.is_handleable(device):

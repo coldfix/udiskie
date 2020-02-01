@@ -21,6 +21,8 @@ class TestDev:
         self.object_path = object_path
         self.id_type = id_type
         self.id_uuid = id_uuid
+        self.partition_slave = None
+        self.luks_cleartext_slave = None
 
 
 class TestFilterMatcher(unittest.TestCase):
