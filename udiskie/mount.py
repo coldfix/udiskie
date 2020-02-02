@@ -75,7 +75,8 @@ class Mounter:
             IgnoreDevice({'symlinks': '/dev/mapper/docker-*', 'ignore': True}),
             IgnoreDevice({'symlinks': '/dev/disk/by-id/dm-name-docker-*',
                           'ignore': True}),
-            IgnoreDevice({'is_loop': True, 'loop_file': '/*', 'ignore': False}),
+            IgnoreDevice({'is_loop': True, 'is_ignored': False,
+                          'loop_file': '/*', 'ignore': False}),
             IgnoreDevice({'is_block': False, 'ignore': True}),
             IgnoreDevice({'is_external': False, 'ignore': True}),
             IgnoreDevice({'is_ignored': True, 'ignore': True})]
