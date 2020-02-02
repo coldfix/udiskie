@@ -192,6 +192,11 @@ class Device:
         return not self.is_partition and not self.is_luks_cleartext
 
     @property
+    def parent(self):
+        """Return the device of which this one is a child."""
+        return self.partition_slave or self.luks_cleartext_slave
+
+    @property
     def _assocdrive(self):
         """
         Return associated drive if this is a top level block device.
@@ -346,23 +351,15 @@ class Device:
         """Get wrapper to the drive containing this device."""
         if self.is_drive:
             return self
-        cleartext = self.luks_cleartext_slave
-        if cleartext:
-            return cleartext.drive
-        if self.is_block:
+        elif self.is_block:
             return self._daemon[self._P.Block.Drive]
-        return None
+        else:
+            return None
 
     @property
     def root(self):
         """Get the top level block device in the ancestry of this device."""
-        drive = self.drive
-        for device in self._daemon:
-            if device.is_drive:
-                continue
-            if device.is_toplevel and device.drive == drive:
-                return device
-        return None
+        return self if self.is_toplevel else self.parent.root
 
     @property
     def should_automount(self):
