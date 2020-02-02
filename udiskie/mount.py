@@ -78,7 +78,8 @@ class Mounter:
             IgnoreDevice({'is_loop': True, 'is_ignored': False,
                           'loop_file': '/*', 'ignore': False}),
             IgnoreDevice({'is_block': False, 'ignore': True}),
-            IgnoreDevice({'is_external': False, 'ignore': True}),
+            IgnoreDevice({'is_external': False,
+                          'is_toplevel': True, 'ignore': True}),
             IgnoreDevice({'is_ignored': True, 'ignore': True})]
         self._prompt = prompt
         self._browser = browser

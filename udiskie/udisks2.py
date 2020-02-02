@@ -334,12 +334,12 @@ class Device:
     @property
     def is_external(self):
         """Check if the device is external."""
-        return not self.is_systeminternal if self.is_toplevel else None
+        return not self.is_systeminternal
 
     @property
     def is_systeminternal(self):
         """Check if the device is internal."""
-        return bool(self._P.Block.HintSystem) if self.is_toplevel else None
+        return self._P.Block.HintSystem
 
     @property
     def drive(self):
