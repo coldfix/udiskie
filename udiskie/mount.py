@@ -529,13 +529,16 @@ class Mounter:
             self._log.warn(_('not detaching {0}: unhandled device', device))
             return False
         drive = device.root
-        if not drive.is_detachable:
+        if not drive.is_detachable and not drive.is_loop:
             self._log.warn(_('not detaching {0}: drive not detachable', drive))
             return False
         if force:
             await self.auto_remove(drive, force=True)
         self._log.debug(_('detaching {0}', device))
-        await drive.detach()
+        if drive.is_detachable:
+            await drive.detach()
+        else:
+            await drive.delete()
         self._log.info(_('detached {0}', device))
         return True
 
