@@ -1,6 +1,22 @@
 CHANGELOG
 ---------
 
+2.1.0
+~~~~~
+Date: 02.02.2020
+
+- fix some typos (thanks @torstehu, #197)
+- change how device rules are evaluated: lookup undecided rules on parent
+  device (fixes issue with filters not applying to subdevices of a matched
+  device, see #198)
+- change builtin rules to not show loop devices with ``HintIgnore``, see #181
+- change how is_external attribute is compute: use the value from udisks
+  directly (fixes issue with is_external property not behaving as expected,
+  see #185)
+- add 'skip' keyword for rules to skip evaluation of further rules on this
+  device, and continue directly on the parent
+
+
 2.0.4
 ~~~~~
 Date: 21.01.2020
