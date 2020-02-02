@@ -105,6 +105,8 @@ class DeviceFilter:
             keyfile = os.path.expandvars(keyfile)
             keyfile = os.path.expanduser(keyfile)
             self._values['keyfile'] = keyfile
+        if 'skip' in match:
+            self._values['skip'] = match.pop('skip')
         # the use of list() makes deletion inside the loop safe:
         for k in list(self._match):
             if k not in self.VALID_PARAMETERS:
@@ -170,13 +172,15 @@ def match_config(filters, device, kind, default):
     :returns: value of the first matching filter
     """
     while device is not None:
-        matches = (f.value(kind, device)
-                   for f in filters
-                   if f.has_value(kind) and f.match(device))
-        try:
-            return next(matches)
-        except StopIteration:
-            device = device.partition_slave or device.luks_cleartext_slave
+        for f in filters:
+            if f.has_value(kind) and f.match(device):
+                return f.value(kind, device)
+            # 'skip' allows skipping further rules and directly moving on
+            # lookup on the parent device:
+            if f.has_value('skip') and f.match(device) and (
+                    f.value('skip', device) in (True, 'all', kind)):
+                break
+        device = device.partition_slave or device.luks_cleartext_slave
     return default
 
 
