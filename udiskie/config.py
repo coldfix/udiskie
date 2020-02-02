@@ -25,6 +25,20 @@ def lower(s):
         return s
 
 
+def format_dict(d):
+    return '{' + ', '.join([
+        _format_item(k, v)
+        for k, v in d.items()
+    ]) + '}'
+
+
+def _format_item(k, v):
+    if isinstance(v, bool):
+        return k if v else '!' + k
+    else:
+        return '{}={}'.format(k, v)
+
+
 def match_value(value, pattern):
     if isinstance(value, (list, tuple)):
         return any(match_value(v, pattern) for v in value)
@@ -112,13 +126,12 @@ class DeviceFilter:
             if k not in self.VALID_PARAMETERS:
                 self._log.error(_('Unknown matching attribute: {!r}', k))
                 del self._match[k]
-        self._log.debug(_('{0} created', self))
+        self._log.debug(_('new rule: {0}', self))
 
     def __str__(self):
-        return _('{0}(match={1!r}, value={2!r})',
-                 self.__class__.__name__,
-                 self._match,
-                 self._values)
+        return _('{0} -> {1}',
+                 format_dict(self._match),
+                 format_dict(self._values))
 
     def match(self, device):
         """Check if the device object matches this filter."""
@@ -135,11 +148,7 @@ class DeviceFilter:
         If :meth:`match` is False for the device, the return value of this
         method is undefined.
         """
-        self._log.debug(_('{0}(match={1!r}, {2}={3!r}) used for {4}',
-                          self.__class__.__name__,
-                          self._match,
-                          kind, self._values[kind],
-                          device.object_path))
+        self._log.debug(_('{0} matched {1}', device.device_file, self))
         return self._values[kind]
 
 

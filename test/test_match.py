@@ -18,7 +18,7 @@ from udiskie.config import Config, match_config
 class TestDev:
 
     def __init__(self, object_path, id_type, id_uuid):
-        self.object_path = object_path
+        self.device_file = object_path
         self.id_type = id_type
         self.id_uuid = id_uuid
         self.partition_slave = None
