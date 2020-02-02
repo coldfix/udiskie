@@ -339,7 +339,7 @@ class Device:
     @property
     def is_systeminternal(self):
         """Check if the device is internal."""
-        return self._P.Block.HintSystem
+        return bool(self._P.Block.HintSystem)
 
     @property
     def drive(self):
