@@ -89,7 +89,7 @@ msgid "Open keyfile…"
 msgstr ""
 
 #: ../udiskie/prompt.py:104
-msgid "Remember password"
+msgid "Cache password"
 msgstr ""
 
 #: ../udiskie/prompt.py:119
