@@ -6,7 +6,7 @@ setuptools entry points.
 """
 
 # import udiskie.depend first - for side effects!
-from .depend import has_Notify, has_Gtk, _in_X
+from .depend import has_Notify, has_Gtk, _in_X, has_AppIndicator3
 
 import inspect
 import logging.config
@@ -391,6 +391,16 @@ class Daemon(_EntryPoint):
                 "\nStarting udiskie without tray icon.\n")
             logging.getLogger(__name__).error(gtk3_not_available)
             options['tray'] = False
+
+        if options['appindicator'] and not has_AppIndicator3():
+            appindicator_not_available = _(
+                "Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:"
+                "\n\t- libappindicator is not installed"
+                "\n\t- the typelib is provided by a separate package"
+                "\n\t- it was built with introspection disabled"
+                "\nStarting udiskie without appindicator icon.\n")
+            logging.getLogger(__name__).error(appindicator_not_available)
+            options['appindicator'] = False
 
         # start components
         tasks = []

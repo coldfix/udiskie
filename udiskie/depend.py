@@ -33,6 +33,7 @@ _has_Gtk = (3 if check_version('Gtk', '3.0') else
             0)
 
 _has_Notify = check_version('Notify', '0.7')
+_has_AppIndicator3 = check_version('AppIndicator3', '0.1')
 
 
 def require_Gtk(min_version=2):
@@ -64,9 +65,20 @@ def require_Notify():
     return Notify
 
 
+def require_AppIndicator3():
+    if not _has_AppIndicator3:
+        raise RuntimeError('Module gi.repository.Notify not available!')
+    from gi.repository import AppIndicator3
+    return AppIndicator3
+
+
 def has_Notify():
     return check_call((RuntimeError, ImportError), require_Notify)
 
 
 def has_Gtk(min_version=2):
     return check_call((RuntimeError, ImportError), require_Gtk, min_version)
+
+
+def has_AppIndicator3():
+    return check_call((RuntimeError, ImportError), require_AppIndicator3)
