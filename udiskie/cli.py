@@ -375,14 +375,16 @@ class Daemon(_EntryPoint):
             logging.getLogger(__name__).error(libnotify_not_available)
             options['notify'] = False
 
-        if options['tray'] and not _in_X:
+        show_tray = options['tray'] or options['appindicator']
+
+        if show_tray and not _in_X:
             no_X_session = _(
                 "Not run within X session. "
                 "\nStarting udiskie without tray icon.\n")
             logging.getLogger(__name__).error(no_X_session)
-            options['tray'] = False
+            show_tray = False
 
-        if options['tray'] and not has_Gtk(3):
+        if show_tray and not has_Gtk(3):
             gtk3_not_available = _(
                 "Typelib for 'Gtk 3.0' is not available. Possible causes include:"
                 "\n\t- GTK3 is not installed"
@@ -390,11 +392,12 @@ class Daemon(_EntryPoint):
                 "\n\t- GTK3 was built with introspection disabled"
                 "\nStarting udiskie without tray icon.\n")
             logging.getLogger(__name__).error(gtk3_not_available)
-            options['tray'] = False
+            show_tray = False
 
-        if options['appindicator'] and not has_AppIndicator3():
+        if show_tray and options['appindicator'] and not has_AppIndicator3():
             appindicator_not_available = _(
-                "Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:"
+                "Typelib for 'AppIndicator3 0.1' is not available. Possible "
+                "causes include:"
                 "\n\t- libappindicator is not installed"
                 "\n\t- the typelib is provided by a separate package"
                 "\n\t- it was built with introspection disabled"
@@ -415,7 +418,7 @@ class Daemon(_EntryPoint):
         if options['notify_command']:
             # is currently enabled/disabled statically only once:
             self.notify_command()
-        if options['tray']:
+        if show_tray:
             self.statusicon.activate()
             tasks.append(self.statusicon.instance._icon.task)
         else:
@@ -450,11 +453,8 @@ class Daemon(_EntryPoint):
         options = self.options
         config = self.config
 
-        if options['tray'] == 'auto':
-            smart = True
-        elif options['tray'] is True:
-            smart = False
-        else:
+        smart = options['tray'] == 'auto'
+        if options['tray'] not in ('auto', True, False):
             raise ValueError("Invalid tray: %s" % (options['tray'],))
         icons = udiskie.tray.Icons(self.config.icon_names)
         actions = udiskie.mount.DeviceActions(self.mounter)
