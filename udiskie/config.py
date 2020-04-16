@@ -204,10 +204,9 @@ class Config:
     @classmethod
     def default_pathes(cls):
         """Return the default config file paths as a list."""
-        try:
-            from xdg.BaseDirectory import xdg_config_home as config_home
-        except ImportError:
-            config_home = os.path.expanduser('~/.config')
+        config_home = (
+            os.environ.get('XDG_CONFIG_HOME') or
+            os.path.expanduser('~/.config'))
         return [os.path.join(config_home, 'udiskie', 'config.yml'),
                 os.path.join(config_home, 'udiskie', 'config.json')]
 
