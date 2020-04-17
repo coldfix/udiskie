@@ -1,6 +1,22 @@
 CHANGELOG
 ---------
 
+2.1.1
+~~~~~
+Date: 17.04.2020
+
+- handle XDG_CONFIG_HOME variable without external pyxdg dependency
+- silence warning when using AppIndicator
+- make ``--appindicator`` sufficient to show icon (previously additionally
+  required ``--tray``)
+- improve wording in password dialog "Remember" -> "Cache"
+- make some of the logging more concise
+- fix recursive adding/removing of some child devices:
+    - fix incorrect root device detection for devices without Drive property
+      (e.g. children of loop devices)
+    - fix ``--detach`` option when applied to partitions of loop devices
+
+
 2.1.0
 ~~~~~
 Date: 02.02.2020
