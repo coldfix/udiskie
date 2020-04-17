@@ -148,7 +148,8 @@ class DeviceFilter:
         If :meth:`match` is False for the device, the return value of this
         method is undefined.
         """
-        self._log.debug(_('{0} matched {1}', device.device_file, self))
+        self._log.debug(_('{0} matched {1}',
+                          device.device_file or device.object_path, self))
         return self._values[kind]
 
 
