@@ -494,7 +494,7 @@ msgstr "Dispositivo retirado"
 #: ../udiskie/notify.py:155
 #, python-brace-format
 msgid "device disappeared on {0.device_presentation}"
-msgstr "el dispositivo despareció en {0.device_presentation} "
+msgstr "el dispositivo desapareció en {0.device_presentation} "
 
 #: ../udiskie/notify.py:164
 #, python-brace-format
