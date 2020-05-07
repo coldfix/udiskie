@@ -1,5 +1,5 @@
 
-all: en_US.po es_ES.po sk_SK.po
+all: $(wildcard *.po)
 
 %.po: udiskie.pot
 	if [ -f $@ ]; then \
