@@ -1,6 +1,15 @@
 CHANGELOG
 ---------
 
+2.2.0
+~~~~~
+Date: 07.05.2020
+
+- add Italian translation
+- remove unneeded ``xdg`` from optional dependencies
+- fix a typo in Spanish translation and update russian translation files
+
+
 2.1.1
 ~~~~~
 Date: 17.04.2020
