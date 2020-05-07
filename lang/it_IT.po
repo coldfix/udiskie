@@ -1,0 +1,639 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: udiskie\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-05-06 11:52+0200\n"
+"PO-Revision-Date: 2020-05-06 11:52+0200\n"
+"Last-Translator: Stefano Mecocci <mecocci15@gmail.com>\n"
+"Language-Team: \n"
+"Language: it_IT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../udiskie/cli.py:46
+#, python-brace-format
+msgid "These options are mutually exclusive: {0}"
+msgstr "Queste opzioni sono mutualmente esclusive: {0}"
+
+#: ../udiskie/cli.py:119
+msgid ""
+"\n"
+"    Note, that the options in the individual groups are mutually exclusive.\n"
+"\n"
+"    The config file can be a JSON or preferably a YAML file. For an\n"
+"    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
+"    "
+msgstr ""
+"\n"
+"    Attenzione, le opzioni nei gruppi individuali sono mutualmente esclusive\n"
+"\n"
+"    Il file di configurazione può essere un file JSON o preferibilmente un file YAML.\n"
+"    Per un esempio, guarda la pagina MAN (oppure doc/udiskie.8.txt nella repository).\n"
+"    "
+
+#: ../udiskie/cli.py:139
+#, python-format
+msgid "%(message)s"
+msgstr "%(message)s"
+
+#: ../udiskie/cli.py:141
+#, python-format
+msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+
+#: ../udiskie/cli.py:370
+msgid ""
+"Typelib for 'libnotify' is not available. Possible causes include:\n"
+"\t- libnotify is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- libnotify was built with introspection disabled\n"
+"\n"
+"Starting udiskie without notifications."
+msgstr ""
+"Typelib per 'libnotify' non è disponibile. Fra le possibili cause:\n"
+"\t- libnotify non è installato\n"
+"\t- typelib è fornito da un pacchetto separato\n"
+"\t- La build di libnotify è stata eseguita con introspezione disabilitata\n"
+"\n"
+"Avvio di udiskie con notifiche disattivate."
+
+#: ../udiskie/cli.py:382
+msgid ""
+"Not run within X session. \n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+"Non è stata rilevata una sessione X. \n"
+"Avvio di udiskie senza icona di sistema.\n"
+
+#: ../udiskie/cli.py:389
+msgid ""
+"Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
+"\t- GTK3 is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- GTK3 was built with introspection disabled\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+"Typelib per 'Gtk 3.0' non è disponibile. Fra le possibili cause:\n"
+"\t- GTK3 non è installato\n"
+"\t- typelib è fornito da un pacchetto separato\n"
+"\t- La build di GTK3 è stata eseguita con introspezione disabilitata\n"
+"Avvio di udiskie senza icona di sistema.\n"
+
+#: ../udiskie/cli.py:399
+msgid ""
+"Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
+"\t- libappindicator is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- it was built with introspection disabled\n"
+"Starting udiskie without appindicator icon.\n"
+msgstr ""
+"Typelib per 'AppIndicator3 0.1' non è disponibile. Fra le possibili cause:\n"
+"\t- libappindicator non è installato\n"
+"\t- typelib è fornita da un pacchetto separato\n"
+"\t- La build è stata eseguita con introspezione disabilitata\n"
+"Avvio di udiskie senza icona di sistema.\n"
+
+#: ../udiskie/config.py:127
+msgid "Unknown matching attribute: {!r}"
+msgstr ""
+
+#: ../udiskie/config.py:129
+#, python-brace-format
+msgid "new rule: {0}"
+msgstr "nuova regola: {0}"
+
+#: ../udiskie/config.py:132
+#, python-brace-format
+msgid "{0} -> {1}"
+msgstr ""
+
+#: ../udiskie/config.py:151
+#, python-brace-format
+msgid "{0} matched {1}"
+msgstr "{0} è uguale ad {1}"
+
+#: ../udiskie/config.py:228
+#, python-brace-format
+msgid "Failed to read config file: {0}"
+msgstr "Impossibile leggere il file di configurazione: {0}"
+
+#: ../udiskie/config.py:231
+msgid "Failed to read {0!r}: {1}"
+msgstr "Impossibile leggere {0!r}: {1}"
+
+#: ../udiskie/depend.py:51
+msgid ""
+"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
+msgstr ""
+"Dipendenza mancante: GTK 3. Viene usato GTK 2 per richiedere la password"
+
+#: ../udiskie/depend.py:57
+msgid "X server not connected!"
+msgstr "server X non connesso!"
+
+#: ../udiskie/mount.py:29
+#, python-brace-format
+msgid "failed to {0} {1}: {2}"
+msgstr "Errore nel {0} {1}: {2}"
+
+#: ../udiskie/mount.py:115
+#, python-brace-format
+msgid "not browsing {0}: not mounted"
+msgstr "Impossibile aprire {0}: non montato"
+
+#: ../udiskie/mount.py:118
+#, python-brace-format
+msgid "not browsing {0}: no program"
+msgstr "Impossibile aprire {0}: nessun programma"
+
+#: ../udiskie/mount.py:120 ../udiskie/mount.py:140
+#, python-brace-format
+msgid "opening {0} on {0.mount_paths[0]}"
+msgstr "Apertura di {0} su {0.mount_paths[0]}"
+
+#: ../udiskie/mount.py:122 ../udiskie/mount.py:142
+#, python-brace-format
+msgid "opened {0} on {0.mount_paths[0]}"
+msgstr "Aperto {0} su {0.mount_paths[0]}"
+
+#: ../udiskie/mount.py:135
+#, python-brace-format
+msgid "not opening terminal {0}: not mounted"
+msgstr "Impossibile aprire il terminale {0}: non montato"
+
+#: ../udiskie/mount.py:138
+#, python-brace-format
+msgid "not opening terminal {0}: no program"
+msgstr "Impossibile aprire il terminale {0}: nessun programma"
+
+#: ../udiskie/mount.py:156
+#, python-brace-format
+msgid "not mounting {0}: unhandled device"
+msgstr "Impossibile montare {0}: dispositivo non gestibile"
+
+#: ../udiskie/mount.py:159
+#, python-brace-format
+msgid "not mounting {0}: already mounted"
+msgstr "Impossibile montare {0}: è stato già montato"
+
+#: ../udiskie/mount.py:163
+#, python-brace-format
+msgid "mounting {0} with {1}"
+msgstr "montato {0} con {1}"
+
+#: ../udiskie/mount.py:166
+#, python-brace-format
+msgid "mounted {0} on {1}"
+msgstr "montato {0} in {1}"
+
+#: ../udiskie/mount.py:172
+msgid ""
+"Mounting NTFS device with default driver.\n"
+"Please install 'ntfs-3g' if you experience problems or the device is "
+"readonly."
+msgstr ""
+"Montatura dispositivo NTFS con il driver di default.\n"
+"Per favore, installa 'ntfs-3g' se riscontri problemi o il dispositivo è "
+"di sola lettura."
+
+#: ../udiskie/mount.py:186
+#, python-brace-format
+msgid "not unmounting {0}: unhandled device"
+msgstr "Impossibile montare {0}: dispositivo non gestibile"
+
+#: ../udiskie/mount.py:189
+#, python-brace-format
+msgid "not unmounting {0}: not mounted"
+msgstr "Impossibile smontare {0}: non è montato"
+
+#: ../udiskie/mount.py:191
+#, python-brace-format
+msgid "unmounting {0}"
+msgstr "Smontando {0}"
+
+#: ../udiskie/mount.py:193
+#, python-brace-format
+msgid "Unmounted {0}"
+msgstr "Smontato {0}"
+
+#: ../udiskie/mount.py:207
+#, python-brace-format
+msgid "not unlocking {0}: unhandled device"
+msgstr "Impossibile sbloccare {0}: dispositivo non gestibile"
+
+#: ../udiskie/mount.py:210
+#, python-brace-format
+msgid "not unlocking {0}: already unlocked"
+msgstr "Impossibile sbloccare {0}: dispositivo già sbloccato"
+
+#: ../udiskie/mount.py:213
+#, python-brace-format
+msgid "not unlocking {0}: no password prompt"
+msgstr "Impossibile sbloccare {0}: niente input password"
+
+#: ../udiskie/mount.py:227
+#, python-brace-format
+msgid "not unlocking {0}: cancelled by user"
+msgstr "Impossibile sbloccare {0}: annullato dall'utente"
+
+#: ../udiskie/mount.py:232
+#, python-brace-format
+msgid "unlocking {0} using keyfile"
+msgstr "sblocco di {0} con keyfile"
+
+#: ../udiskie/mount.py:235
+#, python-brace-format
+msgid "unlocking {0}"
+msgstr "sblocco di {0}"
+
+#: ../udiskie/mount.py:238
+#, python-brace-format
+msgid "unlocked {0}"
+msgstr "{0} é stato sbloccato"
+
+#: ../udiskie/mount.py:247
+#, python-brace-format
+msgid "no cached key for {0}"
+msgstr "nessuna chiave memorizzata per {0}"
+
+#: ../udiskie/mount.py:249
+#, python-brace-format
+msgid "unlocking {0} using cached password"
+msgstr "Sblocco di {0} con password memorizzata"
+
+#: ../udiskie/mount.py:253
+#, python-brace-format
+msgid "failed to unlock {0} using cached password"
+msgstr "Impossibile sbloccare {0} usando la password memorizzata"
+
+#: ../udiskie/mount.py:256
+#, python-brace-format
+msgid "unlocked {0} using cached password"
+msgstr "{0} é stato sbloccato con la password memorizzata"
+
+#: ../udiskie/mount.py:264
+msgid "No matching keyfile rule for {}."
+msgstr "Nessuna regola keyfile corrispondente per {}."
+
+#: ../udiskie/mount.py:270
+#, python-brace-format
+msgid "keyfile for {0} not found: {1}"
+msgstr "keyfile per {0} non trovato: {1}"
+
+#: ../udiskie/mount.py:272
+#, python-brace-format
+msgid "unlocking {0} using keyfile {1}"
+msgstr "Sto sbloccando {0} usando il keyfile"
+
+#: ../udiskie/mount.py:276
+#, python-brace-format
+msgid "failed to unlock {0} using keyfile"
+msgstr "Impossibile sbloccare {0} usando il keyfile"
+
+#: ../udiskie/mount.py:279
+#, python-brace-format
+msgid "unlocked {0} using keyfile"
+msgstr "{0} è stato sbloccato usando il keyfile"
+
+#: ../udiskie/mount.py:305
+#, python-brace-format
+msgid "not locking {0}: unhandled device"
+msgstr "Impossibile bloccare {0}: dispositivo non gestibile"
+
+#: ../udiskie/mount.py:308
+#, python-brace-format
+msgid "not locking {0}: not unlocked"
+msgstr "Impossibile bloccare {0}: è già bloccato"
+
+#: ../udiskie/mount.py:310
+#, python-brace-format
+msgid "locking {0}"
+msgstr "Sto bloccando {0}"
+
+#: ../udiskie/mount.py:312
+#, python-brace-format
+msgid "locked {0}"
+msgstr "{0} è stato bloccato"
+
+#: ../udiskie/mount.py:349 ../udiskie/mount.py:392
+#, python-brace-format
+msgid "not adding {0}: unhandled device"
+msgstr "Impossibile aggiungere {0}: dispositivo non gestibile"
+
+#: ../udiskie/mount.py:428 ../udiskie/mount.py:478
+#, python-brace-format
+msgid "not removing {0}: unhandled device"
+msgstr "Impossibile rimuovere {0}: dispositivo non gestibile"
+
+#: ../udiskie/mount.py:503
+#, python-brace-format
+msgid "not ejecting {0}: unhandled device"
+msgstr "Impossibile espellere {0}: dispositivo non gestibile"
+
+#: ../udiskie/mount.py:507
+#, python-brace-format
+msgid "not ejecting {0}: drive not ejectable"
+msgstr "Impossibile espellere {0}: dispositivo non rimovibile"
+
+#: ../udiskie/mount.py:513
+#, python-brace-format
+msgid "ejecting {0}"
+msgstr "Sto espellendo {0}"
+
+#: ../udiskie/mount.py:515
+#, python-brace-format
+msgid "ejected {0}"
+msgstr "{0} è stato espulso"
+
+#: ../udiskie/mount.py:529
+#, python-brace-format
+msgid "not detaching {0}: unhandled device"
+msgstr "Impossibile staccare {0}: dispositivo non gestibile"
+
+#: ../udiskie/mount.py:533
+#, python-brace-format
+msgid "not detaching {0}: drive not detachable"
+msgstr "Impossibile staccare {0}: dispositivo non staccabile"
+
+#: ../udiskie/mount.py:537
+#, python-brace-format
+msgid "detaching {0}"
+msgstr "Sto staccando {0}"
+
+#: ../udiskie/mount.py:542
+#, python-brace-format
+msgid "detached {0}"
+msgstr "{0} è stato staccato"
+
+#: ../udiskie/mount.py:593
+#, python-brace-format
+msgid "not setting up {0}: already up"
+msgstr "Impossibile impostare {0}: è già impostato"
+
+#: ../udiskie/mount.py:596
+#, python-brace-format
+msgid "not setting up {0}: not a file"
+msgstr "Impossibile impostare {0}: non è un file"
+
+#: ../udiskie/mount.py:598
+#, python-brace-format
+msgid "setting up {0}"
+msgstr "Sto impostando {0}"
+
+#: ../udiskie/mount.py:606
+#, python-brace-format
+msgid "set up {0} as {1}"
+msgstr "Imposta {0} come {1}"
+
+#: ../udiskie/mount.py:621
+#, python-brace-format
+msgid "not deleting {0}: unhandled device"
+msgstr "Impossibile cancellare {0}: dispositivo non gestibile"
+
+#: ../udiskie/mount.py:625
+#, python-brace-format
+msgid "deleting {0}"
+msgstr "Sto cancellando {0}"
+
+#: ../udiskie/mount.py:627
+#, python-brace-format
+msgid "deleted {0}"
+msgstr "{0} è stato cancellato"
+
+#: ../udiskie/mount.py:753
+#, python-brace-format
+msgid "Browse {0}"
+msgstr "Apri {0}"
+
+#: ../udiskie/mount.py:754
+#, python-brace-format
+msgid "Hack on {0}"
+msgstr ""
+
+#: ../udiskie/mount.py:755
+#, python-brace-format
+msgid "Mount {0}"
+msgstr "Monta {0}"
+
+#: ../udiskie/mount.py:756
+#, python-brace-format
+msgid "Unmount {0}"
+msgstr "Smonta {0}"
+
+#: ../udiskie/mount.py:757
+#, python-brace-format
+msgid "Unlock {0}"
+msgstr "Sblocca {0}"
+
+#: ../udiskie/mount.py:758
+#, python-brace-format
+msgid "Lock {0}"
+msgstr "Blocca {0}"
+
+#: ../udiskie/mount.py:759
+#, python-brace-format
+msgid "Eject {1}"
+msgstr "Espelli {1}"
+
+#: ../udiskie/mount.py:760
+#, python-brace-format
+msgid "Unpower {1}"
+msgstr "Rimuovi {1}"
+
+#: ../udiskie/mount.py:761
+#, python-brace-format
+msgid "Clear password for {0}"
+msgstr "Dimentica la password per {0}"
+
+#: ../udiskie/mount.py:762
+#, python-brace-format
+msgid "Detach {0}"
+msgstr "Stacca {0}"
+
+#: ../udiskie/notify.py:62
+msgid "Browse directory"
+msgstr "Apri la cartella"
+
+#: ../udiskie/notify.py:64
+msgid "Open terminal"
+msgstr "Apri il terminale"
+
+#: ../udiskie/notify.py:68
+msgid "Device mounted"
+msgstr "Dispositivo montato"
+
+#: ../udiskie/notify.py:69
+#, python-brace-format
+msgid "{0.ui_label} mounted on {0.mount_paths[0]}"
+msgstr "{0.ui_label} montato in {0.mount_paths[0]}"
+
+#: ../udiskie/notify.py:80
+msgid "Device unmounted"
+msgstr "Dispositivo smontato"
+
+#: ../udiskie/notify.py:81
+#, python-brace-format
+msgid "{0.ui_label} unmounted"
+msgstr "{0.ui_label} smontato"
+
+#: ../udiskie/notify.py:90
+msgid "Device locked"
+msgstr "Dispositivo bloccato"
+
+#: ../udiskie/notify.py:91
+#, python-brace-format
+msgid "{0.device_presentation} locked"
+msgstr "{0.device_presentation} bloccato"
+
+#: ../udiskie/notify.py:100
+msgid "Device unlocked"
+msgstr "Dispositivo sbloccato"
+
+#: ../udiskie/notify.py:101
+#, python-brace-format
+msgid "{0.device_presentation} unlocked"
+msgstr "{0.device_presentation} sbloccato"
+
+#: ../udiskie/notify.py:134
+msgid "Device added"
+msgstr "Nuovo dispositivo"
+
+#: ../udiskie/notify.py:135
+#, python-brace-format
+msgid "device appeared on {0.device_presentation}"
+msgstr "Aggiunto dispositivo da {0.device_presentation}"
+
+#: ../udiskie/notify.py:154
+msgid "Device removed"
+msgstr "Dispositivo rimosso"
+
+#: ../udiskie/notify.py:155
+#, python-brace-format
+msgid "device disappeared on {0.device_presentation}"
+msgstr "Dispositivo rimosso da {0.device_presentation}"
+
+#: ../udiskie/notify.py:164
+#, python-brace-format
+msgid ""
+"failed to {0} {1}:\n"
+"{2}"
+msgstr ""
+"Errore in {0} {1}:\n"
+"{2}"
+
+#: ../udiskie/notify.py:166
+#, python-brace-format
+msgid "failed to {0} device {1}."
+msgstr "Errore in {0} dispositivo {1}"
+
+#: ../udiskie/notify.py:172
+msgid "Retry"
+msgstr "Riprova"
+
+#: ../udiskie/notify.py:175
+msgid "Job failed"
+msgstr "Lavoro fallito"
+
+#: ../udiskie/notify.py:206
+#, python-brace-format
+msgid "Failed to show notification: {0}"
+msgstr "Impossibile mostrare la notifica: {0}"
+
+#: ../udiskie/prompt.py:96
+msgid "Show password"
+msgstr "Mostra password"
+
+#: ../udiskie/prompt.py:101
+msgid "Open keyfile…"
+msgstr "Apri keyfile..."
+
+#: ../udiskie/prompt.py:108
+msgid "Cache password"
+msgstr "Memorizza password"
+
+#: ../udiskie/prompt.py:123
+msgid "Open a keyfile to unlock the LUKS device"
+msgstr "Apri un keyfile per sbloccare il dispositivo LUKS"
+
+#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#, python-brace-format
+msgid "Enter password for {0.device_presentation}: "
+msgstr "Immetti la password per {0.device_presentation}: "
+
+#: ../udiskie/prompt.py:202
+msgid "Unknown device attribute {!r} in format string: {!r}"
+msgstr "Attributo dispositivo sconosciuto {!r} nella stringa di formato: {!r}"
+
+#: ../udiskie/prompt.py:254
+msgid ""
+"Can't find file browser: {0!r}. You may want to change the value for the '-"
+"f' option."
+msgstr ""
+"Impossibile trovare esplora risorse: {0!r}. Potresti voler cambiare il valore per l'opzione '-"
+"f'."
+
+#: ../udiskie/tray.py:159
+msgid "Mount disc image"
+msgstr "Monta l'immagine del disco"
+
+#: ../udiskie/tray.py:165
+msgid "Enable automounting"
+msgstr "Abilita l'automontaggio"
+
+#: ../udiskie/tray.py:171
+msgid "Enable notifications"
+msgstr "Abilita le notifiche"
+
+#: ../udiskie/tray.py:180
+msgid "Quit"
+msgstr "Esci"
+
+#: ../udiskie/tray.py:187
+msgid "Open disc image"
+msgstr "Apri l'immagine del disco"
+
+#: ../udiskie/tray.py:189
+msgid "Open"
+msgstr "Apri"
+
+#: ../udiskie/tray.py:190
+msgid "Cancel"
+msgstr "Annulla"
+
+#: ../udiskie/tray.py:230
+msgid "Invalid node!"
+msgstr "Nodo invalido!"
+
+#: ../udiskie/tray.py:232
+msgid "No external devices"
+msgstr "Nessun dispositivo esterno"
+
+#: ../udiskie/tray.py:341
+msgid "udiskie"
+msgstr "udiskie"
+
+#: ../udiskie/udisks2.py:647
+#, python-brace-format
+msgid "found device owning \"{0}\": \"{1}\""
+msgstr "Trovato dispositivo a cui appartiene \"{0}\": \"{1}\""
+
+#: ../udiskie/udisks2.py:650
+#, python-brace-format
+msgid "no device found owning \"{0}\""
+msgstr "Nessun dispositivo trovato a cui appartiene \"{0}\""
+
+#: ../udiskie/udisks2.py:669
+#, python-brace-format
+msgid "Daemon version: {0}"
+msgstr "Versione demone: {0}"
+
+#: ../udiskie/udisks2.py:674
+#, python-brace-format
+msgid "Keyfile support: {0}"
+msgstr "Supporto keyfile: {0}"
+
+#: ../udiskie/udisks2.py:753
+#, python-brace-format
+msgid "+++ {0}: {1}"
+msgstr "+++ {0}: {1}"
