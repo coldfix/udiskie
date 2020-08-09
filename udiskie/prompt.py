@@ -179,12 +179,13 @@ class DeviceCommand:
     specified in terms of a command line template.
     """
 
-    def __init__(self, argv, **extra):
+    def __init__(self, argv, capture=False, **extra):
         """Create the launcher object from the command line template."""
         if isinstance(argv, str):
             self.argv = shlex.split(argv)
         else:
             self.argv = argv
+        self.capture = capture
         self.extra = extra.copy()
         # obtain a list of used fields names
         formatter = string.Formatter()
@@ -211,12 +212,12 @@ class DeviceCommand:
         attrs.update(self.extra)
         argv = [arg.format(**attrs) for arg in self.argv]
         try:
-            stdout = await exec_subprocess(argv)
+            stdout = await exec_subprocess(argv, self.capture)
         except subprocess.CalledProcessError:
             return None
         # Remove trailing newline for text answers, but not for binary
         # keyfiles. This logic is a guess that may cause bugs for some users:(
-        if stdout.endswith(b'\n') and is_utf8(stdout):
+        if stdout and stdout.endswith(b'\n') and is_utf8(stdout):
             stdout = stdout[:-1]
         return stdout
 
@@ -234,7 +235,7 @@ def password(password_command):
     elif password_command == 'builtin:tty':
         return tty() or gui()
     elif password_command:
-        return DeviceCommand(password_command).password
+        return DeviceCommand(password_command, capture=True).password
     else:
         return None
 
@@ -283,4 +284,5 @@ def notify_command(command_format, mounter):
                   'device_locked', 'device_unlocked',
                   'device_added', 'device_removed',
                   'job_failed']:
-        udisks.connect(event, run_bg(DeviceCommand(command_format, event=event)))
+        udisks.connect(event, run_bg(DeviceCommand(
+            command_format, event=event, capture=False)))
