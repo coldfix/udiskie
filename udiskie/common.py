@@ -81,6 +81,7 @@ def extend(a: dict, b: dict) -> dict:
 def cachedproperty(func):
     """A memoize decorator for class properties."""
     key = '_' + func.__name__
+
     @wraps(func)
     def get(self):
         try:
