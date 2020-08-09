@@ -203,7 +203,7 @@ def gio_callback(proxy, result, future):
     future.set_result(result)
 
 
-async def exec_subprocess(argv):
+async def exec_subprocess(argv, capture=True):
     """
     An Future task that represents a subprocess. If successful, the task's
     result is set to the collected STDOUT of the subprocess.
@@ -212,17 +212,17 @@ async def exec_subprocess(argv):
                                            exit code
     """
     future = Future()
-    process = Gio.Subprocess.new(
-        argv,
-        Gio.SubprocessFlags.STDOUT_PIPE |
-        Gio.SubprocessFlags.STDIN_INHERIT)
+    flags = ((Gio.SubprocessFlags.STDOUT_PIPE if capture else
+              Gio.SubprocessFlags.NONE) |
+             Gio.SubprocessFlags.STDIN_INHERIT)
+    process = Gio.Subprocess.new(argv, flags)
     stdin_buf = None
     cancellable = None
     process.communicate_async(
         stdin_buf, cancellable, gio_callback, future)
     result = await future
     success, stdout, stderr = process.communicate_finish(result)
-    stdout = stdout.get_data()      # GLib.Bytes -> bytes
+    stdout = stdout.get_data() if capture else None     # GLib.Bytes -> bytes
     if not success:
         raise RuntimeError("Subprocess did not exit normally!")
     exit_code = process.get_exit_status()
