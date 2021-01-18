@@ -6,7 +6,7 @@ setuptools entry points.
 """
 
 # import udiskie.depend first - for side effects!
-from .depend import has_Notify, has_Gtk, _in_X, has_AppIndicator3
+from .depend import has_Notify, has_Gtk, _in_X, _in_Wayland, has_AppIndicator3
 
 import inspect
 import logging.config
@@ -377,11 +377,12 @@ class Daemon(_EntryPoint):
 
         show_tray = options['tray'] or options['appindicator']
 
-        if show_tray and not _in_X:
-            no_X_session = _(
-                "Not run within X session. "
+        if show_tray and not (_in_X or _in_Wayland and options['appindicator']):
+            no_tray_support = _(
+                "Not run within session that allows this kind of tray icon. "
+                "That is, either X, or Wayland with the --appindicator option."
                 "\nStarting udiskie without tray icon.\n")
-            logging.getLogger(__name__).error(no_X_session)
+            logging.getLogger(__name__).error(no_tray_support)
             show_tray = False
 
         if show_tray and not has_Gtk(3):
