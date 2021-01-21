@@ -1,6 +1,16 @@
 CHANGELOG
 ---------
 
+2.3.0
+~~~~~
+Date: 07.05.2020
+
+- don't swallow STDOUT for notify-commands
+- default to appindicator if tray is requested under wayland
+- don't auto-disable tray when running in "pure" wayland session
+- set window role on the password dialog
+
+
 2.2.0
 ~~~~~
 Date: 07.05.2020
