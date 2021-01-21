@@ -377,10 +377,9 @@ class Daemon(_EntryPoint):
 
         show_tray = options['tray'] or options['appindicator']
 
-        if show_tray and not (_in_X or _in_Wayland and options['appindicator']):
+        if show_tray and not (_in_X or _in_Wayland):
             no_tray_support = _(
-                "Not run within session that allows this kind of tray icon. "
-                "That is, either X, or Wayland with the --appindicator option."
+                "Not run within X or Wayland session."
                 "\nStarting udiskie without tray icon.\n")
             logging.getLogger(__name__).error(no_tray_support)
             show_tray = False

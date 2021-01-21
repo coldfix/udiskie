@@ -44,7 +44,7 @@ def require_Gtk(min_version=2):
     :raises RuntimeError: if Gtk can not be properly initialized
     """
     if not (_in_X or _in_Wayland):
-        raise RuntimeError('Not in graphical session.')
+        raise RuntimeError('Not in X or Wayland session.')
     if _has_Gtk < min_version:
         raise RuntimeError('Module gi.repository.Gtk not available!')
     if _has_Gtk == 2:
