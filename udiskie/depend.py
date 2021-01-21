@@ -27,6 +27,10 @@ def check_version(package, version):
 
 
 _in_X = bool(os.environ.get('DISPLAY'))
+_in_Wayland = bool(os.environ.get('WAYLAND_DISPLAY'))
+if not _in_Wayland and os.environ.get('XDG_RUNTIME_DIR'):
+    _in_Wayland = os.path.exists(os.path.join(
+        os.environ.get('XDG_RUNTIME_DIR'), 'wayland-0'))
 
 _has_Gtk = (3 if check_version('Gtk', '3.0') else
             2 if check_version('Gtk', '2.0') else
@@ -42,8 +46,8 @@ def require_Gtk(min_version=2):
 
     :raises RuntimeError: if Gtk can not be properly initialized
     """
-    if not _in_X:
-        raise RuntimeError('Not in X session.')
+    if not (_in_X or _in_Wayland):
+        raise RuntimeError('Not in X or Wayland session.')
     if _has_Gtk < min_version:
         raise RuntimeError('Module gi.repository.Gtk not available!')
     if _has_Gtk == 2:
