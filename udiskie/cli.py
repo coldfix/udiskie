@@ -312,7 +312,7 @@ class Daemon(_EntryPoint):
         'notify': True,
         'tray': False,
         'menu': 'flat',
-        'appindicator': False,
+        'appindicator': None,
         'file_manager': 'xdg-open',
         'terminal': '',
         'password_prompt': 'builtin:gui',
@@ -376,6 +376,8 @@ class Daemon(_EntryPoint):
             options['notify'] = False
 
         show_tray = options['tray'] or options['appindicator']
+        if show_tray and _in_Wayland and options['appindicator'] is None:
+            options['appindicator'] = True
 
         if show_tray and not (_in_X or _in_Wayland):
             no_tray_support = _(
