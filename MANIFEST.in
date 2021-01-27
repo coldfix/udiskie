@@ -2,8 +2,8 @@ include doc/*.txt
 include doc/asciidoc.conf
 include doc/Makefile
 graft completions
-recursive-include icons *.svg
 recursive-include lang *.pot *.po
 recursive-include udiskie *.ui
+recursive-include udiskie/icons *.svg
 include CONTRIBUTORS COPYING LICENSE
 include README.rst CHANGES.rst

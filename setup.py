@@ -11,7 +11,6 @@ from glob import glob
 
 
 comp_files = glob('completions/zsh/_*')
-icon_files = glob('icons/scalable/actions/udiskie-*.svg')
 languages  = [path.splitext(path.split(po_file)[1])[0]
               for po_file in glob('lang/*.po')]
 
@@ -65,17 +64,7 @@ class build_mo(Command):
 # rather than the *distutils* one to prevent errors when installing with pip
 # from the source distribution.
 class install(orig_install):
-
-    """Custom install command used to update the gtk icon cache."""
-
-    def run(self):
-        """Perform distutils-style install, then update GTK icon cache."""
-        orig_install.run(self)
-        try:
-            call(['gtk-update-icon-cache', 'share/icons/hicolor'])
-        except OSError as e:
-            # ignore failures since the tray icon is an optional component:
-            logging.warning(e)
+    pass
 
 
 def fast_entrypoint_script_template():
@@ -112,7 +101,6 @@ setup(
         'build_mo': build_mo,
     },
     data_files=[
-        ('share/icons/hicolor/scalable/actions', icon_files),
         ('share/zsh/site-functions', comp_files),
         *[('share/locale/{}/LC_MESSAGES'.format(lang),
            ['build/locale/{}/LC_MESSAGES/udiskie.mo'.format(lang)])
