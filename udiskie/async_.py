@@ -187,9 +187,9 @@ class Task(Future):
         the ``await`` and handle further awaits."""
         try:
             value = func(*args)
-        except StopIteration:
+        except StopIteration as e:
             self._generator.close()
-            self.set_result(None)
+            self.set_result(e.value)
         except Exception as e:
             self._generator.close()
             self.set_exception(e)
