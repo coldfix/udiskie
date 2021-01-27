@@ -6,13 +6,16 @@ from gi.repository import Gio
 from gi.repository import Gtk
 
 from .async_ import run_bg, Future
-from .common import setdefault, DaemonBase
+from .common import setdefault, DaemonBase, cachedmethod
 from .locale import _
 from .mount import Action, prune_empty_node
 from .prompt import Dialog
+from .icons import IconDist
+
+import os
 
 
-__all__ = ['UdiskieMenu', 'TrayIcon']
+__all__ = ['TrayMenu', 'TrayIcon']
 
 
 class MenuFolder:
@@ -67,12 +70,14 @@ class Icons:
 
     def __init__(self, icon_names={}):
         """Merge ``icon_names`` into default icon names."""
+        self._icon_dist = IconDist()
         _icon_names = icon_names.copy()
         setdefault(_icon_names, self.__class__._icon_names)
         self._icon_names = _icon_names
         for k, v in _icon_names.items():
             if isinstance(v, str):
-                self._icon_names[k] = [v]
+                self._icon_names[k] = v = [v]
+            self._icon_names[k] = self._icon_dist.patch_list(v)
 
     def get_icon_name(self, icon_id: str) -> str:
         """Lookup the system icon name from udisie-internal id."""
@@ -80,18 +85,29 @@ class Icons:
         for name in self._icon_names[icon_id]:
             if icon_theme.has_icon(name):
                 return name
+            elif os.path.exists(name):
+                return name
         return 'not-available'
 
+    @cachedmethod
     def get_icon(self, icon_id: str, size: "Gtk.IconSize") -> "Gtk.Image":
         """Load Gtk.Image from udiskie-internal id."""
         return Gtk.Image.new_from_gicon(self.get_gicon(icon_id), size)
 
+    @cachedmethod
     def get_gicon(self, icon_id: str) -> "Gio.Icon":
         """Lookup Gio.Icon from udiskie-internal id."""
-        return Gio.ThemedIcon.new_from_names(self._icon_names[icon_id])
+        name = self.get_icon_name(icon_id)
+        if os.path.exists(name):
+            # TODO (?): we could also add the icon to the theme using
+            # Gtk.IconTheme.append_search_path or .add_resource_path:
+            file = Gio.File.new_for_path(name)
+            return Gio.FileIcon.new(file)
+        else:
+            return Gio.ThemedIcon.new(name)
 
 
-class UdiskieMenu:
+class TrayMenu:
 
     """
     Builder for udiskie menus.
@@ -349,7 +365,7 @@ class TrayIcon:
         icon will be initially visible, which results in a perceptable
         flickering.
 
-        :param UdiskieMenu menumaker: menu factory
+        :param TrayMenu menumaker: menu factory
         :param Gtk.StatusIcon statusicon: status icon
         """
         self._icons = icons

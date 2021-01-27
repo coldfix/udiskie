@@ -78,6 +78,25 @@ def extend(a: dict, b: dict) -> dict:
     return res
 
 
+def cachedmethod(func):
+    """A memoize decorator for object methods."""
+    key = '_' + func.__name__
+
+    @wraps(func)
+    def get(self, *args):
+        try:
+            cache = getattr(self, key)
+        except AttributeError:
+            cache = {}
+            setattr(self, key, cache)
+        try:
+            val = cache[args]
+        except KeyError:
+            val = cache[args] = func(self, *args)
+        return val
+    return get
+
+
 def cachedproperty(func):
     """A memoize decorator for class properties."""
     key = '_' + func.__name__

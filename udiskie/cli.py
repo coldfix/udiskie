@@ -487,7 +487,7 @@ class Daemon(_EntryPoint):
         else:
             raise ValueError("Invalid menu: %s" % (options['menu'],))
 
-        menu_maker = udiskie.tray.UdiskieMenu(
+        menu_maker = udiskie.tray.TrayMenu(
             self, icons, actions, flat,
             config.quickmenu_actions,
             checkbox_workaround=checkbox_workaround,
