@@ -15,7 +15,7 @@ from .icons import IconDist
 import os
 
 
-__all__ = ['UdiskieMenu', 'TrayIcon']
+__all__ = ['TrayMenu', 'TrayIcon']
 
 
 class MenuFolder:
@@ -105,7 +105,7 @@ class Icons:
             return Gio.ThemedIcon.new(name)
 
 
-class UdiskieMenu:
+class TrayMenu:
 
     """
     Builder for udiskie menus.
@@ -363,7 +363,7 @@ class TrayIcon:
         icon will be initially visible, which results in a perceptable
         flickering.
 
-        :param UdiskieMenu menumaker: menu factory
+        :param TrayMenu menumaker: menu factory
         :param Gtk.StatusIcon statusicon: status icon
         """
         self._icons = icons
