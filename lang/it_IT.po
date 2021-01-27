@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-06 11:52+0200\n"
+"POT-Creation-Date: 2021-01-27 21:54+0100\n"
 "PO-Revision-Date: 2020-05-06 11:52+0200\n"
 "Last-Translator: Stefano Mecocci <mecocci15@gmail.com>\n"
 "Language-Team: \n"
@@ -26,10 +26,13 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Attenzione, le opzioni nei gruppi individuali sono mutualmente esclusive\n"
+"    Attenzione, le opzioni nei gruppi individuali sono mutualmente "
+"esclusive\n"
 "\n"
-"    Il file di configurazione può essere un file JSON o preferibilmente un file YAML.\n"
-"    Per un esempio, guarda la pagina MAN (oppure doc/udiskie.8.txt nella repository).\n"
+"    Il file di configurazione può essere un file JSON o preferibilmente un "
+"file YAML.\n"
+"    Per un esempio, guarda la pagina MAN (oppure doc/udiskie.8.txt nella "
+"repository).\n"
 "    "
 
 #: ../udiskie/cli.py:139
@@ -42,7 +45,7 @@ msgstr "%(message)s"
 msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 
-#: ../udiskie/cli.py:370
+#: ../udiskie/cli.py:380
 msgid ""
 "Typelib for 'libnotify' is not available. Possible causes include:\n"
 "\t- libnotify is not installed\n"
@@ -58,15 +61,16 @@ msgstr ""
 "\n"
 "Avvio di udiskie con notifiche disattivate."
 
-#: ../udiskie/cli.py:382
+#: ../udiskie/cli.py:394
+#, fuzzy
 msgid ""
-"Not run within X session. \n"
+"Not run within X or Wayland session.\n"
 "Starting udiskie without tray icon.\n"
 msgstr ""
 "Non è stata rilevata una sessione X. \n"
 "Avvio di udiskie senza icona di sistema.\n"
 
-#: ../udiskie/cli.py:389
+#: ../udiskie/cli.py:401
 msgid ""
 "Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
 "\t- GTK3 is not installed\n"
@@ -80,7 +84,7 @@ msgstr ""
 "\t- La build di GTK3 è stata eseguita con introspezione disabilitata\n"
 "Avvio di udiskie senza icona di sistema.\n"
 
-#: ../udiskie/cli.py:399
+#: ../udiskie/cli.py:411
 msgid ""
 "Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
 "\t- libappindicator is not installed\n"
@@ -122,13 +126,13 @@ msgstr "Impossibile leggere il file di configurazione: {0}"
 msgid "Failed to read {0!r}: {1}"
 msgstr "Impossibile leggere {0!r}: {1}"
 
-#: ../udiskie/depend.py:51
+#: ../udiskie/depend.py:55
 msgid ""
 "Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
 msgstr ""
 "Dipendenza mancante: GTK 3. Viene usato GTK 2 per richiedere la password"
 
-#: ../udiskie/depend.py:57
+#: ../udiskie/depend.py:61
 msgid "X server not connected!"
 msgstr "server X non connesso!"
 
@@ -194,8 +198,8 @@ msgid ""
 "readonly."
 msgstr ""
 "Montatura dispositivo NTFS con il driver di default.\n"
-"Per favore, installa 'ntfs-3g' se riscontri problemi o il dispositivo è "
-"di sola lettura."
+"Per favore, installa 'ntfs-3g' se riscontri problemi o il dispositivo è di "
+"sola lettura."
 
 #: ../udiskie/mount.py:186
 #, python-brace-format
@@ -213,8 +217,8 @@ msgid "unmounting {0}"
 msgstr "Smontando {0}"
 
 #: ../udiskie/mount.py:193
-#, python-brace-format
-msgid "Unmounted {0}"
+#, fuzzy, python-brace-format
+msgid "unmounted {0}"
 msgstr "Smontato {0}"
 
 #: ../udiskie/mount.py:207
@@ -561,55 +565,59 @@ msgstr "Apri un keyfile per sbloccare il dispositivo LUKS"
 msgid "Enter password for {0.device_presentation}: "
 msgstr "Immetti la password per {0.device_presentation}: "
 
-#: ../udiskie/prompt.py:202
+#: ../udiskie/prompt.py:203
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "Attributo dispositivo sconosciuto {!r} nella stringa di formato: {!r}"
 
-#: ../udiskie/prompt.py:254
+#: ../udiskie/prompt.py:255
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."
 msgstr ""
-"Impossibile trovare esplora risorse: {0!r}. Potresti voler cambiare il valore per l'opzione '-"
-"f'."
+"Impossibile trovare esplora risorse: {0!r}. Potresti voler cambiare il "
+"valore per l'opzione '-f'."
 
-#: ../udiskie/tray.py:159
+#: ../udiskie/tray.py:182
+msgid "Managed devices"
+msgstr ""
+
+#: ../udiskie/tray.py:198
 msgid "Mount disc image"
 msgstr "Monta l'immagine del disco"
 
-#: ../udiskie/tray.py:165
+#: ../udiskie/tray.py:204
 msgid "Enable automounting"
 msgstr "Abilita l'automontaggio"
 
-#: ../udiskie/tray.py:171
+#: ../udiskie/tray.py:210
 msgid "Enable notifications"
 msgstr "Abilita le notifiche"
 
-#: ../udiskie/tray.py:180
+#: ../udiskie/tray.py:219
 msgid "Quit"
 msgstr "Esci"
 
-#: ../udiskie/tray.py:187
+#: ../udiskie/tray.py:226
 msgid "Open disc image"
 msgstr "Apri l'immagine del disco"
 
-#: ../udiskie/tray.py:189
+#: ../udiskie/tray.py:228
 msgid "Open"
 msgstr "Apri"
 
-#: ../udiskie/tray.py:190
+#: ../udiskie/tray.py:229
 msgid "Cancel"
 msgstr "Annulla"
 
-#: ../udiskie/tray.py:230
+#: ../udiskie/tray.py:269
 msgid "Invalid node!"
 msgstr "Nodo invalido!"
 
-#: ../udiskie/tray.py:232
+#: ../udiskie/tray.py:271
 msgid "No external devices"
 msgstr "Nessun dispositivo esterno"
 
-#: ../udiskie/tray.py:341
+#: ../udiskie/tray.py:387
 msgid "udiskie"
 msgstr "udiskie"
 

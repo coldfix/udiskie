@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-06 11:30+0200\n"
+"POT-Creation-Date: 2021-01-27 21:54+0100\n"
 "PO-Revision-Date: 2019-02-16 21:18+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -52,7 +52,7 @@ msgstr "%(message)s"
 msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 
-#: ../udiskie/cli.py:370
+#: ../udiskie/cli.py:380
 msgid ""
 "Typelib for 'libnotify' is not available. Possible causes include:\n"
 "\t- libnotify is not installed\n"
@@ -68,15 +68,16 @@ msgstr ""
 "\n"
 "Запуск udiskie выполнен без уведомлений."
 
-#: ../udiskie/cli.py:382
+#: ../udiskie/cli.py:394
+#, fuzzy
 msgid ""
-"Not run within X session. \n"
+"Not run within X or Wayland session.\n"
 "Starting udiskie without tray icon.\n"
 msgstr ""
 "Не запущено в сессии X-Windows. \n"
 "Запустите udiskie без иконки в трее.\n"
 
-#: ../udiskie/cli.py:389
+#: ../udiskie/cli.py:401
 msgid ""
 "Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
 "\t- GTK3 is not installed\n"
@@ -90,7 +91,7 @@ msgstr ""
 "\t- GTK3 был собран с отключенным самоанализом\n"
 "Запуск udiskie выполнен без иконки в трее.\n"
 
-#: ../udiskie/cli.py:399
+#: ../udiskie/cli.py:411
 #, fuzzy
 msgid ""
 "Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
@@ -133,12 +134,12 @@ msgstr "Невозможно прочитать файл настроек: {0}"
 msgid "Failed to read {0!r}: {1}"
 msgstr "Невозможно прочитать {0!r}: {1}"
 
-#: ../udiskie/depend.py:51
+#: ../udiskie/depend.py:55
 msgid ""
 "Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
 msgstr "Отсутствуют библиотеки GTK 3. Возврат к GTK 2 для запроса пароля"
 
-#: ../udiskie/depend.py:57
+#: ../udiskie/depend.py:61
 msgid "X server not connected!"
 msgstr "X-сервер не подключен!"
 
@@ -572,11 +573,11 @@ msgstr ""
 msgid "Enter password for {0.device_presentation}: "
 msgstr "Введите пароль для {0.device_presentation}:"
 
-#: ../udiskie/prompt.py:202
+#: ../udiskie/prompt.py:203
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "Неизвестный атрибут устройства {!r} в формате строки: {!r}"
 
-#: ../udiskie/prompt.py:254
+#: ../udiskie/prompt.py:255
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."
@@ -584,43 +585,47 @@ msgstr ""
 "Не найдена программа для работы с файлами: {0!r}. Вы можете изменить "
 "значение указанное после '-f'."
 
-#: ../udiskie/tray.py:159
+#: ../udiskie/tray.py:182
+msgid "Managed devices"
+msgstr ""
+
+#: ../udiskie/tray.py:198
 msgid "Mount disc image"
 msgstr "Монтировать образ диска"
 
-#: ../udiskie/tray.py:165
+#: ../udiskie/tray.py:204
 msgid "Enable automounting"
 msgstr "Включить автоматическое монтирование"
 
-#: ../udiskie/tray.py:171
+#: ../udiskie/tray.py:210
 msgid "Enable notifications"
 msgstr "Включить уведомления"
 
-#: ../udiskie/tray.py:180
+#: ../udiskie/tray.py:219
 msgid "Quit"
 msgstr "Выход"
 
-#: ../udiskie/tray.py:187
+#: ../udiskie/tray.py:226
 msgid "Open disc image"
 msgstr "Открыть образ диска"
 
-#: ../udiskie/tray.py:189
+#: ../udiskie/tray.py:228
 msgid "Open"
 msgstr "Открыть"
 
-#: ../udiskie/tray.py:190
+#: ../udiskie/tray.py:229
 msgid "Cancel"
 msgstr "Отмена"
 
-#: ../udiskie/tray.py:230
+#: ../udiskie/tray.py:269
 msgid "Invalid node!"
 msgstr ""
 
-#: ../udiskie/tray.py:232
+#: ../udiskie/tray.py:271
 msgid "No external devices"
 msgstr "Нет внешних устройств"
 
-#: ../udiskie/tray.py:341
+#: ../udiskie/tray.py:387
 msgid "udiskie"
 msgstr "udiskie"
 
