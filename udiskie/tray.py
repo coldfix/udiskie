@@ -60,9 +60,9 @@ class Icons:
         'delete': ['udiskie-eject'],
         'losetup': ['udiskie-mount'],
         # checkbox workaround:
-        'checked': ['checkbox-checked'],
-        'unchecked': ['checkbox'],
-        'submenu': ['pan-end-symbolic'],
+        'checked': ['checkbox-checked', 'udiskie-checkbox-checked'],
+        'unchecked': ['checkbox', 'udiskie-checkbox-unchecked'],
+        'submenu': ['udiskie-submenu', 'pan-end-symbolic'],
     }
 
     def __init__(self, icon_names={}):
