@@ -6,7 +6,7 @@ from gi.repository import Gio
 from gi.repository import Gtk
 
 from .async_ import run_bg, Future
-from .common import setdefault, DaemonBase
+from .common import setdefault, DaemonBase, cachedmethod
 from .locale import _
 from .mount import Action, prune_empty_node
 from .prompt import Dialog
@@ -89,10 +89,12 @@ class Icons:
                 return name
         return 'not-available'
 
+    @cachedmethod
     def get_icon(self, icon_id: str, size: "Gtk.IconSize") -> "Gtk.Image":
         """Load Gtk.Image from udiskie-internal id."""
         return Gtk.Image.new_from_gicon(self.get_gicon(icon_id), size)
 
+    @cachedmethod
     def get_gicon(self, icon_id: str) -> "Gio.Icon":
         """Lookup Gio.Icon from udiskie-internal id."""
         name = self.get_icon_name(icon_id)
