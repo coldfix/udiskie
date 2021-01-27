@@ -59,6 +59,10 @@ class Icons:
         'forget_password': ['edit-delete'],
         'delete': ['udiskie-eject'],
         'losetup': ['udiskie-mount'],
+        # checkbox workaround:
+        'checked': ['checkbox-checked', 'udiskie-checkbox-checked'],
+        'unchecked': ['checkbox', 'udiskie-checkbox-unchecked'],
+        'submenu': ['udiskie-submenu', 'pan-end-symbolic'],
     }
 
     def __init__(self, icon_names={}):
@@ -96,7 +100,9 @@ class UdiskieMenu:
     """
 
     def __init__(self, daemon, icons, actions, flat=True,
-                 quickmenu_actions=None):
+                 quickmenu_actions=None,
+                 checkbox_workaround=False,
+                 update_workaround=False):
         """
         Initialize a new menu maker.
 
@@ -142,12 +148,29 @@ class UdiskieMenu:
             # 'eject',
             # 'forget_password',
         ]
+        self._checkbox_workaround = checkbox_workaround
+        self._update_workaround = update_workaround
 
     def __call__(self, menu, extended=True):
         """Populate the Gtk.Menu with udiskie mount operations."""
         # create actions items
         flat = self.flat and not extended
-        self._create_menu_items(menu, self._prepare_menu(self.detect(), flat))
+        if self._update_workaround:
+            # When showing menus via AppIndicator3 on sway, the menu geometry
+            # seems to be calculated before the 'about-to-show' event, and
+            # therefore cannot take into account newly inserted menu items.
+            # For this reason, we have to keep the top-level menu fixed-size
+            # and insert dynamic entries into a submenu.
+            devmenu = Gtk.Menu()
+            menu.append(self._menuitem(
+                label=_('Managed devices'),
+                icon=None,
+                onclick=devmenu,
+            ))
+        else:
+            devmenu = menu
+        self._create_menu_items(
+            devmenu, self._prepare_menu(self.detect(), flat))
         if extended:
             self._insert_options(menu)
         return menu
@@ -252,6 +275,13 @@ class UdiskieMenu:
         :returns: the menu item object
         :rtype: Gtk.MenuItem
         """
+        if self._checkbox_workaround:
+            if checked is not None:
+                icon_name = 'checked' if checked else 'unchecked'
+                icon = self._icons.get_icon(icon_name, Gtk.IconSize.MENU)
+                checked = None
+            elif isinstance(onclick, Gtk.Menu):
+                icon = self._icons.get_icon('submenu', Gtk.IconSize.MENU)
         if checked is not None:
             item = Gtk.CheckMenuItem()
             item.set_active(checked)

@@ -34,6 +34,7 @@ class AppIndicatorIcon:
         # Populate menu initially, so libdbusmenu does not ignore the
         # 'about-to-show':
         self._maker(self._menu)
+        self._menu.show_all()
 
     def destroy(self):
         self.show(False)
