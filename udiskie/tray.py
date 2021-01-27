@@ -59,6 +59,9 @@ class Icons:
         'forget_password': ['edit-delete'],
         'delete': ['udiskie-eject'],
         'losetup': ['udiskie-mount'],
+        # checkbox workaround:
+        'checked': ['checkbox-checked'],
+        'unchecked': ['checkbox'],
     }
 
     def __init__(self, icon_names={}):
@@ -96,7 +99,8 @@ class UdiskieMenu:
     """
 
     def __init__(self, daemon, icons, actions, flat=True,
-                 quickmenu_actions=None):
+                 quickmenu_actions=None,
+                 checkbox_workaround=False):
         """
         Initialize a new menu maker.
 
@@ -142,6 +146,7 @@ class UdiskieMenu:
             # 'eject',
             # 'forget_password',
         ]
+        self._checkbox_workaround = checkbox_workaround
 
     def __call__(self, menu, extended=True):
         """Populate the Gtk.Menu with udiskie mount operations."""
@@ -252,6 +257,10 @@ class UdiskieMenu:
         :returns: the menu item object
         :rtype: Gtk.MenuItem
         """
+        if checked is not None and self._checkbox_workaround:
+            icon_name = 'checked' if checked else 'unchecked'
+            icon = self._icons.get_icon(icon_name, Gtk.IconSize.MENU)
+            checked = None
         if checked is not None:
             item = Gtk.CheckMenuItem()
             item.set_active(checked)

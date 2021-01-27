@@ -305,6 +305,9 @@ class Daemon(_EntryPoint):
 
         --notify-command COMMAND                Command to execute on events
         --no-notify-command                     Disable command notifications
+
+        --menu-checkbox-workaround              Use checkbox workaround
+        --no-menu-checkbox-workaround           Disable checkbox workaround
     """
 
     option_defaults = extend(_EntryPoint.option_defaults, {
@@ -318,6 +321,7 @@ class Daemon(_EntryPoint):
         'password_prompt': 'builtin:gui',
         'password_cache': False,
         'notify_command': None,
+        'menu_checkbox_workaround': None,
     })
 
     option_rules = extend(_EntryPoint.option_rules, {
@@ -333,6 +337,7 @@ class Daemon(_EntryPoint):
         'password_prompt': OptionalValue('--password-prompt'),
         'password_cache': OptionalValue('--password-cache'),
         'notify_command': OptionalValue('--notify-command'),
+        'menu_checkbox_workaround': OptionalValue('--menu-checkbox-workaround'),
     })
 
     def _init(self):
@@ -461,6 +466,10 @@ class Daemon(_EntryPoint):
         icons = udiskie.tray.Icons(self.config.icon_names)
         actions = udiskie.mount.DeviceActions(self.mounter)
 
+        checkbox_workaround = options['menu_checkbox_workaround']
+        if checkbox_workaround is None:
+            checkbox_workaround = options['appindicator'] and _in_Wayland
+
         if options['menu'] == 'flat':
             flat = True
         # dropped legacy 'nested' mode:
@@ -469,8 +478,10 @@ class Daemon(_EntryPoint):
         else:
             raise ValueError("Invalid menu: %s" % (options['menu'],))
 
-        menu_maker = udiskie.tray.UdiskieMenu(self, icons, actions, flat,
-                                              config.quickmenu_actions)
+        menu_maker = udiskie.tray.UdiskieMenu(
+            self, icons, actions, flat,
+            config.quickmenu_actions,
+            checkbox_workaround=checkbox_workaround)
         if options['appindicator']:
             import udiskie.appindicator
             TrayIcon = udiskie.appindicator.AppIndicatorIcon
