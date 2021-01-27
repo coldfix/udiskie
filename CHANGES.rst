@@ -1,9 +1,20 @@
 CHANGELOG
 ---------
 
+2.3.1
+~~~~~
+Date: 27.01.2021
+
+- add workaround for missing menu checkboxes on sway/wayland
+- add workaround for menu not showing up with proper size on sway/wayland
+- distribute icons within udiskie package (allows displaying icons in
+  local/venv installations)
+- fix ignored coroutine return values, fixes e.g. program exit code
+
+
 2.3.0
 ~~~~~
-Date: 07.05.2020
+Date: 22.01.2021
 
 - don't swallow STDOUT for notify-commands
 - default to appindicator if tray is requested under wayland
