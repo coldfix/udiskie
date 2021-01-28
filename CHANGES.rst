@@ -1,6 +1,16 @@
 CHANGELOG
 ---------
 
+2.3.2
+~~~~~
+Date: 27.01.2021
+
+- fix incorrect use of wayland settings (appindicator+workarounds) within X
+  session, if a wayland session is or was active under the same user (even if
+  that was in a different login session)
+- fix incorrect display of image menu items under X due to caching
+
+
 2.3.1
 ~~~~~
 Date: 27.01.2021
