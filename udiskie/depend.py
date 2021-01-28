@@ -28,7 +28,7 @@ def check_version(package, version):
 
 _in_X = bool(os.environ.get('DISPLAY'))
 _in_Wayland = bool(os.environ.get('WAYLAND_DISPLAY'))
-if not _in_Wayland and os.environ.get('XDG_RUNTIME_DIR'):
+if not _in_X and not _in_Wayland and os.environ.get('XDG_RUNTIME_DIR'):
     _in_Wayland = os.path.exists(os.path.join(
         os.environ.get('XDG_RUNTIME_DIR'), 'wayland-0'))
 
