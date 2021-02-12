@@ -101,7 +101,7 @@ setup(
         'build_mo': build_mo,
     },
     data_files=[
-        ('share/zsh/site-functions', comp_files),
+        ('share/zsh/vendor-completions', comp_files),
         *[('share/locale/{}/LC_MESSAGES'.format(lang),
            ['build/locale/{}/LC_MESSAGES/udiskie.mo'.format(lang)])
           for lang in languages],
