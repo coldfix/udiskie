@@ -59,9 +59,9 @@ class Notify(DaemonBase):
         """Show mount notification for specified device object."""
         if not self._mounter.is_handleable(device):
             return
-        browse_action = ('browse', _('Browse directory'),
+        browse_action = (device, 'browse', _('Browse directory'),
                          self._mounter.browse, device)
-        terminal_action = ('terminal', _('Open terminal'),
+        terminal_action = (device, 'terminal', _('Open terminal'),
                            self._mounter.terminal, device)
         self._show_notification(
             'device_mounted',
@@ -122,7 +122,8 @@ class Notify(DaemonBase):
                 node_tree = self._actions.detect(device.object_path)
                 flat_actions = self._flatten_node(node_tree)
                 actions = [
-                    (action.method,
+                    (action.device,
+                     action.method,
                      action.label.format(action.device.ui_label),
                      action.action)
                     for action in flat_actions
@@ -169,7 +170,7 @@ class Notify(DaemonBase):
         except AttributeError:
             retry_action = None
         else:
-            retry_action = ('retry', _('Retry'), retry, device)
+            retry_action = (device, 'retry', _('Retry'), retry, device)
         self._show_notification(
             'job_failed',
             _('Job failed'), text,
@@ -193,7 +194,7 @@ class Notify(DaemonBase):
         if timeout != -1:
             notification.set_timeout(int(timeout * 1000))
         for action in actions:
-            if action and self._action_enabled(event, action[0]):
+            if action and self._action_enabled(event, action[1]):
                 self._add_action(notification, *action)
         try:
             notification.show()
@@ -206,12 +207,13 @@ class Notify(DaemonBase):
             self._log.error(_("Failed to show notification: {0}", exc_message(exc)))
             self._log.debug(format_exc())
 
-    def _add_action(self, notification, action, label, callback, *args):
+    def _add_action(self, notification, device, action, label, callback, *args):
         """
         Show an action button button in mount notifications.
 
         Note, this only works with some libnotify services.
         """
+        action = action + ':' + device.device_file
         on_action_click = run_bg(lambda *_: callback(*args))
         try:
             # this is the correct signature for Notify-0.7, the last argument
