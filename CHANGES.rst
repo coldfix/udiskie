@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+2.3.3
+~~~~~
+Date: 05.03.2021
+
+- fix: buttons in "device-added" notifications always mounting the last
+  partition instead of the selected one
+
+
 2.3.2
 ~~~~~
 Date: 27.01.2021
