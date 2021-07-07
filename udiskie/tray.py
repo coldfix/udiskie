@@ -44,6 +44,7 @@ class Icons:
 
     _icon_names = {
         'media': [
+            'drive-removable-media-usb-panel',
             'drive-removable-media-usb-pendrive',
             'drive-removable-media-usb',
             'drive-removable-media',
