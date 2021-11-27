@@ -1,0 +1,652 @@
+# Turkish translations for PACKAGE package.
+# Copyright (C) 2021 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Oğuz Ersen <oguzersen@protonmail.com>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: udiskie\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-01-27 21:54+0100\n"
+"PO-Revision-Date: 2021-11-27 13:56+0300\n"
+"Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
+"Language-Team: Turkish <tr>\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+
+#: ../udiskie/cli.py:46
+#, python-brace-format
+msgid "These options are mutually exclusive: {0}"
+msgstr "Bu seçenekler birlikte kullanılamaz: {0}"
+
+#: ../udiskie/cli.py:119
+msgid ""
+"\n"
+"    Note, that the options in the individual groups are mutually exclusive.\n"
+"\n"
+"    The config file can be a JSON or preferably a YAML file. For an\n"
+"    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
+"    "
+msgstr ""
+"\n"
+"    Aynı gruptaki seçeneklerin birlikte kullanılamayacağını unutmayın.\n"
+"\n"
+"    Yapılandırma dosyası bir JSON ya da tercihen YAML dosyası olabilir. "
+"Örnek\n"
+"    için kılavuz sayfasına (veya depodaki doc/udiskie.8.txt dosyasına) "
+"bakın.\n"
+"    "
+
+#: ../udiskie/cli.py:139
+#, python-format
+msgid "%(message)s"
+msgstr "%(message)s"
+
+#: ../udiskie/cli.py:141
+#, python-format
+msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+
+#: ../udiskie/cli.py:380
+msgid ""
+"Typelib for 'libnotify' is not available. Possible causes include:\n"
+"\t- libnotify is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- libnotify was built with introspection disabled\n"
+"\n"
+"Starting udiskie without notifications."
+msgstr ""
+"'libnotify' için typelib kullanılamıyor. Olası nedenler şunlardır:\n"
+"\t- libnotify kurulu değil\n"
+"\t- typelib ayrı bir paket tarafından sağlanıyor\n"
+"\t- libnotify, iç gözlem devre dışı bırakılarak oluşturuldu\n"
+"\n"
+"udiskie, bildirimler olmadan başlatılıyor."
+
+#: ../udiskie/cli.py:394
+msgid ""
+"Not run within X or Wayland session.\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+"X veya Wayland oturumu içinde çalıştırılmadı.\n"
+"udiskie, tepsi simgesi olmadan başlatılıyor.\n"
+
+#: ../udiskie/cli.py:401
+msgid ""
+"Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
+"\t- GTK3 is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- GTK3 was built with introspection disabled\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+"'Gtk 3.0' için typelib kullanılamıyor. Olası nedenler şunlardır:\n"
+"\t- GTK3 kurulu değil\n"
+"\t- typelib ayrı bir paket tarafından sağlanıyor\n"
+"\t- GTK3, iç gözlem devre dışı bırakılarak oluşturuldu\n"
+"\n"
+"udiskie, tepsi simgesi olmadan başlatılıyor.\n"
+
+#: ../udiskie/cli.py:411
+msgid ""
+"Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
+"\t- libappindicator is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- it was built with introspection disabled\n"
+"Starting udiskie without appindicator icon.\n"
+msgstr ""
+"'AppIndicator3 0.1' için typelib kullanılamıyor. Olası nedenler şunlardır:\n"
+"\t- libappindicator kurulu değil\n"
+"\t- typelib ayrı bir paket tarafından sağlanıyor\n"
+"\t- iç gözlem devre dışı bırakılarak oluşturuldu\n"
+"\n"
+"udiskie, appindicator simgesi olmadan başlatılıyor.\n"
+
+#: ../udiskie/config.py:127
+msgid "Unknown matching attribute: {!r}"
+msgstr "Bilinmeyen eşleşen özellik: {!r}"
+
+#: ../udiskie/config.py:129
+#, python-brace-format
+msgid "new rule: {0}"
+msgstr "yeni kural: {0}"
+
+#: ../udiskie/config.py:132
+#, python-brace-format
+msgid "{0} -> {1}"
+msgstr "{0} -> {1}"
+
+#: ../udiskie/config.py:151
+#, python-brace-format
+msgid "{0} matched {1}"
+msgstr "{0}, {1} ile eşleşti"
+
+#: ../udiskie/config.py:228
+#, python-brace-format
+msgid "Failed to read config file: {0}"
+msgstr "Yapılandırma dosyası okunamadı: {0}"
+
+#: ../udiskie/config.py:231
+msgid "Failed to read {0!r}: {1}"
+msgstr "{0!r} okunamadı: {1}"
+
+#: ../udiskie/depend.py:55
+msgid ""
+"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
+msgstr ""
+"Çalışma zamanı bağımlılığı GTK 3 eksik. Parola istemi için GTK 2 kullanılıyor"
+
+#: ../udiskie/depend.py:61
+msgid "X server not connected!"
+msgstr "X sunucusu bağlı değil!"
+
+#: ../udiskie/mount.py:29
+#, python-brace-format
+msgid "failed to {0} {1}: {2}"
+msgstr "{0} {1} başarısız oldu: {2}"
+
+#: ../udiskie/mount.py:115
+#, python-brace-format
+msgid "not browsing {0}: not mounted"
+msgstr "{0} tarayıcıda açılmıyor: bağlı değil"
+
+#: ../udiskie/mount.py:118
+#, python-brace-format
+msgid "not browsing {0}: no program"
+msgstr "{0} tarayıcıda açılmıyor: program yok"
+
+#: ../udiskie/mount.py:120 ../udiskie/mount.py:140
+#, python-brace-format
+msgid "opening {0} on {0.mount_paths[0]}"
+msgstr "{0}, {0.mount_paths[0]} yolunda açılıyor"
+
+#: ../udiskie/mount.py:122 ../udiskie/mount.py:142
+#, python-brace-format
+msgid "opened {0} on {0.mount_paths[0]}"
+msgstr "{0}, {0.mount_paths[0]} yolunda açıldı"
+
+#: ../udiskie/mount.py:135
+#, python-brace-format
+msgid "not opening terminal {0}: not mounted"
+msgstr "{0} terminalde açılmıyor: bağlı değil"
+
+#: ../udiskie/mount.py:138
+#, python-brace-format
+msgid "not opening terminal {0}: no program"
+msgstr "{0} terminalde açılmıyor: program yok"
+
+#: ../udiskie/mount.py:156
+#, python-brace-format
+msgid "not mounting {0}: unhandled device"
+msgstr "{0} bağlanmıyor: beklenmeyen aygıt"
+
+#: ../udiskie/mount.py:159
+#, python-brace-format
+msgid "not mounting {0}: already mounted"
+msgstr "{0} bağlanmıyor: zaten bağlı"
+
+#: ../udiskie/mount.py:163
+#, python-brace-format
+msgid "mounting {0} with {1}"
+msgstr "{0}, {1} ile bağlanıyor"
+
+#: ../udiskie/mount.py:166
+#, python-brace-format
+msgid "mounted {0} on {1}"
+msgstr "{0}, {1} yolunda bağlandı"
+
+#: ../udiskie/mount.py:172
+msgid ""
+"Mounting NTFS device with default driver.\n"
+"Please install 'ntfs-3g' if you experience problems or the device is "
+"readonly."
+msgstr ""
+"NTFS aygıtı öntanımlı sürücüyle bağlanıyor\n"
+"Sorun yaşarsanız veya aygıt salt okunursa lütfen 'ntfs-3g' programını kurun."
+
+#: ../udiskie/mount.py:186
+#, python-brace-format
+msgid "not unmounting {0}: unhandled device"
+msgstr "{0} bağı kesilmiyor: beklenmeyen aygıt"
+
+#: ../udiskie/mount.py:189
+#, python-brace-format
+msgid "not unmounting {0}: not mounted"
+msgstr "{0} bağı kesilmiyor: bağlı değil"
+
+#: ../udiskie/mount.py:191
+#, python-brace-format
+msgid "unmounting {0}"
+msgstr "{0} bağı kesiliyor"
+
+#: ../udiskie/mount.py:193
+#, python-brace-format
+msgid "unmounted {0}"
+msgstr "{0} bağı kesildi"
+
+#: ../udiskie/mount.py:207
+#, python-brace-format
+msgid "not unlocking {0}: unhandled device"
+msgstr "{0} kilidi açılmıyor: beklenmeyen aygıt"
+
+#: ../udiskie/mount.py:210
+#, python-brace-format
+msgid "not unlocking {0}: already unlocked"
+msgstr "{0} kilidi açılmıyor: zaten kilidi açık"
+
+#: ../udiskie/mount.py:213
+#, python-brace-format
+msgid "not unlocking {0}: no password prompt"
+msgstr "{0} kilidi açılmıyor: parola istemi yok"
+
+#: ../udiskie/mount.py:227
+#, python-brace-format
+msgid "not unlocking {0}: cancelled by user"
+msgstr "{0} kilidi açılmıyor: kullanıcı iptal etti"
+
+#: ../udiskie/mount.py:232
+#, python-brace-format
+msgid "unlocking {0} using keyfile"
+msgstr "anahtar dosyası kullanılarak {0} kilidi açılıyor"
+
+#: ../udiskie/mount.py:235
+#, python-brace-format
+msgid "unlocking {0}"
+msgstr "{0} kilidi açılıyor"
+
+#: ../udiskie/mount.py:238
+#, python-brace-format
+msgid "unlocked {0}"
+msgstr "{0} kilidi açıldı"
+
+#: ../udiskie/mount.py:247
+#, python-brace-format
+msgid "no cached key for {0}"
+msgstr "{0} için önbelleğe alınan anahtar yok"
+
+#: ../udiskie/mount.py:249
+#, python-brace-format
+msgid "unlocking {0} using cached password"
+msgstr "önbelleğe alınan parola kullanılarak {0} kilidi açılıyor"
+
+#: ../udiskie/mount.py:253
+#, python-brace-format
+msgid "failed to unlock {0} using cached password"
+msgstr "önbelleğe alınan parola kullanılarak {0} kilidi açılamadı"
+
+#: ../udiskie/mount.py:256
+#, python-brace-format
+msgid "unlocked {0} using cached password"
+msgstr "önbelleğe alınan parola kullanılarak {0} kilidi açıldı"
+
+#: ../udiskie/mount.py:264
+msgid "No matching keyfile rule for {}."
+msgstr "{} için eşleşen anahtar dosyası kuralı yok."
+
+#: ../udiskie/mount.py:270
+#, python-brace-format
+msgid "keyfile for {0} not found: {1}"
+msgstr "{0} için anahtar dosyası bulunamadı: {1}"
+
+#: ../udiskie/mount.py:272
+#, python-brace-format
+msgid "unlocking {0} using keyfile {1}"
+msgstr "{0} kilidi, {1} anahtar dosyası kullanılarak açılıyor"
+
+#: ../udiskie/mount.py:276
+#, python-brace-format
+msgid "failed to unlock {0} using keyfile"
+msgstr "anahtar dosyası kullanılarak {0} kilidi açılamadı"
+
+#: ../udiskie/mount.py:279
+#, python-brace-format
+msgid "unlocked {0} using keyfile"
+msgstr "anahtar dosyası kullanılarak {0} kilidi açıldı"
+
+#: ../udiskie/mount.py:305
+#, python-brace-format
+msgid "not locking {0}: unhandled device"
+msgstr "{0} kilitlenmiyor: beklenmeyen aygıt"
+
+#: ../udiskie/mount.py:308
+#, python-brace-format
+msgid "not locking {0}: not unlocked"
+msgstr "{0} kilitlenmiyor: kilidi açık değil"
+
+#: ../udiskie/mount.py:310
+#, python-brace-format
+msgid "locking {0}"
+msgstr "{0} kilitleniyor"
+
+#: ../udiskie/mount.py:312
+#, python-brace-format
+msgid "locked {0}"
+msgstr "{0} kilitlendi"
+
+#: ../udiskie/mount.py:349 ../udiskie/mount.py:392
+#, python-brace-format
+msgid "not adding {0}: unhandled device"
+msgstr "{0} eklenmiyor: beklenmeyen aygıt"
+
+#: ../udiskie/mount.py:428 ../udiskie/mount.py:478
+#, python-brace-format
+msgid "not removing {0}: unhandled device"
+msgstr "{0} kaldırılmıyor: beklenmeyen aygıt"
+
+#: ../udiskie/mount.py:503
+#, python-brace-format
+msgid "not ejecting {0}: unhandled device"
+msgstr "{0} çıkartılmıyor: beklenmeyen aygıt"
+
+#: ../udiskie/mount.py:507
+#, python-brace-format
+msgid "not ejecting {0}: drive not ejectable"
+msgstr "{0} çıkartılmıyor: sürücü çıkartılabilir değil"
+
+#: ../udiskie/mount.py:513
+#, python-brace-format
+msgid "ejecting {0}"
+msgstr "{0} çıkartılıyor"
+
+#: ../udiskie/mount.py:515
+#, python-brace-format
+msgid "ejected {0}"
+msgstr "{0} çıkartıldı"
+
+#: ../udiskie/mount.py:529
+#, python-brace-format
+msgid "not detaching {0}: unhandled device"
+msgstr "{0} ayrılmıyor: beklenmeyen aygıt"
+
+#: ../udiskie/mount.py:533
+#, python-brace-format
+msgid "not detaching {0}: drive not detachable"
+msgstr "{0} ayrılmıyor: sürücü ayrılabilir değil"
+
+#: ../udiskie/mount.py:537
+#, python-brace-format
+msgid "detaching {0}"
+msgstr "{0} ayrılıyor"
+
+#: ../udiskie/mount.py:542
+#, python-brace-format
+msgid "detached {0}"
+msgstr "{0} ayrıldı"
+
+#: ../udiskie/mount.py:593
+#, python-brace-format
+msgid "not setting up {0}: already up"
+msgstr "{0} kurulmuyor: zaten kurulu"
+
+#: ../udiskie/mount.py:596
+#, python-brace-format
+msgid "not setting up {0}: not a file"
+msgstr "{0} kurulmuyor: bir dosya değil"
+
+#: ../udiskie/mount.py:598
+#, python-brace-format
+msgid "setting up {0}"
+msgstr "{0} kuruluyor"
+
+#: ../udiskie/mount.py:606
+#, python-brace-format
+msgid "set up {0} as {1}"
+msgstr "{0}, {1} olarak kuruldu"
+
+#: ../udiskie/mount.py:621
+#, python-brace-format
+msgid "not deleting {0}: unhandled device"
+msgstr "{0} silinmiyor: beklenmeyen aygıt"
+
+#: ../udiskie/mount.py:625
+#, python-brace-format
+msgid "deleting {0}"
+msgstr "{0} siliniyor"
+
+#: ../udiskie/mount.py:627
+#, python-brace-format
+msgid "deleted {0}"
+msgstr "{0} silindi"
+
+#: ../udiskie/mount.py:753
+#, python-brace-format
+msgid "Browse {0}"
+msgstr "Tarayıcıda aç: {0}"
+
+#: ../udiskie/mount.py:754
+#, python-brace-format
+msgid "Hack on {0}"
+msgstr "Terminalde aç: {0}"
+
+#: ../udiskie/mount.py:755
+#, python-brace-format
+msgid "Mount {0}"
+msgstr "Bağla: {0}"
+
+#: ../udiskie/mount.py:756
+#, python-brace-format
+msgid "Unmount {0}"
+msgstr "Bağını kes: {0}"
+
+#: ../udiskie/mount.py:757
+#, python-brace-format
+msgid "Unlock {0}"
+msgstr "Kilidini aç: {0}"
+
+#: ../udiskie/mount.py:758
+#, python-brace-format
+msgid "Lock {0}"
+msgstr "Kilitle: {0}"
+
+#: ../udiskie/mount.py:759
+#, python-brace-format
+msgid "Eject {1}"
+msgstr "Çıkart: {1}"
+
+#: ../udiskie/mount.py:760
+#, python-brace-format
+msgid "Unpower {1}"
+msgstr "Gücünü kapat: {1}"
+
+#: ../udiskie/mount.py:761
+#, python-brace-format
+msgid "Clear password for {0}"
+msgstr "{0} için parolayı temizle"
+
+#: ../udiskie/mount.py:762
+#, python-brace-format
+msgid "Detach {0}"
+msgstr "Ayır: {0}"
+
+#: ../udiskie/notify.py:62
+msgid "Browse directory"
+msgstr "Dizine göz at"
+
+#: ../udiskie/notify.py:64
+msgid "Open terminal"
+msgstr "Terminali aç"
+
+#: ../udiskie/notify.py:68
+msgid "Device mounted"
+msgstr "Aygıt bağlandı"
+
+#: ../udiskie/notify.py:69
+#, python-brace-format
+msgid "{0.ui_label} mounted on {0.mount_paths[0]}"
+msgstr "{0.ui_label}, {0.mount_paths[0]} yolunda bağlandı"
+
+#: ../udiskie/notify.py:80
+msgid "Device unmounted"
+msgstr "Aygıtın bağı kesildi"
+
+#: ../udiskie/notify.py:81
+#, python-brace-format
+msgid "{0.ui_label} unmounted"
+msgstr "{0.ui_label} bağı kesildi"
+
+#: ../udiskie/notify.py:90
+msgid "Device locked"
+msgstr "Aygıt kilitlendi"
+
+#: ../udiskie/notify.py:91
+#, python-brace-format
+msgid "{0.device_presentation} locked"
+msgstr "{0.device_presentation} kilitlendi"
+
+#: ../udiskie/notify.py:100
+msgid "Device unlocked"
+msgstr "Aygıtın kilidi açıldı"
+
+#: ../udiskie/notify.py:101
+#, python-brace-format
+msgid "{0.device_presentation} unlocked"
+msgstr "{0.device_presentation} kilidi açıldı"
+
+#: ../udiskie/notify.py:134
+msgid "Device added"
+msgstr "Aygıt eklendi"
+
+#: ../udiskie/notify.py:135
+#, python-brace-format
+msgid "device appeared on {0.device_presentation}"
+msgstr "Aygıt {0.device_presentation} yolunda göründü"
+
+#: ../udiskie/notify.py:154
+msgid "Device removed"
+msgstr "Aygıt kaldırıldı"
+
+#: ../udiskie/notify.py:155
+#, python-brace-format
+msgid "device disappeared on {0.device_presentation}"
+msgstr "Aygıt {0.device_presentation} yolunda kayboldu"
+
+#: ../udiskie/notify.py:164
+#, python-brace-format
+msgid ""
+"failed to {0} {1}:\n"
+"{2}"
+msgstr ""
+"{0} {1} başarısız oldu:\n"
+"{2}"
+
+#: ../udiskie/notify.py:166
+#, python-brace-format
+msgid "failed to {0} device {1}."
+msgstr "{0} aygıt {1} başarısız oldu."
+
+#: ../udiskie/notify.py:172
+msgid "Retry"
+msgstr "Yeniden dene"
+
+#: ../udiskie/notify.py:175
+msgid "Job failed"
+msgstr "Görev başarısız oldu"
+
+#: ../udiskie/notify.py:206
+#, python-brace-format
+msgid "Failed to show notification: {0}"
+msgstr "Bildirim gösterilemedi: {0}"
+
+#: ../udiskie/prompt.py:96
+msgid "Show password"
+msgstr "Parolayı göster"
+
+#: ../udiskie/prompt.py:101
+msgid "Open keyfile…"
+msgstr "Anahtar dosyasını aç…"
+
+#: ../udiskie/prompt.py:108
+msgid "Cache password"
+msgstr "Parolayı önbelleğe al"
+
+#: ../udiskie/prompt.py:123
+msgid "Open a keyfile to unlock the LUKS device"
+msgstr "LUKS aygıtının kilidini açmak için bir anahtar dosyası açın"
+
+#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#, python-brace-format
+msgid "Enter password for {0.device_presentation}: "
+msgstr "{0.device_presentation} için parolayı girin: "
+
+#: ../udiskie/prompt.py:203
+msgid "Unknown device attribute {!r} in format string: {!r}"
+msgstr "Biçim dizgesinde bilinmeyen aygıt özelliği {!r}: {!r}"
+
+#: ../udiskie/prompt.py:255
+msgid ""
+"Can't find file browser: {0!r}. You may want to change the value for the '-"
+"f' option."
+msgstr ""
+"{0!r} dosya tarayıcısı bulunamıyor. '-f' seçeneğinin değerini değiştirmek "
+"isteyebilirsiniz."
+
+#: ../udiskie/tray.py:182
+msgid "Managed devices"
+msgstr "Yönetilen aygıtlar"
+
+#: ../udiskie/tray.py:198
+msgid "Mount disc image"
+msgstr "Disk kalıbını bağla"
+
+#: ../udiskie/tray.py:204
+msgid "Enable automounting"
+msgstr "Otomatik bağlamayı etkinleştir"
+
+#: ../udiskie/tray.py:210
+msgid "Enable notifications"
+msgstr "Bildirimleri etkinleştir"
+
+#: ../udiskie/tray.py:219
+msgid "Quit"
+msgstr "Çıkış"
+
+#: ../udiskie/tray.py:226
+msgid "Open disc image"
+msgstr "Disk kalıbı aç"
+
+#: ../udiskie/tray.py:228
+msgid "Open"
+msgstr "Aç"
+
+#: ../udiskie/tray.py:229
+msgid "Cancel"
+msgstr "İptal"
+
+#: ../udiskie/tray.py:269
+msgid "Invalid node!"
+msgstr "Geçersiz düğüm!"
+
+#: ../udiskie/tray.py:271
+msgid "No external devices"
+msgstr "Harici aygıt yok"
+
+#: ../udiskie/tray.py:387
+msgid "udiskie"
+msgstr "udiskie"
+
+#: ../udiskie/udisks2.py:647
+#, python-brace-format
+msgid "found device owning \"{0}\": \"{1}\""
+msgstr "\"{0}\" sahibi aygıt bulundu: \"{1}\""
+
+#: ../udiskie/udisks2.py:650
+#, python-brace-format
+msgid "no device found owning \"{0}\""
+msgstr "\"{0}\" sahibi aygıt bulunamadı"
+
+#: ../udiskie/udisks2.py:669
+#, python-brace-format
+msgid "Daemon version: {0}"
+msgstr "Arka plan programı sürümü: {0}"
+
+#: ../udiskie/udisks2.py:674
+#, python-brace-format
+msgid "Keyfile support: {0}"
+msgstr "Anahtar dosyası desteği: {0}"
+
+#: ../udiskie/udisks2.py:753
+#, python-brace-format
+msgid "+++ {0}: {1}"
+msgstr "+++ {0}: {1}"
