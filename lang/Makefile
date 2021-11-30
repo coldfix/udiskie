@@ -13,7 +13,7 @@ all: po mo
 	@if [ -f $@ ]; then \
 		$(echo) msgmerge -q -U $@ $< && touch $@;\
 	else \
-		$(echo) msginit -o=$@ -i=$<;\
+		$(echo) msginit -o $@ -i $< -l $*;\
 	fi
 
 udiskie.pot: $(shell $(sources))
