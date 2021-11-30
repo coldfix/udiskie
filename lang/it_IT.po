@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-27 21:54+0100\n"
+"POT-Creation-Date: 2021-11-30 17:50+0000\n"
 "PO-Revision-Date: 2020-05-06 11:52+0200\n"
 "Last-Translator: Stefano Mecocci <mecocci15@gmail.com>\n"
 "Language-Team: \n"
@@ -10,6 +10,108 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: ../udiskie/tray.py:182
+msgid "Managed devices"
+msgstr ""
+
+#: ../udiskie/tray.py:198
+msgid "Mount disc image"
+msgstr "Monta l'immagine del disco"
+
+#: ../udiskie/tray.py:204
+msgid "Enable automounting"
+msgstr "Abilita l'automontaggio"
+
+#: ../udiskie/tray.py:210
+msgid "Enable notifications"
+msgstr "Abilita le notifiche"
+
+#: ../udiskie/tray.py:219
+msgid "Quit"
+msgstr "Esci"
+
+#: ../udiskie/tray.py:226
+msgid "Open disc image"
+msgstr "Apri l'immagine del disco"
+
+#: ../udiskie/tray.py:228
+msgid "Open"
+msgstr "Apri"
+
+#: ../udiskie/tray.py:229
+msgid "Cancel"
+msgstr "Annulla"
+
+#: ../udiskie/tray.py:269
+msgid "Invalid node!"
+msgstr "Nodo invalido!"
+
+#: ../udiskie/tray.py:271
+msgid "No external devices"
+msgstr "Nessun dispositivo esterno"
+
+#: ../udiskie/tray.py:387
+msgid "udiskie"
+msgstr "udiskie"
+
+#: ../udiskie/udisks2.py:647
+#, python-brace-format
+msgid "found device owning \"{0}\": \"{1}\""
+msgstr "Trovato dispositivo a cui appartiene \"{0}\": \"{1}\""
+
+#: ../udiskie/udisks2.py:650
+#, python-brace-format
+msgid "no device found owning \"{0}\""
+msgstr "Nessun dispositivo trovato a cui appartiene \"{0}\""
+
+#: ../udiskie/udisks2.py:669
+#, python-brace-format
+msgid "Daemon version: {0}"
+msgstr "Versione demone: {0}"
+
+#: ../udiskie/udisks2.py:674
+#, python-brace-format
+msgid "Keyfile support: {0}"
+msgstr "Supporto keyfile: {0}"
+
+#: ../udiskie/udisks2.py:753
+#, python-brace-format
+msgid "+++ {0}: {1}"
+msgstr "+++ {0}: {1}"
+
+#: ../udiskie/prompt.py:96
+msgid "Show password"
+msgstr "Mostra password"
+
+#: ../udiskie/prompt.py:101
+msgid "Open keyfile…"
+msgstr "Apri keyfile..."
+
+#: ../udiskie/prompt.py:108
+msgid "Cache password"
+msgstr "Memorizza password"
+
+#: ../udiskie/prompt.py:123
+msgid "Open a keyfile to unlock the LUKS device"
+msgstr "Apri un keyfile per sbloccare il dispositivo LUKS"
+
+#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#, python-brace-format
+msgid "Enter password for {0.device_presentation}: "
+msgstr "Immetti la password per {0.device_presentation}: "
+
+#: ../udiskie/prompt.py:203
+msgid "Unknown device attribute {!r} in format string: {!r}"
+msgstr "Attributo dispositivo sconosciuto {!r} nella stringa di formato: {!r}"
+
+#: ../udiskie/prompt.py:255
+msgid ""
+"Can't find file browser: {0!r}. You may want to change the value for the '-"
+"f' option."
+msgstr ""
+"Impossibile trovare esplora risorse: {0!r}. Potresti voler cambiare il "
+"valore per l'opzione '-f'."
 
 #: ../udiskie/cli.py:46
 #, python-brace-format
@@ -97,44 +199,6 @@ msgstr ""
 "\t- typelib è fornita da un pacchetto separato\n"
 "\t- La build è stata eseguita con introspezione disabilitata\n"
 "Avvio di udiskie senza icona di sistema.\n"
-
-#: ../udiskie/config.py:127
-msgid "Unknown matching attribute: {!r}"
-msgstr ""
-
-#: ../udiskie/config.py:129
-#, python-brace-format
-msgid "new rule: {0}"
-msgstr "nuova regola: {0}"
-
-#: ../udiskie/config.py:132
-#, python-brace-format
-msgid "{0} -> {1}"
-msgstr ""
-
-#: ../udiskie/config.py:151
-#, python-brace-format
-msgid "{0} matched {1}"
-msgstr "{0} è uguale ad {1}"
-
-#: ../udiskie/config.py:228
-#, python-brace-format
-msgid "Failed to read config file: {0}"
-msgstr "Impossibile leggere il file di configurazione: {0}"
-
-#: ../udiskie/config.py:231
-msgid "Failed to read {0!r}: {1}"
-msgstr "Impossibile leggere {0!r}: {1}"
-
-#: ../udiskie/depend.py:55
-msgid ""
-"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
-msgstr ""
-"Dipendenza mancante: GTK 3. Viene usato GTK 2 per richiedere la password"
-
-#: ../udiskie/depend.py:61
-msgid "X server not connected!"
-msgstr "server X non connesso!"
 
 #: ../udiskie/mount.py:29
 #, python-brace-format
@@ -455,6 +519,16 @@ msgstr "Dimentica la password per {0}"
 msgid "Detach {0}"
 msgstr "Stacca {0}"
 
+#: ../udiskie/depend.py:55
+msgid ""
+"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
+msgstr ""
+"Dipendenza mancante: GTK 3. Viene usato GTK 2 per richiedere la password"
+
+#: ../udiskie/depend.py:61
+msgid "X server not connected!"
+msgstr "server X non connesso!"
+
 #: ../udiskie/notify.py:62
 msgid "Browse directory"
 msgstr "Apri la cartella"
@@ -499,25 +573,25 @@ msgstr "Dispositivo sbloccato"
 msgid "{0.device_presentation} unlocked"
 msgstr "{0.device_presentation} sbloccato"
 
-#: ../udiskie/notify.py:134
+#: ../udiskie/notify.py:135
 msgid "Device added"
 msgstr "Nuovo dispositivo"
 
-#: ../udiskie/notify.py:135
+#: ../udiskie/notify.py:136
 #, python-brace-format
 msgid "device appeared on {0.device_presentation}"
 msgstr "Aggiunto dispositivo da {0.device_presentation}"
 
-#: ../udiskie/notify.py:154
+#: ../udiskie/notify.py:155
 msgid "Device removed"
 msgstr "Dispositivo rimosso"
 
-#: ../udiskie/notify.py:155
+#: ../udiskie/notify.py:156
 #, python-brace-format
 msgid "device disappeared on {0.device_presentation}"
 msgstr "Dispositivo rimosso da {0.device_presentation}"
 
-#: ../udiskie/notify.py:164
+#: ../udiskie/notify.py:165
 #, python-brace-format
 msgid ""
 "failed to {0} {1}:\n"
@@ -526,122 +600,48 @@ msgstr ""
 "Errore in {0} {1}:\n"
 "{2}"
 
-#: ../udiskie/notify.py:166
+#: ../udiskie/notify.py:167
 #, python-brace-format
 msgid "failed to {0} device {1}."
 msgstr "Errore in {0} dispositivo {1}"
 
-#: ../udiskie/notify.py:172
+#: ../udiskie/notify.py:173
 msgid "Retry"
 msgstr "Riprova"
 
-#: ../udiskie/notify.py:175
+#: ../udiskie/notify.py:176
 msgid "Job failed"
 msgstr "Lavoro fallito"
 
-#: ../udiskie/notify.py:206
+#: ../udiskie/notify.py:207
 #, python-brace-format
 msgid "Failed to show notification: {0}"
 msgstr "Impossibile mostrare la notifica: {0}"
 
-#: ../udiskie/prompt.py:96
-msgid "Show password"
-msgstr "Mostra password"
-
-#: ../udiskie/prompt.py:101
-msgid "Open keyfile…"
-msgstr "Apri keyfile..."
-
-#: ../udiskie/prompt.py:108
-msgid "Cache password"
-msgstr "Memorizza password"
-
-#: ../udiskie/prompt.py:123
-msgid "Open a keyfile to unlock the LUKS device"
-msgstr "Apri un keyfile per sbloccare il dispositivo LUKS"
-
-#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
-#, python-brace-format
-msgid "Enter password for {0.device_presentation}: "
-msgstr "Immetti la password per {0.device_presentation}: "
-
-#: ../udiskie/prompt.py:203
-msgid "Unknown device attribute {!r} in format string: {!r}"
-msgstr "Attributo dispositivo sconosciuto {!r} nella stringa di formato: {!r}"
-
-#: ../udiskie/prompt.py:255
-msgid ""
-"Can't find file browser: {0!r}. You may want to change the value for the '-"
-"f' option."
-msgstr ""
-"Impossibile trovare esplora risorse: {0!r}. Potresti voler cambiare il "
-"valore per l'opzione '-f'."
-
-#: ../udiskie/tray.py:182
-msgid "Managed devices"
+#: ../udiskie/config.py:127
+msgid "Unknown matching attribute: {!r}"
 msgstr ""
 
-#: ../udiskie/tray.py:198
-msgid "Mount disc image"
-msgstr "Monta l'immagine del disco"
-
-#: ../udiskie/tray.py:204
-msgid "Enable automounting"
-msgstr "Abilita l'automontaggio"
-
-#: ../udiskie/tray.py:210
-msgid "Enable notifications"
-msgstr "Abilita le notifiche"
-
-#: ../udiskie/tray.py:219
-msgid "Quit"
-msgstr "Esci"
-
-#: ../udiskie/tray.py:226
-msgid "Open disc image"
-msgstr "Apri l'immagine del disco"
-
-#: ../udiskie/tray.py:228
-msgid "Open"
-msgstr "Apri"
-
-#: ../udiskie/tray.py:229
-msgid "Cancel"
-msgstr "Annulla"
-
-#: ../udiskie/tray.py:269
-msgid "Invalid node!"
-msgstr "Nodo invalido!"
-
-#: ../udiskie/tray.py:271
-msgid "No external devices"
-msgstr "Nessun dispositivo esterno"
-
-#: ../udiskie/tray.py:387
-msgid "udiskie"
-msgstr "udiskie"
-
-#: ../udiskie/udisks2.py:647
+#: ../udiskie/config.py:129
 #, python-brace-format
-msgid "found device owning \"{0}\": \"{1}\""
-msgstr "Trovato dispositivo a cui appartiene \"{0}\": \"{1}\""
+msgid "new rule: {0}"
+msgstr "nuova regola: {0}"
 
-#: ../udiskie/udisks2.py:650
+#: ../udiskie/config.py:132
 #, python-brace-format
-msgid "no device found owning \"{0}\""
-msgstr "Nessun dispositivo trovato a cui appartiene \"{0}\""
+msgid "{0} -> {1}"
+msgstr ""
 
-#: ../udiskie/udisks2.py:669
+#: ../udiskie/config.py:151
 #, python-brace-format
-msgid "Daemon version: {0}"
-msgstr "Versione demone: {0}"
+msgid "{0} matched {1}"
+msgstr "{0} è uguale ad {1}"
 
-#: ../udiskie/udisks2.py:674
+#: ../udiskie/config.py:228
 #, python-brace-format
-msgid "Keyfile support: {0}"
-msgstr "Supporto keyfile: {0}"
+msgid "Failed to read config file: {0}"
+msgstr "Impossibile leggere il file di configurazione: {0}"
 
-#: ../udiskie/udisks2.py:753
-#, python-brace-format
-msgid "+++ {0}: {1}"
-msgstr "+++ {0}: {1}"
+#: ../udiskie/config.py:231
+msgid "Failed to read {0!r}: {1}"
+msgstr "Impossibile leggere {0!r}: {1}"

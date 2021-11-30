@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-27 21:54+0100\n"
+"POT-Creation-Date: 2021-11-30 17:50+0000\n"
 "PO-Revision-Date: 2019-05-02 14:20+0200\n"
 "Last-Translator: Jose Riha <jose1711@gmail.com>\n"
 "Language-Team: Slovak\n"
@@ -18,6 +18,108 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Poedit 2.2.1\n"
+
+#: ../udiskie/tray.py:182
+msgid "Managed devices"
+msgstr ""
+
+#: ../udiskie/tray.py:198
+msgid "Mount disc image"
+msgstr "Pripojiť obraz disku"
+
+#: ../udiskie/tray.py:204
+msgid "Enable automounting"
+msgstr "Povoliť automatické pripájanie"
+
+#: ../udiskie/tray.py:210
+msgid "Enable notifications"
+msgstr "Povoliť notifikácie"
+
+#: ../udiskie/tray.py:219
+msgid "Quit"
+msgstr "Ukončiť"
+
+#: ../udiskie/tray.py:226
+msgid "Open disc image"
+msgstr "Otvoriť obraz disku"
+
+#: ../udiskie/tray.py:228
+msgid "Open"
+msgstr "Otvoriť"
+
+#: ../udiskie/tray.py:229
+msgid "Cancel"
+msgstr "Zrušiť"
+
+#: ../udiskie/tray.py:269
+msgid "Invalid node!"
+msgstr ""
+
+#: ../udiskie/tray.py:271
+msgid "No external devices"
+msgstr "Žiadne externé zariadenia"
+
+#: ../udiskie/tray.py:387
+msgid "udiskie"
+msgstr "udiskie"
+
+#: ../udiskie/udisks2.py:647
+#, python-brace-format
+msgid "found device owning \"{0}\": \"{1}\""
+msgstr "našiel som zariadenie vlastniace \"{0}\": \"{1}\""
+
+#: ../udiskie/udisks2.py:650
+#, python-brace-format
+msgid "no device found owning \"{0}\""
+msgstr "nenašiel som zariadenie vlastniace \"{0}\""
+
+#: ../udiskie/udisks2.py:669
+#, python-brace-format
+msgid "Daemon version: {0}"
+msgstr "Verzia daemona: {0}"
+
+#: ../udiskie/udisks2.py:674
+#, python-brace-format
+msgid "Keyfile support: {0}"
+msgstr "Podpora pre kľúč (keyfile): {0}"
+
+#: ../udiskie/udisks2.py:753
+#, python-brace-format
+msgid "+++ {0}: {1}"
+msgstr "+++ {0}: {1}"
+
+#: ../udiskie/prompt.py:96
+msgid "Show password"
+msgstr ""
+
+#: ../udiskie/prompt.py:101
+msgid "Open keyfile…"
+msgstr ""
+
+#: ../udiskie/prompt.py:108
+msgid "Cache password"
+msgstr ""
+
+#: ../udiskie/prompt.py:123
+msgid "Open a keyfile to unlock the LUKS device"
+msgstr ""
+
+#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#, python-brace-format
+msgid "Enter password for {0.device_presentation}: "
+msgstr "Zadajte heslo pre {0.device_presentation}: "
+
+#: ../udiskie/prompt.py:203
+msgid "Unknown device attribute {!r} in format string: {!r}"
+msgstr "Neznámy atribút zariadenia {!r} vo formátovacom reťazci: {!r}"
+
+#: ../udiskie/prompt.py:255
+msgid ""
+"Can't find file browser: {0!r}. You may want to change the value for the '-"
+"f' option."
+msgstr ""
+"Nepodarilo sa nájsť prehliadač súborov: {0!r}. Možno budete chcieť zmeniť "
+"hodnotu pre voľbu '-f'."
 
 #: ../udiskie/cli.py:46
 #, python-brace-format
@@ -77,43 +179,6 @@ msgid ""
 "\t- it was built with introspection disabled\n"
 "Starting udiskie without appindicator icon.\n"
 msgstr ""
-
-#: ../udiskie/config.py:127
-msgid "Unknown matching attribute: {!r}"
-msgstr "Neznámy atribút pre vyhľadávanie: {!r}"
-
-#: ../udiskie/config.py:129
-#, python-brace-format
-msgid "new rule: {0}"
-msgstr ""
-
-#: ../udiskie/config.py:132
-#, fuzzy, python-brace-format
-msgid "{0} -> {1}"
-msgstr "+++ {0}: {1}"
-
-#: ../udiskie/config.py:151
-#, fuzzy, python-brace-format
-msgid "{0} matched {1}"
-msgstr "{0} vytvorené"
-
-#: ../udiskie/config.py:228
-#, python-brace-format
-msgid "Failed to read config file: {0}"
-msgstr "Nepodarilo sa načítať konfiguračný súbor: {0}"
-
-#: ../udiskie/config.py:231
-msgid "Failed to read {0!r}: {1}"
-msgstr "Nepodarilo sa načítať {0!r}: {1}"
-
-#: ../udiskie/depend.py:55
-msgid ""
-"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
-msgstr ""
-
-#: ../udiskie/depend.py:61
-msgid "X server not connected!"
-msgstr "X server nie je pripojený!"
 
 #: ../udiskie/mount.py:29
 #, python-brace-format
@@ -434,6 +499,15 @@ msgstr "Vymazať heslo pre {0}"
 msgid "Detach {0}"
 msgstr ""
 
+#: ../udiskie/depend.py:55
+msgid ""
+"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
+msgstr ""
+
+#: ../udiskie/depend.py:61
+msgid "X server not connected!"
+msgstr "X server nie je pripojený!"
+
 #: ../udiskie/notify.py:62
 msgid "Browse directory"
 msgstr "Prehliadať adresár"
@@ -478,25 +552,25 @@ msgstr "Zariadenie odomknuté"
 msgid "{0.device_presentation} unlocked"
 msgstr "{0.device_presentation} odomknuté"
 
-#: ../udiskie/notify.py:134
+#: ../udiskie/notify.py:135
 msgid "Device added"
 msgstr "Zariadenie pridané"
 
-#: ../udiskie/notify.py:135
+#: ../udiskie/notify.py:136
 #, python-brace-format
 msgid "device appeared on {0.device_presentation}"
 msgstr "zariadenie sa objavilo na {0.device_presentation}"
 
-#: ../udiskie/notify.py:154
+#: ../udiskie/notify.py:155
 msgid "Device removed"
 msgstr "Zariadenie odstránené"
 
-#: ../udiskie/notify.py:155
+#: ../udiskie/notify.py:156
 #, python-brace-format
 msgid "device disappeared on {0.device_presentation}"
 msgstr "zariadenie zmizlo z {0.device_presentation}"
 
-#: ../udiskie/notify.py:164
+#: ../udiskie/notify.py:165
 #, python-brace-format
 msgid ""
 "failed to {0} {1}:\n"
@@ -505,125 +579,51 @@ msgstr ""
 "nepodarilo sa {0} {1}:\n"
 "{2}"
 
-#: ../udiskie/notify.py:166
+#: ../udiskie/notify.py:167
 #, python-brace-format
 msgid "failed to {0} device {1}."
 msgstr "chyba pri {0} zariadenia {1}."
 
-#: ../udiskie/notify.py:172
+#: ../udiskie/notify.py:173
 msgid "Retry"
 msgstr "Skúsiť znova"
 
-#: ../udiskie/notify.py:175
+#: ../udiskie/notify.py:176
 msgid "Job failed"
 msgstr "Úloha skončila s chybou"
 
-#: ../udiskie/notify.py:206
+#: ../udiskie/notify.py:207
 #, python-brace-format
 msgid "Failed to show notification: {0}"
 msgstr "Nepodarilo sa zobraziť notifikáciu: {0}"
 
-#: ../udiskie/prompt.py:96
-msgid "Show password"
-msgstr ""
+#: ../udiskie/config.py:127
+msgid "Unknown matching attribute: {!r}"
+msgstr "Neznámy atribút pre vyhľadávanie: {!r}"
 
-#: ../udiskie/prompt.py:101
-msgid "Open keyfile…"
-msgstr ""
-
-#: ../udiskie/prompt.py:108
-msgid "Cache password"
-msgstr ""
-
-#: ../udiskie/prompt.py:123
-msgid "Open a keyfile to unlock the LUKS device"
-msgstr ""
-
-#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#: ../udiskie/config.py:129
 #, python-brace-format
-msgid "Enter password for {0.device_presentation}: "
-msgstr "Zadajte heslo pre {0.device_presentation}: "
-
-#: ../udiskie/prompt.py:203
-msgid "Unknown device attribute {!r} in format string: {!r}"
-msgstr "Neznámy atribút zariadenia {!r} vo formátovacom reťazci: {!r}"
-
-#: ../udiskie/prompt.py:255
-msgid ""
-"Can't find file browser: {0!r}. You may want to change the value for the '-"
-"f' option."
-msgstr ""
-"Nepodarilo sa nájsť prehliadač súborov: {0!r}. Možno budete chcieť zmeniť "
-"hodnotu pre voľbu '-f'."
-
-#: ../udiskie/tray.py:182
-msgid "Managed devices"
+msgid "new rule: {0}"
 msgstr ""
 
-#: ../udiskie/tray.py:198
-msgid "Mount disc image"
-msgstr "Pripojiť obraz disku"
-
-#: ../udiskie/tray.py:204
-msgid "Enable automounting"
-msgstr "Povoliť automatické pripájanie"
-
-#: ../udiskie/tray.py:210
-msgid "Enable notifications"
-msgstr "Povoliť notifikácie"
-
-#: ../udiskie/tray.py:219
-msgid "Quit"
-msgstr "Ukončiť"
-
-#: ../udiskie/tray.py:226
-msgid "Open disc image"
-msgstr "Otvoriť obraz disku"
-
-#: ../udiskie/tray.py:228
-msgid "Open"
-msgstr "Otvoriť"
-
-#: ../udiskie/tray.py:229
-msgid "Cancel"
-msgstr "Zrušiť"
-
-#: ../udiskie/tray.py:269
-msgid "Invalid node!"
-msgstr ""
-
-#: ../udiskie/tray.py:271
-msgid "No external devices"
-msgstr "Žiadne externé zariadenia"
-
-#: ../udiskie/tray.py:387
-msgid "udiskie"
-msgstr "udiskie"
-
-#: ../udiskie/udisks2.py:647
-#, python-brace-format
-msgid "found device owning \"{0}\": \"{1}\""
-msgstr "našiel som zariadenie vlastniace \"{0}\": \"{1}\""
-
-#: ../udiskie/udisks2.py:650
-#, python-brace-format
-msgid "no device found owning \"{0}\""
-msgstr "nenašiel som zariadenie vlastniace \"{0}\""
-
-#: ../udiskie/udisks2.py:669
-#, python-brace-format
-msgid "Daemon version: {0}"
-msgstr "Verzia daemona: {0}"
-
-#: ../udiskie/udisks2.py:674
-#, python-brace-format
-msgid "Keyfile support: {0}"
-msgstr "Podpora pre kľúč (keyfile): {0}"
-
-#: ../udiskie/udisks2.py:753
-#, python-brace-format
-msgid "+++ {0}: {1}"
+#: ../udiskie/config.py:132
+#, fuzzy, python-brace-format
+msgid "{0} -> {1}"
 msgstr "+++ {0}: {1}"
+
+#: ../udiskie/config.py:151
+#, fuzzy, python-brace-format
+msgid "{0} matched {1}"
+msgstr "{0} vytvorené"
+
+#: ../udiskie/config.py:228
+#, python-brace-format
+msgid "Failed to read config file: {0}"
+msgstr "Nepodarilo sa načítať konfiguračný súbor: {0}"
+
+#: ../udiskie/config.py:231
+msgid "Failed to read {0!r}: {1}"
+msgstr "Nepodarilo sa načítať {0!r}: {1}"
 
 #~ msgid "{0}(match={1!r}, value={2!r})"
 #~ msgstr "{0}(zhoda={1!r}, hodnota={2!r})"
