@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-27 21:54+0100\n"
+"POT-Creation-Date: 2021-11-30 14:08+0000\n"
 "PO-Revision-Date: 2021-11-27 13:56+0300\n"
 "Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
 "Language-Team: Turkish <tr>\n"
@@ -16,93 +16,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0\n"
-
-#: ../udiskie/cli.py:46
-#, python-brace-format
-msgid "These options are mutually exclusive: {0}"
-msgstr "Bu seçenekler birlikte kullanılamaz: {0}"
-
-#: ../udiskie/cli.py:119
-msgid ""
-"\n"
-"    Note, that the options in the individual groups are mutually exclusive.\n"
-"\n"
-"    The config file can be a JSON or preferably a YAML file. For an\n"
-"    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
-"    "
-msgstr ""
-"\n"
-"    Aynı gruptaki seçeneklerin birlikte kullanılamayacağını unutmayın.\n"
-"\n"
-"    Yapılandırma dosyası bir JSON ya da tercihen YAML dosyası olabilir. "
-"Örnek\n"
-"    için kılavuz sayfasına (veya depodaki doc/udiskie.8.txt dosyasına) "
-"bakın.\n"
-"    "
-
-#: ../udiskie/cli.py:139
-#, python-format
-msgid "%(message)s"
-msgstr "%(message)s"
-
-#: ../udiskie/cli.py:141
-#, python-format
-msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
-msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
-
-#: ../udiskie/cli.py:380
-msgid ""
-"Typelib for 'libnotify' is not available. Possible causes include:\n"
-"\t- libnotify is not installed\n"
-"\t- the typelib is provided by a separate package\n"
-"\t- libnotify was built with introspection disabled\n"
-"\n"
-"Starting udiskie without notifications."
-msgstr ""
-"'libnotify' için typelib kullanılamıyor. Olası nedenler şunlardır:\n"
-"\t- libnotify kurulu değil\n"
-"\t- typelib ayrı bir paket tarafından sağlanıyor\n"
-"\t- libnotify, iç gözlem devre dışı bırakılarak oluşturuldu\n"
-"\n"
-"udiskie, bildirimler olmadan başlatılıyor."
-
-#: ../udiskie/cli.py:394
-msgid ""
-"Not run within X or Wayland session.\n"
-"Starting udiskie without tray icon.\n"
-msgstr ""
-"X veya Wayland oturumu içinde çalıştırılmadı.\n"
-"udiskie, tepsi simgesi olmadan başlatılıyor.\n"
-
-#: ../udiskie/cli.py:401
-msgid ""
-"Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
-"\t- GTK3 is not installed\n"
-"\t- the typelib is provided by a separate package\n"
-"\t- GTK3 was built with introspection disabled\n"
-"Starting udiskie without tray icon.\n"
-msgstr ""
-"'Gtk 3.0' için typelib kullanılamıyor. Olası nedenler şunlardır:\n"
-"\t- GTK3 kurulu değil\n"
-"\t- typelib ayrı bir paket tarafından sağlanıyor\n"
-"\t- GTK3, iç gözlem devre dışı bırakılarak oluşturuldu\n"
-"\n"
-"udiskie, tepsi simgesi olmadan başlatılıyor.\n"
-
-#: ../udiskie/cli.py:411
-msgid ""
-"Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
-"\t- libappindicator is not installed\n"
-"\t- the typelib is provided by a separate package\n"
-"\t- it was built with introspection disabled\n"
-"Starting udiskie without appindicator icon.\n"
-msgstr ""
-"'AppIndicator3 0.1' için typelib kullanılamıyor. Olası nedenler şunlardır:\n"
-"\t- libappindicator kurulu değil\n"
-"\t- typelib ayrı bir paket tarafından sağlanıyor\n"
-"\t- iç gözlem devre dışı bırakılarak oluşturuldu\n"
-"\n"
-"udiskie, appindicator simgesi olmadan başlatılıyor.\n"
 
 #: ../udiskie/config.py:127
 msgid "Unknown matching attribute: {!r}"
@@ -460,127 +373,30 @@ msgstr "{0} için parolayı temizle"
 msgid "Detach {0}"
 msgstr "Ayır: {0}"
 
-#: ../udiskie/notify.py:62
-msgid "Browse directory"
-msgstr "Dizine göz at"
-
-#: ../udiskie/notify.py:64
-msgid "Open terminal"
-msgstr "Terminali aç"
-
-#: ../udiskie/notify.py:68
-msgid "Device mounted"
-msgstr "Aygıt bağlandı"
-
-#: ../udiskie/notify.py:69
+#: ../udiskie/udisks2.py:647
 #, python-brace-format
-msgid "{0.ui_label} mounted on {0.mount_paths[0]}"
-msgstr "{0.ui_label}, {0.mount_paths[0]} yolunda bağlandı"
+msgid "found device owning \"{0}\": \"{1}\""
+msgstr "\"{0}\" sahibi aygıt bulundu: \"{1}\""
 
-#: ../udiskie/notify.py:80
-msgid "Device unmounted"
-msgstr "Aygıtın bağı kesildi"
-
-#: ../udiskie/notify.py:81
+#: ../udiskie/udisks2.py:650
 #, python-brace-format
-msgid "{0.ui_label} unmounted"
-msgstr "{0.ui_label} bağı kesildi"
+msgid "no device found owning \"{0}\""
+msgstr "\"{0}\" sahibi aygıt bulunamadı"
 
-#: ../udiskie/notify.py:90
-msgid "Device locked"
-msgstr "Aygıt kilitlendi"
-
-#: ../udiskie/notify.py:91
+#: ../udiskie/udisks2.py:669
 #, python-brace-format
-msgid "{0.device_presentation} locked"
-msgstr "{0.device_presentation} kilitlendi"
+msgid "Daemon version: {0}"
+msgstr "Arka plan programı sürümü: {0}"
 
-#: ../udiskie/notify.py:100
-msgid "Device unlocked"
-msgstr "Aygıtın kilidi açıldı"
-
-#: ../udiskie/notify.py:101
+#: ../udiskie/udisks2.py:674
 #, python-brace-format
-msgid "{0.device_presentation} unlocked"
-msgstr "{0.device_presentation} kilidi açıldı"
+msgid "Keyfile support: {0}"
+msgstr "Anahtar dosyası desteği: {0}"
 
-#: ../udiskie/notify.py:134
-msgid "Device added"
-msgstr "Aygıt eklendi"
-
-#: ../udiskie/notify.py:135
+#: ../udiskie/udisks2.py:753
 #, python-brace-format
-msgid "device appeared on {0.device_presentation}"
-msgstr "Aygıt {0.device_presentation} yolunda göründü"
-
-#: ../udiskie/notify.py:154
-msgid "Device removed"
-msgstr "Aygıt kaldırıldı"
-
-#: ../udiskie/notify.py:155
-#, python-brace-format
-msgid "device disappeared on {0.device_presentation}"
-msgstr "Aygıt {0.device_presentation} yolunda kayboldu"
-
-#: ../udiskie/notify.py:164
-#, python-brace-format
-msgid ""
-"failed to {0} {1}:\n"
-"{2}"
-msgstr ""
-"{0} {1} başarısız oldu:\n"
-"{2}"
-
-#: ../udiskie/notify.py:166
-#, python-brace-format
-msgid "failed to {0} device {1}."
-msgstr "{0} aygıt {1} başarısız oldu."
-
-#: ../udiskie/notify.py:172
-msgid "Retry"
-msgstr "Yeniden dene"
-
-#: ../udiskie/notify.py:175
-msgid "Job failed"
-msgstr "Görev başarısız oldu"
-
-#: ../udiskie/notify.py:206
-#, python-brace-format
-msgid "Failed to show notification: {0}"
-msgstr "Bildirim gösterilemedi: {0}"
-
-#: ../udiskie/prompt.py:96
-msgid "Show password"
-msgstr "Parolayı göster"
-
-#: ../udiskie/prompt.py:101
-msgid "Open keyfile…"
-msgstr "Anahtar dosyasını aç…"
-
-#: ../udiskie/prompt.py:108
-msgid "Cache password"
-msgstr "Parolayı önbelleğe al"
-
-#: ../udiskie/prompt.py:123
-msgid "Open a keyfile to unlock the LUKS device"
-msgstr "LUKS aygıtının kilidini açmak için bir anahtar dosyası açın"
-
-#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
-#, python-brace-format
-msgid "Enter password for {0.device_presentation}: "
-msgstr "{0.device_presentation} için parolayı girin: "
-
-#: ../udiskie/prompt.py:203
-msgid "Unknown device attribute {!r} in format string: {!r}"
-msgstr "Biçim dizgesinde bilinmeyen aygıt özelliği {!r}: {!r}"
-
-#: ../udiskie/prompt.py:255
-msgid ""
-"Can't find file browser: {0!r}. You may want to change the value for the '-"
-"f' option."
-msgstr ""
-"{0!r} dosya tarayıcısı bulunamıyor. '-f' seçeneğinin değerini değiştirmek "
-"isteyebilirsiniz."
+msgid "+++ {0}: {1}"
+msgstr "+++ {0}: {1}"
 
 #: ../udiskie/tray.py:182
 msgid "Managed devices"
@@ -626,27 +442,211 @@ msgstr "Harici aygıt yok"
 msgid "udiskie"
 msgstr "udiskie"
 
-#: ../udiskie/udisks2.py:647
-#, python-brace-format
-msgid "found device owning \"{0}\": \"{1}\""
-msgstr "\"{0}\" sahibi aygıt bulundu: \"{1}\""
+#: ../udiskie/notify.py:62
+msgid "Browse directory"
+msgstr "Dizine göz at"
 
-#: ../udiskie/udisks2.py:650
-#, python-brace-format
-msgid "no device found owning \"{0}\""
-msgstr "\"{0}\" sahibi aygıt bulunamadı"
+#: ../udiskie/notify.py:64
+msgid "Open terminal"
+msgstr "Terminali aç"
 
-#: ../udiskie/udisks2.py:669
-#, python-brace-format
-msgid "Daemon version: {0}"
-msgstr "Arka plan programı sürümü: {0}"
+#: ../udiskie/notify.py:68
+msgid "Device mounted"
+msgstr "Aygıt bağlandı"
 
-#: ../udiskie/udisks2.py:674
+#: ../udiskie/notify.py:69
 #, python-brace-format
-msgid "Keyfile support: {0}"
-msgstr "Anahtar dosyası desteği: {0}"
+msgid "{0.ui_label} mounted on {0.mount_paths[0]}"
+msgstr "{0.ui_label}, {0.mount_paths[0]} yolunda bağlandı"
 
-#: ../udiskie/udisks2.py:753
+#: ../udiskie/notify.py:80
+msgid "Device unmounted"
+msgstr "Aygıtın bağı kesildi"
+
+#: ../udiskie/notify.py:81
 #, python-brace-format
-msgid "+++ {0}: {1}"
-msgstr "+++ {0}: {1}"
+msgid "{0.ui_label} unmounted"
+msgstr "{0.ui_label} bağı kesildi"
+
+#: ../udiskie/notify.py:90
+msgid "Device locked"
+msgstr "Aygıt kilitlendi"
+
+#: ../udiskie/notify.py:91
+#, python-brace-format
+msgid "{0.device_presentation} locked"
+msgstr "{0.device_presentation} kilitlendi"
+
+#: ../udiskie/notify.py:100
+msgid "Device unlocked"
+msgstr "Aygıtın kilidi açıldı"
+
+#: ../udiskie/notify.py:101
+#, python-brace-format
+msgid "{0.device_presentation} unlocked"
+msgstr "{0.device_presentation} kilidi açıldı"
+
+#: ../udiskie/notify.py:135
+msgid "Device added"
+msgstr "Aygıt eklendi"
+
+#: ../udiskie/notify.py:136
+#, python-brace-format
+msgid "device appeared on {0.device_presentation}"
+msgstr "Aygıt {0.device_presentation} yolunda göründü"
+
+#: ../udiskie/notify.py:155
+msgid "Device removed"
+msgstr "Aygıt kaldırıldı"
+
+#: ../udiskie/notify.py:156
+#, python-brace-format
+msgid "device disappeared on {0.device_presentation}"
+msgstr "Aygıt {0.device_presentation} yolunda kayboldu"
+
+#: ../udiskie/notify.py:165
+#, python-brace-format
+msgid ""
+"failed to {0} {1}:\n"
+"{2}"
+msgstr ""
+"{0} {1} başarısız oldu:\n"
+"{2}"
+
+#: ../udiskie/notify.py:167
+#, python-brace-format
+msgid "failed to {0} device {1}."
+msgstr "{0} aygıt {1} başarısız oldu."
+
+#: ../udiskie/notify.py:173
+msgid "Retry"
+msgstr "Yeniden dene"
+
+#: ../udiskie/notify.py:176
+msgid "Job failed"
+msgstr "Görev başarısız oldu"
+
+#: ../udiskie/notify.py:207
+#, python-brace-format
+msgid "Failed to show notification: {0}"
+msgstr "Bildirim gösterilemedi: {0}"
+
+#: ../udiskie/prompt.py:96
+msgid "Show password"
+msgstr "Parolayı göster"
+
+#: ../udiskie/prompt.py:101
+msgid "Open keyfile…"
+msgstr "Anahtar dosyasını aç…"
+
+#: ../udiskie/prompt.py:108
+msgid "Cache password"
+msgstr "Parolayı önbelleğe al"
+
+#: ../udiskie/prompt.py:123
+msgid "Open a keyfile to unlock the LUKS device"
+msgstr "LUKS aygıtının kilidini açmak için bir anahtar dosyası açın"
+
+#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#, python-brace-format
+msgid "Enter password for {0.device_presentation}: "
+msgstr "{0.device_presentation} için parolayı girin: "
+
+#: ../udiskie/prompt.py:203
+msgid "Unknown device attribute {!r} in format string: {!r}"
+msgstr "Biçim dizgesinde bilinmeyen aygıt özelliği {!r}: {!r}"
+
+#: ../udiskie/prompt.py:255
+msgid ""
+"Can't find file browser: {0!r}. You may want to change the value for the '-"
+"f' option."
+msgstr ""
+"{0!r} dosya tarayıcısı bulunamıyor. '-f' seçeneğinin değerini değiştirmek "
+"isteyebilirsiniz."
+
+#: ../udiskie/cli.py:46
+#, python-brace-format
+msgid "These options are mutually exclusive: {0}"
+msgstr "Bu seçenekler birlikte kullanılamaz: {0}"
+
+#: ../udiskie/cli.py:119
+msgid ""
+"\n"
+"    Note, that the options in the individual groups are mutually exclusive.\n"
+"\n"
+"    The config file can be a JSON or preferably a YAML file. For an\n"
+"    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
+"    "
+msgstr ""
+"\n"
+"    Aynı gruptaki seçeneklerin birlikte kullanılamayacağını unutmayın.\n"
+"\n"
+"    Yapılandırma dosyası bir JSON ya da tercihen YAML dosyası olabilir. "
+"Örnek\n"
+"    için kılavuz sayfasına (veya depodaki doc/udiskie.8.txt dosyasına) "
+"bakın.\n"
+"    "
+
+#: ../udiskie/cli.py:139
+#, python-format
+msgid "%(message)s"
+msgstr "%(message)s"
+
+#: ../udiskie/cli.py:141
+#, python-format
+msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+
+#: ../udiskie/cli.py:380
+msgid ""
+"Typelib for 'libnotify' is not available. Possible causes include:\n"
+"\t- libnotify is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- libnotify was built with introspection disabled\n"
+"\n"
+"Starting udiskie without notifications."
+msgstr ""
+"'libnotify' için typelib kullanılamıyor. Olası nedenler şunlardır:\n"
+"\t- libnotify kurulu değil\n"
+"\t- typelib ayrı bir paket tarafından sağlanıyor\n"
+"\t- libnotify, iç gözlem devre dışı bırakılarak oluşturuldu\n"
+"\n"
+"udiskie, bildirimler olmadan başlatılıyor."
+
+#: ../udiskie/cli.py:394
+msgid ""
+"Not run within X or Wayland session.\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+"X veya Wayland oturumu içinde çalıştırılmadı.\n"
+"udiskie, tepsi simgesi olmadan başlatılıyor.\n"
+
+#: ../udiskie/cli.py:401
+msgid ""
+"Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
+"\t- GTK3 is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- GTK3 was built with introspection disabled\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+"'Gtk 3.0' için typelib kullanılamıyor. Olası nedenler şunlardır:\n"
+"\t- GTK3 kurulu değil\n"
+"\t- typelib ayrı bir paket tarafından sağlanıyor\n"
+"\t- GTK3, iç gözlem devre dışı bırakılarak oluşturuldu\n"
+"\n"
+"udiskie, tepsi simgesi olmadan başlatılıyor.\n"
+
+#: ../udiskie/cli.py:411
+msgid ""
+"Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
+"\t- libappindicator is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- it was built with introspection disabled\n"
+"Starting udiskie without appindicator icon.\n"
+msgstr ""
+"'AppIndicator3 0.1' için typelib kullanılamıyor. Olası nedenler şunlardır:\n"
+"\t- libappindicator kurulu değil\n"
+"\t- typelib ayrı bir paket tarafından sağlanıyor\n"
+"\t- iç gözlem devre dışı bırakılarak oluşturuldu\n"
+"\n"
+"udiskie, appindicator simgesi olmadan başlatılıyor.\n"

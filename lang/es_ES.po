@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-27 21:54+0100\n"
+"POT-Creation-Date: 2021-11-30 14:08+0000\n"
 "PO-Revision-Date: 2014-07-23 18:43+0100\n"
 "Last-Translator: Alejandro Pérez <alejandro.perez.mendez@gmail.com>\n"
 "Language-Team: Spanish alejandro.perez.mendez@gmail.com\n"
@@ -12,73 +12,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.6.5\n"
-
-#: ../udiskie/cli.py:46
-#, python-brace-format
-msgid "These options are mutually exclusive: {0}"
-msgstr "Estas opciones son excluyentes: {0}"
-
-#: ../udiskie/cli.py:119
-#, fuzzy
-msgid ""
-"\n"
-"    Note, that the options in the individual groups are mutually exclusive.\n"
-"\n"
-"    The config file can be a JSON or preferably a YAML file. For an\n"
-"    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
-"    "
-msgstr ""
-"\n"
-"    Nótese que las opciones de los grupos individuales son excluyentes.\n"
-"\n"
-"    El fichero de configuración puede ser un fichero JSON o YAML "
-"(preferiblemente).\n"
-"    Para un ejemplo, refiérase a la pagína del manual (o doc/udiskie.8.txt "
-"in the repository).\n"
-
-#: ../udiskie/cli.py:139
-#, python-format
-msgid "%(message)s"
-msgstr "%(message)s"
-
-#: ../udiskie/cli.py:141
-#, python-format
-msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
-msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
-
-#: ../udiskie/cli.py:380
-msgid ""
-"Typelib for 'libnotify' is not available. Possible causes include:\n"
-"\t- libnotify is not installed\n"
-"\t- the typelib is provided by a separate package\n"
-"\t- libnotify was built with introspection disabled\n"
-"\n"
-"Starting udiskie without notifications."
-msgstr ""
-
-#: ../udiskie/cli.py:394
-msgid ""
-"Not run within X or Wayland session.\n"
-"Starting udiskie without tray icon.\n"
-msgstr ""
-
-#: ../udiskie/cli.py:401
-msgid ""
-"Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
-"\t- GTK3 is not installed\n"
-"\t- the typelib is provided by a separate package\n"
-"\t- GTK3 was built with introspection disabled\n"
-"Starting udiskie without tray icon.\n"
-msgstr ""
-
-#: ../udiskie/cli.py:411
-msgid ""
-"Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
-"\t- libappindicator is not installed\n"
-"\t- the typelib is provided by a separate package\n"
-"\t- it was built with introspection disabled\n"
-"Starting udiskie without appindicator icon.\n"
-msgstr ""
 
 #: ../udiskie/config.py:127
 msgid "Unknown matching attribute: {!r}"
@@ -434,128 +367,30 @@ msgstr ""
 msgid "Detach {0}"
 msgstr "desconectado {0}"
 
-#: ../udiskie/notify.py:62
-msgid "Browse directory"
-msgstr "Navegar directorio"
-
-#: ../udiskie/notify.py:64
-msgid "Open terminal"
-msgstr ""
-
-#: ../udiskie/notify.py:68
-msgid "Device mounted"
-msgstr "Dispositivo montado"
-
-#: ../udiskie/notify.py:69
-#, fuzzy, python-brace-format
-msgid "{0.ui_label} mounted on {0.mount_paths[0]}"
-msgstr "{0.ui_label} montado en {0.mount_paths[0]}"
-
-#: ../udiskie/notify.py:80
-msgid "Device unmounted"
-msgstr "Dispositivo desmontado"
-
-#: ../udiskie/notify.py:81
-#, fuzzy, python-brace-format
-msgid "{0.ui_label} unmounted"
-msgstr "{0.ui_label} desmontado"
-
-#: ../udiskie/notify.py:90
-msgid "Device locked"
-msgstr "Dispositivo bloqueado"
-
-#: ../udiskie/notify.py:91
+#: ../udiskie/udisks2.py:647
 #, python-brace-format
-msgid "{0.device_presentation} locked"
-msgstr "{0.device_presentation} bloqueado"
+msgid "found device owning \"{0}\": \"{1}\""
+msgstr "Se encontró el dispositivo maestro \"{0}\": \"{1}\""
 
-#: ../udiskie/notify.py:100
-msgid "Device unlocked"
-msgstr "Dispositivo desbloqueado"
-
-#: ../udiskie/notify.py:101
+#: ../udiskie/udisks2.py:650
 #, python-brace-format
-msgid "{0.device_presentation} unlocked"
-msgstr "{0.device_presentation} desbloqueado"
+msgid "no device found owning \"{0}\""
+msgstr "no se encontró dispositivo maestro para \"{0}\""
 
-#: ../udiskie/notify.py:134
-msgid "Device added"
-msgstr "Dispositivo añadido"
-
-#: ../udiskie/notify.py:135
+#: ../udiskie/udisks2.py:669
 #, python-brace-format
-msgid "device appeared on {0.device_presentation}"
-msgstr "Dispositivo apareció en {0.device_presentation}"
+msgid "Daemon version: {0}"
+msgstr ""
 
-#: ../udiskie/notify.py:154
-msgid "Device removed"
-msgstr "Dispositivo retirado"
-
-#: ../udiskie/notify.py:155
+#: ../udiskie/udisks2.py:674
 #, python-brace-format
-msgid "device disappeared on {0.device_presentation}"
-msgstr "el dispositivo desapareció en {0.device_presentation} "
+msgid "Keyfile support: {0}"
+msgstr ""
 
-#: ../udiskie/notify.py:164
+#: ../udiskie/udisks2.py:753
 #, python-brace-format
-msgid ""
-"failed to {0} {1}:\n"
-"{2}"
-msgstr ""
-"fallo al {0} {1}:\n"
-"{2}"
-
-#: ../udiskie/notify.py:166
-#, python-brace-format
-msgid "failed to {0} device {1}."
-msgstr "fallo al {0} el dispositivo {1}."
-
-#: ../udiskie/notify.py:172
-msgid "Retry"
-msgstr "Reintentar"
-
-#: ../udiskie/notify.py:175
-msgid "Job failed"
-msgstr "Falló la tarea."
-
-#: ../udiskie/notify.py:206
-#, python-brace-format
-msgid "Failed to show notification: {0}"
-msgstr ""
-
-#: ../udiskie/prompt.py:96
-msgid "Show password"
-msgstr ""
-
-#: ../udiskie/prompt.py:101
-msgid "Open keyfile…"
-msgstr ""
-
-#: ../udiskie/prompt.py:108
-msgid "Cache password"
-msgstr ""
-
-#: ../udiskie/prompt.py:123
-msgid "Open a keyfile to unlock the LUKS device"
-msgstr ""
-
-#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
-#, python-brace-format
-msgid "Enter password for {0.device_presentation}: "
-msgstr "Introduce la clave para {0.device_presentation}: "
-
-#: ../udiskie/prompt.py:203
-msgid "Unknown device attribute {!r} in format string: {!r}"
-msgstr ""
-
-#: ../udiskie/prompt.py:255
-#, fuzzy
-msgid ""
-"Can't find file browser: {0!r}. You may want to change the value for the '-"
-"f' option."
-msgstr ""
-"No se encontró el gestor de ficheros: {0!r}. Puede que necesites cambiar el "
-"valor de la opción '-b'."
+msgid "+++ {0}: {1}"
+msgstr "+++ {0}: {1}"
 
 #: ../udiskie/tray.py:182
 msgid "Managed devices"
@@ -601,32 +436,196 @@ msgstr ""
 msgid "udiskie"
 msgstr "udiskie"
 
-#: ../udiskie/udisks2.py:647
-#, python-brace-format
-msgid "found device owning \"{0}\": \"{1}\""
-msgstr "Se encontró el dispositivo maestro \"{0}\": \"{1}\""
+#: ../udiskie/notify.py:62
+msgid "Browse directory"
+msgstr "Navegar directorio"
 
-#: ../udiskie/udisks2.py:650
-#, python-brace-format
-msgid "no device found owning \"{0}\""
-msgstr "no se encontró dispositivo maestro para \"{0}\""
-
-#: ../udiskie/udisks2.py:669
-#, python-brace-format
-msgid "Daemon version: {0}"
+#: ../udiskie/notify.py:64
+msgid "Open terminal"
 msgstr ""
 
-#: ../udiskie/udisks2.py:674
+#: ../udiskie/notify.py:68
+msgid "Device mounted"
+msgstr "Dispositivo montado"
+
+#: ../udiskie/notify.py:69
+#, fuzzy, python-brace-format
+msgid "{0.ui_label} mounted on {0.mount_paths[0]}"
+msgstr "{0.ui_label} montado en {0.mount_paths[0]}"
+
+#: ../udiskie/notify.py:80
+msgid "Device unmounted"
+msgstr "Dispositivo desmontado"
+
+#: ../udiskie/notify.py:81
+#, fuzzy, python-brace-format
+msgid "{0.ui_label} unmounted"
+msgstr "{0.ui_label} desmontado"
+
+#: ../udiskie/notify.py:90
+msgid "Device locked"
+msgstr "Dispositivo bloqueado"
+
+#: ../udiskie/notify.py:91
 #, python-brace-format
-msgid "Keyfile support: {0}"
+msgid "{0.device_presentation} locked"
+msgstr "{0.device_presentation} bloqueado"
+
+#: ../udiskie/notify.py:100
+msgid "Device unlocked"
+msgstr "Dispositivo desbloqueado"
+
+#: ../udiskie/notify.py:101
+#, python-brace-format
+msgid "{0.device_presentation} unlocked"
+msgstr "{0.device_presentation} desbloqueado"
+
+#: ../udiskie/notify.py:135
+msgid "Device added"
+msgstr "Dispositivo añadido"
+
+#: ../udiskie/notify.py:136
+#, python-brace-format
+msgid "device appeared on {0.device_presentation}"
+msgstr "Dispositivo apareció en {0.device_presentation}"
+
+#: ../udiskie/notify.py:155
+msgid "Device removed"
+msgstr "Dispositivo retirado"
+
+#: ../udiskie/notify.py:156
+#, python-brace-format
+msgid "device disappeared on {0.device_presentation}"
+msgstr "el dispositivo desapareció en {0.device_presentation} "
+
+#: ../udiskie/notify.py:165
+#, python-brace-format
+msgid ""
+"failed to {0} {1}:\n"
+"{2}"
+msgstr ""
+"fallo al {0} {1}:\n"
+"{2}"
+
+#: ../udiskie/notify.py:167
+#, python-brace-format
+msgid "failed to {0} device {1}."
+msgstr "fallo al {0} el dispositivo {1}."
+
+#: ../udiskie/notify.py:173
+msgid "Retry"
+msgstr "Reintentar"
+
+#: ../udiskie/notify.py:176
+msgid "Job failed"
+msgstr "Falló la tarea."
+
+#: ../udiskie/notify.py:207
+#, python-brace-format
+msgid "Failed to show notification: {0}"
 msgstr ""
 
-#: ../udiskie/udisks2.py:753
-#, python-brace-format
-msgid "+++ {0}: {1}"
-msgstr "+++ {0}: {1}"
+#: ../udiskie/prompt.py:96
+msgid "Show password"
+msgstr ""
 
+#: ../udiskie/prompt.py:101
+msgid "Open keyfile…"
+msgstr ""
+
+#: ../udiskie/prompt.py:108
+msgid "Cache password"
+msgstr ""
+
+#: ../udiskie/prompt.py:123
+msgid "Open a keyfile to unlock the LUKS device"
+msgstr ""
+
+#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
 #, python-brace-format
+msgid "Enter password for {0.device_presentation}: "
+msgstr "Introduce la clave para {0.device_presentation}: "
+
+#: ../udiskie/prompt.py:203
+msgid "Unknown device attribute {!r} in format string: {!r}"
+msgstr ""
+
+#: ../udiskie/prompt.py:255
+#, fuzzy
+msgid ""
+"Can't find file browser: {0!r}. You may want to change the value for the '-"
+"f' option."
+msgstr ""
+"No se encontró el gestor de ficheros: {0!r}. Puede que necesites cambiar el "
+"valor de la opción '-b'."
+
+#: ../udiskie/cli.py:46
+#, python-brace-format
+msgid "These options are mutually exclusive: {0}"
+msgstr "Estas opciones son excluyentes: {0}"
+
+#: ../udiskie/cli.py:119
+#, fuzzy
+msgid ""
+"\n"
+"    Note, that the options in the individual groups are mutually exclusive.\n"
+"\n"
+"    The config file can be a JSON or preferably a YAML file. For an\n"
+"    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
+"    "
+msgstr ""
+"\n"
+"    Nótese que las opciones de los grupos individuales son excluyentes.\n"
+"\n"
+"    El fichero de configuración puede ser un fichero JSON o YAML "
+"(preferiblemente).\n"
+"    Para un ejemplo, refiérase a la pagína del manual (o doc/udiskie.8.txt "
+"in the repository).\n"
+
+#: ../udiskie/cli.py:139
+#, python-format
+msgid "%(message)s"
+msgstr "%(message)s"
+
+#: ../udiskie/cli.py:141
+#, python-format
+msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+
+#: ../udiskie/cli.py:380
+msgid ""
+"Typelib for 'libnotify' is not available. Possible causes include:\n"
+"\t- libnotify is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- libnotify was built with introspection disabled\n"
+"\n"
+"Starting udiskie without notifications."
+msgstr ""
+
+#: ../udiskie/cli.py:394
+msgid ""
+"Not run within X or Wayland session.\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+
+#: ../udiskie/cli.py:401
+msgid ""
+"Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
+"\t- GTK3 is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- GTK3 was built with introspection disabled\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+
+#: ../udiskie/cli.py:411
+msgid ""
+"Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
+"\t- libappindicator is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- it was built with introspection disabled\n"
+"Starting udiskie without appindicator icon.\n"
+msgstr ""
+
 #~ msgid "{0} created"
 #~ msgstr "{0} creado"
 
