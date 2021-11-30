@@ -2,13 +2,8 @@ Hacking
 -------
 
 *udiskie* is developed on github_. Feel free to contribute patches as pull
-requests here.
-
-Try to be consistent with the PEP8_ guidelines. Add `unit tests`_ where
-feasible.
-
-Commits should be semantic units if possible. Use descriptive titles and also
-add an explaining commit message unless the modification is trivial.
+requests here. If you don't have nor want a github account, you can send me
+the relevant files via email.
 
 Further resources:
 

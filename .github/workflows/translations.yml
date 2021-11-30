@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: sudo apt-get install -qy gettext
-      - run: make -C lang
+      - run: make -BC lang
       - uses: peter-evans/create-pull-request@v3
         with:
           commit-message: Update language files
