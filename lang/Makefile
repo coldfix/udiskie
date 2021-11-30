@@ -4,10 +4,21 @@ echo = _() { echo "$$@"; "$$@"; }; _
 
 po: $(wildcard *.po)
 mo: $(addsuffix .mo, $(basename $(wildcard *.po)))
+	@if [ -z "$$TEXTDOMAINDIR" ]; then\
+		echo In order to activate the newly built localization files, type:;\
+		echo;\
+		echo     export TEXTDOMAINDIR=\"$$(readlink -f ../build/locale)\"; \
+	fi
+
 all: po mo
+
+clean:
+	rm -rf *.po~ *.mo locale
 
 %.mo: %.po
 	msgfmt $< -o $@
+	@mkdir -p ../build/locale/$*/LC_MESSAGES/
+	@cp $@ ../build/locale/$*/LC_MESSAGES/udiskie.mo
 
 %.po: udiskie.pot
 	@if [ -f $@ ]; then \

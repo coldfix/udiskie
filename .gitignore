@@ -30,5 +30,6 @@ pip-log.txt
 .tox
 nosetests.xml
 
-# backup files
+# translations
 lang/*~
+lang/**/*.mo
