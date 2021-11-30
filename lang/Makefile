@@ -1,3 +1,7 @@
+version = $(shell sed -ne "s/__version__ = //p" ../udiskie/__init__.py)
+sources = find ../udiskie -name '*.py'
+echo = _() { echo "$$@"; "$$@"; }; _
+
 po: $(wildcard *.po)
 mo: $(addsuffix .mo, $(basename $(wildcard *.po)))
 all: po mo
@@ -7,15 +11,13 @@ all: po mo
 
 %.po: udiskie.pot
 	@if [ -f $@ ]; then \
-		$(echo) msgmerge -q -U $@ $<;\
+		$(echo) msgmerge -q -U $@ $< && touch $@;\
 	else \
 		$(echo) msginit -o=$@ -i=$<;\
 	fi
 
-# Make .pot phony because make doesn't play well with git
-.PHONY: udiskie.pot
-udiskie.pot:
-	find ../udiskie -name '*.py' | xgettext -o $@ -f - \
+udiskie.pot: $(shell $(sources))
+	$(sources) | xgettext -o $@ -f - \
 		-LPython --from-code=UTF-8 \
 		--package-name=udiskie \
 		--package-version=$(version) \
@@ -24,6 +26,3 @@ udiskie.pot:
 	@if [ $$( git diff --numstat -- $@ | cut -f1 ) -le 1 ]; then \
 		$(echo) git checkout -- $@; \
 	fi
-
-version = $(shell sed -ne "s/__version__ = //p" ../udiskie/__init__.py)
-echo = _() { echo "$$@"; "$$@"; }; _
