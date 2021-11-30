@@ -28,7 +28,7 @@ clean:
 	fi
 
 udiskie.pot: $(shell $(sources))
-	$(sources) | xgettext -o $@ -f - \
+	$(sources) | sort | xgettext -o $@ -f - \
 		-LPython --from-code=UTF-8 \
 		--package-name=udiskie \
 		--package-version=$(version) \
