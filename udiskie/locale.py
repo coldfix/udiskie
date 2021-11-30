@@ -2,10 +2,12 @@
 I18n utilities.
 """
 
+import os
 from gettext import translation
 
 
-_t = translation('udiskie', localedir=None, languages=None, fallback=True)
+localedir = os.environ.get('TEXTDOMAINDIR')
+_t = translation('udiskie', localedir, languages=None, fallback=True)
 
 
 def _(text, *args, **kwargs):
