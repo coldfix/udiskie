@@ -1,0 +1,16 @@
+name: Update language files
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: sudo apt-get install -qy gettext
+      - run: make -C lang
+      - uses: peter-evans/create-pull-request@v3
+        with:
+          commit-message: Update language files
+          branch: ${{ github.ref }}_langfiles
