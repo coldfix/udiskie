@@ -1,6 +1,18 @@
 CHANGELOG
 ---------
 
+2.4.0
+~~~~~
+Date: 30.11.2021
+
+- add icon name that is specifically designed for tray panel
+- add Turkish translations (thanks @ersen0!)
+- try to detect installed translation files also in non-system installations
+- make it possible to override localedir manually using the ``TEXTDOMAINDIR``
+  environment variable
+- add guide on how to contribute translations and improve the Makefile
+
+
 2.3.3
 ~~~~~
 Date: 05.03.2021
