@@ -1,0 +1,19 @@
+name: Translations
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  update_po:
+    name: Update language files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: sudo apt-get install -qy gettext
+      - run: make -C lang
+      - uses: peter-evans/create-pull-request@v3
+        with:
+          commit-message: Update language files
+          title: Update language files on ${{ github.ref_name }}
+          branch: ${{ github.ref }}_langfiles

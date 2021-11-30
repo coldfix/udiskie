@@ -8,6 +8,8 @@ all: $(wildcard *.po)
         msginit --output=$@ --input=$< --locale=en_US ;\
     fi
 
+# Make .pot phony because make doesn't play well with git
+.PHONY: udiskie.pot
 udiskie.pot: $(wildcard ../udiskie/*.py)
 	xgettext --language=Python --keyword=_ --output=$@ --from-code=UTF-8 $^
 
