@@ -1,5 +1,10 @@
+all: po mo
 
-all: $(wildcard *.po)
+po: $(wildcard *.po)
+mo: $(addsuffix .mo, $(basename $(wildcard *.po)))
+
+%.mo: %.po
+	msgfmt $< -o $@
 
 %.po: udiskie.pot
 	if [ -f $@ ]; then \
