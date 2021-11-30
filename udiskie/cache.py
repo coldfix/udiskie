@@ -24,7 +24,7 @@ class PasswordCache:
         try:
             key_id = keyutils.request_key(key, self.keyring)
         except keyutils.Error:
-            raise KeyError("Key has been revoked!")
+            raise KeyError("Key has been revoked!") from None
         if key_id is None:
             raise KeyError("Key not cached!")
         return key_id
@@ -42,7 +42,7 @@ class PasswordCache:
         try:
             return keyutils.read_key(key_id)
         except keyutils.Error:
-            raise KeyError("Key not cached!")
+            raise KeyError("Key not cached!") from None
 
     def __setitem__(self, device, value):
         key = self._key(device)

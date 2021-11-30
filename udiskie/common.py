@@ -127,7 +127,7 @@ class AttrDictView:
         try:
             return self.__data[key]
         except KeyError:
-            raise AttributeError
+            raise AttributeError(key) from None
 
 
 class ObjDictView:
@@ -143,7 +143,7 @@ class ObjDictView:
             try:
                 return getattr(self._object, key)
             except AttributeError:
-                raise KeyError(key)
+                raise KeyError(key) from None
         raise KeyError("Unknown key: {}".format(key))
 
 
