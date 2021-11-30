@@ -12,5 +12,6 @@ all: $(wildcard *.po)
 .PHONY: udiskie.pot
 udiskie.pot: $(wildcard ../udiskie/*.py)
 	xgettext --language=Python --keyword=_ --output=$@ --from-code=UTF-8 $^
-
-
+	if [[ $$( git diff --numstat -- $@ | cut -f1 ) -le 1 ]]; then \
+		git checkout -- $@; \
+	fi
