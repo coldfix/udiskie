@@ -1,3 +1,8 @@
+# English translations for udiskie package.
+# Copyright (C) 2021 Thomas Gläßle
+# This file is distributed under the same license as the udiskie package.
+# Thomas Gläßle <t_glaessle@gmx.de>, 2021.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"

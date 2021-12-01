@@ -1,7 +1,7 @@
-# Slovak translations for PACKAGE package
-# Slovenské preklady pre balík PACKAGE.
-# Copyright (C) 2019 THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# Slovak translations for udiskie package
+# Slovenské preklady pre balík udiskie.
+# Copyright (C) 2021 Thomas Gläßle
+# This file is distributed under the same license as the udiskie package.
 # oli <jose1711@gmail.com>, 2019.
 #
 msgid ""
