@@ -20,6 +20,9 @@ clean:
 	@mkdir -p ../build/locale/$*/LC_MESSAGES/
 	@cp $@ ../build/locale/$*/LC_MESSAGES/udiskie.mo
 
+en_US.po: udiskie.pot
+	msginit -o $@ -i $< -l en_US --no-translator
+
 %.po: udiskie.pot
 	@if [ -f $@ ]; then \
 		$(echo) msgmerge -q -U $@ $< && touch $@;\
