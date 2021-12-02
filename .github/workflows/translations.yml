@@ -8,12 +8,28 @@ jobs:
   update_po:
     name: Update language files
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -eo pipefail {0}
+
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+
       - run: sudo apt-get install -qy gettext
+
+      - run: ./lang/report.sh | tee before.tsv | column -t
       - run: make -BC lang
+      - run: ./lang/report.sh | tee after.tsv | column -t
+      - run: .github/pr_text.py | tee summary.md
+
+      - run: .github/set-output summary <summary.md
+        id: report
+      - run: rm before.tsv after.tsv summary.md
+
       - uses: peter-evans/create-pull-request@v3
         with:
+          branch: ${{ github.ref }}_langfiles
           commit-message: Update language files
           title: Update language files on ${{ github.ref_name }}
-          branch: ${{ github.ref }}_langfiles
+          body: ${{ steps.report.outputs.summary }}
