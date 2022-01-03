@@ -1,14 +1,14 @@
 # English translations for udiskie package.
-# Copyright (C) 2021 Thomas Gläßle
+# Copyright (C) 2022 Thomas Gläßle
 # This file is distributed under the same license as the udiskie package.
-# Automatically generated, 2021.
+# Automatically generated, 2022.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: udiskie 2.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-30 22:53+0100\n"
-"PO-Revision-Date: 2021-11-30 22:53+0100\n"
+"POT-Creation-Date: 2022-01-03 12:00+0000\n"
+"PO-Revision-Date: 2022-01-03 12:00+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en_US\n"
