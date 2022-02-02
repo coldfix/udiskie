@@ -60,6 +60,10 @@ Interface = {
     'Job':              'org.freedesktop.UDisks2.Job',
     'ObjectManager':    'org.freedesktop.DBus.ObjectManager',
     'Properties':       'org.freedesktop.DBus.Properties',
+    # (experimental) pseudo-interface to represent loop files:
+    # TODO: Should this be improved and receive additional properties such as
+    # parent device (using mount point)?
+    'LoopFile':         'LoopFile',
 }
 
 
@@ -181,6 +185,12 @@ class Device:
         """Check if the device is a loop device."""
         return bool(self._P.Loop)
 
+    @property
+    def is_loopfile(self):
+        """Check if this object is a pseudo-device that represents an image
+        file to be used for setting up a loop device."""
+        return bool(self._P.LoopFile)
+
     # ----------------------------------------
     # Drive
     # ----------------------------------------
@@ -260,7 +270,9 @@ class Device:
     @property
     def device_file(self):
         """The filesystem path of the device block file."""
-        return decode_ay(self._P.Block.Device)
+        return (
+            decode_ay(self._P.Block.Device) or
+            self._P.LoopFile.Filename or '')
 
     @property
     def device_presentation(self):
@@ -493,7 +505,9 @@ class Device:
     @property
     def loop_file(self):
         """Get the file backing the loop device."""
-        return decode_ay(self._P.Loop.BackingFile)
+        return (
+            decode_ay(self._P.Loop.BackingFile) or
+            self._P.LoopFile.Filename or '')
 
     @property
     def setup_by_uid(self):
@@ -922,3 +936,7 @@ class Daemon(Emitter):
                 self.trigger(event_name, device)
         else:
             self.trigger('job_failed', device, action, message)
+
+    def loopfile_device(self, path):
+        properties = PropertyHub({'LoopFile': {'Filename': path}})
+        return Device(self, '', properties, None)

@@ -59,6 +59,8 @@ class DeviceFilter:
         'is_filesystem',
         'is_luks',
         'is_loop',
+        # FIXME: experimental/undocumented
+        'is_loopfile',
         'is_toplevel',
         'is_detachable',
         'is_ejectable',

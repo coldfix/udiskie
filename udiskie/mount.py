@@ -597,6 +597,17 @@ class Mounter:
             return None
         self._log.debug(_('setting up loop device {0}', image))
 
+        # Create pseudo Device object to enable config matching:
+        loopfile = self.udisks.loopfile_device(image)
+        options = match_config(self._config, loopfile, 'options', [])
+
+        # TODO: also set 'offset', 'size', 'no_part_scan' from config
+        if read_only is None:
+            if 'ro' in options:
+                read_only = True
+            if 'rw' in options:
+                read_only = False
+
         if not read_only:
             try:
                 fd = os.open(image, os.O_RDWR)
