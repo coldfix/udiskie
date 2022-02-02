@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-30 22:53+0100\n"
+"POT-Creation-Date: 2022-02-02 15:06+0000\n"
 "PO-Revision-Date: 2019-02-16 21:18+0300\n"
 "Last-Translator: mr-GreyWolf <mr.greywolf@list.ru>\n"
 "Language-Team: Russian\n"
@@ -388,76 +388,83 @@ msgid "not setting up {0}: not a file"
 msgstr "не включено {0}: это не файл"
 
 #: ../udiskie/mount.py:598
-#, python-brace-format
-msgid "setting up {0}"
+#, fuzzy, python-brace-format
+msgid "setting up loop device {0}"
 msgstr "настройка {0}"
 
-#: ../udiskie/mount.py:606
+#: ../udiskie/mount.py:605
+#, python-brace-format
+msgid ""
+"Insufficient permission to open {0} in read-write mode. Retrying in read-"
+"only mode."
+msgstr ""
+
+#: ../udiskie/mount.py:617
 #, python-brace-format
 msgid "set up {0} as {1}"
 msgstr "установлено {0} как {1}"
 
-#: ../udiskie/mount.py:621
+#: ../udiskie/mount.py:632
 #, python-brace-format
 msgid "not deleting {0}: unhandled device"
 msgstr "не удаляется {0}: необработанное устройство"
 
-#: ../udiskie/mount.py:625
+#: ../udiskie/mount.py:636
 #, python-brace-format
 msgid "deleting {0}"
 msgstr "удаление {0}"
 
-#: ../udiskie/mount.py:627
+#: ../udiskie/mount.py:638
 #, python-brace-format
 msgid "deleted {0}"
 msgstr "удалён {0}"
 
-#: ../udiskie/mount.py:753
+#: ../udiskie/mount.py:764
 #, python-brace-format
 msgid "Browse {0}"
 msgstr "Обзор {0}"
 
-#: ../udiskie/mount.py:754
+#: ../udiskie/mount.py:765
 #, fuzzy, python-brace-format
 msgid "Hack on {0}"
 msgstr "заперто {0}"
 
-#: ../udiskie/mount.py:755
+#: ../udiskie/mount.py:766
 #, python-brace-format
 msgid "Mount {0}"
 msgstr "Монтировать {0}"
 
-#: ../udiskie/mount.py:756
+#: ../udiskie/mount.py:767
 #, python-brace-format
 msgid "Unmount {0}"
 msgstr "Размонтировать {0}"
 
-#: ../udiskie/mount.py:757
+#: ../udiskie/mount.py:768
 #, python-brace-format
 msgid "Unlock {0}"
 msgstr "Разблокировать {0}"
 
-#: ../udiskie/mount.py:758
+#: ../udiskie/mount.py:769
 #, python-brace-format
 msgid "Lock {0}"
 msgstr "Заблокировать {0}"
 
-#: ../udiskie/mount.py:759
+#: ../udiskie/mount.py:770
 #, python-brace-format
 msgid "Eject {1}"
 msgstr "Извлечь {1}"
 
-#: ../udiskie/mount.py:760
+#: ../udiskie/mount.py:771
 #, python-brace-format
 msgid "Unpower {1}"
 msgstr "Отключить питание {1}"
 
-#: ../udiskie/mount.py:761
+#: ../udiskie/mount.py:772
 #, python-brace-format
 msgid "Clear password for {0}"
 msgstr "Очистить пароль для {0}"
 
-#: ../udiskie/mount.py:762
+#: ../udiskie/mount.py:773
 #, python-brace-format
 msgid "Detach {0}"
 msgstr "Отсоединить {0}"

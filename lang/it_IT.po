@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-30 22:53+0100\n"
+"POT-Creation-Date: 2022-02-02 15:06+0000\n"
 "PO-Revision-Date: 2020-05-06 11:52+0200\n"
 "Last-Translator: Stefano Mecocci <mecocci15@gmail.com>\n"
 "Language-Team: Italian\n"
@@ -386,76 +386,83 @@ msgid "not setting up {0}: not a file"
 msgstr "Impossibile impostare {0}: non è un file"
 
 #: ../udiskie/mount.py:598
-#, python-brace-format
-msgid "setting up {0}"
+#, fuzzy, python-brace-format
+msgid "setting up loop device {0}"
 msgstr "Sto impostando {0}"
 
-#: ../udiskie/mount.py:606
+#: ../udiskie/mount.py:605
+#, python-brace-format
+msgid ""
+"Insufficient permission to open {0} in read-write mode. Retrying in read-"
+"only mode."
+msgstr ""
+
+#: ../udiskie/mount.py:617
 #, python-brace-format
 msgid "set up {0} as {1}"
 msgstr "Imposta {0} come {1}"
 
-#: ../udiskie/mount.py:621
+#: ../udiskie/mount.py:632
 #, python-brace-format
 msgid "not deleting {0}: unhandled device"
 msgstr "Impossibile cancellare {0}: dispositivo non gestibile"
 
-#: ../udiskie/mount.py:625
+#: ../udiskie/mount.py:636
 #, python-brace-format
 msgid "deleting {0}"
 msgstr "Sto cancellando {0}"
 
-#: ../udiskie/mount.py:627
+#: ../udiskie/mount.py:638
 #, python-brace-format
 msgid "deleted {0}"
 msgstr "{0} è stato cancellato"
 
-#: ../udiskie/mount.py:753
+#: ../udiskie/mount.py:764
 #, python-brace-format
 msgid "Browse {0}"
 msgstr "Apri {0}"
 
-#: ../udiskie/mount.py:754
+#: ../udiskie/mount.py:765
 #, python-brace-format
 msgid "Hack on {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:755
+#: ../udiskie/mount.py:766
 #, python-brace-format
 msgid "Mount {0}"
 msgstr "Monta {0}"
 
-#: ../udiskie/mount.py:756
+#: ../udiskie/mount.py:767
 #, python-brace-format
 msgid "Unmount {0}"
 msgstr "Smonta {0}"
 
-#: ../udiskie/mount.py:757
+#: ../udiskie/mount.py:768
 #, python-brace-format
 msgid "Unlock {0}"
 msgstr "Sblocca {0}"
 
-#: ../udiskie/mount.py:758
+#: ../udiskie/mount.py:769
 #, python-brace-format
 msgid "Lock {0}"
 msgstr "Blocca {0}"
 
-#: ../udiskie/mount.py:759
+#: ../udiskie/mount.py:770
 #, python-brace-format
 msgid "Eject {1}"
 msgstr "Espelli {1}"
 
-#: ../udiskie/mount.py:760
+#: ../udiskie/mount.py:771
 #, python-brace-format
 msgid "Unpower {1}"
 msgstr "Rimuovi {1}"
 
-#: ../udiskie/mount.py:761
+#: ../udiskie/mount.py:772
 #, python-brace-format
 msgid "Clear password for {0}"
 msgstr "Dimentica la password per {0}"
 
-#: ../udiskie/mount.py:762
+#: ../udiskie/mount.py:773
 #, python-brace-format
 msgid "Detach {0}"
 msgstr "Stacca {0}"
