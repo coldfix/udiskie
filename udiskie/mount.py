@@ -573,7 +573,7 @@ class Mounter:
         return success
 
     # loop devices
-    async def losetup(self, image, read_only=True, offset=None, size=None,
+    async def losetup(self, image, read_only=None, offset=None, size=None,
                       no_part_scan=None):
         """
         Setup a loop device.
@@ -595,12 +595,23 @@ class Mounter:
         if not os.path.isfile(image):
             self._log.error(_('not setting up {0}: not a file', image))
             return None
-        self._log.debug(_('setting up {0}', image))
-        fd = os.open(image, os.O_RDONLY)
+        self._log.debug(_('setting up loop device {0}', image))
+
+        if not read_only:
+            try:
+                fd = os.open(image, os.O_RDWR)
+            except PermissionError:
+                self._log.debug(_(
+                    'Insufficient permission to open {0} in read-write mode. '
+                    'Retrying in read-only mode.', image))
+                read_only = True
+        if read_only:
+            fd = os.open(image, os.O_RDONLY)
+
         device = await self.udisks.loop_setup(fd, {
             'offset': offset,
             'size': size,
-            'read-only': read_only,
+            'read-only': bool(read_only),
             'no-part-scan': no_part_scan,
         })
         self._log.info(_('set up {0} as {1}', image,
