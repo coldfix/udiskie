@@ -1,123 +1,21 @@
-# Turkish translations for PACKAGE package.
-# Copyright (C) 2021 THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# Turkish translations for udiskie package.
+# Copyright (C) 2021 Thomas Gläßle
+# This file is distributed under the same license as the udiskie package.
 # Oğuz Ersen <oguzersen@protonmail.com>, 2021.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-30 17:50+0000\n"
+"POT-Creation-Date: 2021-11-30 22:53+0100\n"
 "PO-Revision-Date: 2021-11-27 13:56+0300\n"
 "Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
-"Language-Team: Turkish <tr>\n"
+"Language-Team: Turkish\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0\n"
-
-#: ../udiskie/tray.py:182
-msgid "Managed devices"
-msgstr "Yönetilen aygıtlar"
-
-#: ../udiskie/tray.py:198
-msgid "Mount disc image"
-msgstr "Disk kalıbını bağla"
-
-#: ../udiskie/tray.py:204
-msgid "Enable automounting"
-msgstr "Otomatik bağlamayı etkinleştir"
-
-#: ../udiskie/tray.py:210
-msgid "Enable notifications"
-msgstr "Bildirimleri etkinleştir"
-
-#: ../udiskie/tray.py:219
-msgid "Quit"
-msgstr "Çıkış"
-
-#: ../udiskie/tray.py:226
-msgid "Open disc image"
-msgstr "Disk kalıbı aç"
-
-#: ../udiskie/tray.py:228
-msgid "Open"
-msgstr "Aç"
-
-#: ../udiskie/tray.py:229
-msgid "Cancel"
-msgstr "İptal"
-
-#: ../udiskie/tray.py:269
-msgid "Invalid node!"
-msgstr "Geçersiz düğüm!"
-
-#: ../udiskie/tray.py:271
-msgid "No external devices"
-msgstr "Harici aygıt yok"
-
-#: ../udiskie/tray.py:387
-msgid "udiskie"
-msgstr "udiskie"
-
-#: ../udiskie/udisks2.py:647
-#, python-brace-format
-msgid "found device owning \"{0}\": \"{1}\""
-msgstr "\"{0}\" sahibi aygıt bulundu: \"{1}\""
-
-#: ../udiskie/udisks2.py:650
-#, python-brace-format
-msgid "no device found owning \"{0}\""
-msgstr "\"{0}\" sahibi aygıt bulunamadı"
-
-#: ../udiskie/udisks2.py:669
-#, python-brace-format
-msgid "Daemon version: {0}"
-msgstr "Arka plan programı sürümü: {0}"
-
-#: ../udiskie/udisks2.py:674
-#, python-brace-format
-msgid "Keyfile support: {0}"
-msgstr "Anahtar dosyası desteği: {0}"
-
-#: ../udiskie/udisks2.py:753
-#, python-brace-format
-msgid "+++ {0}: {1}"
-msgstr "+++ {0}: {1}"
-
-#: ../udiskie/prompt.py:96
-msgid "Show password"
-msgstr "Parolayı göster"
-
-#: ../udiskie/prompt.py:101
-msgid "Open keyfile…"
-msgstr "Anahtar dosyasını aç…"
-
-#: ../udiskie/prompt.py:108
-msgid "Cache password"
-msgstr "Parolayı önbelleğe al"
-
-#: ../udiskie/prompt.py:123
-msgid "Open a keyfile to unlock the LUKS device"
-msgstr "LUKS aygıtının kilidini açmak için bir anahtar dosyası açın"
-
-#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
-#, python-brace-format
-msgid "Enter password for {0.device_presentation}: "
-msgstr "{0.device_presentation} için parolayı girin: "
-
-#: ../udiskie/prompt.py:203
-msgid "Unknown device attribute {!r} in format string: {!r}"
-msgstr "Biçim dizgesinde bilinmeyen aygıt özelliği {!r}: {!r}"
-
-#: ../udiskie/prompt.py:255
-msgid ""
-"Can't find file browser: {0!r}. You may want to change the value for the '-"
-"f' option."
-msgstr ""
-"{0!r} dosya tarayıcısı bulunamıyor. '-f' seçeneğinin değerini değiştirmek "
-"isteyebilirsiniz."
 
 #: ../udiskie/cli.py:46
 #, python-brace-format
@@ -205,6 +103,44 @@ msgstr ""
 "\t- iç gözlem devre dışı bırakılarak oluşturuldu\n"
 "\n"
 "udiskie, appindicator simgesi olmadan başlatılıyor.\n"
+
+#: ../udiskie/config.py:127
+msgid "Unknown matching attribute: {!r}"
+msgstr "Bilinmeyen eşleşen özellik: {!r}"
+
+#: ../udiskie/config.py:129
+#, python-brace-format
+msgid "new rule: {0}"
+msgstr "yeni kural: {0}"
+
+#: ../udiskie/config.py:132
+#, python-brace-format
+msgid "{0} -> {1}"
+msgstr "{0} -> {1}"
+
+#: ../udiskie/config.py:151
+#, python-brace-format
+msgid "{0} matched {1}"
+msgstr "{0}, {1} ile eşleşti"
+
+#: ../udiskie/config.py:228
+#, python-brace-format
+msgid "Failed to read config file: {0}"
+msgstr "Yapılandırma dosyası okunamadı: {0}"
+
+#: ../udiskie/config.py:231
+msgid "Failed to read {0!r}: {1}"
+msgstr "{0!r} okunamadı: {1}"
+
+#: ../udiskie/depend.py:55
+msgid ""
+"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
+msgstr ""
+"Çalışma zamanı bağımlılığı GTK 3 eksik. Parola istemi için GTK 2 kullanılıyor"
+
+#: ../udiskie/depend.py:61
+msgid "X server not connected!"
+msgstr "X sunucusu bağlı değil!"
 
 #: ../udiskie/mount.py:29
 #, python-brace-format
@@ -524,16 +460,6 @@ msgstr "{0} için parolayı temizle"
 msgid "Detach {0}"
 msgstr "Ayır: {0}"
 
-#: ../udiskie/depend.py:55
-msgid ""
-"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
-msgstr ""
-"Çalışma zamanı bağımlılığı GTK 3 eksik. Parola istemi için GTK 2 kullanılıyor"
-
-#: ../udiskie/depend.py:61
-msgid "X server not connected!"
-msgstr "X sunucusu bağlı değil!"
-
 #: ../udiskie/notify.py:62
 msgid "Browse directory"
 msgstr "Dizine göz at"
@@ -623,30 +549,104 @@ msgstr "Görev başarısız oldu"
 msgid "Failed to show notification: {0}"
 msgstr "Bildirim gösterilemedi: {0}"
 
-#: ../udiskie/config.py:127
-msgid "Unknown matching attribute: {!r}"
-msgstr "Bilinmeyen eşleşen özellik: {!r}"
+#: ../udiskie/prompt.py:96
+msgid "Show password"
+msgstr "Parolayı göster"
 
-#: ../udiskie/config.py:129
+#: ../udiskie/prompt.py:101
+msgid "Open keyfile…"
+msgstr "Anahtar dosyasını aç…"
+
+#: ../udiskie/prompt.py:108
+msgid "Cache password"
+msgstr "Parolayı önbelleğe al"
+
+#: ../udiskie/prompt.py:123
+msgid "Open a keyfile to unlock the LUKS device"
+msgstr "LUKS aygıtının kilidini açmak için bir anahtar dosyası açın"
+
+#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
 #, python-brace-format
-msgid "new rule: {0}"
-msgstr "yeni kural: {0}"
+msgid "Enter password for {0.device_presentation}: "
+msgstr "{0.device_presentation} için parolayı girin: "
 
-#: ../udiskie/config.py:132
+#: ../udiskie/prompt.py:203
+msgid "Unknown device attribute {!r} in format string: {!r}"
+msgstr "Biçim dizgesinde bilinmeyen aygıt özelliği {!r}: {!r}"
+
+#: ../udiskie/prompt.py:255
+msgid ""
+"Can't find file browser: {0!r}. You may want to change the value for the '-"
+"f' option."
+msgstr ""
+"{0!r} dosya tarayıcısı bulunamıyor. '-f' seçeneğinin değerini değiştirmek "
+"isteyebilirsiniz."
+
+#: ../udiskie/tray.py:182
+msgid "Managed devices"
+msgstr "Yönetilen aygıtlar"
+
+#: ../udiskie/tray.py:198
+msgid "Mount disc image"
+msgstr "Disk kalıbını bağla"
+
+#: ../udiskie/tray.py:204
+msgid "Enable automounting"
+msgstr "Otomatik bağlamayı etkinleştir"
+
+#: ../udiskie/tray.py:210
+msgid "Enable notifications"
+msgstr "Bildirimleri etkinleştir"
+
+#: ../udiskie/tray.py:219
+msgid "Quit"
+msgstr "Çıkış"
+
+#: ../udiskie/tray.py:226
+msgid "Open disc image"
+msgstr "Disk kalıbı aç"
+
+#: ../udiskie/tray.py:228
+msgid "Open"
+msgstr "Aç"
+
+#: ../udiskie/tray.py:229
+msgid "Cancel"
+msgstr "İptal"
+
+#: ../udiskie/tray.py:269
+msgid "Invalid node!"
+msgstr "Geçersiz düğüm!"
+
+#: ../udiskie/tray.py:271
+msgid "No external devices"
+msgstr "Harici aygıt yok"
+
+#: ../udiskie/tray.py:387
+msgid "udiskie"
+msgstr "udiskie"
+
+#: ../udiskie/udisks2.py:647
 #, python-brace-format
-msgid "{0} -> {1}"
-msgstr "{0} -> {1}"
+msgid "found device owning \"{0}\": \"{1}\""
+msgstr "\"{0}\" sahibi aygıt bulundu: \"{1}\""
 
-#: ../udiskie/config.py:151
+#: ../udiskie/udisks2.py:650
 #, python-brace-format
-msgid "{0} matched {1}"
-msgstr "{0}, {1} ile eşleşti"
+msgid "no device found owning \"{0}\""
+msgstr "\"{0}\" sahibi aygıt bulunamadı"
 
-#: ../udiskie/config.py:228
+#: ../udiskie/udisks2.py:669
 #, python-brace-format
-msgid "Failed to read config file: {0}"
-msgstr "Yapılandırma dosyası okunamadı: {0}"
+msgid "Daemon version: {0}"
+msgstr "Arka plan programı sürümü: {0}"
 
-#: ../udiskie/config.py:231
-msgid "Failed to read {0!r}: {1}"
-msgstr "{0!r} okunamadı: {1}"
+#: ../udiskie/udisks2.py:674
+#, python-brace-format
+msgid "Keyfile support: {0}"
+msgstr "Anahtar dosyası desteği: {0}"
+
+#: ../udiskie/udisks2.py:753
+#, python-brace-format
+msgid "+++ {0}: {1}"
+msgstr "+++ {0}: {1}"

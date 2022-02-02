@@ -20,6 +20,9 @@ clean:
 	@mkdir -p ../build/locale/$*/LC_MESSAGES/
 	@cp $@ ../build/locale/$*/LC_MESSAGES/udiskie.mo
 
+en_US.po: udiskie.pot
+	msginit -o $@ -i $< -l en_US --no-translator
+
 %.po: udiskie.pot
 	@if [ -f $@ ]; then \
 		$(echo) msgmerge -q -U $@ $< && touch $@;\
@@ -28,7 +31,7 @@ clean:
 	fi
 
 udiskie.pot: $(shell $(sources))
-	$(sources) | xgettext -o $@ -f - \
+	$(sources) | sort | xgettext -o $@ -f - \
 		-LPython --from-code=UTF-8 \
 		--package-name=udiskie \
 		--package-version=$(version) \
