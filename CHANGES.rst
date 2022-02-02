@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+2.4.1
+~~~~~
+Date: 02.02.2022
+
+- setup loop devices in read-write mode if sufficient permissions are
+  available
+
+
 2.4.0
 ~~~~~
 Date: 30.11.2021
