@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-02 15:06+0000\n"
+"POT-Creation-Date: 2022-02-02 16:09+0000\n"
 "PO-Revision-Date: 2021-11-27 13:56+0300\n"
 "Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
 "Language-Team: Turkish\n"
@@ -104,31 +104,31 @@ msgstr ""
 "\n"
 "udiskie, appindicator simgesi olmadan başlatılıyor.\n"
 
-#: ../udiskie/config.py:127
+#: ../udiskie/config.py:129
 msgid "Unknown matching attribute: {!r}"
 msgstr "Bilinmeyen eşleşen özellik: {!r}"
 
-#: ../udiskie/config.py:129
+#: ../udiskie/config.py:131
 #, python-brace-format
 msgid "new rule: {0}"
 msgstr "yeni kural: {0}"
 
-#: ../udiskie/config.py:132
+#: ../udiskie/config.py:134
 #, python-brace-format
 msgid "{0} -> {1}"
 msgstr "{0} -> {1}"
 
-#: ../udiskie/config.py:151
+#: ../udiskie/config.py:153
 #, python-brace-format
 msgid "{0} matched {1}"
 msgstr "{0}, {1} ile eşleşti"
 
-#: ../udiskie/config.py:228
+#: ../udiskie/config.py:230
 #, python-brace-format
 msgid "Failed to read config file: {0}"
 msgstr "Yapılandırma dosyası okunamadı: {0}"
 
-#: ../udiskie/config.py:231
+#: ../udiskie/config.py:233
 msgid "Failed to read {0!r}: {1}"
 msgstr "{0!r} okunamadı: {1}"
 
@@ -390,79 +390,79 @@ msgstr "{0} kurulmuyor: bir dosya değil"
 msgid "setting up loop device {0}"
 msgstr "{0} kuruluyor"
 
-#: ../udiskie/mount.py:605
+#: ../udiskie/mount.py:616
 #, python-brace-format
 msgid ""
 "Insufficient permission to open {0} in read-write mode. Retrying in read-"
 "only mode."
 msgstr ""
 
-#: ../udiskie/mount.py:617
+#: ../udiskie/mount.py:628
 #, python-brace-format
 msgid "set up {0} as {1}"
 msgstr "{0}, {1} olarak kuruldu"
 
-#: ../udiskie/mount.py:632
+#: ../udiskie/mount.py:643
 #, python-brace-format
 msgid "not deleting {0}: unhandled device"
 msgstr "{0} silinmiyor: beklenmeyen aygıt"
 
-#: ../udiskie/mount.py:636
+#: ../udiskie/mount.py:647
 #, python-brace-format
 msgid "deleting {0}"
 msgstr "{0} siliniyor"
 
-#: ../udiskie/mount.py:638
+#: ../udiskie/mount.py:649
 #, python-brace-format
 msgid "deleted {0}"
 msgstr "{0} silindi"
 
-#: ../udiskie/mount.py:764
+#: ../udiskie/mount.py:775
 #, python-brace-format
 msgid "Browse {0}"
 msgstr "Tarayıcıda aç: {0}"
 
-#: ../udiskie/mount.py:765
+#: ../udiskie/mount.py:776
 #, python-brace-format
 msgid "Hack on {0}"
 msgstr "Terminalde aç: {0}"
 
-#: ../udiskie/mount.py:766
+#: ../udiskie/mount.py:777
 #, python-brace-format
 msgid "Mount {0}"
 msgstr "Bağla: {0}"
 
-#: ../udiskie/mount.py:767
+#: ../udiskie/mount.py:778
 #, python-brace-format
 msgid "Unmount {0}"
 msgstr "Bağını kes: {0}"
 
-#: ../udiskie/mount.py:768
+#: ../udiskie/mount.py:779
 #, python-brace-format
 msgid "Unlock {0}"
 msgstr "Kilidini aç: {0}"
 
-#: ../udiskie/mount.py:769
+#: ../udiskie/mount.py:780
 #, python-brace-format
 msgid "Lock {0}"
 msgstr "Kilitle: {0}"
 
-#: ../udiskie/mount.py:770
+#: ../udiskie/mount.py:781
 #, python-brace-format
 msgid "Eject {1}"
 msgstr "Çıkart: {1}"
 
-#: ../udiskie/mount.py:771
+#: ../udiskie/mount.py:782
 #, python-brace-format
 msgid "Unpower {1}"
 msgstr "Gücünü kapat: {1}"
 
-#: ../udiskie/mount.py:772
+#: ../udiskie/mount.py:783
 #, python-brace-format
 msgid "Clear password for {0}"
 msgstr "{0} için parolayı temizle"
 
-#: ../udiskie/mount.py:773
+#: ../udiskie/mount.py:784
 #, python-brace-format
 msgid "Detach {0}"
 msgstr "Ayır: {0}"
@@ -633,27 +633,27 @@ msgstr "Harici aygıt yok"
 msgid "udiskie"
 msgstr "udiskie"
 
-#: ../udiskie/udisks2.py:647
+#: ../udiskie/udisks2.py:661
 #, python-brace-format
 msgid "found device owning \"{0}\": \"{1}\""
 msgstr "\"{0}\" sahibi aygıt bulundu: \"{1}\""
 
-#: ../udiskie/udisks2.py:650
+#: ../udiskie/udisks2.py:664
 #, python-brace-format
 msgid "no device found owning \"{0}\""
 msgstr "\"{0}\" sahibi aygıt bulunamadı"
 
-#: ../udiskie/udisks2.py:669
+#: ../udiskie/udisks2.py:683
 #, python-brace-format
 msgid "Daemon version: {0}"
 msgstr "Arka plan programı sürümü: {0}"
 
-#: ../udiskie/udisks2.py:674
+#: ../udiskie/udisks2.py:688
 #, python-brace-format
 msgid "Keyfile support: {0}"
 msgstr "Anahtar dosyası desteği: {0}"
 
-#: ../udiskie/udisks2.py:753
+#: ../udiskie/udisks2.py:767
 #, python-brace-format
 msgid "+++ {0}: {1}"
 msgstr "+++ {0}: {1}"

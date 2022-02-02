@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-02 15:06+0000\n"
+"POT-Creation-Date: 2022-02-02 16:09+0000\n"
 "PO-Revision-Date: 2019-05-02 14:20+0200\n"
 "Last-Translator: Jose Riha <jose1711@gmail.com>\n"
 "Language-Team: Slovak\n"
@@ -78,31 +78,31 @@ msgid ""
 "Starting udiskie without appindicator icon.\n"
 msgstr ""
 
-#: ../udiskie/config.py:127
+#: ../udiskie/config.py:129
 msgid "Unknown matching attribute: {!r}"
 msgstr "Neznámy atribút pre vyhľadávanie: {!r}"
 
-#: ../udiskie/config.py:129
+#: ../udiskie/config.py:131
 #, python-brace-format
 msgid "new rule: {0}"
 msgstr ""
 
-#: ../udiskie/config.py:132
+#: ../udiskie/config.py:134
 #, fuzzy, python-brace-format
 msgid "{0} -> {1}"
 msgstr "+++ {0}: {1}"
 
-#: ../udiskie/config.py:151
+#: ../udiskie/config.py:153
 #, fuzzy, python-brace-format
 msgid "{0} matched {1}"
 msgstr "{0} vytvorené"
 
-#: ../udiskie/config.py:228
+#: ../udiskie/config.py:230
 #, python-brace-format
 msgid "Failed to read config file: {0}"
 msgstr "Nepodarilo sa načítať konfiguračný súbor: {0}"
 
-#: ../udiskie/config.py:231
+#: ../udiskie/config.py:233
 msgid "Failed to read {0!r}: {1}"
 msgstr "Nepodarilo sa načítať {0!r}: {1}"
 
@@ -364,79 +364,79 @@ msgstr "nenastavujem {0}: nie je to súbor"
 msgid "setting up loop device {0}"
 msgstr "nastavujem {0}"
 
-#: ../udiskie/mount.py:605
+#: ../udiskie/mount.py:616
 #, python-brace-format
 msgid ""
 "Insufficient permission to open {0} in read-write mode. Retrying in read-"
 "only mode."
 msgstr ""
 
-#: ../udiskie/mount.py:617
+#: ../udiskie/mount.py:628
 #, python-brace-format
 msgid "set up {0} as {1}"
 msgstr "nastaviť {0} ako {1}"
 
-#: ../udiskie/mount.py:632
+#: ../udiskie/mount.py:643
 #, python-brace-format
 msgid "not deleting {0}: unhandled device"
 msgstr "nemažem {0}: nepodporované zariadenie"
 
-#: ../udiskie/mount.py:636
+#: ../udiskie/mount.py:647
 #, python-brace-format
 msgid "deleting {0}"
 msgstr "mažem {0}"
 
-#: ../udiskie/mount.py:638
+#: ../udiskie/mount.py:649
 #, python-brace-format
 msgid "deleted {0}"
 msgstr "vymazané {0}"
 
-#: ../udiskie/mount.py:764
+#: ../udiskie/mount.py:775
 #, python-brace-format
 msgid "Browse {0}"
 msgstr "Prehliadať {0}"
 
-#: ../udiskie/mount.py:765
+#: ../udiskie/mount.py:776
 #, fuzzy, python-brace-format
 msgid "Hack on {0}"
 msgstr "zamykám {0}"
 
-#: ../udiskie/mount.py:766
+#: ../udiskie/mount.py:777
 #, python-brace-format
 msgid "Mount {0}"
 msgstr "Pripojiť {0}"
 
-#: ../udiskie/mount.py:767
+#: ../udiskie/mount.py:778
 #, python-brace-format
 msgid "Unmount {0}"
 msgstr "Odpojiť {0}"
 
-#: ../udiskie/mount.py:768
+#: ../udiskie/mount.py:779
 #, python-brace-format
 msgid "Unlock {0}"
 msgstr "Odomknúť {0}"
 
-#: ../udiskie/mount.py:769
+#: ../udiskie/mount.py:780
 #, python-brace-format
 msgid "Lock {0}"
 msgstr "Uzamknúť {0}"
 
-#: ../udiskie/mount.py:770
+#: ../udiskie/mount.py:781
 #, python-brace-format
 msgid "Eject {1}"
 msgstr "Vysunúť {1}"
 
-#: ../udiskie/mount.py:771
+#: ../udiskie/mount.py:782
 #, python-brace-format
 msgid "Unpower {1}"
 msgstr "Vypnúť {1}"
 
-#: ../udiskie/mount.py:772
+#: ../udiskie/mount.py:783
 #, python-brace-format
 msgid "Clear password for {0}"
 msgstr "Vymazať heslo pre {0}"
 
-#: ../udiskie/mount.py:773
+#: ../udiskie/mount.py:784
 #, python-brace-format
 msgid "Detach {0}"
 msgstr ""
@@ -607,27 +607,27 @@ msgstr "Žiadne externé zariadenia"
 msgid "udiskie"
 msgstr "udiskie"
 
-#: ../udiskie/udisks2.py:647
+#: ../udiskie/udisks2.py:661
 #, python-brace-format
 msgid "found device owning \"{0}\": \"{1}\""
 msgstr "našiel som zariadenie vlastniace \"{0}\": \"{1}\""
 
-#: ../udiskie/udisks2.py:650
+#: ../udiskie/udisks2.py:664
 #, python-brace-format
 msgid "no device found owning \"{0}\""
 msgstr "nenašiel som zariadenie vlastniace \"{0}\""
 
-#: ../udiskie/udisks2.py:669
+#: ../udiskie/udisks2.py:683
 #, python-brace-format
 msgid "Daemon version: {0}"
 msgstr "Verzia daemona: {0}"
 
-#: ../udiskie/udisks2.py:674
+#: ../udiskie/udisks2.py:688
 #, python-brace-format
 msgid "Keyfile support: {0}"
 msgstr "Podpora pre kľúč (keyfile): {0}"
 
-#: ../udiskie/udisks2.py:753
+#: ../udiskie/udisks2.py:767
 #, python-brace-format
 msgid "+++ {0}: {1}"
 msgstr "+++ {0}: {1}"
