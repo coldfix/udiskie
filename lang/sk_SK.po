@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-30 22:53+0100\n"
+"POT-Creation-Date: 2022-02-02 15:06+0000\n"
 "PO-Revision-Date: 2019-05-02 14:20+0200\n"
 "Last-Translator: Jose Riha <jose1711@gmail.com>\n"
 "Language-Team: Slovak\n"
@@ -360,76 +360,83 @@ msgid "not setting up {0}: not a file"
 msgstr "nenastavujem {0}: nie je to súbor"
 
 #: ../udiskie/mount.py:598
-#, python-brace-format
-msgid "setting up {0}"
+#, fuzzy, python-brace-format
+msgid "setting up loop device {0}"
 msgstr "nastavujem {0}"
 
-#: ../udiskie/mount.py:606
+#: ../udiskie/mount.py:605
+#, python-brace-format
+msgid ""
+"Insufficient permission to open {0} in read-write mode. Retrying in read-"
+"only mode."
+msgstr ""
+
+#: ../udiskie/mount.py:617
 #, python-brace-format
 msgid "set up {0} as {1}"
 msgstr "nastaviť {0} ako {1}"
 
-#: ../udiskie/mount.py:621
+#: ../udiskie/mount.py:632
 #, python-brace-format
 msgid "not deleting {0}: unhandled device"
 msgstr "nemažem {0}: nepodporované zariadenie"
 
-#: ../udiskie/mount.py:625
+#: ../udiskie/mount.py:636
 #, python-brace-format
 msgid "deleting {0}"
 msgstr "mažem {0}"
 
-#: ../udiskie/mount.py:627
+#: ../udiskie/mount.py:638
 #, python-brace-format
 msgid "deleted {0}"
 msgstr "vymazané {0}"
 
-#: ../udiskie/mount.py:753
+#: ../udiskie/mount.py:764
 #, python-brace-format
 msgid "Browse {0}"
 msgstr "Prehliadať {0}"
 
-#: ../udiskie/mount.py:754
+#: ../udiskie/mount.py:765
 #, fuzzy, python-brace-format
 msgid "Hack on {0}"
 msgstr "zamykám {0}"
 
-#: ../udiskie/mount.py:755
+#: ../udiskie/mount.py:766
 #, python-brace-format
 msgid "Mount {0}"
 msgstr "Pripojiť {0}"
 
-#: ../udiskie/mount.py:756
+#: ../udiskie/mount.py:767
 #, python-brace-format
 msgid "Unmount {0}"
 msgstr "Odpojiť {0}"
 
-#: ../udiskie/mount.py:757
+#: ../udiskie/mount.py:768
 #, python-brace-format
 msgid "Unlock {0}"
 msgstr "Odomknúť {0}"
 
-#: ../udiskie/mount.py:758
+#: ../udiskie/mount.py:769
 #, python-brace-format
 msgid "Lock {0}"
 msgstr "Uzamknúť {0}"
 
-#: ../udiskie/mount.py:759
+#: ../udiskie/mount.py:770
 #, python-brace-format
 msgid "Eject {1}"
 msgstr "Vysunúť {1}"
 
-#: ../udiskie/mount.py:760
+#: ../udiskie/mount.py:771
 #, python-brace-format
 msgid "Unpower {1}"
 msgstr "Vypnúť {1}"
 
-#: ../udiskie/mount.py:761
+#: ../udiskie/mount.py:772
 #, python-brace-format
 msgid "Clear password for {0}"
 msgstr "Vymazať heslo pre {0}"
 
-#: ../udiskie/mount.py:762
+#: ../udiskie/mount.py:773
 #, python-brace-format
 msgid "Detach {0}"
 msgstr ""

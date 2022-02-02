@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-30 22:53+0100\n"
+"POT-Creation-Date: 2022-02-02 15:06+0000\n"
 "PO-Revision-Date: 2021-11-27 13:56+0300\n"
 "Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
 "Language-Team: Turkish\n"
@@ -386,76 +386,83 @@ msgid "not setting up {0}: not a file"
 msgstr "{0} kurulmuyor: bir dosya değil"
 
 #: ../udiskie/mount.py:598
-#, python-brace-format
-msgid "setting up {0}"
+#, fuzzy, python-brace-format
+msgid "setting up loop device {0}"
 msgstr "{0} kuruluyor"
 
-#: ../udiskie/mount.py:606
+#: ../udiskie/mount.py:605
+#, python-brace-format
+msgid ""
+"Insufficient permission to open {0} in read-write mode. Retrying in read-"
+"only mode."
+msgstr ""
+
+#: ../udiskie/mount.py:617
 #, python-brace-format
 msgid "set up {0} as {1}"
 msgstr "{0}, {1} olarak kuruldu"
 
-#: ../udiskie/mount.py:621
+#: ../udiskie/mount.py:632
 #, python-brace-format
 msgid "not deleting {0}: unhandled device"
 msgstr "{0} silinmiyor: beklenmeyen aygıt"
 
-#: ../udiskie/mount.py:625
+#: ../udiskie/mount.py:636
 #, python-brace-format
 msgid "deleting {0}"
 msgstr "{0} siliniyor"
 
-#: ../udiskie/mount.py:627
+#: ../udiskie/mount.py:638
 #, python-brace-format
 msgid "deleted {0}"
 msgstr "{0} silindi"
 
-#: ../udiskie/mount.py:753
+#: ../udiskie/mount.py:764
 #, python-brace-format
 msgid "Browse {0}"
 msgstr "Tarayıcıda aç: {0}"
 
-#: ../udiskie/mount.py:754
+#: ../udiskie/mount.py:765
 #, python-brace-format
 msgid "Hack on {0}"
 msgstr "Terminalde aç: {0}"
 
-#: ../udiskie/mount.py:755
+#: ../udiskie/mount.py:766
 #, python-brace-format
 msgid "Mount {0}"
 msgstr "Bağla: {0}"
 
-#: ../udiskie/mount.py:756
+#: ../udiskie/mount.py:767
 #, python-brace-format
 msgid "Unmount {0}"
 msgstr "Bağını kes: {0}"
 
-#: ../udiskie/mount.py:757
+#: ../udiskie/mount.py:768
 #, python-brace-format
 msgid "Unlock {0}"
 msgstr "Kilidini aç: {0}"
 
-#: ../udiskie/mount.py:758
+#: ../udiskie/mount.py:769
 #, python-brace-format
 msgid "Lock {0}"
 msgstr "Kilitle: {0}"
 
-#: ../udiskie/mount.py:759
+#: ../udiskie/mount.py:770
 #, python-brace-format
 msgid "Eject {1}"
 msgstr "Çıkart: {1}"
 
-#: ../udiskie/mount.py:760
+#: ../udiskie/mount.py:771
 #, python-brace-format
 msgid "Unpower {1}"
 msgstr "Gücünü kapat: {1}"
 
-#: ../udiskie/mount.py:761
+#: ../udiskie/mount.py:772
 #, python-brace-format
 msgid "Clear password for {0}"
 msgstr "{0} için parolayı temizle"
 
-#: ../udiskie/mount.py:762
+#: ../udiskie/mount.py:773
 #, python-brace-format
 msgid "Detach {0}"
 msgstr "Ayır: {0}"
