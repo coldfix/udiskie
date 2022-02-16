@@ -3,7 +3,10 @@ Status icon using AppIndicator3.
 """
 
 from gi.repository import Gtk
-from gi.repository import AppIndicator3
+try:
+    from gi.repository import AyatanaAppIndicator3 as AppIndicator3
+except ImportError:
+    from gi.repository import AppIndicator3
 
 from .async_ import Future
 
