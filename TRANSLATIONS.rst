@@ -17,7 +17,7 @@ The translations may become outdated as udiskie changes. If you notice an
 outdated translation, please edit the corresponding ``.po`` file in submit a
 patch, even for very small changes.
 
-In order to test udiskie with your locally editted translation files, type
+In order to test udiskie with your locally edited translation files, type
 (still from the ``lang`` folder)::
 
     export TEXTDOMAINDIR=$PWD/../build/locale

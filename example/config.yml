@@ -24,7 +24,7 @@ program_options:
 
   terminal:         'termite -d'
     # [string] Set terminal command line to open directories. It will be
-    # invoked with thefolder path as its last command line argument.
+    # invoked with the folder path as its last command line argument.
 
   password_prompt: ["gnome-keyring-query", "get", "{id_uuid}"]
     # [string|list] Set command to retrieve passwords. If specified
@@ -79,7 +79,7 @@ notifications:
 
   timeout:          1.5     # set the default for all notifications
 
-  # Specify only if you want to overwrite the the default:
+  # Specify only if you want to overwrite the default:
   device_mounted:   5       # mount notification
   device_unmounted: false   # unmount notification
   device_added:     false   # device has appeared

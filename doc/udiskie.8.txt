@@ -179,7 +179,7 @@ Mount '/dev/sdb1':
 
 Configuration
 -------------
-The file '.config/udiskie/config.yml' can be used to configure defaults for command line parameters and customize further settings. The actual path may differ depending on '$XDG_CONFIG_HOME'. The file format is YAML, see http://en.wikipedia.org/wiki/YAML. If you don't want to install PyYAML, it is possible to use an equivalent JSON file with the name 'config.json' instead.
+The file '.config/udiskie/config.yml' can be used to configure defaults for command line parameters and customize further settings. The actual path may differ depending on '$XDG_CONFIG_HOME'. The file format is YAML, see https://en.wikipedia.org/wiki/YAML. If you don't want to install PyYAML, it is possible to use an equivalent JSON file with the name 'config.json' instead.
 
 ----------------------------------------------------------------------
 # This is an example (nonsense) configuration file for udiskie.
@@ -208,7 +208,7 @@ program_options:
 
   terminal:         'termite -d'
     # [string] Set terminal command line to open directories. It will be
-    # invoked with thefolder path as its last command line argument.
+    # invoked with the folder path as its last command line argument.
 
   password_prompt: ["gnome-keyring-query", "get", "{id_uuid}"]
     # [string|list] Set command to retrieve passwords. If specified
@@ -263,7 +263,7 @@ notifications:
 
   timeout:          1.5     # set the default for all notifications
 
-  # Specify only if you want to overwrite the the default:
+  # Specify only if you want to overwrite the default:
   device_mounted:   5       # mount notification
   device_unmounted: false   # unmount notification
   device_added:     false   # device has appeared
@@ -365,7 +365,7 @@ See Also
 --------
 linkman:udisks[1]
 
-http://www.freedesktop.org/wiki/Software/udisks/
+https://www.freedesktop.org/wiki/Software/udisks/
 
 
 Contact

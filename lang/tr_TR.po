@@ -1,14 +1,14 @@
 # Turkish translations for udiskie package.
 # Copyright (C) 2021 Thomas Gläßle
 # This file is distributed under the same license as the udiskie package.
-# Oğuz Ersen <oguzersen@protonmail.com>, 2021.
+# Oğuz Ersen <oguzersen@protonmail.com>, 2021-2022.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-02-02 16:09+0000\n"
-"PO-Revision-Date: 2021-11-27 13:56+0300\n"
+"PO-Revision-Date: 2022-02-18 23:04+0300\n"
 "Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
 "Language-Team: Turkish\n"
 "Language: tr\n"
@@ -386,9 +386,9 @@ msgid "not setting up {0}: not a file"
 msgstr "{0} kurulmuyor: bir dosya değil"
 
 #: ../udiskie/mount.py:598
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "setting up loop device {0}"
-msgstr "{0} kuruluyor"
+msgstr "{0} döngü aygıtı kuruluyor"
 
 #: ../udiskie/mount.py:616
 #, python-brace-format
@@ -396,6 +396,8 @@ msgid ""
 "Insufficient permission to open {0} in read-write mode. Retrying in read-"
 "only mode."
 msgstr ""
+"{0} okuma-yazma modunda açılması için yetersiz izin. Salt okunur modda "
+"yeniden deneniyor."
 
 #: ../udiskie/mount.py:628
 #, python-brace-format
