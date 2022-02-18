@@ -4,7 +4,7 @@ udiskie
 
 |Version| |License|
 
-*udiskie* is a udisks2_ front-end that allows to manage removeable media such
+*udiskie* is a udisks2_ front-end that allows to manage removable media such
 as CDs or flash drives from userspace.
 
 |Screenshot|
@@ -26,7 +26,7 @@ All features can be individually enabled or disabled.
 version of udiskie that supports python2, please check out the ``1.7.X``
 releases or the ``maint-1.7`` branch.
 
-.. _udisks2: http://www.freedesktop.org/wiki/Software/udisks
+.. _udisks2: https://www.freedesktop.org/wiki/Software/udisks
 
 - `Documentation`_
 
