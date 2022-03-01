@@ -23,7 +23,8 @@ def check_call(exc_type, func, *args):
 
 
 def check_version(package, version):
-    return check_call(ValueError, require_version, package, version)
+    if check_call(ValueError, require_version, package, version):
+        return (package, version)
 
 
 _in_X = bool(os.environ.get('DISPLAY'))
@@ -37,7 +38,10 @@ _has_Gtk = (3 if check_version('Gtk', '3.0') else
             0)
 
 _has_Notify = check_version('Notify', '0.7')
-_has_AppIndicator3 = check_version('AppIndicator3', '0.1')
+_has_AppIndicator3 = (
+    check_version('AyatanaAppIndicator3', '0.1') or
+    check_version('AppIndicator3', '0.1')
+)
 
 
 def require_Gtk(min_version=2):
@@ -70,9 +74,12 @@ def require_Notify():
 
 
 def require_AppIndicator3():
-    if not _has_AppIndicator3:
-        raise RuntimeError('Module gi.repository.Notify not available!')
-    from gi.repository import AppIndicator3
+    if _has_AppIndicator3 == ('AppIndicator3', '0.1'):
+        from gi.repository import AppIndicator3
+    elif _has_AppIndicator3 == ('AyatanaAppIndicator3', '0.1'):
+        from gi.repository import AyatanaAppIndicator3 as AppIndicator3
+    else:
+        raise RuntimeError('Module gi.repository.AppIndicator3 not available!')
     return AppIndicator3
 
 
