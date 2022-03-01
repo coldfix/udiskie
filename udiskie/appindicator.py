@@ -3,12 +3,12 @@ Status icon using AppIndicator3.
 """
 
 from gi.repository import Gtk
-try:
-    from gi.repository import AyatanaAppIndicator3 as AppIndicator3
-except ImportError:
-    from gi.repository import AppIndicator3
 
 from .async_ import Future
+from .depend import require_AppIndicator3
+
+
+AppIndicator3 = require_AppIndicator3()
 
 
 class AppIndicatorIcon:
