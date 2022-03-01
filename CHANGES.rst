@@ -1,6 +1,15 @@
 CHANGELOG
 ---------
 
+2.4.2
+~~~~~
+Date: 01.03.2022
+
+- add support for AyatanaAppIndicator3
+- update Turkish translation
+- fix some documentation typos and errors
+
+
 2.4.1
 ~~~~~
 Date: 02.02.2022
