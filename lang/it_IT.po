@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-02 16:09+0000\n"
+"POT-Creation-Date: 2022-03-01 16:22+0000\n"
 "PO-Revision-Date: 2020-05-06 11:52+0200\n"
 "Last-Translator: Stefano Mecocci <mecocci15@gmail.com>\n"
 "Language-Team: Italian\n"
@@ -131,13 +131,13 @@ msgstr "Impossibile leggere il file di configurazione: {0}"
 msgid "Failed to read {0!r}: {1}"
 msgstr "Impossibile leggere {0!r}: {1}"
 
-#: ../udiskie/depend.py:55
+#: ../udiskie/depend.py:59
 msgid ""
 "Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
 msgstr ""
 "Dipendenza mancante: GTK 3. Viene usato GTK 2 per richiedere la password"
 
-#: ../udiskie/depend.py:61
+#: ../udiskie/depend.py:65
 msgid "X server not connected!"
 msgstr "server X non connesso!"
 

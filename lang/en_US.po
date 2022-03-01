@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: udiskie 2.4.0\n"
+"Project-Id-Version: udiskie 2.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-02 16:09+0000\n"
-"PO-Revision-Date: 2022-02-02 16:09+0000\n"
+"POT-Creation-Date: 2022-03-01 16:22+0000\n"
+"PO-Revision-Date: 2022-03-01 16:22+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en_US\n"
@@ -128,13 +128,13 @@ msgstr "Failed to read config file: {0}"
 msgid "Failed to read {0!r}: {1}"
 msgstr "Failed to read {0!r}: {1}"
 
-#: ../udiskie/depend.py:55
+#: ../udiskie/depend.py:59
 msgid ""
 "Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
 msgstr ""
 "Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
 
-#: ../udiskie/depend.py:61
+#: ../udiskie/depend.py:65
 msgid "X server not connected!"
 msgstr "X server not connected!"
 

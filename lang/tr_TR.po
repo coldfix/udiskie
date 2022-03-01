@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-02 16:09+0000\n"
+"POT-Creation-Date: 2022-03-01 16:22+0000\n"
 "PO-Revision-Date: 2022-02-18 23:04+0300\n"
 "Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
 "Language-Team: Turkish\n"
@@ -132,13 +132,13 @@ msgstr "Yapılandırma dosyası okunamadı: {0}"
 msgid "Failed to read {0!r}: {1}"
 msgstr "{0!r} okunamadı: {1}"
 
-#: ../udiskie/depend.py:55
+#: ../udiskie/depend.py:59
 msgid ""
 "Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
 msgstr ""
 "Çalışma zamanı bağımlılığı GTK 3 eksik. Parola istemi için GTK 2 kullanılıyor"
 
-#: ../udiskie/depend.py:61
+#: ../udiskie/depend.py:65
 msgid "X server not connected!"
 msgstr "X sunucusu bağlı değil!"
 
