@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-02 16:09+0000\n"
+"POT-Creation-Date: 2022-03-01 16:22+0000\n"
 "PO-Revision-Date: 2014-07-23 18:43+0100\n"
 "Last-Translator: Alejandro Pérez <alejandro.perez.mendez@gmail.com>\n"
 "Language-Team: Spanish alejandro.perez.mendez@gmail.com\n"
@@ -114,12 +114,12 @@ msgstr ""
 msgid "Failed to read {0!r}: {1}"
 msgstr "Fallo al {0} {1}: {2}"
 
-#: ../udiskie/depend.py:55
+#: ../udiskie/depend.py:59
 msgid ""
 "Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
 msgstr ""
 
-#: ../udiskie/depend.py:61
+#: ../udiskie/depend.py:65
 msgid "X server not connected!"
 msgstr "¡Servidor X no conectado!"
 
