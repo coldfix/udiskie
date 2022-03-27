@@ -1,0 +1,80 @@
+# udiskie completion
+
+_udiskie()
+{
+  local cur prev opts
+  _get_comp_words_by_ref cur prev
+
+  opts=(
+    '-h'
+    '--help'
+    '-V'
+    '--version'
+    '-v'
+    '--verbose'
+    '-q'
+    '--quiet'
+    '-c'
+    '--config'
+    '-C'
+    '--no-config'
+    '-a'
+    '--automount'
+    '-A'
+    '--no-automount'
+    '-n'
+    '--notify'
+    '-N'
+    '--no-notify'
+    '-t'
+    '--tray'
+    '-s'
+    '--smart-tray'
+    '-T'
+    '--no-tray'
+    '-m'
+    '--menu'
+    '-p'
+    '--password-prompt'
+    '-P'
+    '--no-password-prompt'
+    '-f'
+    '--file-manager'
+    '-F'
+    '--no-file-manager'
+    '--terminal'
+    '--no-terminal'
+    '--appindicator'
+    '--no-appindicator'
+    '--password-cache'
+    '--no-password-cache'
+    '--notify-command'
+    '--no-notify-command'
+    '--menu-checkbox-workaround'
+    '--no-menu-checkbox-workaround'
+    '--menu-update-workaround'
+    '--no-menu-update-workaround'
+  )
+
+  case "$prev" in
+    -c|--config)
+      COMPREPLY=($(compgen -f -- "$cur"))
+      return
+      ;;
+    -f|--file-manager|--notify-command|-p|--password-prompt|--terminal)
+      COMPREPLY=($(compgen -c -- "$cur"))
+      return
+      ;;
+    -m|--menu)
+      COMPREPLY=($(compgen -W "flat nested" -- "$cur"))
+      return
+      ;;
+    --password-cache)
+      return
+      ;;
+  esac
+
+  COMPREPLY=($(compgen -W "${opts[*]}" -- "$cur"))
+
+} &&
+complete -F _udiskie udiskie

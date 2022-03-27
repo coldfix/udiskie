@@ -1,0 +1,53 @@
+# udiskie-umount completion
+
+_udiskie_umount()
+{
+  local cur prev devs opts
+  _get_comp_words_by_ref cur prev
+
+  devs=( $(udiskie-info -a) )
+
+  opts=(
+    '-h'
+    '--help'
+    '-V'
+    '--version'
+    '-v'
+    '--verbose'
+    '-q'
+    '--quiet'
+    '-c'
+    '--config'
+    '-C'
+    '--no-config'
+    '-a'
+    '--all'
+    '-d'
+    '--detach'
+    '-D'
+    '--no-detach'
+    '-e'
+    '--eject'
+    '-E'
+    '--no-eject'
+    '-f'
+    '--force'
+    '-F'
+    '--no-force'
+    '-l'
+    '--lock'
+    '-L'
+    '--no-lock'
+  )
+
+  case $prev in
+    -c|--config)
+      COMPREPLY=($(compgen -f -- "$cur"))
+      return
+      ;;
+  esac
+
+  COMPREPLY=($(compgen -W "${devs[*]} ${opts[*]}" -- "$cur"))
+
+} &&
+complete -F _udiskie_umount udiskie-umount
