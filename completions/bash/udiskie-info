@@ -1,0 +1,44 @@
+# udiskie-info completion
+
+_udiskie_info()
+{
+  local cur prev devs opts
+  _get_comp_words_by_ref cur prev
+
+  devs=( $(udiskie-info -a) )
+
+  opts=(
+    '-h'
+    '--help'
+    '-V'
+    '--version'
+    '-v'
+    '--verbose'
+    '-q'
+    '--quiet'
+    '-c'
+    '--config'
+    '-C'
+    '--no-config'
+    '-a'
+    '--all'
+    '-o'
+    '--output'
+    '-f'
+    '--filter'
+  )
+
+  case $prev in
+    -c|--config)
+      COMPREPLY=($(compgen -f -- "$cur"))
+      return
+      ;;
+    -o|--output|-f|--filter)
+      return
+      ;;
+  esac
+
+  COMPREPLY=($(compgen -W "${devs[*]} ${opts[*]}" -- "$cur"))
+
+} &&
+complete -F _udiskie_info udiskie-info

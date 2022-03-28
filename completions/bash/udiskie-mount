@@ -1,0 +1,54 @@
+# udiskie-mount completion
+
+_udiskie_mount()
+{
+  local cur prev devs opts
+  _get_comp_words_by_ref cur prev
+
+  devs=( $(udiskie-info -a) )
+
+  opts=(
+    '-h'
+    '--help'
+    '-V'
+    '--version'
+    '-v'
+    '--verbose'
+    '-q'
+    '--quiet'
+    '-c'
+    '--config'
+    '-C'
+    '--no-config'
+    '-a'
+    '--all'
+    '-r'
+    '--recursive'
+    '-R'
+    '--no-recursive'
+    '-o'
+    '--options'
+    '-p'
+    '--password-prompt'
+    '-P'
+    '--no-password-prompt'
+  )
+
+  case $prev in
+    -c|--config)
+      COMPREPLY=($(compgen -f -- "$cur"))
+      return
+      ;;
+    -o|--options)
+      return
+      ;;
+    -p|--password-prompt)
+      COMPREPLY=($(compgen -c -- "$cur"))
+      return
+      ;;
+  esac
+
+  COMPREPLY=($(compgen -W "${devs[*]} ${opts[*]}" -- "$cur"))
+
+} &&
+complete -F _udiskie_mount udiskie-mount
