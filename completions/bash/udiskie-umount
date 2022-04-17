@@ -51,3 +51,5 @@ _udiskie_umount()
 
 } &&
 complete -F _udiskie_umount udiskie-umount
+
+# ex:et ts=2 sw=2 ft=sh

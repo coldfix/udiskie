@@ -42,3 +42,5 @@ _udiskie_info()
 
 } &&
 complete -F _udiskie_info udiskie-info
+
+# ex:et ts=2 sw=2 ft=sh
