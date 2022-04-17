@@ -2,7 +2,7 @@
 udiskie
 =======
 
-|Version| |License|
+|Version| |License| |Translations|
 
 *udiskie* is a udisks2_ front-end that allows to manage removable media such
 as CDs or flash drives from userspace.
@@ -64,6 +64,10 @@ releases or the ``maint-1.7`` branch.
 .. |License| image::   https://img.shields.io/pypi/l/udiskie.svg
    :target:            https://github.com/coldfix/udiskie/blob/master/COPYING
    :alt:               License: MIT
+
+.. |Translations| image:: http://weblate.coldfix.de/widgets/udiskie/-/udiskie/svg-badge.svg
+   :target:               http://weblate.coldfix.de/engage/udiskie/
+   :alt:                  Translations
 
 .. |Screenshot| image:: https://raw.githubusercontent.com/coldfix/udiskie/master/screenshot.png
    :target:             https://raw.githubusercontent.com/coldfix/udiskie/master/screenshot.png
