@@ -10,7 +10,8 @@ from os import path
 from glob import glob
 
 
-comp_files = glob('completions/zsh/_*')
+completions_zsh = glob('completions/zsh/_*')
+completions_bash = glob('completions/bash/*')
 languages  = [path.splitext(path.split(po_file)[1])[0]
               for po_file in glob('lang/*.po')]
 
@@ -101,7 +102,8 @@ setup(
         'build_mo': build_mo,
     },
     data_files=[
-        ('share/zsh/site-functions', comp_files),
+        ('share/bash-completions/completions', completions_bash),
+        ('share/zsh/site-functions', completions_zsh),
         *[('share/locale/{}/LC_MESSAGES'.format(lang),
            ['build/locale/{}/LC_MESSAGES/udiskie.mo'.format(lang)])
           for lang in languages],
