@@ -13,13 +13,11 @@
        stroke="#000000"
        stroke-width="8"
        stroke-linejoin="round"
-       stroke-linecap="round"
-       fill="none"
+       fill="#eee"
        d="M 5,5
        L 5,95
        L 95,95
        L 95,5
-       L 5,5
-       " />
+       Z" />
   </g>
 </svg>

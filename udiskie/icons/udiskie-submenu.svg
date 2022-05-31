@@ -7,14 +7,22 @@
    version="1.1"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:xlink="http://www.w3.org/1999/xlink">
-  <g>
+  <defs>
     <path
        id="tick"
-       fill="#000000"
        d="M 35,25
        L 35,75
        L 65,50
-       L 35,25
-       " />
+       Z" />
+  </defs>
+  <g>
+    <use
+      stroke="#eee"
+      stroke-width="10"
+      stroke-linejoin="round"
+      xlink:href="#tick" />
+    <use
+      fill="#000"
+      xlink:href="#tick" />
   </g>
 </svg>
