@@ -25,7 +25,10 @@ jobs:
       - run: ./lang/report.sh | tee after.tsv | column -t
       - run: .github/pr_text.py | tee summary.md
 
-      - run: .github/set-output summary <summary.md
+      - run: |
+          echo >>$GITHUB_OUTPUT "summary<<EOS_SUMMARY"
+          cat  >>$GITHUB_OUTPUT <summary.md
+          echo >>$GITHUB_OUTPUT "EOS_SUMMARY"
         id: report
       - run: rm before.tsv after.tsv summary.md
 
