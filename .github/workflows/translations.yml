@@ -31,7 +31,7 @@ jobs:
 
       - uses: peter-evans/create-pull-request@v5
         with:
-          branch: ${{ github.ref }}_langfiles
+          branch: ${{ github.ref_name }}_langfiles
           commit-message: Update language files
           title: Update language files on ${{ github.ref_name }}
           body: ${{ steps.report.outputs.summary }}
