@@ -3,12 +3,8 @@
 # Sets a (multi-line) output of the current step.
 # Usage: set-output NAME <FILE
 name=$1
+delim=EOS_${name}_$(openssl rand -hex 16)
 
-echo -n "$name=" >> $GITHUB_OUTPUT
-
-# Escape '\n', '\r', '%' to make this work with multi-line strings, see:
-# https://github.community/t/set-output-truncates-multiline-strings/16852
-sed -e '{:a;N;$!ba}' \
-    -e 's/%/%25/g' \
-    -e 's/\r/%0D/g' \
-    -e 's/\n/%0A/g' >>$GITHUB_OUTPUT
+echo >>$GITHUB_OUTPUT "$name<<$delim"
+cat >>$GITHUB_OUTPUT
+echo >>$GITHUB_OUTPUT "$delim"
