@@ -1,6 +1,19 @@
 CHANGELOG
 ---------
 
+2.5.0
+~~~~~
+Date: 03.10.2023
+
+- add bash completions for CLI options (thanks @oersen)
+- updates for translations
+- added German translation
+- add bright outlines for wayland icons in dark themes
+- ignore snap loop devices by default
+- maintenance on CI workflows
+- fix KeyError when properties are invalidated multiple times (#272)
+
+
 2.4.2
 ~~~~~
 Date: 01.03.2022
