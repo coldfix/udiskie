@@ -862,7 +862,10 @@ class Daemon(Emitter):
         # update device state:
         old_state = deepcopy(self._objects[object_path])
         for property_name in invalidated_properties:
-            del self._objects[object_path][interface_name][property_name]
+            try:
+                del self._objects[object_path][interface_name][property_name]
+            except KeyError:
+                pass
         for key, value in changed_properties.items():
             self._objects[object_path][interface_name][key] = value
         new_state = self._objects[object_path]
