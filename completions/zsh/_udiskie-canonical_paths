@@ -1,11 +1,20 @@
 #autoload
 
+# NOTE:
+# This file is a copy of the upstream _canonical_paths file that was modified
+# to fix a problem with device names that contain spaces (see #253).
+# The fix was taken from a discussion on the zsh-workers mailing list, see:
+# https://www.zsh.org/mla/workers/2022/msg01377.html
+# The original file is usually installed at:
+# /usr/share/zsh/functions/Completion/Unix/_canonical_paths
+
+
 # This completion function completes all paths given to it, and also tries to
 # offer completions which point to the same file as one of the paths given
 # (relative path when an absolute path is given, and vice versa; when ..'s are
 # present in the word to be completed, and some paths got from symlinks).
 
-# Usage: _canonical_paths [-A var] [-N] [-MJV12onfX] tag desc [paths...]
+# Usage: _udiskie-canonical_paths [-A var] [-N] [-MJV12onfX] tag desc [paths...]
 
 # -A, if specified, takes the paths from the array variable specified. Paths
 # can also be specified on the command line as shown above. -N, if specified,
@@ -14,7 +23,7 @@
 # addition, the options -M, -J, -V, -1, -2, -o, -n, -F, -x, -X are passed to
 # compadd.
 
-_canonical_paths_add_paths () {
+_udiskie-canonical_paths_add_paths () {
   # origpref = original prefix
   # expref = expanded prefix
   # curpref = current prefix
@@ -46,11 +55,11 @@ _canonical_paths_add_paths () {
   fi
 
   for subdir in $expref?*(@); do
-    _canonical_paths_add_paths ${subdir/$expref/$origpref} add
+    _udiskie-canonical_paths_add_paths ${subdir/$expref/$origpref} add
   done
 }
 
-_canonical_paths() {
+_udiskie-canonical_paths() {
   # The following parameters are used by callee functions:
   #    __gopts
   #    matches
@@ -88,10 +97,10 @@ _canonical_paths() {
   local base=$PREFIX
   typeset -i blimit
 
-  _canonical_paths_add_paths $base
+  _udiskie-canonical_paths_add_paths $base
 
   if [[ -z $base ]]; then
-    _canonical_paths_add_paths / add
+    _udiskie-canonical_paths_add_paths / add
   elif [[ $base == ..(/.(|.))#(|/) ]]; then
 
     # This style controls how many parent directory links (..) to chase searching
@@ -109,7 +118,7 @@ _canonical_paths() {
     fi
     until [[ $base.. -ef $base || blimit -le 0 ]]; do
       base+=../
-      _canonical_paths_add_paths $base add
+      _udiskie-canonical_paths_add_paths $base add
       blimit+=-1
     done
   fi
@@ -119,4 +128,4 @@ _canonical_paths() {
   return ret
 }
 
-_canonical_paths "$@"
+_udiskie-canonical_paths "$@"

@@ -48,9 +48,9 @@ function _udiskie-umount
     loop_tmp=( ${loop_tmp##*<:5:>} )
 
     _alternative \
-      'directories:mount point:_canonical_paths -A mp_tmp -N directories mount\ point' \
-      'device-paths: device path:_canonical_paths -A dev_tmp -N device-paths device\ path' \
-      'loop-files: loop file:_canonical_paths -A loop_tmp -N loop-files loop\ file' \
+      'directories:mount point:_udiskie-canonical_paths -A mp_tmp -N directories mount\ point' \
+      'device-paths: device path:_udiskie-canonical_paths -A dev_tmp -N device-paths device\ path' \
+      'loop-files: loop file:_udiskie-canonical_paths -A loop_tmp -N loop-files loop\ file' \
       && ret=0
 
   ;;

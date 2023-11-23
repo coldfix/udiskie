@@ -36,7 +36,7 @@ function _udiskie-mount
       local dev_tmp mp_tmp
       dev_tmp=( $(udiskie-info -a) )
       _alternative \
-        'device-paths: device path:_canonical_paths -A dev_tmp -N device-paths device\ path' \
+        'device-paths: device path:_udiskie-canonical_paths -A dev_tmp -N device-paths device\ path' \
         && ret=0
       ;;
   esac
