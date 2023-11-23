@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+2.5.1
+~~~~~
+Date: 23.11.2023
+
+- fix default install location for bash completion scripts (#275)
+- fix zsh completion for device names with spaces (#253)
+
+
 2.5.0
 ~~~~~
 Date: 03.10.2023
