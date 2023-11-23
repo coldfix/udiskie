@@ -102,7 +102,7 @@ setup(
         'build_mo': build_mo,
     },
     data_files=[
-        ('share/bash-completions/completions', completions_bash),
+        ('share/bash-completion/completions', completions_bash),
         ('share/zsh/site-functions', completions_zsh),
         *[('share/locale/{}/LC_MESSAGES'.format(lang),
            ['build/locale/{}/LC_MESSAGES/udiskie.mo'.format(lang)])
