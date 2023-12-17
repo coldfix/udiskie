@@ -5,7 +5,7 @@ User prompt utility.
 from udiskie.depend import has_Gtk, require_Gtk
 from udiskie.common import is_utf8
 
-from distutils.spawn import find_executable
+from shutil import which
 import getpass
 import logging
 import shlex
@@ -247,7 +247,7 @@ def browser(browser_name='xdg-open'):
     if not browser_name:
         return None
     argv = shlex.split(browser_name)
-    executable = find_executable(argv[0])
+    executable = which(argv[0])
     if executable is None:
         # Why not raise an exception? -I think it is more convenient (for
         # end users) to have a reasonable default, without enforcing it.

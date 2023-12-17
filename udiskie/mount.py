@@ -2,9 +2,9 @@
 Mount utilities.
 """
 
-from distutils.spawn import find_executable
 from collections import namedtuple
 from functools import partial
+from shutil import which
 import logging
 import os
 
@@ -169,7 +169,7 @@ class Mounter:
         return True
 
     def _check_device_before_mount(self, device):
-        if device.id_type == 'ntfs' and not find_executable('ntfs-3g'):
+        if device.id_type == 'ntfs' and not which('ntfs-3g'):
             self._log.warn(_(
                 "Mounting NTFS device with default driver.\n"
                 "Please install 'ntfs-3g' if you experience problems or the "
