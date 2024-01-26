@@ -48,8 +48,8 @@ _udiskie()
     '--no-appindicator'
     '--password-cache'
     '--no-password-cache'
-    '--notify-command'
-    '--no-notify-command'
+    '--event-hook'
+    '--no-event-hook'
     '--menu-checkbox-workaround'
     '--no-menu-checkbox-workaround'
     '--menu-update-workaround'
@@ -61,7 +61,7 @@ _udiskie()
       COMPREPLY=($(compgen -f -- "$cur"))
       return
       ;;
-    -f|--file-manager|--notify-command|-p|--password-prompt|--terminal)
+    -f|--file-manager|--event-hook|-p|--password-prompt|--terminal)
       COMPREPLY=($(compgen -c -- "$cur"))
       return
       ;;

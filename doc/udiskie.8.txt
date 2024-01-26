@@ -104,12 +104,12 @@ Daemon options
 *--no-password-cache*::
 	Never cache passwords (default).
 
-*--notify-command COMMAND*::
+*--event-hook COMMAND*::
 	Command to execute on device events. Command string be formatted using the event name and the list of device attributes (see below), e.g.:
 
-	--notify-command "zenity --info --text '{event}: {device_presentation}'"
+	--event-hook "zenity --info --text '{event}: {device_presentation}'"
 
-*--no-notify-command*::
+*--no-event-hook*::
 	No notify command (default).
 
 
@@ -219,7 +219,7 @@ program_options:
     # "builtin:gui" and "builtin:tty" signify to use udiskie's
     # builtin password prompt.
 
-  notify_command: "zenity --info --text '{event}: {device_presentation}'"
+  event_hook: "zenity --info --text '{event}: {device_presentation}'"
     # [string|list] Set command to be executed on any device event.
     # This is specified like `password_prompt`.
 

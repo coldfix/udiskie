@@ -263,7 +263,7 @@ def browser(browser_name='xdg-open'):
     return browse
 
 
-def notify_command(command_format, mounter):
+def connect_event_hook(command_format, mounter):
     """
     Command notification tool.
 

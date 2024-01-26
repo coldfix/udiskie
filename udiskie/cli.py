@@ -303,14 +303,18 @@ class Daemon(_EntryPoint):
         -p COMMAND, --password-prompt COMMAND   Command for password retrieval
         -P, --no-password-prompt                Disable unlocking
 
-        --notify-command COMMAND                Command to execute on events
-        --no-notify-command                     Disable command notifications
+        --event-hook COMMAND                    Command to execute on events
+        --no-event-hook                         Disable command notifications
 
         --menu-checkbox-workaround              Use checkbox workaround
         --no-menu-checkbox-workaround           Disable checkbox workaround
 
         --menu-update-workaround                Use wayland menu workaround
         --no-menu-update-workaround             Disable wayland menu workaround
+
+    [DEPRECATED]:
+        --notify-command COMMAND                Renamed to --event-hook
+        --no-notify-command                     Renamed to --no-event-hook
     """
 
     option_defaults = extend(_EntryPoint.option_defaults, {
@@ -324,6 +328,7 @@ class Daemon(_EntryPoint):
         'password_prompt': 'builtin:gui',
         'password_cache': False,
         'notify_command': None,
+        'event_hook': None,
         'menu_checkbox_workaround': None,
         'menu_update_workaround': None,
     })
@@ -341,12 +346,12 @@ class Daemon(_EntryPoint):
         'password_prompt': OptionalValue('--password-prompt'),
         'password_cache': OptionalValue('--password-cache'),
         'notify_command': OptionalValue('--notify-command'),
+        'event_hook': OptionalValue('--event-hook'),
         'menu_checkbox_workaround': OptionalValue('--menu-checkbox-workaround'),
         'menu_update_workaround': OptionalValue('--menu-update-workaround'),
     })
 
     def _init(self):
-
         import udiskie.prompt
 
         config = self.config
@@ -425,11 +430,22 @@ class Daemon(_EntryPoint):
         self.automounter = self._load_automounter(options['automount'])
         self.automounter.activate()
 
+        if options['notify_command']:
+            logging.getLogger(__name__).warn(_(
+                "The 'notify_command' option was renamed to 'event_hook'. "
+                "The old name still works, but may be removed in a future version. "
+                "Please change your command line and config to use the new name."))
+            if options['event_hook'] is None:
+                options['event_hook'] = options['notify_command']
+            else:
+                logging.getLogger(__name__).warn(_(
+                    "Ignoring 'notify_command' in favor of 'event_hook'."))
+
         if options['notify']:
             self.notify.activate()
-        if options['notify_command']:
+        if options['event_hook']:
             # is currently enabled/disabled statically only once:
-            self.notify_command()
+            self.connect_event_hook(options['event_hook'])
         if show_tray:
             self.statusicon.activate()
             tasks.append(self.statusicon.instance._icon.task)
@@ -455,10 +471,9 @@ class Daemon(_EntryPoint):
             timeout=self.config.notifications,
             aconfig=aconfig)
 
-    def notify_command(self):
+    def connect_event_hook(self, command):
         import udiskie.prompt
-        return udiskie.prompt.notify_command(
-            self.options['notify_command'], self.mounter)
+        return udiskie.prompt.connect_event_hook(command, self.mounter)
 
     def _load_statusicon(self):
         import udiskie.tray
