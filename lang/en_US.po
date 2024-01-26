@@ -1,14 +1,14 @@
 # English translations for udiskie package.
-# Copyright (C) 2023 Thomas Gläßle
+# Copyright (C) 2024 Thomas Gläßle
 # This file is distributed under the same license as the udiskie package.
-# Automatically generated, 2023.
+# Automatically generated, 2024.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: udiskie 2.5.0\n"
+"Project-Id-Version: udiskie 2.5.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-03 12:13+0000\n"
-"PO-Revision-Date: 2023-10-03 12:13+0000\n"
+"POT-Creation-Date: 2024-01-27 00:26+0100\n"
+"PO-Revision-Date: 2024-01-27 00:26+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en_US\n"
@@ -48,7 +48,7 @@ msgstr "%(message)s"
 msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 
-#: ../udiskie/cli.py:380
+#: ../udiskie/cli.py:385
 msgid ""
 "Typelib for 'libnotify' is not available. Possible causes include:\n"
 "\t- libnotify is not installed\n"
@@ -64,7 +64,7 @@ msgstr ""
 "\n"
 "Starting udiskie without notifications."
 
-#: ../udiskie/cli.py:394
+#: ../udiskie/cli.py:399
 msgid ""
 "Not run within X or Wayland session.\n"
 "Starting udiskie without tray icon.\n"
@@ -72,7 +72,7 @@ msgstr ""
 "Not run within X or Wayland session.\n"
 "Starting udiskie without tray icon.\n"
 
-#: ../udiskie/cli.py:401
+#: ../udiskie/cli.py:406
 msgid ""
 "Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
 "\t- GTK3 is not installed\n"
@@ -86,7 +86,7 @@ msgstr ""
 "\t- GTK3 was built with introspection disabled\n"
 "Starting udiskie without tray icon.\n"
 
-#: ../udiskie/cli.py:411
+#: ../udiskie/cli.py:416
 msgid ""
 "Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
 "\t- libappindicator is not installed\n"
@@ -99,6 +99,20 @@ msgstr ""
 "\t- the typelib is provided by a separate package\n"
 "\t- it was built with introspection disabled\n"
 "Starting udiskie without appindicator icon.\n"
+
+#: ../udiskie/cli.py:435
+msgid ""
+"The 'notify_command' option was renamed to 'event_hook'. The old name still "
+"works, but may be removed in a future version. Please change your command "
+"line and config to use the new name."
+msgstr ""
+"The 'notify_command' option was renamed to 'event_hook'. The old name still "
+"works, but may be removed in a future version. Please change your command "
+"line and config to use the new name."
+
+#: ../udiskie/cli.py:442
+msgid "Ignoring 'notify_command' in favor of 'event_hook'."
+msgstr "Ignoring 'notify_command' in favor of 'event_hook'."
 
 #: ../udiskie/config.py:129
 msgid "Unknown matching attribute: {!r}"
