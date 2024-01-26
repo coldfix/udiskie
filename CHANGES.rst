@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+2.5.2
+~~~~~
+Date: 27.01.2024
+
+- drop external dependency on distutils (#278)
+- rename ``--notify-command`` to ``--event-hook`` to prevent misunderstandings (#279)
+
+
 2.5.1
 ~~~~~
 Date: 23.11.2023
