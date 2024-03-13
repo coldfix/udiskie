@@ -367,7 +367,7 @@ class Daemon(_EntryPoint):
             import udiskie.cache
             timeout = int(options['password_cache']) * 60
             cache = udiskie.cache.PasswordCache(timeout)
-        except ImportError:
+        except (ImportError, AttributeError):
             cache = None
 
         self.mounter = udiskie.mount.Mounter(
