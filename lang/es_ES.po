@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-27 00:26+0100\n"
+"POT-Creation-Date: 2024-04-16 21:10+0000\n"
 "PO-Revision-Date: 2014-07-23 18:43+0100\n"
 "Last-Translator: Alejandro Pérez <alejandro.perez.mendez@gmail.com>\n"
 "Language-Team: Spanish alejandro.perez.mendez@gmail.com\n"
@@ -51,7 +51,7 @@ msgstr "%(message)s"
 msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 
-#: ../udiskie/cli.py:385
+#: ../udiskie/cli.py:386
 msgid ""
 "Typelib for 'libnotify' is not available. Possible causes include:\n"
 "\t- libnotify is not installed\n"
@@ -61,13 +61,13 @@ msgid ""
 "Starting udiskie without notifications."
 msgstr ""
 
-#: ../udiskie/cli.py:399
+#: ../udiskie/cli.py:400
 msgid ""
 "Not run within X or Wayland session.\n"
 "Starting udiskie without tray icon.\n"
 msgstr ""
 
-#: ../udiskie/cli.py:406
+#: ../udiskie/cli.py:407
 msgid ""
 "Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
 "\t- GTK3 is not installed\n"
@@ -76,7 +76,7 @@ msgid ""
 "Starting udiskie without tray icon.\n"
 msgstr ""
 
-#: ../udiskie/cli.py:416
+#: ../udiskie/cli.py:417
 msgid ""
 "Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
 "\t- libappindicator is not installed\n"
@@ -85,14 +85,14 @@ msgid ""
 "Starting udiskie without appindicator icon.\n"
 msgstr ""
 
-#: ../udiskie/cli.py:435
+#: ../udiskie/cli.py:436
 msgid ""
 "The 'notify_command' option was renamed to 'event_hook'. The old name still "
 "works, but may be removed in a future version. Please change your command "
 "line and config to use the new name."
 msgstr ""
 
-#: ../udiskie/cli.py:442
+#: ../udiskie/cli.py:443
 msgid "Ignoring 'notify_command' in favor of 'event_hook'."
 msgstr ""
 

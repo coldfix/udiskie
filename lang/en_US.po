@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: udiskie 2.5.1\n"
+"Project-Id-Version: udiskie 2.5.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-27 00:26+0100\n"
-"PO-Revision-Date: 2024-01-27 00:26+0100\n"
+"POT-Creation-Date: 2024-04-16 21:10+0000\n"
+"PO-Revision-Date: 2024-04-16 21:10+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en_US\n"
@@ -48,7 +48,7 @@ msgstr "%(message)s"
 msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 
-#: ../udiskie/cli.py:385
+#: ../udiskie/cli.py:386
 msgid ""
 "Typelib for 'libnotify' is not available. Possible causes include:\n"
 "\t- libnotify is not installed\n"
@@ -64,7 +64,7 @@ msgstr ""
 "\n"
 "Starting udiskie without notifications."
 
-#: ../udiskie/cli.py:399
+#: ../udiskie/cli.py:400
 msgid ""
 "Not run within X or Wayland session.\n"
 "Starting udiskie without tray icon.\n"
@@ -72,7 +72,7 @@ msgstr ""
 "Not run within X or Wayland session.\n"
 "Starting udiskie without tray icon.\n"
 
-#: ../udiskie/cli.py:406
+#: ../udiskie/cli.py:407
 msgid ""
 "Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
 "\t- GTK3 is not installed\n"
@@ -86,7 +86,7 @@ msgstr ""
 "\t- GTK3 was built with introspection disabled\n"
 "Starting udiskie without tray icon.\n"
 
-#: ../udiskie/cli.py:416
+#: ../udiskie/cli.py:417
 msgid ""
 "Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
 "\t- libappindicator is not installed\n"
@@ -100,7 +100,7 @@ msgstr ""
 "\t- it was built with introspection disabled\n"
 "Starting udiskie without appindicator icon.\n"
 
-#: ../udiskie/cli.py:435
+#: ../udiskie/cli.py:436
 msgid ""
 "The 'notify_command' option was renamed to 'event_hook'. The old name still "
 "works, but may be removed in a future version. Please change your command "
@@ -110,7 +110,7 @@ msgstr ""
 "works, but may be removed in a future version. Please change your command "
 "line and config to use the new name."
 
-#: ../udiskie/cli.py:442
+#: ../udiskie/cli.py:443
 msgid "Ignoring 'notify_command' in favor of 'event_hook'."
 msgstr "Ignoring 'notify_command' in favor of 'event_hook'."
 
