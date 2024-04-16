@@ -345,6 +345,7 @@ class Daemon(_EntryPoint):
         'file_manager': OptionalValue('--file-manager'),
         'password_prompt': OptionalValue('--password-prompt'),
         'password_cache': OptionalValue('--password-cache'),
+        'terminal': OptionalValue('--terminal'),
         'notify_command': OptionalValue('--notify-command'),
         'event_hook': OptionalValue('--event-hook'),
         'menu_checkbox_workaround': OptionalValue('--menu-checkbox-workaround'),
