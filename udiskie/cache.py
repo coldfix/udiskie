@@ -4,12 +4,16 @@ Utility for temporarily caching passwords.
 
 import keyutils
 
+# This import fails in python-keyring-keyutils, which is a not (yet) supported
+# alternative for the python-keyring package. This lets us distinguish between
+# the two identically named python packages (=keyring).
+from keyutils import KEY_SPEC_PROCESS_KEYRING
 
 class PasswordCache:
 
     def __init__(self, timeout):
         self.timeout = timeout
-        self.keyring = keyutils.KEY_SPEC_PROCESS_KEYRING
+        self.keyring = KEY_SPEC_PROCESS_KEYRING
 
     def _key(self, device):
         return device.id_uuid.encode('utf-8')
