@@ -232,10 +232,14 @@ device_config:
   # The rules defined here are simply prepended to the builtin device rules,
   # so that it is possible to completely overwrite the defaults by specifying
   # a catch-all rule (i.e. a rule without device attributes).
+  # Filter rules can be passed a list of values, in which case the rule is matched
+  # if the attribute matches any of the values in the list.
 
 - device_file: /dev/dm-5    # [filter]
   ignore:      false        # [action] never ignore this device
-- id_uuid: 9d53-13ba        # [filter] match by device UUID
+- id_uuid:                  # [filter] match by device UUID
+  - 9d53-13ba               # This rule matches on either of these uids
+  - 8675-309a
   options: [noexec, nodev]  # [action] mount options can be given as list
   ignore:  false            # [action] never ignore this device (even if fs=FAT)
   automount: false          # [action] do not automount this device
