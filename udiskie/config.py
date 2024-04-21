@@ -42,6 +42,8 @@ def _format_item(k, v):
 def match_value(value, pattern):
     if isinstance(value, (list, tuple)):
         return any(match_value(v, pattern) for v in value)
+    if isinstance(pattern, (list, tuple)):
+        return any(match_value(value, p) for p in pattern)
     if isinstance(value, str) and isinstance(pattern, str):
         return fnmatch.fnmatch(value.lower(), pattern.lower())
     return lower(value) == lower(pattern)
