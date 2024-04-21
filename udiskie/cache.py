@@ -9,6 +9,7 @@ import keyutils
 # the two identically named python packages (=keyring).
 from keyutils import KEY_SPEC_PROCESS_KEYRING
 
+
 class PasswordCache:
 
     def __init__(self, timeout):
