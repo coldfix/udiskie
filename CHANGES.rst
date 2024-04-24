@@ -1,6 +1,17 @@
 CHANGELOG
 ---------
 
+2.5.3
+-----
+Date 24.04.2024
+
+- allow matching against a list of values in config rules (``device_config``)
+  [thanks @dajt1725]
+- fix ``--terminal`` command line option (was not doing anything) [@dajt1725]
+- fix AttributeError when *python-keyring-keyutils* is installed instead of
+  *keyutils* [thanks @bubbleguuum]
+
+
 2.5.2
 ~~~~~
 Date: 27.01.2024
