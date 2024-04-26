@@ -98,6 +98,8 @@ class DeviceFilter:
         'ui_device_presentation',
         'ui_id_label',
         'ui_id_uuid',
+        'job_action',
+        'job_message',
     ]
 
     def __init__(self, match):
