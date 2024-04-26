@@ -615,6 +615,14 @@ class Device:
             self.drive_model,
         ]))
 
+    @property
+    def job_action(self):
+        return None
+
+    @property
+    def job_message(self):
+        return None
+
 
 # ----------------------------------------
 # UDisks2 service wrapper
