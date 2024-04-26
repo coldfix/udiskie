@@ -363,6 +363,8 @@ remain available:
     ui_device_presentation
     ui_id_label
     ui_id_uuid
+    job_action              in an event_hook call of a job_failed event, this is the action that failed
+    job_message             in an event_hook call of a job_failed event, this is the message from udisks
 
 
 See Also
