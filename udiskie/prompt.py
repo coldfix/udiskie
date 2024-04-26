@@ -175,7 +175,8 @@ async def get_password_tty(device, options):
 class DeviceCommand:
 
     """
-    Launcher that starts user-defined password prompts. The command can be
+    Launcher that starts a user-defined external command.  This may be
+    a user-defined password prompt, or an event hook. The command can be
     specified in terms of a command line template.
     """
 
@@ -203,13 +204,24 @@ class DeviceCommand:
                         'Unknown device attribute {!r} in format string: {!r}',
                         kwd, arg))
 
-    async def __call__(self, device):
+# I'm not sure what to do with the event_hook on device_changed events
+# We should probably call the event hook only once, with a list of changed
+# attributes.  But for now, just call the event_hook twice, once with the
+# old attributes, and once with the new ones.
+    async def __call__(self, device, arg1 = None, arg2 = None):
         """
-        Invoke the subprocess to ask the user to enter a password for unlocking
-        the specified device.
+        Invoke a subprocess.  This may be an event hook or to ask the user
+        to enter a password for unlocking the specified device.
+        arg2 will only be not-None for a job_failed event hook.
+        arg1 will only be not-None for job_failed or device_changed event hooks.
         """
         attrs = {attr: getattr(device, attr) for attr in self.used_attrs}
         attrs.update(self.extra)
+       if arg2:
+            attrs['job_action'] = arg1
+            attrs['job_message'] = arg2
+        elif arg1:
+            attrs['event'] = 'device_changed_from'
         argv = [arg.format(**attrs) for arg in self.argv]
         try:
             stdout = await exec_subprocess(argv, self.capture)
@@ -219,6 +231,15 @@ class DeviceCommand:
         # keyfiles. This logic is a guess that may cause bugs for some users:(
         if stdout and stdout.endswith(b'\n') and is_utf8(stdout):
             stdout = stdout[:-1]
+        if arg1 and arg2 is None:
+            attrs = {attr: getattr(arg1, attr) for attr in self.used_attrs}
+            attrs.update(self.extra)
+            attrs['event'] = 'device_changed_to'
+            argv = [arg.format(**attrs) for arg in self.argv]
+            try:
+                stdout2 = await exec_subprocess(argv, self.capture)
+            except subprocess.CalledProcessError:
+                return None
         return stdout
 
     async def password(self, device, options):
@@ -280,7 +301,7 @@ def connect_event_hook(command_format, mounter):
     :param mounter: Mounter object
     """
     udisks = mounter.udisks
-    for event in ['device_mounted', 'device_unmounted',
+    for event in ['device_changed', 'device_mounted', 'device_unmounted',
                   'device_locked', 'device_unlocked',
                   'device_added', 'device_removed',
                   'job_failed']:
