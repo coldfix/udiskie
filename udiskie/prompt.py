@@ -237,7 +237,7 @@ class DeviceCommand:
             attrs['event'] = 'device_changed_to'
             argv = [arg.format(**attrs) for arg in self.argv]
             try:
-                stdout2 = await exec_subprocess(argv, self.capture)
+                await exec_subprocess(argv, False)
             except subprocess.CalledProcessError:
                 return None
         return stdout
