@@ -208,7 +208,7 @@ class DeviceCommand:
 # We should probably call the event hook only once, with a list of changed
 # attributes.  But for now, just call the event_hook twice, once with the
 # old attributes, and once with the new ones.
-    async def __call__(self, device, arg1 = None, arg2 = None):
+    async def __call__(self, device, arg1=None, arg2=None):
         """
         Invoke a subprocess.  This may be an event hook or to ask the user
         to enter a password for unlocking the specified device.
