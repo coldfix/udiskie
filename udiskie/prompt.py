@@ -217,7 +217,7 @@ class DeviceCommand:
         """
         attrs = {attr: getattr(device, attr) for attr in self.used_attrs}
         attrs.update(self.extra)
-       if arg2:
+        if arg2:
             attrs['job_action'] = arg1
             attrs['job_message'] = arg2
         elif arg1:
