@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-16 21:10+0000\n"
+"POT-Creation-Date: 2024-09-04 05:17+0000\n"
 "PO-Revision-Date: 2014-07-23 18:43+0100\n"
 "Last-Translator: Alejandro Pérez <alejandro.perez.mendez@gmail.com>\n"
 "Language-Team: Spanish alejandro.perez.mendez@gmail.com\n"
@@ -96,31 +96,31 @@ msgstr ""
 msgid "Ignoring 'notify_command' in favor of 'event_hook'."
 msgstr ""
 
-#: ../udiskie/config.py:129
+#: ../udiskie/config.py:131
 msgid "Unknown matching attribute: {!r}"
 msgstr "Atributo de filtrado desconocido: {!r}"
 
-#: ../udiskie/config.py:131
+#: ../udiskie/config.py:133
 #, python-brace-format
 msgid "new rule: {0}"
 msgstr ""
 
-#: ../udiskie/config.py:134
+#: ../udiskie/config.py:136
 #, fuzzy, python-brace-format
 msgid "{0} -> {1}"
 msgstr "+++ {0}: {1}"
 
-#: ../udiskie/config.py:153
+#: ../udiskie/config.py:155
 #, fuzzy, python-brace-format
 msgid "{0} matched {1}"
 msgstr "{0} usado para {1}"
 
-#: ../udiskie/config.py:230
+#: ../udiskie/config.py:232
 #, python-brace-format
 msgid "Failed to read config file: {0}"
 msgstr ""
 
-#: ../udiskie/config.py:233
+#: ../udiskie/config.py:235
 #, fuzzy
 msgid "Failed to read {0!r}: {1}"
 msgstr "Fallo al {0} {1}: {2}"
