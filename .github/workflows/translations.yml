@@ -32,7 +32,7 @@ jobs:
         id: report
       - run: rm before.tsv after.tsv summary.md
 
-      - uses: peter-evans/create-pull-request@v5
+      - uses: peter-evans/create-pull-request@v7
         with:
           branch: ${{ github.ref_name }}_langfiles
           commit-message: Update language files
