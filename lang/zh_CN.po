@@ -99,7 +99,7 @@ msgstr ""
 "\t- 没有安装libappindicator\n"
 "\t- 类型库(typelib)由一个单独的软件包提供\n"
 "\t- 在编译时禁用了对象自省功能\n"
-"启动没有托盘功能udiskie。\n"
+"启动不带托盘图标的udiskie。\n"
 
 #: ../udiskie/cli.py:436
 msgid ""
