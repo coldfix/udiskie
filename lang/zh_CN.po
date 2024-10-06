@@ -226,7 +226,7 @@ msgstr "未挂载 {0}: 未处理设备"
 #: ../udiskie/mount.py:191
 #, python-brace-format
 msgid "not unmounting {0}: not mounted"
-msgstr "not unmounting {0}: not mounted"
+msgstr "未卸载 {0}：未挂载"
 
 #: ../udiskie/mount.py:193
 #, python-brace-format
@@ -236,52 +236,52 @@ msgstr "unmounting {0}"
 #: ../udiskie/mount.py:195
 #, python-brace-format
 msgid "unmounted {0}"
-msgstr "unmounted {0}"
+msgstr "未挂载 {0}"
 
 #: ../udiskie/mount.py:209
 #, python-brace-format
 msgid "not unlocking {0}: unhandled device"
-msgstr "not unlocking {0}: unhandled device"
+msgstr "无法解锁 {0}：未处理的设备"
 
 #: ../udiskie/mount.py:212
 #, python-brace-format
 msgid "not unlocking {0}: already unlocked"
-msgstr "not unlocking {0}: already unlocked"
+msgstr "未解锁 {0}：已解锁"
 
 #: ../udiskie/mount.py:215
 #, python-brace-format
 msgid "not unlocking {0}: no password prompt"
-msgstr "not unlocking {0}: no password prompt"
+msgstr "未解锁 {0}：无密码提示"
 
 #: ../udiskie/mount.py:229
 #, python-brace-format
 msgid "not unlocking {0}: cancelled by user"
-msgstr "not unlocking {0}: cancelled by user"
+msgstr "未解锁 {0}：用户取消"
 
 #: ../udiskie/mount.py:234
 #, python-brace-format
 msgid "unlocking {0} using keyfile"
-msgstr "unlocking {0} using keyfile"
+msgstr "使用密钥文件解锁 {0}"
 
 #: ../udiskie/mount.py:237
 #, python-brace-format
 msgid "unlocking {0}"
-msgstr "unlocking {0}"
+msgstr "解锁 {0}"
 
 #: ../udiskie/mount.py:240
 #, python-brace-format
 msgid "unlocked {0}"
-msgstr "unlocked {0}"
+msgstr "已解锁 {0}"
 
 #: ../udiskie/mount.py:249
 #, python-brace-format
 msgid "no cached key for {0}"
-msgstr "no cached key for {0}"
+msgstr "{0}没有可用的缓存密钥"
 
 #: ../udiskie/mount.py:251
 #, python-brace-format
 msgid "unlocking {0} using cached password"
-msgstr "unlocking {0} using cached password"
+msgstr "使用缓存密码解锁 {0}"
 
 #: ../udiskie/mount.py:255
 #, python-brace-format
