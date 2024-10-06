@@ -1,0 +1,673 @@
+
+# English translations for udiskie package.
+# Copyright (C) 2024 Thomas Gläßle
+# This file is distributed under the same license as the udiskie package.
+# Automatically generated, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: udiskie 2.5.3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-09-04 05:17+0000\n"
+"PO-Revision-Date: 2024-09-04 05:17+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: Chinese\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../udiskie/cli.py:46
+#, python-brace-format
+msgid "These options are mutually exclusive: {0}"
+msgstr "这些选项是互斥的： {0}"
+
+#: ../udiskie/cli.py:119
+msgid ""
+"\n"
+"    Note, that the options in the individual groups are mutually exclusive.\n"
+"\n"
+"    The config file can be a JSON or preferably a YAML file. For an\n"
+"    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
+"    "
+msgstr ""
+"\n"
+"    请注意，各组中的选项是互斥的。\n"
+"\n"
+"    配置文件可以是 JSON 文件，最好是 YAML 文件。\n"
+"   例如，请参阅 MAN 页面（或软件源中的 doc/udiskie.8.txt）。\n"
+"    "
+
+#: ../udiskie/cli.py:139
+#, python-format
+msgid "%(message)s"
+msgstr "%(信息)s"
+
+#: ../udiskie/cli.py:141
+#, python-format
+msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+msgstr "%(日志输出级别)s [%(时间与日期)s] %(变量名)s: %(消息)s"
+
+#: ../udiskie/cli.py:386
+msgid ""
+"Typelib for 'libnotify' is not available. Possible causes include:\n"
+"\t- libnotify is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- libnotify was built with introspection disabled\n"
+"\n"
+"Starting udiskie without notifications."
+msgstr ""
+"libnotify' 的类型库(Typelib)不可用。可能的原因包括:\n"
+"\t- 没有安装libnotify\n"
+"\t- 类型库(typelib)由一个单独的软件包提供\n"
+"\t- 编译libnotify时禁用了对象自省\n"
+"\n"
+"启动不带通知功能的udiskie。"
+
+#: ../udiskie/cli.py:400
+msgid ""
+"Not run within X or Wayland session.\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+"没有运行在X或者wayland下.\n"
+"启动不带托盘图标的udiskie。\n"
+
+#: ../udiskie/cli.py:407
+msgid ""
+"Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
+"\t- GTK3 is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- GTK3 was built with introspection disabled\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+"Gtk 3.0 "的类型库(Typelib)不可用。可能的原因包括:\n"
+"\t- 没有安装GIK3\n"
+"\t- 类型库(typelib)由一个单独的软件包提供\n"
+"\t- 编译GTK3时禁用了对象自省\n"
+"启动不带托盘图标的udiskie。\n"
+
+#: ../udiskie/cli.py:417
+msgid ""
+"Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
+"\t- libappindicator is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- it was built with introspection disabled\n"
+"Starting udiskie without appindicator icon.\n"
+msgstr ""
+"AppIndicator3 0.1 的类型库(typelib)不可用,可能的原因包括:\n"
+"\t- 没有安装libappindicator\n"
+"\t- 类型库(typelib)由一个单独的软件包提供\n"
+"\t- 在编译时禁用了对象自省功能\n"
+"启动不带托盘图标的udiskie。\n"
+
+#: ../udiskie/cli.py:436
+msgid ""
+"The 'notify_command' option was renamed to 'event_hook'. The old name still "
+"works, but may be removed in a future version. Please change your command "
+"line and config to use the new name."
+msgstr ""
+" notify_command “选项更名为 ”event_hook"。旧名称仍"
+"可以运行，但可能会在未来版本中删除。请更改您的命令"
+"行并配置用新的命令名。"
+
+#: ../udiskie/cli.py:443
+msgid "Ignoring 'notify_command' in favor of 'event_hook'."
+msgstr "忽略 “notify_command ”而使用 “event_hook”。"
+
+#: ../udiskie/config.py:131
+msgid "Unknown matching attribute: {!r}"
+msgstr "未知匹配属性：{!r}"
+
+#: ../udiskie/config.py:133
+#, python-brace-format
+msgid "new rule: {0}"
+msgstr "新规则: {0}"
+
+#: ../udiskie/config.py:136
+#, python-brace-format
+msgid "{0} -> {1}"
+msgstr "{0} -> {1}"
+
+#: ../udiskie/config.py:155
+#, python-brace-format
+msgid "{0} matched {1}"
+msgstr "{0} 匹配 {1}"
+
+#: ../udiskie/config.py:232
+#, python-brace-format
+msgid "Failed to read config file: {0}"
+msgstr "读取配置文件失败: {0}"
+
+#: ../udiskie/config.py:235
+msgid "Failed to read {0!r}: {1}"
+msgstr "读取{0!r}: {1}失败"
+
+#: ../udiskie/depend.py:59
+msgid ""
+"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
+msgstr ""
+"缺少GTK 3运行时依赖。密码提示回退到GTK 2"
+
+#: ../udiskie/depend.py:65
+msgid "X server not connected!"
+msgstr "X服务器未连接!"
+
+#: ../udiskie/mount.py:29
+#, python-brace-format
+msgid "failed to {0} {1}: {2}"
+msgstr "不能到 {0} {1}: {2}"
+
+#: ../udiskie/mount.py:117
+#, python-brace-format
+msgid "not browsing {0}: not mounted"
+msgstr "未浏览 {0}：未挂载"
+
+#: ../udiskie/mount.py:120
+#, python-brace-format
+msgid "not browsing {0}: no program"
+msgstr "未浏览 {0}：未计划"
+
+#: ../udiskie/mount.py:122 ../udiskie/mount.py:142
+#, python-brace-format
+msgid "opening {0} on {0.mount_paths[0]}"
+msgstr "开启{0}在位置{0.mount_paths[0]}"
+
+#: ../udiskie/mount.py:124 ../udiskie/mount.py:144
+#, python-brace-format
+msgid "opened {0} on {0.mount_paths[0]}"
+msgstr "已开启{0}在位置{0.mount_paths[0]}"
+
+#: ../udiskie/mount.py:137
+#, python-brace-format
+msgid "not opening terminal {0}: not mounted"
+msgstr "未打开终端 {0}: 未挂载"
+
+#: ../udiskie/mount.py:140
+#, python-brace-format
+msgid "not opening terminal {0}: no program"
+msgstr "未打开终端 {0}: 未计划"
+
+#: ../udiskie/mount.py:158
+#, python-brace-format
+msgid "not mounting {0}: unhandled device"
+msgstr "未挂载 {0}: 未处理设备"
+
+#: ../udiskie/mount.py:161
+#, python-brace-format
+msgid "not mounting {0}: already mounted"
+msgstr "未挂载 {0}：已被挂载"
+
+#: ../udiskie/mount.py:165
+#, python-brace-format
+msgid "mounting {0} with {1}"
+msgstr "将 {0} 挂载到 {1} 上"
+
+#: ../udiskie/mount.py:168
+#, python-brace-format
+msgid "mounted {0} on {1}"
+msgstr "已挂载 {0} 在 {1} 上"
+
+#: ../udiskie/mount.py:174
+msgid ""
+"Mounting NTFS device with default driver.\n"
+"Please install 'ntfs-3g' if you experience problems or the device is "
+"readonly."
+msgstr ""
+"使用默认驱动程序挂载 NTFS 设备。\n"
+" 请安装 “ntfs-3g”,如果遇到问题或设备是"
+"只读的."
+
+#: ../udiskie/mount.py:188
+#, python-brace-format
+msgid "not unmounting {0}: unhandled device"
+msgstr "未挂载 {0}: 未处理设备"
+
+#: ../udiskie/mount.py:191
+#, python-brace-format
+msgid "not unmounting {0}: not mounted"
+msgstr "未卸载 {0}：未挂载"
+
+#: ../udiskie/mount.py:193
+#, python-brace-format
+msgid "unmounting {0}"
+msgstr "卸载 {0}"
+
+#: ../udiskie/mount.py:195
+#, python-brace-format
+msgid "unmounted {0}"
+msgstr "未挂载 {0}"
+
+#: ../udiskie/mount.py:209
+#, python-brace-format
+msgid "not unlocking {0}: unhandled device"
+msgstr "无法解锁 {0}：未处理设备"
+
+#: ../udiskie/mount.py:212
+#, python-brace-format
+msgid "not unlocking {0}: already unlocked"
+msgstr "未解锁 {0}：已解锁"
+
+#: ../udiskie/mount.py:215
+#, python-brace-format
+msgid "not unlocking {0}: no password prompt"
+msgstr "未解锁 {0}：无密码提示"
+
+#: ../udiskie/mount.py:229
+#, python-brace-format
+msgid "not unlocking {0}: cancelled by user"
+msgstr "未解锁 {0}：用户取消"
+
+#: ../udiskie/mount.py:234
+#, python-brace-format
+msgid "unlocking {0} using keyfile"
+msgstr "使用密钥文件解锁 {0}"
+
+#: ../udiskie/mount.py:237
+#, python-brace-format
+msgid "unlocking {0}"
+msgstr "解锁 {0}"
+
+#: ../udiskie/mount.py:240
+#, python-brace-format
+msgid "unlocked {0}"
+msgstr "已解锁 {0}"
+
+#: ../udiskie/mount.py:249
+#, python-brace-format
+msgid "no cached key for {0}"
+msgstr "{0}没有可用的缓存密钥"
+
+#: ../udiskie/mount.py:251
+#, python-brace-format
+msgid "unlocking {0} using cached password"
+msgstr "使用缓存密码解锁 {0}"
+
+#: ../udiskie/mount.py:255
+#, python-brace-format
+msgid "failed to unlock {0} using cached password"
+msgstr "使用缓存密码解锁 {0} 失败"
+
+#: ../udiskie/mount.py:258
+#, python-brace-format
+msgid "unlocked {0} using cached password"
+msgstr "用缓存的密码解锁了 {0}"
+
+#: ../udiskie/mount.py:266
+msgid "No matching keyfile rule for {}."
+msgstr "没有与 {} 匹配的关键文件规则。"
+
+#: ../udiskie/mount.py:272
+#, python-brace-format
+msgid "keyfile for {0} not found: {1}"
+msgstr "未找到 {0} 的密钥文件： {1}"
+
+#: ../udiskie/mount.py:274
+#, python-brace-format
+msgid "unlocking {0} using keyfile {1}"
+msgstr "用 {1} 密钥文件解锁 {0}"
+
+#: ../udiskie/mount.py:278
+#, python-brace-format
+msgid "failed to unlock {0} using keyfile"
+msgstr "用密码文件解锁 {0} 失败"
+
+#: ../udiskie/mount.py:281
+#, python-brace-format
+msgid "unlocked {0} using keyfile"
+msgstr "已用密钥文件解锁 {0}"
+
+#: ../udiskie/mount.py:307
+#, python-brace-format
+msgid "not locking {0}: unhandled device"
+msgstr "未锁定 {0}：未处理设备"
+
+#: ../udiskie/mount.py:310
+#, python-brace-format
+msgid "not locking {0}: not unlocked"
+msgstr "未锁定 {0}：未解锁"
+
+#: ../udiskie/mount.py:312
+#, python-brace-format
+msgid "locking {0}"
+msgstr "锁定{0｝"
+
+#: ../udiskie/mount.py:314
+#, python-brace-format
+msgid "locked {0}"
+msgstr "已锁定 {0}"
+
+#: ../udiskie/mount.py:351 ../udiskie/mount.py:394
+#, python-brace-format
+msgid "not adding {0}: unhandled device"
+msgstr "未添加 {0}：未处理设备"
+
+#: ../udiskie/mount.py:430 ../udiskie/mount.py:480
+#, python-brace-format
+msgid "not removing {0}: unhandled device"
+msgstr "未移除 {0}：未处理设备"
+
+#: ../udiskie/mount.py:505
+#, python-brace-format
+msgid "not ejecting {0}: unhandled device"
+msgstr "无法弹出 {0}：未处理设备"
+
+#: ../udiskie/mount.py:509
+#, python-brace-format
+msgid "not ejecting {0}: drive not ejectable"
+msgstr "未弹出 {0}：硬盘不可弹出"
+
+#: ../udiskie/mount.py:515
+#, python-brace-format
+msgid "ejecting {0}"
+msgstr "弹出 {0}"
+
+#: ../udiskie/mount.py:517
+#, python-brace-format
+msgid "ejected {0}"
+msgstr "已弹出 {0}"
+
+#: ../udiskie/mount.py:531
+#, python-brace-format
+msgid "not detaching {0}: unhandled device"
+msgstr "未取出 {0}：未处理设备"
+
+#: ../udiskie/mount.py:535
+#, python-brace-format
+msgid "not detaching {0}: drive not detachable"
+msgstr "未取出 {0}：硬盘不可取出"
+
+#: ../udiskie/mount.py:539
+#, python-brace-format
+msgid "detaching {0}"
+msgstr "取出 {0}"
+
+#: ../udiskie/mount.py:544
+#, python-brace-format
+msgid "detached {0}"
+msgstr "已取出 {0}"
+
+#: ../udiskie/mount.py:595
+#, python-brace-format
+msgid "not setting up {0}: already up"
+msgstr "未设置{0}：已设置"
+
+#: ../udiskie/mount.py:598
+#, python-brace-format
+msgid "not setting up {0}: not a file"
+msgstr "未设置 {0}：不是文件"
+
+#: ../udiskie/mount.py:600
+#, python-brace-format
+msgid "setting up loop device {0}"
+msgstr "设置环路设备 {0}"
+
+#: ../udiskie/mount.py:618
+#, python-brace-format
+msgid ""
+"Insufficient permission to open {0} in read-write mode. Retrying in read-"
+"only mode."
+msgstr ""
+"以读写模式打开 {0} 的权限不足。重试"
+"只读模式。"
+
+#: ../udiskie/mount.py:630
+#, python-brace-format
+msgid "set up {0} as {1}"
+msgstr "将 {0} 设为 {1}"
+
+#: ../udiskie/mount.py:645
+#, python-brace-format
+msgid "not deleting {0}: unhandled device"
+msgstr "未删除 {0}：未处理设备"
+
+#: ../udiskie/mount.py:649
+#, python-brace-format
+msgid "deleting {0}"
+msgstr "删除 {0}"
+
+#: ../udiskie/mount.py:651
+#, python-brace-format
+msgid "deleted {0}"
+msgstr "已删除 {0}"
+
+#: ../udiskie/mount.py:777
+#, python-brace-format
+msgid "Browse {0}"
+msgstr "浏览 {0}"
+
+#: ../udiskie/mount.py:778
+#, python-brace-format
+msgid "Hack on {0}"
+msgstr "破解 {0}"
+
+#: ../udiskie/mount.py:779
+#, python-brace-format
+msgid "Mount {0}"
+msgstr "挂载 {0}"
+
+#: ../udiskie/mount.py:780
+#, python-brace-format
+msgid "Unmount {0}"
+msgstr "卸载 {0}"
+
+#: ../udiskie/mount.py:781
+#, python-brace-format
+msgid "Unlock {0}"
+msgstr "解锁 {0}"
+
+#: ../udiskie/mount.py:782
+#, python-brace-format
+msgid "Lock {0}"
+msgstr "锁定 {0}"
+
+#: ../udiskie/mount.py:783
+#, python-brace-format
+msgid "Eject {1}"
+msgstr "弹出 {1}"
+
+#: ../udiskie/mount.py:784
+#, python-brace-format
+msgid "Unpower {1}"
+msgstr "断电 {1}"
+
+#: ../udiskie/mount.py:785
+#, python-brace-format
+msgid "Clear password for {0}"
+msgstr "清除 {0} 的密码"
+
+#: ../udiskie/mount.py:786
+#, python-brace-format
+msgid "Detach {0}"
+msgstr "取出 {0}"
+
+#: ../udiskie/notify.py:62
+msgid "Browse directory"
+msgstr "浏览目录"
+
+#: ../udiskie/notify.py:64
+msgid "Open terminal"
+msgstr "打开终端"
+
+#: ../udiskie/notify.py:68
+msgid "Device mounted"
+msgstr "设备已挂载"
+
+#: ../udiskie/notify.py:69
+#, python-brace-format
+msgid "{0.ui_label} mounted on {0.mount_paths[0]}"
+msgstr "{0.mount_paths[0]} 已挂载在 {0.ui_label} 上"
+
+#: ../udiskie/notify.py:80
+msgid "Device unmounted"
+msgstr "设备未挂载"
+
+#: ../udiskie/notify.py:81
+#, python-brace-format
+msgid "{0.ui_label} unmounted"
+msgstr "{0.ui_label} 未挂载"
+
+#: ../udiskie/notify.py:90
+msgid "Device locked"
+msgstr "设备已锁定"
+
+#: ../udiskie/notify.py:91
+#, python-brace-format
+msgid "{0.device_presentation} locked"
+msgstr "{0.device_presentation} 已锁定"
+
+#: ../udiskie/notify.py:100
+msgid "Device unlocked"
+msgstr "设备未锁定"
+
+#: ../udiskie/notify.py:101
+#, python-brace-format
+msgid "{0.device_presentation} unlocked"
+msgstr "{0.device_presentation} 未锁定"
+
+#: ../udiskie/notify.py:135
+msgid "Device added"
+msgstr "设备已添加"
+
+#: ../udiskie/notify.py:136
+#, python-brace-format
+msgid "device appeared on {0.device_presentation}"
+msgstr "设备已出现在 {0.device_presentation} 上"
+
+#: ../udiskie/notify.py:155
+msgid "Device removed"
+msgstr "设备已移除"
+
+#: ../udiskie/notify.py:156
+#, python-brace-format
+msgid "device disappeared on {0.device_presentation}"
+msgstr "设备在 {0.device_presentation} 上已消失"
+
+#: ../udiskie/notify.py:165
+#, python-brace-format
+msgid ""
+"failed to {0} {1}:\n"
+"{2}"
+msgstr ""
+"不能到 {0} {1}:\n"
+"{2}"
+
+#: ../udiskie/notify.py:167
+#, python-brace-format
+msgid "failed to {0} device {1}."
+msgstr "不能到 {0} device {1}."
+
+#: ../udiskie/notify.py:173
+msgid "Retry"
+msgstr "重试"
+
+#: ../udiskie/notify.py:176
+msgid "Job failed"
+msgstr "任务失败"
+
+#: ../udiskie/notify.py:207
+#, python-brace-format
+msgid "Failed to show notification: {0}"
+msgstr "无法显示通知： {0}"
+
+#: ../udiskie/prompt.py:96
+msgid "Show password"
+msgstr "显示密码"
+
+#: ../udiskie/prompt.py:101
+msgid "Open keyfile…"
+msgstr "打开密钥文件…"
+
+#: ../udiskie/prompt.py:108
+msgid "Cache password"
+msgstr "缓存密码"
+
+#: ../udiskie/prompt.py:123
+msgid "Open a keyfile to unlock the LUKS device"
+msgstr "打开密钥文件以解锁 LUKS 设备"
+
+#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#, python-brace-format
+msgid "Enter password for {0.device_presentation}: "
+msgstr "输入 {0.device_presentation} 的密码: "
+
+#: ../udiskie/prompt.py:203
+msgid "Unknown device attribute {!r} in format string: {!r}"
+msgstr "未知设备属性 {!r} 格式字符串： {!r}"
+
+#: ../udiskie/prompt.py:255
+msgid ""
+"Can't find file browser: {0!r}. You may want to change the value for the '-"
+"f' option."
+msgstr ""
+"找不到文件浏览器： {0!r}. 您可能需要更改”
+“'-f'选项的值。"
+
+#: ../udiskie/tray.py:182
+msgid "Managed devices"
+msgstr "托管设备"
+
+#: ../udiskie/tray.py:198
+msgid "Mount disc image"
+msgstr "挂载光盘镜像"
+
+#: ../udiskie/tray.py:204
+msgid "Enable automounting"
+msgstr "启用自动挂载"
+
+#: ../udiskie/tray.py:210
+msgid "Enable notifications"
+msgstr "启用通知"
+
+#: ../udiskie/tray.py:219
+msgid "Quit"
+msgstr "退出"
+
+#: ../udiskie/tray.py:226
+msgid "Open disc image"
+msgstr "打开光盘镜像"
+
+#: ../udiskie/tray.py:228
+msgid "Open"
+msgstr "打开"
+
+#: ../udiskie/tray.py:229
+msgid "Cancel"
+msgstr "取消"
+
+#: ../udiskie/tray.py:269
+msgid "Invalid node!"
+msgstr "无效节点！"
+
+#: ../udiskie/tray.py:271
+msgid "No external devices"
+msgstr "无外置设备"
+
+#: ../udiskie/tray.py:387
+msgid "udiskie"
+msgstr "udiskie"
+
+#: ../udiskie/udisks2.py:661
+#, python-brace-format
+msgid "found device owning \"{0}\": \"{1}\""
+msgstr "发现设备拥有 \"{0}\": \"{1}\""
+
+#: ../udiskie/udisks2.py:664
+#, python-brace-format
+msgid "no device found owning \"{0}\""
+msgstr "未找到设备拥有 \"{0}\""
+
+#: ../udiskie/udisks2.py:683
+#, python-brace-format
+msgid "Daemon version: {0}"
+msgstr "守护程序版本: {0}"
+
+#: ../udiskie/udisks2.py:688
+#, python-brace-format
+msgid "Keyfile support: {0}"
+msgstr "支持密钥文件: {0}"
+
+#: ../udiskie/udisks2.py:767
+#, python-brace-format
+msgid "+++ {0}: {1}"
+msgstr "+++ {0}: {1}"
