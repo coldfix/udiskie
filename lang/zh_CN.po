@@ -11,7 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2024-09-04 05:17+0000\n"
 "PO-Revision-Date: 2024-09-04 05:17+0000\n"
 "Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"Language-Team: Chinese\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -95,11 +95,11 @@ msgid ""
 "\t- it was built with introspection disabled\n"
 "Starting udiskie without appindicator icon.\n"
 msgstr ""
-"Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
-"\t- libappindicator is not installed\n"
-"\t- the typelib is provided by a separate package\n"
-"\t- it was built with introspection disabled\n"
-"Starting udiskie without appindicator icon.\n"
+"AppIndicator3 0.1 的类型库(typelib)不可用,可能的原因包括:\n"
+"\t- 没有安装libappindicator;\n"
+"\t- 类型库(typelib)由一个单独的软件包提供;\n"
+"\t- 在编译时禁用了对象自省功能;\n"
+"在没有托盘图标的情况下启动 udiskie。\n"
 
 #: ../udiskie/cli.py:436
 msgid ""
@@ -107,22 +107,22 @@ msgid ""
 "works, but may be removed in a future version. Please change your command "
 "line and config to use the new name."
 msgstr ""
-"The 'notify_command' option was renamed to 'event_hook'. The old name still "
-"works, but may be removed in a future version. Please change your command "
-"line and config to use the new name."
+" notify_command “选项更名为 ”event_hook"。旧名称仍"
+"可以运行，但可能会在未来版本中删除。请更改您的命令"
+"行并配置用新的命令名。"
 
 #: ../udiskie/cli.py:443
 msgid "Ignoring 'notify_command' in favor of 'event_hook'."
-msgstr "Ignoring 'notify_command' in favor of 'event_hook'."
+msgstr "忽略 “notify_command ”而使用 “event_hook”。"
 
 #: ../udiskie/config.py:131
 msgid "Unknown matching attribute: {!r}"
-msgstr "Unknown matching attribute: {!r}"
+msgstr "未知匹配属性：{!r}"
 
 #: ../udiskie/config.py:133
 #, python-brace-format
 msgid "new rule: {0}"
-msgstr "new rule: {0}"
+msgstr "新规则: {0}"
 
 #: ../udiskie/config.py:136
 #, python-brace-format
@@ -132,81 +132,81 @@ msgstr "{0} -> {1}"
 #: ../udiskie/config.py:155
 #, python-brace-format
 msgid "{0} matched {1}"
-msgstr "{0} matched {1}"
+msgstr "{0} 匹配 {1}"
 
 #: ../udiskie/config.py:232
 #, python-brace-format
 msgid "Failed to read config file: {0}"
-msgstr "Failed to read config file: {0}"
+msgstr "读取配置文件失败: {0}"
 
 #: ../udiskie/config.py:235
 msgid "Failed to read {0!r}: {1}"
-msgstr "Failed to read {0!r}: {1}"
+msgstr "读取{0!r}: {1}失败"
 
 #: ../udiskie/depend.py:59
 msgid ""
 "Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
 msgstr ""
-"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
+"缺少GTK 3运行时依赖。密码提示回退到GTK 2"
 
 #: ../udiskie/depend.py:65
 msgid "X server not connected!"
-msgstr "X server not connected!"
+msgstr "X服务器未连接!"
 
 #: ../udiskie/mount.py:29
 #, python-brace-format
 msgid "failed to {0} {1}: {2}"
-msgstr "failed to {0} {1}: {2}"
+msgstr "失败 {0} {1}: {2}"
 
 #: ../udiskie/mount.py:117
 #, python-brace-format
 msgid "not browsing {0}: not mounted"
-msgstr "not browsing {0}: not mounted"
+msgstr "未浏览 {0}：未挂载"
 
 #: ../udiskie/mount.py:120
 #, python-brace-format
 msgid "not browsing {0}: no program"
-msgstr "not browsing {0}: no program"
+msgstr "未浏览 {0}：未计划"
 
 #: ../udiskie/mount.py:122 ../udiskie/mount.py:142
 #, python-brace-format
 msgid "opening {0} on {0.mount_paths[0]}"
-msgstr "opening {0} on {0.mount_paths[0]}"
+msgstr "开启{0}在位置{0.mount_paths[0]}"
 
 #: ../udiskie/mount.py:124 ../udiskie/mount.py:144
 #, python-brace-format
 msgid "opened {0} on {0.mount_paths[0]}"
-msgstr "opened {0} on {0.mount_paths[0]}"
+msgstr "已开启{0}在位置{0.mount_paths[0]}"
 
 #: ../udiskie/mount.py:137
 #, python-brace-format
 msgid "not opening terminal {0}: not mounted"
-msgstr "not opening terminal {0}: not mounted"
+msgstr "未打开终端 {0}: 未挂载"
 
 #: ../udiskie/mount.py:140
 #, python-brace-format
 msgid "not opening terminal {0}: no program"
-msgstr "not opening terminal {0}: no program"
+msgstr "未打开终端 {0}: 未计划"
 
 #: ../udiskie/mount.py:158
 #, python-brace-format
 msgid "not mounting {0}: unhandled device"
-msgstr "not mounting {0}: unhandled device"
+msgstr "未挂载 {0}: 未处理设备"
 
 #: ../udiskie/mount.py:161
 #, python-brace-format
 msgid "not mounting {0}: already mounted"
-msgstr "not mounting {0}: already mounted"
+msgstr "未挂载 {0}：已被挂载"
 
 #: ../udiskie/mount.py:165
 #, python-brace-format
 msgid "mounting {0} with {1}"
-msgstr "mounting {0} with {1}"
+msgstr "将 {0} 挂载到 {1} 上"
 
 #: ../udiskie/mount.py:168
 #, python-brace-format
 msgid "mounted {0} on {1}"
-msgstr "mounted {0} on {1}"
+msgstr "已挂载 {0} 在 {1} 上"
 
 #: ../udiskie/mount.py:174
 msgid ""
@@ -214,14 +214,14 @@ msgid ""
 "Please install 'ntfs-3g' if you experience problems or the device is "
 "readonly."
 msgstr ""
-"Mounting NTFS device with default driver.\n"
-"Please install 'ntfs-3g' if you experience problems or the device is "
-"readonly."
+"使用默认驱动程序挂载 NTFS 设备。\n"
+" 请安装 “ntfs-3g”,如果遇到问题或设备是"
+"只读的."
 
 #: ../udiskie/mount.py:188
 #, python-brace-format
 msgid "not unmounting {0}: unhandled device"
-msgstr "not unmounting {0}: unhandled device"
+msgstr "未挂载 {0}: 未处理设备"
 
 #: ../udiskie/mount.py:191
 #, python-brace-format
