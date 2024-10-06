@@ -33,10 +33,10 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Note, that the options in the individual groups are mutually exclusive.\n"
+"    请注意，各组中的选项是互斥的。\n"
 "\n"
-"    The config file can be a JSON or preferably a YAML file. For an\n"
-"    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
+"    配置文件可以是 JSON 文件，最好是 YAML 文件。\n"
+"   例如，请参阅 MAN 页面（或软件源中的 doc/udiskie.8.txt）。\n"
 "    "
 
 #: ../udiskie/cli.py:139
