@@ -42,12 +42,12 @@ msgstr ""
 #: ../udiskie/cli.py:139
 #, python-format
 msgid "%(message)s"
-msgstr "%(message)s"
+msgstr "%(信息)s"
 
 #: ../udiskie/cli.py:141
 #, python-format
 msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
-msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+msgstr "%(日志输出级别)s [%(时间与日期)s] %(变量名)s: %(消息)s"
 
 #: ../udiskie/cli.py:386
 msgid ""
@@ -156,7 +156,7 @@ msgstr "X服务器未连接!"
 #: ../udiskie/mount.py:29
 #, python-brace-format
 msgid "failed to {0} {1}: {2}"
-msgstr "失败 {0} {1}: {2}"
+msgstr "不能到 {0} {1}: {2}"
 
 #: ../udiskie/mount.py:117
 #, python-brace-format
@@ -241,7 +241,7 @@ msgstr "未挂载 {0}"
 #: ../udiskie/mount.py:209
 #, python-brace-format
 msgid "not unlocking {0}: unhandled device"
-msgstr "无法解锁 {0}：未处理的设备"
+msgstr "无法解锁 {0}：未处理设备"
 
 #: ../udiskie/mount.py:212
 #, python-brace-format
@@ -491,57 +491,57 @@ msgstr "打开终端"
 
 #: ../udiskie/notify.py:68
 msgid "Device mounted"
-msgstr "Device mounted"
+msgstr "设备已挂载"
 
 #: ../udiskie/notify.py:69
 #, python-brace-format
 msgid "{0.ui_label} mounted on {0.mount_paths[0]}"
-msgstr "{0.ui_label} mounted on {0.mount_paths[0]}"
+msgstr "{0.mount_paths[0]} 已挂载在 {0.ui_label} 上"
 
 #: ../udiskie/notify.py:80
 msgid "Device unmounted"
-msgstr "Device unmounted"
+msgstr "设备未挂载"
 
 #: ../udiskie/notify.py:81
 #, python-brace-format
 msgid "{0.ui_label} unmounted"
-msgstr "{0.ui_label} unmounted"
+msgstr "{0.ui_label} 未挂载"
 
 #: ../udiskie/notify.py:90
 msgid "Device locked"
-msgstr "Device locked"
+msgstr "设备已锁定"
 
 #: ../udiskie/notify.py:91
 #, python-brace-format
 msgid "{0.device_presentation} locked"
-msgstr "{0.device_presentation} locked"
+msgstr "{0.device_presentation} 已锁定"
 
 #: ../udiskie/notify.py:100
 msgid "Device unlocked"
-msgstr "Device unlocked"
+msgstr "设备未锁定"
 
 #: ../udiskie/notify.py:101
 #, python-brace-format
 msgid "{0.device_presentation} unlocked"
-msgstr "{0.device_presentation} unlocked"
+msgstr "{0.device_presentation} 未锁定"
 
 #: ../udiskie/notify.py:135
 msgid "Device added"
-msgstr "Device added"
+msgstr "设备已添加"
 
 #: ../udiskie/notify.py:136
 #, python-brace-format
 msgid "device appeared on {0.device_presentation}"
-msgstr "device appeared on {0.device_presentation}"
+msgstr "设备已出现在 {0.device_presentation} 上"
 
 #: ../udiskie/notify.py:155
 msgid "Device removed"
-msgstr "Device removed"
+msgstr "设备已移除"
 
 #: ../udiskie/notify.py:156
 #, python-brace-format
 msgid "device disappeared on {0.device_presentation}"
-msgstr "device disappeared on {0.device_presentation}"
+msgstr "设备在 {0.device_presentation} 上已消失"
 
 #: ../udiskie/notify.py:165
 #, python-brace-format
@@ -549,99 +549,99 @@ msgid ""
 "failed to {0} {1}:\n"
 "{2}"
 msgstr ""
-"failed to {0} {1}:\n"
+"不能到 {0} {1}:\n"
 "{2}"
 
 #: ../udiskie/notify.py:167
 #, python-brace-format
 msgid "failed to {0} device {1}."
-msgstr "failed to {0} device {1}."
+msgstr "不能到 {0} device {1}."
 
 #: ../udiskie/notify.py:173
 msgid "Retry"
-msgstr "Retry"
+msgstr "重试"
 
 #: ../udiskie/notify.py:176
 msgid "Job failed"
-msgstr "Job failed"
+msgstr "任务失败"
 
 #: ../udiskie/notify.py:207
 #, python-brace-format
 msgid "Failed to show notification: {0}"
-msgstr "Failed to show notification: {0}"
+msgstr "无法显示通知： {0}"
 
 #: ../udiskie/prompt.py:96
 msgid "Show password"
-msgstr "Show password"
+msgstr "显示密码"
 
 #: ../udiskie/prompt.py:101
 msgid "Open keyfile…"
-msgstr "Open keyfile…"
+msgstr "打开密钥文件…"
 
 #: ../udiskie/prompt.py:108
 msgid "Cache password"
-msgstr "Cache password"
+msgstr "缓存密码"
 
 #: ../udiskie/prompt.py:123
 msgid "Open a keyfile to unlock the LUKS device"
-msgstr "Open a keyfile to unlock the LUKS device"
+msgstr "打开密钥文件以解锁 LUKS 设备"
 
 #: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
 #, python-brace-format
 msgid "Enter password for {0.device_presentation}: "
-msgstr "Enter password for {0.device_presentation}: "
+msgstr "输入 {0.device_presentation} 的密码: "
 
 #: ../udiskie/prompt.py:203
 msgid "Unknown device attribute {!r} in format string: {!r}"
-msgstr "Unknown device attribute {!r} in format string: {!r}"
+msgstr "未知设备属性 {!r} 格式字符串： {!r}"
 
 #: ../udiskie/prompt.py:255
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."
 msgstr ""
-"Can't find file browser: {0!r}. You may want to change the value for the '-"
-"f' option."
+"找不到文件浏览器： {0!r}. 您可能需要更改”
+“'-f'选项的值。"
 
 #: ../udiskie/tray.py:182
 msgid "Managed devices"
-msgstr "Managed devices"
+msgstr "托管设备"
 
 #: ../udiskie/tray.py:198
 msgid "Mount disc image"
-msgstr "Mount disc image"
+msgstr "挂载光盘镜像"
 
 #: ../udiskie/tray.py:204
 msgid "Enable automounting"
-msgstr "Enable automounting"
+msgstr "启用自动挂载"
 
 #: ../udiskie/tray.py:210
 msgid "Enable notifications"
-msgstr "Enable notifications"
+msgstr "启用通知"
 
 #: ../udiskie/tray.py:219
 msgid "Quit"
-msgstr "Quit"
+msgstr "退出"
 
 #: ../udiskie/tray.py:226
 msgid "Open disc image"
-msgstr "Open disc image"
+msgstr "打开光盘镜像"
 
 #: ../udiskie/tray.py:228
 msgid "Open"
-msgstr "Open"
+msgstr "打开"
 
 #: ../udiskie/tray.py:229
 msgid "Cancel"
-msgstr "Cancel"
+msgstr "取消"
 
 #: ../udiskie/tray.py:269
 msgid "Invalid node!"
-msgstr "Invalid node!"
+msgstr "无效节点！"
 
 #: ../udiskie/tray.py:271
 msgid "No external devices"
-msgstr "No external devices"
+msgstr "无外置设备"
 
 #: ../udiskie/tray.py:387
 msgid "udiskie"
@@ -650,22 +650,22 @@ msgstr "udiskie"
 #: ../udiskie/udisks2.py:661
 #, python-brace-format
 msgid "found device owning \"{0}\": \"{1}\""
-msgstr "found device owning \"{0}\": \"{1}\""
+msgstr "发现设备拥有 \"{0}\": \"{1}\""
 
 #: ../udiskie/udisks2.py:664
 #, python-brace-format
 msgid "no device found owning \"{0}\""
-msgstr "no device found owning \"{0}\""
+msgstr "未找到设备拥有 \"{0}\""
 
 #: ../udiskie/udisks2.py:683
 #, python-brace-format
 msgid "Daemon version: {0}"
-msgstr "Daemon version: {0}"
+msgstr "守护程序版本: {0}"
 
 #: ../udiskie/udisks2.py:688
 #, python-brace-format
 msgid "Keyfile support: {0}"
-msgstr "Keyfile support: {0}"
+msgstr "支持密钥文件: {0}"
 
 #: ../udiskie/udisks2.py:767
 #, python-brace-format
