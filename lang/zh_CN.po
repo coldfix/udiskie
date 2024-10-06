@@ -21,7 +21,7 @@ msgstr ""
 #: ../udiskie/cli.py:46
 #, python-brace-format
 msgid "These options are mutually exclusive: {0}"
-msgstr "These options are mutually exclusive: {0}"
+msgstr "这些选项是互斥的： {0}"
 
 #: ../udiskie/cli.py:119
 msgid ""
@@ -58,20 +58,20 @@ msgid ""
 "\n"
 "Starting udiskie without notifications."
 msgstr ""
-"Typelib for 'libnotify' is not available. Possible causes include:\n"
-"\t- libnotify is not installed\n"
-"\t- the typelib is provided by a separate package\n"
-"\t- libnotify was built with introspection disabled\n"
+"libnotify' 的类型库(Typelib)不可用。可能的原因包括:\n"
+"\t- 没有安装libnotify\n"
+"\t- 类型库(typelib)由一个单独的软件包提供\n"
+"\t- 编译libnotify时禁用了对象自省\n"
 "\n"
-"Starting udiskie without notifications."
+"启动不带通知功能的udiskie。"
 
 #: ../udiskie/cli.py:400
 msgid ""
 "Not run within X or Wayland session.\n"
 "Starting udiskie without tray icon.\n"
 msgstr ""
-"Not run within X or Wayland session.\n"
-"Starting udiskie without tray icon.\n"
+"没有运行在X或者wayland下.\n"
+"启动不带托盘图标的udiskie。\n"
 
 #: ../udiskie/cli.py:407
 msgid ""
@@ -81,11 +81,11 @@ msgid ""
 "\t- GTK3 was built with introspection disabled\n"
 "Starting udiskie without tray icon.\n"
 msgstr ""
-"Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
-"\t- GTK3 is not installed\n"
-"\t- the typelib is provided by a separate package\n"
-"\t- GTK3 was built with introspection disabled\n"
-"Starting udiskie without tray icon.\n"
+"Gtk 3.0 "的类型库(Typelib)不可用。可能的原因包括:\n"
+"\t- 没有安装GIK3\n"
+"\t- 类型库(typelib)由一个单独的软件包提供\n"
+"\t- 编译GTK3时禁用了对象自省\n"
+"启动不带托盘图标的udiskie。\n"
 
 #: ../udiskie/cli.py:417
 msgid ""
@@ -96,10 +96,10 @@ msgid ""
 "Starting udiskie without appindicator icon.\n"
 msgstr ""
 "AppIndicator3 0.1 的类型库(typelib)不可用,可能的原因包括:\n"
-"\t- 没有安装libappindicator;\n"
-"\t- 类型库(typelib)由一个单独的软件包提供;\n"
-"\t- 在编译时禁用了对象自省功能;\n"
-"在没有托盘图标的情况下启动 udiskie。\n"
+"\t- 没有安装libappindicator\n"
+"\t- 类型库(typelib)由一个单独的软件包提供\n"
+"\t- 在编译时禁用了对象自省功能\n"
+"启动没有托盘功能udiskie。\n"
 
 #: ../udiskie/cli.py:436
 msgid ""
@@ -231,7 +231,7 @@ msgstr "未卸载 {0}：未挂载"
 #: ../udiskie/mount.py:193
 #, python-brace-format
 msgid "unmounting {0}"
-msgstr "unmounting {0}"
+msgstr "卸载 {0}"
 
 #: ../udiskie/mount.py:195
 #, python-brace-format
@@ -408,86 +408,86 @@ msgid ""
 "Insufficient permission to open {0} in read-write mode. Retrying in read-"
 "only mode."
 msgstr ""
-"Insufficient permission to open {0} in read-write mode. Retrying in read-"
-"only mode."
+"以读写模式打开 {0} 的权限不足。重试"
+"只读模式。"
 
 #: ../udiskie/mount.py:630
 #, python-brace-format
 msgid "set up {0} as {1}"
-msgstr "set up {0} as {1}"
+msgstr "将 {0} 设为 {1}"
 
 #: ../udiskie/mount.py:645
 #, python-brace-format
 msgid "not deleting {0}: unhandled device"
-msgstr "not deleting {0}: unhandled device"
+msgstr "未删除 {0}：未处理设备"
 
 #: ../udiskie/mount.py:649
 #, python-brace-format
 msgid "deleting {0}"
-msgstr "deleting {0}"
+msgstr "删除 {0}"
 
 #: ../udiskie/mount.py:651
 #, python-brace-format
 msgid "deleted {0}"
-msgstr "deleted {0}"
+msgstr "已删除 {0}"
 
 #: ../udiskie/mount.py:777
 #, python-brace-format
 msgid "Browse {0}"
-msgstr "Browse {0}"
+msgstr "浏览 {0}"
 
 #: ../udiskie/mount.py:778
 #, python-brace-format
 msgid "Hack on {0}"
-msgstr "Hack on {0}"
+msgstr "破解 {0}"
 
 #: ../udiskie/mount.py:779
 #, python-brace-format
 msgid "Mount {0}"
-msgstr "Mount {0}"
+msgstr "挂载 {0}"
 
 #: ../udiskie/mount.py:780
 #, python-brace-format
 msgid "Unmount {0}"
-msgstr "Unmount {0}"
+msgstr "卸载 {0}"
 
 #: ../udiskie/mount.py:781
 #, python-brace-format
 msgid "Unlock {0}"
-msgstr "Unlock {0}"
+msgstr "解锁 {0}"
 
 #: ../udiskie/mount.py:782
 #, python-brace-format
 msgid "Lock {0}"
-msgstr "Lock {0}"
+msgstr "锁定 {0}"
 
 #: ../udiskie/mount.py:783
 #, python-brace-format
 msgid "Eject {1}"
-msgstr "Eject {1}"
+msgstr "弹出 {1}"
 
 #: ../udiskie/mount.py:784
 #, python-brace-format
 msgid "Unpower {1}"
-msgstr "Unpower {1}"
+msgstr "断电 {1}"
 
 #: ../udiskie/mount.py:785
 #, python-brace-format
 msgid "Clear password for {0}"
-msgstr "Clear password for {0}"
+msgstr "清除 {0} 的密码"
 
 #: ../udiskie/mount.py:786
 #, python-brace-format
 msgid "Detach {0}"
-msgstr "Detach {0}"
+msgstr "取出 {0}"
 
 #: ../udiskie/notify.py:62
 msgid "Browse directory"
-msgstr "Browse directory"
+msgstr "浏览目录"
 
 #: ../udiskie/notify.py:64
 msgid "Open terminal"
-msgstr "Open terminal"
+msgstr "打开终端"
 
 #: ../udiskie/notify.py:68
 msgid "Device mounted"
