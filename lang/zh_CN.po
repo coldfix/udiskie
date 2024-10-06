@@ -286,121 +286,121 @@ msgstr "使用缓存密码解锁 {0}"
 #: ../udiskie/mount.py:255
 #, python-brace-format
 msgid "failed to unlock {0} using cached password"
-msgstr "failed to unlock {0} using cached password"
+msgstr "使用缓存密码解锁 {0} 失败"
 
 #: ../udiskie/mount.py:258
 #, python-brace-format
 msgid "unlocked {0} using cached password"
-msgstr "unlocked {0} using cached password"
+msgstr "用缓存的密码解锁了 {0}"
 
 #: ../udiskie/mount.py:266
 msgid "No matching keyfile rule for {}."
-msgstr "No matching keyfile rule for {}."
+msgstr "没有与 {} 匹配的关键文件规则。"
 
 #: ../udiskie/mount.py:272
 #, python-brace-format
 msgid "keyfile for {0} not found: {1}"
-msgstr "keyfile for {0} not found: {1}"
+msgstr "未找到 {0} 的密钥文件： {1}"
 
 #: ../udiskie/mount.py:274
 #, python-brace-format
 msgid "unlocking {0} using keyfile {1}"
-msgstr "unlocking {0} using keyfile {1}"
+msgstr "用 {1} 密钥文件解锁 {0}"
 
 #: ../udiskie/mount.py:278
 #, python-brace-format
 msgid "failed to unlock {0} using keyfile"
-msgstr "failed to unlock {0} using keyfile"
+msgstr "用密码文件解锁 {0} 失败"
 
 #: ../udiskie/mount.py:281
 #, python-brace-format
 msgid "unlocked {0} using keyfile"
-msgstr "unlocked {0} using keyfile"
+msgstr "已用密钥文件解锁 {0}"
 
 #: ../udiskie/mount.py:307
 #, python-brace-format
 msgid "not locking {0}: unhandled device"
-msgstr "not locking {0}: unhandled device"
+msgstr "未锁定 {0}：未处理设备"
 
 #: ../udiskie/mount.py:310
 #, python-brace-format
 msgid "not locking {0}: not unlocked"
-msgstr "not locking {0}: not unlocked"
+msgstr "未锁定 {0}：未解锁"
 
 #: ../udiskie/mount.py:312
 #, python-brace-format
 msgid "locking {0}"
-msgstr "locking {0}"
+msgstr "锁定{0｝"
 
 #: ../udiskie/mount.py:314
 #, python-brace-format
 msgid "locked {0}"
-msgstr "locked {0}"
+msgstr "已锁定 {0}"
 
 #: ../udiskie/mount.py:351 ../udiskie/mount.py:394
 #, python-brace-format
 msgid "not adding {0}: unhandled device"
-msgstr "not adding {0}: unhandled device"
+msgstr "未添加 {0}：未处理设备"
 
 #: ../udiskie/mount.py:430 ../udiskie/mount.py:480
 #, python-brace-format
 msgid "not removing {0}: unhandled device"
-msgstr "not removing {0}: unhandled device"
+msgstr "未移除 {0}：未处理设备"
 
 #: ../udiskie/mount.py:505
 #, python-brace-format
 msgid "not ejecting {0}: unhandled device"
-msgstr "not ejecting {0}: unhandled device"
+msgstr "无法弹出 {0}：未处理设备"
 
 #: ../udiskie/mount.py:509
 #, python-brace-format
 msgid "not ejecting {0}: drive not ejectable"
-msgstr "not ejecting {0}: drive not ejectable"
+msgstr "未弹出 {0}：硬盘不可弹出"
 
 #: ../udiskie/mount.py:515
 #, python-brace-format
 msgid "ejecting {0}"
-msgstr "ejecting {0}"
+msgstr "弹出 {0}"
 
 #: ../udiskie/mount.py:517
 #, python-brace-format
 msgid "ejected {0}"
-msgstr "ejected {0}"
+msgstr "已弹出 {0}"
 
 #: ../udiskie/mount.py:531
 #, python-brace-format
 msgid "not detaching {0}: unhandled device"
-msgstr "not detaching {0}: unhandled device"
+msgstr "未取出 {0}：未处理设备"
 
 #: ../udiskie/mount.py:535
 #, python-brace-format
 msgid "not detaching {0}: drive not detachable"
-msgstr "not detaching {0}: drive not detachable"
+msgstr "未取出 {0}：硬盘不可取出"
 
 #: ../udiskie/mount.py:539
 #, python-brace-format
 msgid "detaching {0}"
-msgstr "detaching {0}"
+msgstr "取出 {0}"
 
 #: ../udiskie/mount.py:544
 #, python-brace-format
 msgid "detached {0}"
-msgstr "detached {0}"
+msgstr "已取出 {0}"
 
 #: ../udiskie/mount.py:595
 #, python-brace-format
 msgid "not setting up {0}: already up"
-msgstr "not setting up {0}: already up"
+msgstr "未设置{0}：已设置"
 
 #: ../udiskie/mount.py:598
 #, python-brace-format
 msgid "not setting up {0}: not a file"
-msgstr "not setting up {0}: not a file"
+msgstr "未设置 {0}：不是文件"
 
 #: ../udiskie/mount.py:600
 #, python-brace-format
 msgid "setting up loop device {0}"
-msgstr "setting up loop device {0}"
+msgstr "设置环路设备 {0}"
 
 #: ../udiskie/mount.py:618
 #, python-brace-format
