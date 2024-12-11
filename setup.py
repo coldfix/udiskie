@@ -1,6 +1,5 @@
 from setuptools import setup, Command
 from distutils.command.build import build as orig_build
-from distutils.command.install import install as orig_install
 
 from subprocess import call
 import logging
@@ -53,10 +52,6 @@ setup(
     cmdclass={
         'build': build,
         'build_mo': build_mo,
-        # Using distutils' install command because:
-        # - distutils installs data files to the correct location
-        # - distutils correctly calls "build" before "install"
-        'install': orig_install,
     },
     data_files=[
         ('share/bash-completion/completions', completions_bash),
