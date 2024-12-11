@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+2.5.5
+~~~~~
+Date: 11.12.2024
+
+- add translations for ``zh_CN``
+
+
 2.5.4
 ~~~~~
 Date: 11.12.2024
