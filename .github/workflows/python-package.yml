@@ -24,19 +24,17 @@ jobs:
         run: |
           sudo apt-get install -qy \
             gettext \
-            libkeyutils-dev \
             libgirepository1.0-dev
 
       - run: pip install -U pip
       - run: pip install setuptools wheel
 
       - run: python setup.py sdist bdist_wheel
-      - run: pip install dist/*.whl keyutils
+      - run: pip install dist/*.whl
       - run: pip install twine flake8
 
       - run: twine check dist/*
       - run: flake8
-      - run: python test/test_cache.py
       - run: python test/test_match.py
 
       - uses: actions/upload-artifact@v4
