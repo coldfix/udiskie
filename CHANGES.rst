@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+2.5.7
+~~~~~
+Date: 11.12.2024
+
+- remove keyutils from CI workflow to avoid failure on python>=3.11
+
+
 2.5.6
 ~~~~~
 Date: 11.12.2024
