@@ -1,9 +1,17 @@
 CHANGELOG
 ---------
 
+2.5.4
+~~~~~
+Date: 11.12.2024
+
+- fix compatibility with setuptools v75.3.0 in setup.py
+- deprecate installation via ``python setup.py install``
+
+
 2.5.3
 -----
-Date 24.04.2024
+Date: 24.04.2024
 
 - allow matching against a list of values in config rules (``device_config``)
   [thanks @dajt1725]
