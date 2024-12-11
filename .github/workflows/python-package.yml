@@ -20,6 +20,8 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
+      - uses: mxschmitt/action-tmate@v3
+
       - name: Install build dependencies
         run: |
           sudo apt-get install -qy \
