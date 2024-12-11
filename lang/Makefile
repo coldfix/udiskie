@@ -2,6 +2,8 @@ version = $(shell sed -ne "s/__version__ = //p" ../udiskie/__init__.py)
 sources = find ../udiskie -name '*.py'
 echo = _() { echo "$$@"; "$$@"; }; _
 
+all: po mo
+
 po: $(wildcard *.po)
 mo: $(addsuffix .mo, $(basename $(wildcard *.po)))
 	@if [ -z "$$TEXTDOMAINDIR" ]; then\
@@ -9,8 +11,6 @@ mo: $(addsuffix .mo, $(basename $(wildcard *.po)))
 		echo;\
 		echo     export TEXTDOMAINDIR=\"$$(readlink -f ../build/locale)\"; \
 	fi
-
-all: po mo
 
 clean:
 	rm -rf *.po~ *.mo locale
