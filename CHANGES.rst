@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+2.5.6
+~~~~~
+Date: 11.12.2024
+
+- fix another problem in ``setup.py``
+- fix CI workflow failure
+
+
 2.5.5
 ~~~~~
 Date: 11.12.2024
