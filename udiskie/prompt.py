@@ -59,7 +59,7 @@ class Dialog(Future):
 
 
 class PasswordResult:
-    def __init__(self, password=None, cache_hint=None):
+    def __init__(self, password=None, cache_hint=False):
         self.password = password
         self.cache_hint = cache_hint
 
@@ -166,7 +166,8 @@ async def get_password_tty(device, options):
     # TODO: make this a TRUE async
     text = _('Enter password for {0.device_presentation}: ', device)
     try:
-        return PasswordResult(getpass.getpass(text))
+        return PasswordResult(getpass.getpass(text),
+                              options.get('cache_hint', False))
     except EOFError:
         print("")
         return None
@@ -223,7 +224,7 @@ class DeviceCommand:
 
     async def password(self, device, options):
         text = await self(device)
-        return PasswordResult(text)
+        return PasswordResult(text, options.get('cache_hint', False))
 
 
 def password(password_command):
