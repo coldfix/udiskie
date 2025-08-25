@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-04 05:17+0000\n"
+"POT-Creation-Date: 2025-08-25 22:41+0000\n"
 "PO-Revision-Date: 2022-04-17 13:10+0000\n"
 "Last-Translator: Weblate Admin <weblate@coldfix.de>\n"
 "Language-Team: Russian <http://weblate.coldfix.de/projects/udiskie/udiskie/"
@@ -592,11 +592,11 @@ msgstr ""
 msgid "Enter password for {0.device_presentation}: "
 msgstr "Введите пароль для {0.device_presentation}: "
 
-#: ../udiskie/prompt.py:203
+#: ../udiskie/prompt.py:204
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "Неизвестный атрибут устройства {!r} в формате строки: {!r}"
 
-#: ../udiskie/prompt.py:255
+#: ../udiskie/prompt.py:256
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."

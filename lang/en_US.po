@@ -1,14 +1,14 @@
 # English translations for udiskie package.
-# Copyright (C) 2024 Thomas Gläßle
+# Copyright (C) 2025 Thomas Gläßle
 # This file is distributed under the same license as the udiskie package.
-# Automatically generated, 2024.
+# Automatically generated, 2025.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: udiskie 2.5.6\n"
+"Project-Id-Version: udiskie 2.5.7\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-11 12:30+0100\n"
-"PO-Revision-Date: 2024-12-11 12:30+0100\n"
+"POT-Creation-Date: 2025-08-25 22:41+0000\n"
+"PO-Revision-Date: 2025-08-25 22:41+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en_US\n"
@@ -590,11 +590,11 @@ msgstr "Open a keyfile to unlock the LUKS device"
 msgid "Enter password for {0.device_presentation}: "
 msgstr "Enter password for {0.device_presentation}: "
 
-#: ../udiskie/prompt.py:203
+#: ../udiskie/prompt.py:204
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "Unknown device attribute {!r} in format string: {!r}"
 
-#: ../udiskie/prompt.py:255
+#: ../udiskie/prompt.py:256
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."
