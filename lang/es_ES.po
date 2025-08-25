@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-04 05:17+0000\n"
+"POT-Creation-Date: 2025-08-25 22:41+0000\n"
 "PO-Revision-Date: 2014-07-23 18:43+0100\n"
 "Last-Translator: Alejandro Pérez <alejandro.perez.mendez@gmail.com>\n"
 "Language-Team: Spanish alejandro.perez.mendez@gmail.com\n"
@@ -567,11 +567,11 @@ msgstr ""
 msgid "Enter password for {0.device_presentation}: "
 msgstr "Introduce la clave para {0.device_presentation}: "
 
-#: ../udiskie/prompt.py:203
+#: ../udiskie/prompt.py:204
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr ""
 
-#: ../udiskie/prompt.py:255
+#: ../udiskie/prompt.py:256
 #, fuzzy
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"

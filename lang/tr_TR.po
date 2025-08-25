@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-04 05:17+0000\n"
+"POT-Creation-Date: 2025-08-25 22:41+0000\n"
 "PO-Revision-Date: 2022-02-18 23:04+0300\n"
 "Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
 "Language-Team: Turkish\n"
@@ -590,11 +590,11 @@ msgstr "LUKS aygıtının kilidini açmak için bir anahtar dosyası açın"
 msgid "Enter password for {0.device_presentation}: "
 msgstr "{0.device_presentation} için parolayı girin: "
 
-#: ../udiskie/prompt.py:203
+#: ../udiskie/prompt.py:204
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "Biçim dizgesinde bilinmeyen aygıt özelliği {!r}: {!r}"
 
-#: ../udiskie/prompt.py:255
+#: ../udiskie/prompt.py:256
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."

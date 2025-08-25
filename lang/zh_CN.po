@@ -1,4 +1,3 @@
-
 # English translations for udiskie package.
 # Copyright (C) 2024 Thomas Gläßle
 # This file is distributed under the same license as the udiskie package.
@@ -8,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie 2.5.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-04 05:17+0000\n"
+"POT-Creation-Date: 2025-08-25 22:41+0000\n"
 "PO-Revision-Date: 2024-09-04 05:17+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: Chinese\n"
@@ -107,9 +106,8 @@ msgid ""
 "works, but may be removed in a future version. Please change your command "
 "line and config to use the new name."
 msgstr ""
-" notify_command “选项更名为 'event_hook'。旧名称仍"
-"可以运行，但可能会在未来版本中删除。请更改您的命令"
-"行并配置用新的命令名。"
+" notify_command “选项更名为 'event_hook'。旧名称仍可以运行，但可能会在未来版"
+"本中删除。请更改您的命令行并配置用新的命令名。"
 
 #: ../udiskie/cli.py:443
 msgid "Ignoring 'notify_command' in favor of 'event_hook'."
@@ -146,8 +144,7 @@ msgstr "读取{0!r}: {1}失败"
 #: ../udiskie/depend.py:59
 msgid ""
 "Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
-msgstr ""
-"缺少GTK 3运行时依赖。密码提示回退到GTK 2"
+msgstr "缺少GTK 3运行时依赖。密码提示回退到GTK 2"
 
 #: ../udiskie/depend.py:65
 msgid "X server not connected!"
@@ -215,8 +212,7 @@ msgid ""
 "readonly."
 msgstr ""
 "使用默认驱动程序挂载 NTFS 设备。\n"
-" 请安装 “ntfs-3g”,如果遇到问题或设备是"
-"只读的."
+" 请安装 “ntfs-3g”,如果遇到问题或设备是只读的."
 
 #: ../udiskie/mount.py:188
 #, python-brace-format
@@ -407,9 +403,7 @@ msgstr "设置环路设备 {0}"
 msgid ""
 "Insufficient permission to open {0} in read-write mode. Retrying in read-"
 "only mode."
-msgstr ""
-"以读写模式打开 {0} 的权限不足。重试"
-"只读模式。"
+msgstr "以读写模式打开 {0} 的权限不足。重试只读模式。"
 
 #: ../udiskie/mount.py:630
 #, python-brace-format
@@ -591,11 +585,11 @@ msgstr "打开密钥文件以解锁 LUKS 设备"
 msgid "Enter password for {0.device_presentation}: "
 msgstr "输入 {0.device_presentation} 的密码: "
 
-#: ../udiskie/prompt.py:203
+#: ../udiskie/prompt.py:204
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "未知设备属性 {!r} 格式字符串： {!r}"
 
-#: ../udiskie/prompt.py:255
+#: ../udiskie/prompt.py:256
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."

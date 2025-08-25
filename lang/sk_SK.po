@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-04 05:17+0000\n"
+"POT-Creation-Date: 2025-08-25 22:41+0000\n"
 "PO-Revision-Date: 2019-05-02 14:20+0200\n"
 "Last-Translator: Jose Riha <jose1711@gmail.com>\n"
 "Language-Team: Slovak\n"
@@ -562,11 +562,11 @@ msgstr ""
 msgid "Enter password for {0.device_presentation}: "
 msgstr "Zadajte heslo pre {0.device_presentation}: "
 
-#: ../udiskie/prompt.py:203
+#: ../udiskie/prompt.py:204
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "Neznámy atribút zariadenia {!r} vo formátovacom reťazci: {!r}"
 
-#: ../udiskie/prompt.py:255
+#: ../udiskie/prompt.py:256
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."
