@@ -10,9 +10,9 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python:
-          - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
 
     steps:
       - uses: actions/checkout@v4
@@ -22,9 +22,12 @@ jobs:
 
       - name: Install build dependencies
         run: |
+          sudo apt-get update && \
           sudo apt-get install -qy \
             gettext \
-            libgirepository1.0-dev
+            libcairo2-dev \
+            libgirepository1.0-dev \
+            libgirepository-2.0-dev
 
       - run: pip install -U pip
       - run: pip install setuptools wheel
