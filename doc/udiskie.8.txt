@@ -255,6 +255,10 @@ device_config:
   automount: False          # show but do not automount this device
   options: []               # additional options to be passed when mounting
 
+- id_uuid: ...              # [filter] match device by UUID
+  keyfile: /path/to/keyfile # [action] use keyfile to unlock a luks encrypted 
+                            # device, bypassing the password prompt
+
 mount_options:              # [deprecated] do not use
 ignore_device:              # [deprecated] do not use
 
