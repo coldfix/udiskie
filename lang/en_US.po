@@ -5,7 +5,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: udiskie 2.5.7\n"
+"Project-Id-Version: udiskie 2.5.8\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25 22:41+0000\n"
 "PO-Revision-Date: 2025-08-25 22:41+0000\n"

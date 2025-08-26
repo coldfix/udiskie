@@ -1,6 +1,15 @@
 CHANGELOG
 ---------
 
+2.5.8
+~~~~~
+Date: 26.08.2025
+
+- **important:** the caching feature was always enabled if keyutils package is
+  available and if using a password input method other than the builtin
+  dialog. This is now fixed, thanks @rhelder (#310)
+
+
 2.5.7
 ~~~~~
 Date: 11.12.2024
