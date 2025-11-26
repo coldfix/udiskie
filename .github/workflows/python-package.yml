@@ -40,7 +40,7 @@ jobs:
       - run: flake8
       - run: python test/test_match.py
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with: {name: dist, path: dist/}
         if: matrix.python == '3.12'
 
