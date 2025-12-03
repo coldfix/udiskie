@@ -370,9 +370,12 @@ class TrayIcon:
         """
         self._icons = icons
         self._icon = statusicon
-        self._menu = menumaker
+        self._maker = menumaker
         self._conn_left = None
         self._conn_right = None
+        self._udisks = menumaker._mounter.udisks
+        self._menu = None
+        self._extended = False
         self.task = Future()
         menumaker._quit_action = self.destroy
 
@@ -419,7 +422,8 @@ class TrayIcon:
     def create_context_menu(self, extended):
         """Create the context menu."""
         menu = Gtk.Menu()
-        self._menu(menu, extended)
+        self._extended = extended
+        self._maker(menu, extended)
         return menu
 
     def _activate(self, icon):
@@ -438,7 +442,19 @@ class TrayIcon:
                 button=button,
                 activate_time=time)
         # need to store reference or menu will be destroyed before showing:
-        self._m = m
+        self._menu = m
+
+    def update_menu(self, *args):
+        if self._menu is None:
+            return
+        # TODO: Remove/add/modify only those entries menuitems that actually
+        # changed to avoid any disruptions and provide a more seemless
+        # experience.
+        for item in self._menu.get_children():
+            self._menu.remove(item)
+        self._maker(self._menu, self._extended)
+        self._menu.show_all()
+        self._menu.show()
 
 
 class UdiskieStatusIcon(DaemonBase):
@@ -461,6 +477,7 @@ class UdiskieStatusIcon(DaemonBase):
             'device_changed': self.update,
             'device_added': self.update,
             'device_removed': self.update,
+            any: self._icon.update_menu,
         }
 
     def activate(self):

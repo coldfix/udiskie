@@ -57,6 +57,12 @@ class AppIndicatorIcon:
         self._indicator.set_status(status)
 
     def _on_show(self, menu):
+        self._update_menu()
+
+    def update_menu(self, *args):
+        # TODO: Remove/add/modify only those entries menuitems that actually
+        # changed to avoid any disruptions and provide a more seemless
+        # experience.
         # clear menu:
         for item in self._menu.get_children():
             self._menu.remove(item)
