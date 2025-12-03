@@ -782,6 +782,8 @@ class Daemon(Emitter):
     # add objects / interfaces
     def _interfaces_added(self, object_path, interfaces_and_properties):
         """Internal method."""
+        if not interfaces_and_properties:
+            return
         added = object_path not in self._objects
         self._objects.setdefault(object_path, {})
         old_state = copy(self._objects[object_path])
@@ -834,7 +836,10 @@ class Daemon(Emitter):
         old_state = copy(self._objects[object_path])
         for interface in interfaces:
             del self._objects[object_path][interface]
+
         new_state = self._objects[object_path]
+        if not new_state:
+            del self._objects[object_path]
 
         if Interface['Drive'] in interfaces:
             self._detect_toggle(
@@ -849,12 +854,11 @@ class Daemon(Emitter):
                 if not self._has_job(slave.object_path, 'device_locked'):
                     self.trigger('device_locked', slave)
 
-        if self._objects[object_path]:
+        if new_state:
             self.trigger('device_changed',
                          self.get(object_path, old_state),
                          self.get(object_path, new_state))
         else:
-            del self._objects[object_path]
             if object_kind(object_path) in ('device', 'drive'):
                 self.trigger(
                     'device_removed',
