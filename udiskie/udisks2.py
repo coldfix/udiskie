@@ -599,6 +599,18 @@ class Device:
         ]))
 
     @property
+    def ui_label_dialog(self):
+        """UI string identifying the partition if possible."""
+        dev_path = self.ui_device_presentation
+        fs_label = self.ui_id_label or self.ui_id_uuid or self.drive_label
+        if dev_path and fs_label:
+            return '{0} [{1}]'.format(dev_path, fs_label)
+        elif fs_label:
+            return fs_label
+        else:
+            return dev_path
+
+    @property
     def ui_device_label(self):
         """UI string identifying the device (drive) if toplevel."""
         return ': '.join(filter(None, [

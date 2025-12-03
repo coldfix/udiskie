@@ -154,7 +154,7 @@ async def password_dialog(key, title, message, options):
 
 def get_password_gui(device, options):
     """Get the password to unlock a device from GUI."""
-    text = _('Enter password for {0.device_presentation}: ', device)
+    text = _('Enter password for {0.ui_label_dialog}: ', device)
     try:
         return password_dialog(device.id_uuid, 'udiskie', text, options)
     except RuntimeError:
@@ -164,7 +164,7 @@ def get_password_gui(device, options):
 async def get_password_tty(device, options):
     """Get the password to unlock a device from terminal."""
     # TODO: make this a TRUE async
-    text = _('Enter password for {0.device_presentation}: ', device)
+    text = _('Enter password for {0.ui_label_dialog}: ', device)
     try:
         return PasswordResult(getpass.getpass(text),
                               options.get('cache_hint', False))

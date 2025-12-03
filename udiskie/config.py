@@ -87,6 +87,7 @@ class DeviceFilter:
         'in_use',
         'should_automount',
         'ui_label',
+        'ui_label_dialog',
         'loop_file',
         'setup_by_uid',
         'autoclear',
