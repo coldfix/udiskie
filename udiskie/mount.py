@@ -810,8 +810,10 @@ class DeviceActions:
         :returns: root node of device hierarchy
         """
         root = Device(None, [], None, "", [])
-        device_nodes = dict(map(self._device_node,
-                                self._mounter.get_all_handleable()))
+        device_nodes = {
+            dev.object_path: self._device_node(dev)
+            for dev in self._mounter.get_all_handleable()
+        }
         # insert child devices as branches into their roots:
         for node in device_nodes.values():
             device_nodes.get(node.root, root).branches.append(node)
@@ -858,7 +860,7 @@ class DeviceActions:
         # find the root device:
         root = device.parent_object_path
         # in this first step leave branches empty
-        return device.object_path, Device(root, [], device, dev_label, methods)
+        return Device(root, [], device, dev_label, methods)
 
 
 def prune_empty_node(node, seen):
