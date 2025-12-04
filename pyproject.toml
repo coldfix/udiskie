@@ -54,7 +54,10 @@ packages = [
     "udiskie",
     "udiskie.icons",
 ]
-include-package-data = true
+
+[tool.setuptools.package-data]
+"udiskie" = ["*.ui"]
+"udiskie.icons" = ["*.svg"]
 
 [tool.setuptools.dynamic]
 version = {attr = "udiskie.__version__"}
