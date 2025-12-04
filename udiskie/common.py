@@ -34,7 +34,7 @@ class Emitter:
     def __init__(self, event_names=(), *args, **kwargs):
         """Initialize with empty lists of event handlers."""
         super().__init__(*args, **kwargs)
-        self._event_handlers = {}
+        self._event_handlers = {any: []}
         for evt in event_names:
             self._event_handlers[evt] = []
 
@@ -42,6 +42,8 @@ class Emitter:
         """Trigger event by name."""
         for handler in self._event_handlers[event]:
             handler(*args)
+        for handler in self._event_handlers[any]:
+            handler(event, *args)
 
     def connect(self, event, handler):
         """Connect an event handler."""
