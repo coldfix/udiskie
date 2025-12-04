@@ -1,0 +1,86 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "udiskie"
+description = "Removable disk automounter based on udisks"
+dynamic = ["version", "readme"]
+requires-python = ">=3.5"
+license = "MIT"
+license-files = ["COPYING"]
+authors = [
+    {name = "Byron Clark", email = "byron@theclarkfamily.name"},
+    {name = "Thomas Gläßle", email = "t_glaessle@gmx.de"},
+]
+maintainers = [
+    {name = "Thomas Gläßle", email = "t_glaessle@gmx.de"},
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Environment :: X11 Applications :: GTK",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Desktop Environment",
+    "Topic :: System :: Filesystems",
+    "Topic :: System :: Hardware",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "PyYAML",
+    "docopt",
+    "importlib_resources; python_version < '3.7'",
+    "PyGObject",
+]
+
+[project.urls]
+"Source Code" = "https://github.com/coldfix/udiskie"
+"Issue Tracker" = "https://github.com/coldfix/udiskie/issues"
+"Changelog" = "https://github.com/coldfix/udiskie/blob/master/CHANGES.rst"
+
+[project.optional-dependencies]
+password-cache = ["keyutils==0.3"]
+
+[project.scripts]
+udiskie = "udiskie.cli:Daemon.main"
+udiskie-mount = "udiskie.cli:Mount.main"
+udiskie-umount = "udiskie.cli:Umount.main"
+udiskie-info = "udiskie.cli:Info.main"
+
+[tool.setuptools]
+packages = [
+    "udiskie",
+    "udiskie.icons",
+]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "udiskie.__version__"}
+readme = {file = ["README.rst", "CHANGES.rst"], content-type = "text/x-rst"}
+
+[tool.ruff]
+line-length = 84
+indent-width = 4
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "docs",
+    # used locally:
+    "devel",
+    "issues",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "C901",     # McCabe complexity
+]
+ignore = [
+    "E731",     # Do not assign a `lambda` expression, use a `def`
+]
+mccabe = {"max-complexity" = 13}
