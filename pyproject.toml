@@ -59,3 +59,28 @@ include-package-data = true
 [tool.setuptools.dynamic]
 version = {attr = "udiskie.__version__"}
 readme = {file = ["README.rst", "CHANGES.rst"], content-type = "text/x-rst"}
+
+[tool.ruff]
+line-length = 84
+indent-width = 4
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "docs",
+    # used locally:
+    "devel",
+    "issues",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "C901",     # McCabe complexity
+]
+ignore = [
+    "E731",     # Do not assign a `lambda` expression, use a `def`
+]
+mccabe = {"max-complexity" = 13}
