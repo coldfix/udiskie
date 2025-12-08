@@ -41,7 +41,7 @@ dependencies = [
 "Changelog" = "https://github.com/coldfix/udiskie/blob/master/CHANGES.rst"
 
 [project.optional-dependencies]
-password-cache = ["keyutils==0.3"]
+password-cache = ["keyutils==0.6"]
 
 [project.scripts]
 udiskie = "udiskie.cli:Daemon.main"
