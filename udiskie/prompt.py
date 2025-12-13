@@ -283,7 +283,6 @@ def connect_event_hook(command_format, mounter):
     udisks = mounter.udisks
     for event in ['device_mounted', 'device_unmounted',
                   'device_locked', 'device_unlocked',
-                  'device_added', 'device_removed',
-                  'job_failed']:
+                  'device_added', 'device_removed']:
         udisks.connect(event, run_bg(DeviceCommand(
             command_format, event=event, capture=False)))
