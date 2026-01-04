@@ -238,8 +238,11 @@ class Config:
         # False/'' => no config
         if not path:
             return cls({})
-        if os.path.splitext(path)[1].lower() == '.json':
+        ext = os.path.splitext(path)[1].lower()
+        if ext == '.json':
             from json import load
+        elif ext == '.toml':
+            from tomllib import load
         else:
             from yaml import safe_load as load
         with open(path) as f:
