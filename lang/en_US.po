@@ -1,14 +1,14 @@
 # English translations for udiskie package.
-# Copyright (C) 2025 Thomas Gläßle
+# Copyright (C) 2026 Thomas Gläßle
 # This file is distributed under the same license as the udiskie package.
-# Automatically generated, 2025.
+# Automatically generated, 2026.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: udiskie 2.5.8\n"
+"Project-Id-Version: udiskie 2.6.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-25 22:41+0000\n"
-"PO-Revision-Date: 2025-08-25 22:41+0000\n"
+"POT-Creation-Date: 2026-01-07 22:05+0100\n"
+"PO-Revision-Date: 2026-01-07 22:05+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en_US\n"
@@ -114,31 +114,31 @@ msgstr ""
 msgid "Ignoring 'notify_command' in favor of 'event_hook'."
 msgstr "Ignoring 'notify_command' in favor of 'event_hook'."
 
-#: ../udiskie/config.py:131
+#: ../udiskie/config.py:132
 msgid "Unknown matching attribute: {!r}"
 msgstr "Unknown matching attribute: {!r}"
 
-#: ../udiskie/config.py:133
+#: ../udiskie/config.py:134
 #, python-brace-format
 msgid "new rule: {0}"
 msgstr "new rule: {0}"
 
-#: ../udiskie/config.py:136
+#: ../udiskie/config.py:137
 #, python-brace-format
 msgid "{0} -> {1}"
 msgstr "{0} -> {1}"
 
-#: ../udiskie/config.py:155
+#: ../udiskie/config.py:156
 #, python-brace-format
 msgid "{0} matched {1}"
 msgstr "{0} matched {1}"
 
-#: ../udiskie/config.py:232
+#: ../udiskie/config.py:233
 #, python-brace-format
 msgid "Failed to read config file: {0}"
 msgstr "Failed to read config file: {0}"
 
-#: ../udiskie/config.py:235
+#: ../udiskie/config.py:236
 msgid "Failed to read {0!r}: {1}"
 msgstr "Failed to read {0!r}: {1}"
 
@@ -293,6 +293,7 @@ msgid "unlocked {0} using cached password"
 msgstr "unlocked {0} using cached password"
 
 #: ../udiskie/mount.py:266
+#, python-brace-format
 msgid "No matching keyfile rule for {}."
 msgstr "No matching keyfile rule for {}."
 
@@ -587,8 +588,8 @@ msgstr "Open a keyfile to unlock the LUKS device"
 
 #: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
 #, python-brace-format
-msgid "Enter password for {0.device_presentation}: "
-msgstr "Enter password for {0.device_presentation}: "
+msgid "Enter password for {0.ui_label_dialog}: "
+msgstr "Enter password for {0.ui_label_dialog}: "
 
 #: ../udiskie/prompt.py:204
 msgid "Unknown device attribute {!r} in format string: {!r}"
@@ -642,31 +643,31 @@ msgstr "Invalid node!"
 msgid "No external devices"
 msgstr "No external devices"
 
-#: ../udiskie/tray.py:387
+#: ../udiskie/tray.py:390
 msgid "udiskie"
 msgstr "udiskie"
 
-#: ../udiskie/udisks2.py:661
+#: ../udiskie/udisks2.py:673
 #, python-brace-format
 msgid "found device owning \"{0}\": \"{1}\""
 msgstr "found device owning \"{0}\": \"{1}\""
 
-#: ../udiskie/udisks2.py:664
+#: ../udiskie/udisks2.py:676
 #, python-brace-format
 msgid "no device found owning \"{0}\""
 msgstr "no device found owning \"{0}\""
 
-#: ../udiskie/udisks2.py:683
+#: ../udiskie/udisks2.py:695
 #, python-brace-format
 msgid "Daemon version: {0}"
 msgstr "Daemon version: {0}"
 
-#: ../udiskie/udisks2.py:688
+#: ../udiskie/udisks2.py:700
 #, python-brace-format
 msgid "Keyfile support: {0}"
 msgstr "Keyfile support: {0}"
 
-#: ../udiskie/udisks2.py:767
+#: ../udiskie/udisks2.py:779
 #, python-brace-format
 msgid "+++ {0}: {1}"
 msgstr "+++ {0}: {1}"

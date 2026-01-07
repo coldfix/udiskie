@@ -1,6 +1,29 @@
 CHANGELOG
 ---------
 
+2.6.0
+~~~~~
+Date: 07.01.2026
+
+Features:
+
+- show partition label in unlocking dialog
+- update tray menu on each device update
+- update Turkish translations
+- can load configuration file from .toml
+
+Bugfixes:
+
+- fix tray menu not updating on some wayland platforms (#314)
+- fix exception being shown when using --event-hook (#324)
+
+Packaging:
+
+- migrate from setup.cfg to pyproject.toml
+- allow versions of python-keyutils>=0.3
+  (Note: the package is orphaned and should be replaced in a future release)
+
+
 2.5.8
 ~~~~~
 Date: 26.08.2025
