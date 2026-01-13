@@ -1,6 +1,15 @@
 CHANGELOG
 ---------
 
+2.6.1
+~~~~~
+Date: 13.01.2026
+
+Bug fixes:
+
+- fix exception due to incorrect function name for appindicator menu (#333)
+
+
 2.6.0
 ~~~~~
 Date: 07.01.2026

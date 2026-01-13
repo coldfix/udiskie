@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: udiskie 2.6.0\n"
+"Project-Id-Version: udiskie 2.6.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-07 22:05+0100\n"
-"PO-Revision-Date: 2026-01-07 22:05+0100\n"
+"POT-Creation-Date: 2026-01-13 06:20+0100\n"
+"PO-Revision-Date: 2026-01-13 06:20+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en_US\n"
