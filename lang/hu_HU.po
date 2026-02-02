@@ -1,0 +1,670 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Thomas Gläßle
+# This file is distributed under the same license as the udiskie package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: udiskie 2.6.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-01 22:20+0100\n"
+"PO-Revision-Date: 2026-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Hrotkó Gábor <hrotkogabor@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: hu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../udiskie/cli.py:46
+#, python-brace-format
+msgid "These options are mutually exclusive: {0}"
+msgstr "Ezek az opciók kölcsönösen kizárják egymást: {0}"
+
+#: ../udiskie/cli.py:119
+msgid ""
+"\n"
+"    Note, that the options in the individual groups are mutually exclusive.\n"
+"\n"
+"    The config file can be a JSON or preferably a YAML file. For an\n"
+"    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
+"    "
+msgstr ""
+"\n"
+"    Megjegyzés: az egyes csoportokon belüli opciók kölcsönösen kizárják egymást.\n"
+"\n"
+"    A konfigurációs fájl lehet JSON, vagy inkább YAML formátumú. Példákért\n"
+"    lásd a MAN oldalt (vagy a doc/udiskie.8.txt fájlt a repóban).\n"
+"    "
+
+#: ../udiskie/cli.py:139
+#, python-format
+msgid "%(message)s"
+msgstr "%(message)s"
+
+#: ../udiskie/cli.py:141
+#, python-format
+msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+
+#: ../udiskie/cli.py:386
+msgid ""
+"Typelib for 'libnotify' is not available. Possible causes include:\n"
+"\t- libnotify is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- libnotify was built with introspection disabled\n"
+"\n"
+"Starting udiskie without notifications."
+msgstr ""
+"A 'libnotify' typelib nem érhető el. Lehetséges okok:\n"
+"\t- a libnotify nincs telepítve\n"
+"\t- a typelib külön csomagban található\n"
+"\t- a libnotify introspection támogatás nélkül lett fordítva\n"
+"\n"
+"Az udiskie értesítések nélkül indul."
+
+#: ../udiskie/cli.py:400
+msgid ""
+"Not run within X or Wayland session.\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+"Nem X vagy Wayland munkamenetben fut.\n"
+"Az udiskie tálcaikon nélkül indul.\n"
+
+#: ../udiskie/cli.py:407
+msgid ""
+"Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
+"\t- GTK3 is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- GTK3 was built with introspection disabled\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+"A 'Gtk 3.0' typelib nem érhető el. Lehetséges okok:\n"
+"\t- a GTK3 nincs telepítve\n"
+"\t- a typelib külön csomagban található\n"
+"\t- a GTK3 introspection támogatás nélkül lett fordítva\n"
+"Az udiskie tálcaikon nélkül indul.\n"
+
+#: ../udiskie/cli.py:417
+msgid ""
+"Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
+"\t- libappindicator is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- it was built with introspection disabled\n"
+"Starting udiskie without appindicator icon.\n"
+msgstr ""
+"Az 'AppIndicator3 0.1' typelib nem érhető el. Lehetséges okok:\n"
+"\t- a libappindicator nincs telepítve\n"
+"\t- a typelib külön csomagban található\n"
+"\t- introspection támogatás nélkül lett fordítva\n"
+"Az udiskie appindicator ikon nélkül indul.\n"
+
+#: ../udiskie/cli.py:436
+msgid ""
+"The 'notify_command' option was renamed to 'event_hook'. The old name still "
+"works, but may be removed in a future version. Please change your command "
+"line and config to use the new name."
+msgstr ""
+"A 'notify_command' opció neve 'event_hook'-ra változott. A régi név még működik, "
+"de a jövőben eltávolításra kerülhet. Kérjük, módosítsd a parancssort és a konfigurációt az új név használatára."
+
+#: ../udiskie/cli.py:443
+msgid "Ignoring 'notify_command' in favor of 'event_hook'."
+msgstr "'notify_command' figyelmen kívül hagyva az 'event_hook' javára."
+
+#: ../udiskie/config.py:132
+msgid "Unknown matching attribute: {!r}"
+msgstr "Ismeretlen egyeztetési attribútum: {!r}"
+
+#: ../udiskie/config.py:134
+#, python-brace-format
+msgid "new rule: {0}"
+msgstr "új szabály: {0}"
+
+#: ../udiskie/config.py:137
+#, python-brace-format
+msgid "{0} -> {1}"
+msgstr "{0} -> {1}"
+
+#: ../udiskie/config.py:156
+#, python-brace-format
+msgid "{0} matched {1}"
+msgstr "{0} egyezett ezzel: {1}"
+
+#: ../udiskie/config.py:233
+#, python-brace-format
+msgid "Failed to read config file: {0}"
+msgstr "A konfigurációs fájl olvasása sikertelen: {0}"
+
+#: ../udiskie/config.py:236
+msgid "Failed to read {0!r}: {1}"
+msgstr "A(z) {0!r} olvasása sikertelen: {1}"
+
+#: ../udiskie/depend.py:59
+msgid ""
+"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
+msgstr ""
+"Hiányzik a GTK 3 futásidejű függőség. A jelszókéréshez GTK 2 kerül használatra."
+
+#: ../udiskie/depend.py:65
+msgid "X server not connected!"
+msgstr "Az X szerver nincs csatlakoztatva!"
+
+#: ../udiskie/mount.py:29
+#, python-brace-format
+msgid "failed to {0} {1}: {2}"
+msgstr "{0} sikertelen: {1}: {2}"
+
+#: ../udiskie/mount.py:117
+#, python-brace-format
+msgid "not browsing {0}: not mounted"
+msgstr "{0} nem böngészhető: nincs csatolva"
+
+#: ../udiskie/mount.py:120
+#, python-brace-format
+msgid "not browsing {0}: no program"
+msgstr "{0} nem böngészhető: nincs elérhető program"
+
+#: ../udiskie/mount.py:122 ../udiskie/mount.py:142
+#, python-brace-format
+msgid "opening {0} on {0.mount_paths[0]}"
+msgstr "{0} megnyitása itt: {0.mount_paths[0]}"
+
+#: ../udiskie/mount.py:124 ../udiskie/mount.py:144
+#, python-brace-format
+msgid "opened {0} on {0.mount_paths[0]}"
+msgstr "{0} megnyitva itt: {0.mount_paths[0]}"
+
+#: ../udiskie/mount.py:137
+#, python-brace-format
+msgid "not opening terminal {0}: not mounted"
+msgstr "{0} terminál nem nyitható meg: nincs csatolva"
+
+#: ../udiskie/mount.py:140
+#, python-brace-format
+msgid "not opening terminal {0}: no program"
+msgstr "{0} terminál nem nyitható meg: nincs elérhető program"
+
+#: ../udiskie/mount.py:158
+#, python-brace-format
+msgid "not mounting {0}: unhandled device"
+msgstr "{0} nem csatolható: nem támogatott eszköz"
+
+#: ../udiskie/mount.py:161
+#, python-brace-format
+msgid "not mounting {0}: already mounted"
+msgstr "{0} nem csatolható: már csatolva van"
+
+#: ../udiskie/mount.py:165
+#, python-brace-format
+msgid "mounting {0} with {1}"
+msgstr "{0} csatolása ezzel: {1}"
+
+#: ../udiskie/mount.py:168
+#, python-brace-format
+msgid "mounted {0} on {1}"
+msgstr "{0} csatolva ide: {1}"
+
+#: ../udiskie/mount.py:174
+msgid ""
+"Mounting NTFS device with default driver.\n"
+"Please install 'ntfs-3g' if you experience problems or the device is "
+"readonly."
+msgstr ""
+"NTFS eszköz csatolása alapértelmezett meghajtóval.\n"
+"Ha problémák adódnak, vagy az eszköz csak olvasható, telepítsd az 'ntfs-3g' csomagot."
+
+#: ../udiskie/mount.py:188
+#, python-brace-format
+msgid "not unmounting {0}: unhandled device"
+msgstr "{0} nem választható le: nem támogatott eszköz"
+
+#: ../udiskie/mount.py:191
+#, python-brace-format
+msgid "not unmounting {0}: not mounted"
+msgstr "{0} nem választható le: nincs csatolva"
+
+#: ../udiskie/mount.py:193
+#, python-brace-format
+msgid "unmounting {0}"
+msgstr "{0} leválasztása"
+
+#: ../udiskie/mount.py:195
+#, python-brace-format
+msgid "unmounted {0}"
+msgstr "{0} leválasztva"
+
+#: ../udiskie/mount.py:209
+#, python-brace-format
+msgid "not unlocking {0}: unhandled device"
+msgstr "{0} nem oldható fel: nem támogatott eszköz"
+
+#: ../udiskie/mount.py:212
+#, python-brace-format
+msgid "not unlocking {0}: already unlocked"
+msgstr "{0} nem oldható fel: már fel van oldva"
+
+#: ../udiskie/mount.py:215
+#, python-brace-format
+msgid "not unlocking {0}: no password prompt"
+msgstr "{0} nem oldható fel: nincs jelszókérés"
+
+#: ../udiskie/mount.py:229
+#, python-brace-format
+msgid "not unlocking {0}: cancelled by user"
+msgstr "{0} feloldása megszakítva a felhasználó által"
+
+#: ../udiskie/mount.py:234
+#, python-brace-format
+msgid "unlocking {0} using keyfile"
+msgstr "{0} feloldása kulcsfájllal"
+
+#: ../udiskie/mount.py:237
+#, python-brace-format
+msgid "unlocking {0}"
+msgstr "{0} feloldása"
+
+#: ../udiskie/mount.py:240
+#, python-brace-format
+msgid "unlocked {0}"
+msgstr "{0} feloldva"
+
+#: ../udiskie/mount.py:249
+#, python-brace-format
+msgid "no cached key for {0}"
+msgstr "nincs gyorsítótárazott kulcs ehhez: {0}"
+
+#: ../udiskie/mount.py:251
+#, python-brace-format
+msgid "unlocking {0} using cached password"
+msgstr "{0} feloldása gyorsítótárazott jelszóval"
+
+#: ../udiskie/mount.py:255
+#, python-brace-format
+msgid "failed to unlock {0} using cached password"
+msgstr "{0} feloldása sikertelen a gyorsítótárazott jelszóval"
+
+#: ../udiskie/mount.py:258
+#, python-brace-format
+msgid "unlocked {0} using cached password"
+msgstr "{0} feloldva a gyorsítótárazott jelszóval"
+
+#: ../udiskie/mount.py:266
+#, python-brace-format
+msgid "No matching keyfile rule for {}."
+msgstr "Nincs megfelelő kulcsfájl-szabály ehhez: {}."
+
+#: ../udiskie/mount.py:272
+#, python-brace-format
+msgid "keyfile for {0} not found: {1}"
+msgstr "{0} kulcsfájlja nem található: {1}"
+
+#: ../udiskie/mount.py:274
+#, python-brace-format
+msgid "unlocking {0} using keyfile {1}"
+msgstr "{0} feloldása a(z) {1} kulcsfájllal"
+
+#: ../udiskie/mount.py:278
+#, python-brace-format
+msgid "failed to unlock {0} using keyfile"
+msgstr "{0} feloldása sikertelen a kulcsfájllal"
+
+#: ../udiskie/mount.py:281
+#, python-brace-format
+msgid "unlocked {0} using keyfile"
+msgstr "{0} feloldva kulcsfájllal"
+
+#: ../udiskie/mount.py:307
+#, python-brace-format
+msgid "not locking {0}: unhandled device"
+msgstr "{0} nem zárolható: nem támogatott eszköz"
+
+#: ../udiskie/mount.py:310
+#, python-brace-format
+msgid "not locking {0}: not unlocked"
+msgstr "{0} nem zárolható: nincs feloldva"
+
+#: ../udiskie/mount.py:312
+#, python-brace-format
+msgid "locking {0}"
+msgstr "{0} zárolása"
+
+#: ../udiskie/mount.py:314
+#, python-brace-format
+msgid "locked {0}"
+msgstr "{0} zárolva"
+
+#: ../udiskie/mount.py:351 ../udiskie/mount.py:394
+#, python-brace-format
+msgid "not adding {0}: unhandled device"
+msgstr "{0} nem adható hozzá: nem támogatott eszköz"
+
+#: ../udiskie/mount.py:430 ../udiskie/mount.py:480
+#, python-brace-format
+msgid "not removing {0}: unhandled device"
+msgstr "{0} nem távolítható el: nem támogatott eszköz"
+
+#: ../udiskie/mount.py:505
+#, python-brace-format
+msgid "not ejecting {0}: unhandled device"
+msgstr "{0} nem adható ki: nem támogatott eszköz"
+
+#: ../udiskie/mount.py:509
+#, python-brace-format
+msgid "not ejecting {0}: drive not ejectable"
+msgstr "{0} nem adható ki: a meghajtó nem kiadható"
+
+#: ../udiskie/mount.py:515
+#, python-brace-format
+msgid "ejecting {0}"
+msgstr "{0} kiadása"
+
+#: ../udiskie/mount.py:517
+#, python-brace-format
+msgid "ejected {0}"
+msgstr "{0} kiadva"
+
+#: ../udiskie/mount.py:531
+#, python-brace-format
+msgid "not detaching {0}: unhandled device"
+msgstr "{0} nem választható le: nem támogatott eszköz"
+
+#: ../udiskie/mount.py:535
+#, python-brace-format
+msgid "not detaching {0}: drive not detachable"
+msgstr "{0} nem választható le: a meghajtó nem leválasztható"
+
+#: ../udiskie/mount.py:539
+#, python-brace-format
+msgid "detaching {0}"
+msgstr "{0} leválasztása"
+
+#: ../udiskie/mount.py:544
+#, python-brace-format
+msgid "detached {0}"
+msgstr "{0} leválasztva"
+
+#: ../udiskie/mount.py:595
+#, python-brace-format
+msgid "not setting up {0}: already up"
+msgstr "{0} nem állítható be: már be van állítva"
+
+#: ../udiskie/mount.py:598
+#, python-brace-format
+msgid "not setting up {0}: not a file"
+msgstr "{0} nem állítható be: nem fájl"
+
+#: ../udiskie/mount.py:600
+#, python-brace-format
+msgid "setting up loop device {0}"
+msgstr "{0} loop eszköz beállítása"
+
+#: ../udiskie/mount.py:618
+#, python-brace-format
+msgid ""
+"Insufficient permission to open {0} in read-write mode. Retrying in read-"
+"only mode."
+msgstr ""
+"Nincs elegendő jogosultság {0} olvasás‑írás módban való megnyitásához. "
+"Újrapróbálkozás csak olvasható módban."
+
+#: ../udiskie/mount.py:630
+#, python-brace-format
+msgid "set up {0} as {1}"
+msgstr "{0} beállítva mint {1}"
+
+#: ../udiskie/mount.py:645
+#, python-brace-format
+msgid "not deleting {0}: unhandled device"
+msgstr "{0} nem törölhető: nem támogatott eszköz"
+
+#: ../udiskie/mount.py:649
+#, python-brace-format
+msgid "deleting {0}"
+msgstr "{0} törlése"
+
+#: ../udiskie/mount.py:651
+#, python-brace-format
+msgid "deleted {0}"
+msgstr "{0} törölve"
+
+#: ../udiskie/mount.py:777
+#, python-brace-format
+msgid "Browse {0}"
+msgstr "{0} böngészése"
+
+#: ../udiskie/mount.py:778
+#, python-brace-format
+msgid "Hack on {0}"
+msgstr "{0} megnyitása fejlesztéshez"
+
+#: ../udiskie/mount.py:779
+#, python-brace-format
+msgid "Mount {0}"
+msgstr "{0} csatolása"
+
+#: ../udiskie/mount.py:780
+#, python-brace-format
+msgid "Unmount {0}"
+msgstr "{0} leválasztása"
+
+#: ../udiskie/mount.py:781
+#, python-brace-format
+msgid "Unlock {0}"
+msgstr "{0} feloldása"
+
+#: ../udiskie/mount.py:782
+#, python-brace-format
+msgid "Lock {0}"
+msgstr "{0} zárolása"
+
+#: ../udiskie/mount.py:783
+#, python-brace-format
+msgid "Eject {1}"
+msgstr "{1} kiadása"
+
+#: ../udiskie/mount.py:784
+#, python-brace-format
+msgid "Unpower {1}"
+msgstr "{1} kikapcsolása"
+
+#: ../udiskie/mount.py:785
+#, python-brace-format
+msgid "Clear password for {0}"
+msgstr "{0} jelszavának törlése"
+
+#: ../udiskie/mount.py:786
+#, python-brace-format
+msgid "Detach {0}"
+msgstr "{0} leválasztása"
+
+#: ../udiskie/notify.py:62
+msgid "Browse directory"
+msgstr "Könyvtár böngészése"
+
+#: ../udiskie/notify.py:64
+msgid "Open terminal"
+msgstr "Terminál megnyitása"
+
+#: ../udiskie/notify.py:68
+msgid "Device mounted"
+msgstr "Eszköz csatolva"
+
+#: ../udiskie/notify.py:69
+#, python-brace-format
+msgid "{0.ui_label} mounted on {0.mount_paths[0]}"
+msgstr "{0.ui_label} csatolva ide: {0.mount_paths[0]}"
+
+#: ../udiskie/notify.py:80
+msgid "Device unmounted"
+msgstr "Eszköz leválasztva"
+
+#: ../udiskie/notify.py:81
+#, python-brace-format
+msgid "{0.ui_label} unmounted"
+msgstr "{0.ui_label} leválasztva"
+
+#: ../udiskie/notify.py:90
+msgid "Device locked"
+msgstr "Eszköz zárolva"
+
+#: ../udiskie/notify.py:91
+#, python-brace-format
+msgid "{0.device_presentation} locked"
+msgstr "{0.device_presentation} zárolva"
+
+#: ../udiskie/notify.py:100
+msgid "Device unlocked"
+msgstr "Eszköz feloldva"
+
+#: ../udiskie/notify.py:101
+#, python-brace-format
+msgid "{0.device_presentation} unlocked"
+msgstr "{0.device_presentation} feloldva"
+
+#: ../udiskie/notify.py:135
+msgid "Device added"
+msgstr "Eszköz hozzáadva"
+
+#: ../udiskie/notify.py:136
+#, python-brace-format
+msgid "device appeared on {0.device_presentation}"
+msgstr "eszköz megjelent itt: {0.device_presentation}"
+
+#: ../udiskie/notify.py:155
+msgid "Device removed"
+msgstr "Eszköz eltávolítva"
+
+#: ../udiskie/notify.py:156
+#, python-brace-format
+msgid "device disappeared on {0.device_presentation}"
+msgstr "eszköz eltűnt innen: {0.device_presentation}"
+
+#: ../udiskie/notify.py:165
+#, python-brace-format
+msgid ""
+"failed to {0} {1}:\n"
+"{2}"
+msgstr ""
+"{0} sikertelen {1} esetén:\n"
+"{2}"
+
+#: ../udiskie/notify.py:167
+#, python-brace-format
+msgid "failed to {0} device {1}."
+msgstr "{0} sikertelen a(z) {1} eszköznél."
+
+#: ../udiskie/notify.py:173
+msgid "Retry"
+msgstr "Újra"
+
+#: ../udiskie/notify.py:176
+msgid "Job failed"
+msgstr "A feladat sikertelen"
+
+#: ../udiskie/notify.py:207
+#, python-brace-format
+msgid "Failed to show notification: {0}"
+msgstr "Az értesítés megjelenítése sikertelen: {0}"
+
+#: ../udiskie/prompt.py:96
+msgid "Show password"
+msgstr "Jelszó megjelenítése"
+
+#: ../udiskie/prompt.py:101
+msgid "Open keyfile…"
+msgstr "Kulcsfájl megnyitása…"
+
+#: ../udiskie/prompt.py:108
+msgid "Cache password"
+msgstr "Jelszó gyorsítótárazása"
+
+#: ../udiskie/prompt.py:123
+msgid "Open a keyfile to unlock the LUKS device"
+msgstr "Nyiss meg egy kulcsfájlt a LUKS eszköz feloldásához"
+
+#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#, python-brace-format
+msgid "Enter password for {0.ui_label_dialog}: "
+msgstr "Add meg a jelszót ehhez: {0.ui_label_dialog}: "
+
+#: ../udiskie/prompt.py:204
+msgid "Unknown device attribute {!r} in format string: {!r}"
+msgstr "Ismeretlen eszközattribútum {!r} a formátumstringben: {!r}"
+
+#: ../udiskie/prompt.py:256
+msgid ""
+"Can't find file browser: {0!r}. You may want to change the value for the '-"
+"f' option."
+msgstr ""
+"A fájlkezelő nem található: {0!r}. Lehet, hogy módosítanod kell a '-f' opció értékét."
+
+#: ../udiskie/tray.py:182
+msgid "Managed devices"
+msgstr "Kezelt eszközök"
+
+#: ../udiskie/tray.py:198
+msgid "Mount disc image"
+msgstr "Lemezkép csatolása"
+
+#: ../udiskie/tray.py:204
+msgid "Enable automounting"
+msgstr "Automatikus csatolás engedélyezése"
+
+#: ../udiskie/tray.py:210
+msgid "Enable notifications"
+msgstr "Értesítések engedélyezése"
+
+#: ../udiskie/tray.py:219
+msgid "Quit"
+msgstr "Kilépés"
+
+#: ../udiskie/tray.py:226
+msgid "Open disc image"
+msgstr "Lemezkép megnyitása"
+
+#: ../udiskie/tray.py:228
+msgid "Open"
+msgstr "Megnyitás"
+
+#: ../udiskie/tray.py:229
+msgid "Cancel"
+msgstr "Mégse"
+
+#: ../udiskie/tray.py:269
+msgid "Invalid node!"
+msgstr "Érvénytelen csomópont!"
+
+#: ../udiskie/tray.py:271
+msgid "No external devices"
+msgstr "Nincsenek külső eszközök"
+
+#: ../udiskie/tray.py:390
+msgid "udiskie"
+msgstr "udiskie"
+
+#: ../udiskie/udisks2.py:673
+#, python-brace-format
+msgid "found device owning \"{0}\": \"{1}\""
+msgstr "eszköz található, amelyhez \"{0}\" tartozik: \"{1}\""
+
+#: ../udiskie/udisks2.py:676
+#, python-brace-format
+msgid "no device found owning \"{0}\""
+msgstr "nem található eszköz, amelyhez \"{0}\" tartozik"
+
+#: ../udiskie/udisks2.py:695
+#, python-brace-format
+msgid "Daemon version: {0}"
+msgstr "Démon verzió: {0}"
+
+#: ../udiskie/udisks2.py:700
+#, python-brace-format
+msgid "Keyfile support: {0}"
+msgstr "Kulcsfájl támogatás: {0}"
+
+#: ../udiskie/udisks2.py:779
+#, python-brace-format
+msgid "+++ {0}: {1}"
+msgstr "+++ {0}: {1}"
