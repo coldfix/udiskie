@@ -1,6 +1,16 @@
 CHANGELOG
 ---------
 
+2.6.2
+~~~~~
+Date: 13.01.2026
+
+Translations:
+
+- added Georgian translation
+- added Hungarian translation
+
+
 2.6.1
 ~~~~~
 Date: 13.01.2026
