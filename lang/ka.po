@@ -1,0 +1,680 @@
+# Georgian translation for udiskie.
+# Copyright (C) 2026 udiskie's authors.
+# This file is distributed under the same license as the udiskie package.
+# Ekaterine Papava <papava.e@gtu.ge>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: udiskie 2.6.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-13 06:20+0100\n"
+"PO-Revision-Date: 2026-02-26 15:47+0100\n"
+"Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
+"Language-Team: Georgian <(nothing)>\n"
+"Language: ka\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.8\n"
+
+#: ../udiskie/cli.py:46
+#, python-brace-format
+msgid "These options are mutually exclusive: {0}"
+msgstr "ეს პარამეტრები ურთიერთგამომრიცხავია: {0}"
+
+#: ../udiskie/cli.py:119
+msgid ""
+"\n"
+"    Note, that the options in the individual groups are mutually "
+"exclusive.\n"
+"\n"
+"    The config file can be a JSON or preferably a YAML file. For an\n"
+"    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
+"    "
+msgstr ""
+"\n"
+"     დაიმახსოვრეთ, რომ ინდივიდუალურ ჯგუფებში პარამეტრები "
+"ურთიერთგამომრიცხავია.\n"
+"\n"
+"     კონფიგურაციის ფაილი, შეიძლება, იყოს JSON, ან, სასურველია, YAML ფაილი.\n"
+"     მაგალითისთვის იხილეთ MAN-ის გვერდი (ან რეპოზიტორიაში doc/"
+"udiskie.8.txt).\n"
+"     "
+
+#: ../udiskie/cli.py:139
+#, python-format
+msgid "%(message)s"
+msgstr "%(message)s"
+
+#: ../udiskie/cli.py:141
+#, python-format
+msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
+
+#: ../udiskie/cli.py:386
+msgid ""
+"Typelib for 'libnotify' is not available. Possible causes include:\n"
+"\t- libnotify is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- libnotify was built with introspection disabled\n"
+"\n"
+"Starting udiskie without notifications."
+msgstr ""
+"Typelib ბიბლიოთეკისთვის 'libnotify' ხელმისაწვდომი არაა. შესაძლო მიზეზები "
+"შეიცავს:\n"
+"\t- libnotify დაყენებული არაა\n"
+"\t- typelib ცალკე პაკეტშია\n"
+"\t- libnotify-ის აგების დროს ინტროსპექცია გამორთული იყო\n"
+"\n"
+"udiskie გაფრთხილებების გარეშე გაეშვება."
+
+#: ../udiskie/cli.py:400
+msgid ""
+"Not run within X or Wayland session.\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+"არ გაშვებულა X-ის, ან Wayland-ის სესიაში.\n"
+"udiskie სისტემურ საათთან ხატულას გარეშე გაეშვება.\n"
+
+#: ../udiskie/cli.py:407
+msgid ""
+"Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
+"\t- GTK3 is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- GTK3 was built with introspection disabled\n"
+"Starting udiskie without tray icon.\n"
+msgstr ""
+"Typelib ბიბლიოთეკისთვის 'Gtk 3.0' ხელმისაწვდომი არაა. შესაძლო მიზეზები "
+"შეიცავს:\n"
+"\t- GTK3 დაყენებული არაა\n"
+"\t- typelib ცალკე პაკეტშია\n"
+"\t- GTK3-ის აგებისას ინტროსპექცია გამორთული იყო\n"
+"udiskie სისტემურ საათთან ხატულას გარეშე გაეშვება.\n"
+
+#: ../udiskie/cli.py:417
+msgid ""
+"Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
+"\t- libappindicator is not installed\n"
+"\t- the typelib is provided by a separate package\n"
+"\t- it was built with introspection disabled\n"
+"Starting udiskie without appindicator icon.\n"
+msgstr ""
+"Typelib ბიბლიოთეკისთვის 'AppIndicator3 0.1' ხელმისაწვდომი არაა. შესაძლო "
+"მიზეზები შეიცავს:\n"
+"\t- libappindicator დაყენებული არაა\n"
+"\t- typelib ცალკე პაკეტშია\n"
+"\t- აგებისას ინტროსპექცია გამორთული იყო\n"
+"udiskie AppIndicator-is ხატულას გარეშე გაეშვება.\n"
+
+#: ../udiskie/cli.py:436
+msgid ""
+"The 'notify_command' option was renamed to 'event_hook'. The old name still "
+"works, but may be removed in a future version. Please change your command "
+"line and config to use the new name."
+msgstr ""
+"პარამეტრს 'notify_command' სახელი გადაერქვა და ახლა 'event_hook' ჰქვია. "
+"ძველი სახელი ჯერ კიდევ მუშაობს, მაგრამ მომავალ ვერსიაში წაიშლება. შეცვალეთ "
+"თქვენი ბრძანების სტრიქონი და კონფიგურაცია და გამოიყენეთ ახალი სახელი."
+
+#: ../udiskie/cli.py:443
+msgid "Ignoring 'notify_command' in favor of 'event_hook'."
+msgstr "'notify_command' გამოტოვებულია'event_hook'-ის გამო."
+
+#: ../udiskie/config.py:132
+msgid "Unknown matching attribute: {!r}"
+msgstr "უცნობი დამთხვეული ატრიბუტი: {!r}"
+
+#: ../udiskie/config.py:134
+#, python-brace-format
+msgid "new rule: {0}"
+msgstr "ახალი წესი: {0}"
+
+#: ../udiskie/config.py:137
+#, python-brace-format
+msgid "{0} -> {1}"
+msgstr "{0} -> {1}"
+
+#: ../udiskie/config.py:156
+#, python-brace-format
+msgid "{0} matched {1}"
+msgstr "{0} დაემთხვა {1}"
+
+#: ../udiskie/config.py:233
+#, python-brace-format
+msgid "Failed to read config file: {0}"
+msgstr "კონფიგურაციის ფაილის წაკითხვა ჩავარდა: {0}"
+
+#: ../udiskie/config.py:236
+msgid "Failed to read {0!r}: {1}"
+msgstr "{0!r}-ის წაკითხვა ჩავარდა: {1}"
+
+#: ../udiskie/depend.py:59
+msgid ""
+"Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
+msgstr ""
+"საჭირო დამოკიდებულება GTK 3 აღმოჩენილი არაა. პაროლისთვის გამოყენებული "
+"იქნება GTK 2"
+
+#: ../udiskie/depend.py:65
+msgid "X server not connected!"
+msgstr "X სერვერი დაკავშირებული არაა!"
+
+#: ../udiskie/mount.py:29
+#, python-brace-format
+msgid "failed to {0} {1}: {2}"
+msgstr "{0} {1} ჩავარდა: {2}"
+
+#: ../udiskie/mount.py:117
+#, python-brace-format
+msgid "not browsing {0}: not mounted"
+msgstr "{0}-ის დათვალიერება არ მოხდება: მიმაგრებული არაა"
+
+#: ../udiskie/mount.py:120
+#, python-brace-format
+msgid "not browsing {0}: no program"
+msgstr "{0}-ის დათვალიერება არ მოხდება: პროგრამის გარეშე"
+
+#: ../udiskie/mount.py:122 ../udiskie/mount.py:142
+#, python-brace-format
+msgid "opening {0} on {0.mount_paths[0]}"
+msgstr "{0}-ის გახსნა {0.mount_paths[0]}-ზე"
+
+#: ../udiskie/mount.py:124 ../udiskie/mount.py:144
+#, python-brace-format
+msgid "opened {0} on {0.mount_paths[0]}"
+msgstr "{0} გაიხსნა {0.mount_paths[0]}-ზე"
+
+#: ../udiskie/mount.py:137
+#, python-brace-format
+msgid "not opening terminal {0}: not mounted"
+msgstr "ტერმინალი {0} არ გაიხსნება: მიმაგრებული არაა"
+
+#: ../udiskie/mount.py:140
+#, python-brace-format
+msgid "not opening terminal {0}: no program"
+msgstr "ტერმინალი {0} არ გაიხსნება: პროგრამის გარეშე"
+
+#: ../udiskie/mount.py:158
+#, python-brace-format
+msgid "not mounting {0}: unhandled device"
+msgstr "{0} არ მიმაგრდება: დაუმუშავებელი მოწყობილობა"
+
+#: ../udiskie/mount.py:161
+#, python-brace-format
+msgid "not mounting {0}: already mounted"
+msgstr "{0} არ მიმაგრდება: უკვე მიმაგრებულია"
+
+#: ../udiskie/mount.py:165
+#, python-brace-format
+msgid "mounting {0} with {1}"
+msgstr "{0} მიმაგრდება {1}-ზე"
+
+#: ../udiskie/mount.py:168
+#, python-brace-format
+msgid "mounted {0} on {1}"
+msgstr "{0} მიმაგრდა {1}-ზე"
+
+#: ../udiskie/mount.py:174
+msgid ""
+"Mounting NTFS device with default driver.\n"
+"Please install 'ntfs-3g' if you experience problems or the device is "
+"readonly."
+msgstr ""
+"NTFS მოწყობილობა ნაგულისხმევი დრაივერით მიმაგრდება.\n"
+"თუ პრობლემებს გადააწყდებით, ან მომწყობილობა, მხოლოდ, წაკითხვადია, დააყენეთ "
+"პაკეტი 'ntfs-3g'."
+
+#: ../udiskie/mount.py:188
+#, python-brace-format
+msgid "not unmounting {0}: unhandled device"
+msgstr "{0} არ მოიხსნება: დაუმუშავებელი მოწყობილობა"
+
+#: ../udiskie/mount.py:191
+#, python-brace-format
+msgid "not unmounting {0}: not mounted"
+msgstr "{0} არ მოიხსნება: მიმაგრებული არაა"
+
+#: ../udiskie/mount.py:193
+#, python-brace-format
+msgid "unmounting {0}"
+msgstr "{0}-ის მოხსნა"
+
+#: ../udiskie/mount.py:195
+#, python-brace-format
+msgid "unmounted {0}"
+msgstr "{0} მოიხსნა"
+
+#: ../udiskie/mount.py:209
+#, python-brace-format
+msgid "not unlocking {0}: unhandled device"
+msgstr "{0} არ განიბლოკება: დაუმუშავებელი მოწყობილობა"
+
+#: ../udiskie/mount.py:212
+#, python-brace-format
+msgid "not unlocking {0}: already unlocked"
+msgstr "{0} არ განიბლოკება: უკვე განბლოკილია"
+
+#: ../udiskie/mount.py:215
+#, python-brace-format
+msgid "not unlocking {0}: no password prompt"
+msgstr "{0} არ განიბლოკება: პაროლის მოთხოვნის გარეშე"
+
+#: ../udiskie/mount.py:229
+#, python-brace-format
+msgid "not unlocking {0}: cancelled by user"
+msgstr "{0} არ განიბლოკება: გაუქმებულია მომხმარებლის მიერ"
+
+#: ../udiskie/mount.py:234
+#, python-brace-format
+msgid "unlocking {0} using keyfile"
+msgstr "{0}-ის განბლოკვა გასაღების გამოყენებით"
+
+#: ../udiskie/mount.py:237
+#, python-brace-format
+msgid "unlocking {0}"
+msgstr "{0}-ის განბლოკვა"
+
+#: ../udiskie/mount.py:240
+#, python-brace-format
+msgid "unlocked {0}"
+msgstr "{0} განიბლოკა"
+
+#: ../udiskie/mount.py:249
+#, python-brace-format
+msgid "no cached key for {0}"
+msgstr "{0}-ისთვის დაკეშილი გასაღები აღმოჩენილი არაა"
+
+#: ../udiskie/mount.py:251
+#, python-brace-format
+msgid "unlocking {0} using cached password"
+msgstr "{0}-ის განბლოკვა დაკეშილი პაროლით"
+
+#: ../udiskie/mount.py:255
+#, python-brace-format
+msgid "failed to unlock {0} using cached password"
+msgstr "დაკეშილი პაროლით {0}-ის განბლოკვა ჩავარდა"
+
+#: ../udiskie/mount.py:258
+#, python-brace-format
+msgid "unlocked {0} using cached password"
+msgstr "{0} განიბლოკა დაკეშილი პაროლით"
+
+#: ../udiskie/mount.py:266
+#, python-brace-format
+msgid "No matching keyfile rule for {}."
+msgstr "{}-ისთვის შესაბამისი გასაღების ფაილის წესის გარეშე."
+
+#: ../udiskie/mount.py:272
+#, python-brace-format
+msgid "keyfile for {0} not found: {1}"
+msgstr "{0}-ისთვის გასაღების ფაილი აღმოჩენილი არაა: {1}"
+
+#: ../udiskie/mount.py:274
+#, python-brace-format
+msgid "unlocking {0} using keyfile {1}"
+msgstr "{0}-ის განბლოკვა გასაღების ფაილით {1}"
+
+#: ../udiskie/mount.py:278
+#, python-brace-format
+msgid "failed to unlock {0} using keyfile"
+msgstr "{0}-ის გასაღების ფაილით განბლოკვა ჩავარდა"
+
+#: ../udiskie/mount.py:281
+#, python-brace-format
+msgid "unlocked {0} using keyfile"
+msgstr "{0} განიბლოკა გასაღებების ფაილიტ"
+
+#: ../udiskie/mount.py:307
+#, python-brace-format
+msgid "not locking {0}: unhandled device"
+msgstr "{0} არ ჩაიკეტება: დაუმუშავებელი მოწყობილობა"
+
+#: ../udiskie/mount.py:310
+#, python-brace-format
+msgid "not locking {0}: not unlocked"
+msgstr "{0} არ დაიბლოკება: განბლოკილი არაა"
+
+#: ../udiskie/mount.py:312
+#, python-brace-format
+msgid "locking {0}"
+msgstr "{0} იბლოკება"
+
+#: ../udiskie/mount.py:314
+#, python-brace-format
+msgid "locked {0}"
+msgstr "{0} დაიბლოკა"
+
+#: ../udiskie/mount.py:351 ../udiskie/mount.py:394
+#, python-brace-format
+msgid "not adding {0}: unhandled device"
+msgstr "{0} არ დაემატება: დაუმუშავებელი მოწყობილობა"
+
+#: ../udiskie/mount.py:430 ../udiskie/mount.py:480
+#, python-brace-format
+msgid "not removing {0}: unhandled device"
+msgstr "{0} არ წაიშლება: დაუმუშავებელი მოწყობილობა"
+
+#: ../udiskie/mount.py:505
+#, python-brace-format
+msgid "not ejecting {0}: unhandled device"
+msgstr "{0}-ის ამოღება არ მოხდება: დაუმუშავებელი მოწყობილობა"
+
+#: ../udiskie/mount.py:509
+#, python-brace-format
+msgid "not ejecting {0}: drive not ejectable"
+msgstr "{0}-ის ამოღება არ მოხდება: დისკი ამოღებადი არაა"
+
+#: ../udiskie/mount.py:515
+#, python-brace-format
+msgid "ejecting {0}"
+msgstr "{0}-ის ამოღება"
+
+#: ../udiskie/mount.py:517
+#, python-brace-format
+msgid "ejected {0}"
+msgstr "{0} ამოღებულია"
+
+#: ../udiskie/mount.py:531
+#, python-brace-format
+msgid "not detaching {0}: unhandled device"
+msgstr "{0} გამოერთებული არ იქნება: დაუმუშავებელი მოწყობილობა"
+
+#: ../udiskie/mount.py:535
+#, python-brace-format
+msgid "not detaching {0}: drive not detachable"
+msgstr "{0} გამოერთებული არ იქნება: დისკი გამოერთებადი არაა"
+
+#: ../udiskie/mount.py:539
+#, python-brace-format
+msgid "detaching {0}"
+msgstr "{0}-ის გამოერთება"
+
+#: ../udiskie/mount.py:544
+#, python-brace-format
+msgid "detached {0}"
+msgstr "{0} გამორთებულია"
+
+#: ../udiskie/mount.py:595
+#, python-brace-format
+msgid "not setting up {0}: already up"
+msgstr "{0}-ის მორგება არ მოხდება: უკვე მორგებულია"
+
+#: ../udiskie/mount.py:598
+#, python-brace-format
+msgid "not setting up {0}: not a file"
+msgstr "{0}-ის მორგება არ მოხდება: ფაილი არაა"
+
+#: ../udiskie/mount.py:600
+#, python-brace-format
+msgid "setting up loop device {0}"
+msgstr "მიმდინარეობს მორგება მარყუჟის მოწყობილობის {0}"
+
+#: ../udiskie/mount.py:618
+#, python-brace-format
+msgid ""
+"Insufficient permission to open {0} in read-write mode. Retrying in read-"
+"only mode."
+msgstr ""
+"არასაკმარისი წვდომები {0} ჩაწერა-წაკითხვის რეჟიმში გასახსნელად. ვცდი მხოლოდ-"
+"წაკითხვად რეჟიმს."
+
+#: ../udiskie/mount.py:630
+#, python-brace-format
+msgid "set up {0} as {1}"
+msgstr "{0} მორგებულია, როგორც {1}"
+
+#: ../udiskie/mount.py:645
+#, python-brace-format
+msgid "not deleting {0}: unhandled device"
+msgstr "{0} არ წაიშლება: დაუმუშავებელი მოწყობილობა"
+
+#: ../udiskie/mount.py:649
+#, python-brace-format
+msgid "deleting {0}"
+msgstr "{0} იშლება"
+
+#: ../udiskie/mount.py:651
+#, python-brace-format
+msgid "deleted {0}"
+msgstr "{0} წაიშალა"
+
+#: ../udiskie/mount.py:777
+#, python-brace-format
+msgid "Browse {0}"
+msgstr "{0}-ის დათვალიერება"
+
+#: ../udiskie/mount.py:778
+#, python-brace-format
+msgid "Hack on {0}"
+msgstr "ჰაკი {0}-ზე"
+
+#: ../udiskie/mount.py:779
+#, python-brace-format
+msgid "Mount {0}"
+msgstr "{0}-ის მიმაგრება"
+
+#: ../udiskie/mount.py:780
+#, python-brace-format
+msgid "Unmount {0}"
+msgstr "{0}-ის მოხსნა"
+
+#: ../udiskie/mount.py:781
+#, python-brace-format
+msgid "Unlock {0}"
+msgstr "{0}-ის განბლოკვა"
+
+#: ../udiskie/mount.py:782
+#, python-brace-format
+msgid "Lock {0}"
+msgstr "{0}-ის დაბლოკვა"
+
+#: ../udiskie/mount.py:783
+#, python-brace-format
+msgid "Eject {1}"
+msgstr "{1}-ის ამოღება"
+
+#: ../udiskie/mount.py:784
+#, python-brace-format
+msgid "Unpower {1}"
+msgstr "{1}-ის კვების გამორთვა"
+
+#: ../udiskie/mount.py:785
+#, python-brace-format
+msgid "Clear password for {0}"
+msgstr "{0}-ის პაროლის გასუფთავება"
+
+#: ../udiskie/mount.py:786
+#, python-brace-format
+msgid "Detach {0}"
+msgstr "{0}-ის გამოყოფა"
+
+#: ../udiskie/notify.py:62
+msgid "Browse directory"
+msgstr "საქაღალდის გახსნა"
+
+#: ../udiskie/notify.py:64
+msgid "Open terminal"
+msgstr "ტერმინალის გახსნა"
+
+#: ../udiskie/notify.py:68
+msgid "Device mounted"
+msgstr "მოწყობილობა მიმაგრებულია"
+
+#: ../udiskie/notify.py:69
+#, python-brace-format
+msgid "{0.ui_label} mounted on {0.mount_paths[0]}"
+msgstr "{0.ui_label} მიმაგრებულია {0.mount_paths[0]}-ზე"
+
+#: ../udiskie/notify.py:80
+msgid "Device unmounted"
+msgstr "მოწყობილობა მოხსნილია"
+
+#: ../udiskie/notify.py:81
+#, python-brace-format
+msgid "{0.ui_label} unmounted"
+msgstr "{0.ui_label} მოხსნილია"
+
+#: ../udiskie/notify.py:90
+msgid "Device locked"
+msgstr "მოწყობილობა დაბლოკილია"
+
+#: ../udiskie/notify.py:91
+#, python-brace-format
+msgid "{0.device_presentation} locked"
+msgstr "{0.device_presentation} დაბლოკილია"
+
+#: ../udiskie/notify.py:100
+msgid "Device unlocked"
+msgstr "მოწყობილობა განბლოკილია"
+
+#: ../udiskie/notify.py:101
+#, python-brace-format
+msgid "{0.device_presentation} unlocked"
+msgstr "{0.device_presentation} განბლოკილია"
+
+#: ../udiskie/notify.py:135
+msgid "Device added"
+msgstr "მოწყობილობა დაემატა"
+
+#: ../udiskie/notify.py:136
+#, python-brace-format
+msgid "device appeared on {0.device_presentation}"
+msgstr "{0.device_presentation}-ზე მოწყობილობა გამოჩნდა"
+
+#: ../udiskie/notify.py:155
+msgid "Device removed"
+msgstr "მოწყობილობა წაიშალა"
+
+#: ../udiskie/notify.py:156
+#, python-brace-format
+msgid "device disappeared on {0.device_presentation}"
+msgstr "{0.device_presentation}-ზე მოწყობილობა გაქრა"
+
+#: ../udiskie/notify.py:165
+#, python-brace-format
+msgid ""
+"failed to {0} {1}:\n"
+"{2}"
+msgstr ""
+"{0} {1} ჩავარდა:\n"
+"{2}"
+
+#: ../udiskie/notify.py:167
+#, python-brace-format
+msgid "failed to {0} device {1}."
+msgstr "{0} ჩავარდა მოწყობილობა {1}."
+
+#: ../udiskie/notify.py:173
+msgid "Retry"
+msgstr "თავიდან ცდა"
+
+#: ../udiskie/notify.py:176
+msgid "Job failed"
+msgstr "დავალების შეცდომა"
+
+#: ../udiskie/notify.py:207
+#, python-brace-format
+msgid "Failed to show notification: {0}"
+msgstr "გაფრთხილების ჩვენება ჩავარდა: {0}"
+
+#: ../udiskie/prompt.py:96
+msgid "Show password"
+msgstr "პაროლის ჩვენება"
+
+#: ../udiskie/prompt.py:101
+msgid "Open keyfile…"
+msgstr "გასაღების ფაილის გახსნა…"
+
+#: ../udiskie/prompt.py:108
+msgid "Cache password"
+msgstr "პაროლის დაკეშვა"
+
+#: ../udiskie/prompt.py:123
+msgid "Open a keyfile to unlock the LUKS device"
+msgstr "გახსენით გასაღების ფაილი LUKS მოწყობილობის განბლოკვისთვის"
+
+#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#, python-brace-format
+msgid "Enter password for {0.ui_label_dialog}: "
+msgstr "შეიყვანეთ პაროლი მოწყობილობისთვის {0.ui_label_dialog}: "
+
+#: ../udiskie/prompt.py:204
+msgid "Unknown device attribute {!r} in format string: {!r}"
+msgstr "უცნობი მოწყობილობის ატრიბუტი {!r} ფორმატის სტრიქონშ: {!r}"
+
+#: ../udiskie/prompt.py:256
+msgid ""
+"Can't find file browser: {0!r}. You may want to change the value for the '-"
+"f' option."
+msgstr ""
+"ფაილების ბრაუზერი ვერ ვიპოვე: {0!r}. შეიძლება, პარამეტრისთვის'-f' "
+"მნიშვნელობის შეცვლა დაგჭირდეთ."
+
+#: ../udiskie/tray.py:182
+msgid "Managed devices"
+msgstr "მართული მოწყობილობები"
+
+#: ../udiskie/tray.py:198
+msgid "Mount disc image"
+msgstr "დისკის ასლის ფაილის მიმაგრება"
+
+#: ../udiskie/tray.py:204
+msgid "Enable automounting"
+msgstr "ავტომიმაგრების ჩართვა"
+
+#: ../udiskie/tray.py:210
+msgid "Enable notifications"
+msgstr "გაფრთხილებების ჩართვა"
+
+#: ../udiskie/tray.py:219
+msgid "Quit"
+msgstr "გასვლა"
+
+#: ../udiskie/tray.py:226
+msgid "Open disc image"
+msgstr "დისკის ასლის ფაილის გახსნა"
+
+#: ../udiskie/tray.py:228
+msgid "Open"
+msgstr "გახსნა"
+
+#: ../udiskie/tray.py:229
+msgid "Cancel"
+msgstr "გაუქმება"
+
+#: ../udiskie/tray.py:269
+msgid "Invalid node!"
+msgstr "არასწორი კვანძი!"
+
+#: ../udiskie/tray.py:271
+msgid "No external devices"
+msgstr "გარე მოწყობილობების გარეშე"
+
+#: ../udiskie/tray.py:390
+msgid "udiskie"
+msgstr "udiskie"
+
+#: ../udiskie/udisks2.py:673
+#, python-brace-format
+msgid "found device owning \"{0}\": \"{1}\""
+msgstr "აღმოჩენილია მოწყობილობა, რომელიც ფლობს \"{0}\"-ს: \"{1}\""
+
+#: ../udiskie/udisks2.py:676
+#, python-brace-format
+msgid "no device found owning \"{0}\""
+msgstr "\"{0}\"-ის მფლობელი მოწყობილობა აღმოჩენილი არაა"
+
+#: ../udiskie/udisks2.py:695
+#, python-brace-format
+msgid "Daemon version: {0}"
+msgstr "დემონის ვერსია: {0}"
+
+#: ../udiskie/udisks2.py:700
+#, python-brace-format
+msgid "Keyfile support: {0}"
+msgstr "გასაღების ფაილის მხარდაჭერა: {0}"
+
+#: ../udiskie/udisks2.py:779
+#, python-brace-format
+msgid "+++ {0}: {1}"
+msgstr "+++ {0}: {1}"
