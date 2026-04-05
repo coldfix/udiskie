@@ -250,30 +250,30 @@ class Config:
 
     @property
     def device_config(self):
-        device_config = map(DeviceFilter, self._data.get('device_config', []))
-        mount_options = map(MountOptions, self._data.get('mount_options', []))
-        ignore_device = map(IgnoreDevice, self._data.get('ignore_device', []))
+        device_config = map(DeviceFilter, self._data.get('device_config') or [])
+        mount_options = map(MountOptions, self._data.get('mount_options') or [])
+        ignore_device = map(IgnoreDevice, self._data.get('ignore_device') or [])
         return list(device_config) + list(mount_options) + list(ignore_device)
 
     @property
     def program_options(self):
         """Get the program options dictionary from the config file."""
-        return self._data.get('program_options', {}).copy()
+        return (self._data.get('program_options') or {}).copy()
 
     @property
     def notifications(self):
         """Get the notification timeouts dictionary from the config file."""
-        return self._data.get('notifications', {}).copy()
+        return (self._data.get('notifications') or {}).copy()
 
     @property
     def icon_names(self):
         """Get the icon names dictionary from the config file."""
-        return self._data.get('icon_names', {}).copy()
+        return (self._data.get('icon_names') or {}).copy()
 
     @property
     def notification_actions(self):
         """Get the notification actions dictionary from the config file."""
-        return self._data.get('notification_actions', {}).copy()
+        return (self._data.get('notification_actions') or {}).copy()
 
     @property
     def quickmenu_actions(self):
