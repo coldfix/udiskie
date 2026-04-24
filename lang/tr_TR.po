@@ -1,14 +1,14 @@
 # Turkish translations for udiskie package.
 # Copyright (C) 2021 Thomas Gläßle
 # This file is distributed under the same license as the udiskie package.
-# Oğuz Ersen <oguz@ersen.moe>, 2021-2025.
+# Oğuz Ersen <oguz@ersen.moe>, 2021-2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-07 22:05+0100\n"
-"PO-Revision-Date: 2025-10-19 19:21+0300\n"
+"PO-Revision-Date: 2026-04-24 20:30+0300\n"
 "Last-Translator: Oğuz Ersen <oguz@ersen.moe>\n"
 "Language-Team: Turkish <tr>\n"
 "Language: tr\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0\n"
-"X-Generator: Gtranslator 48.0\n"
+"X-Generator: Gtranslator 49.0\n"
 
 #: ../udiskie/cli.py:46
 #, python-brace-format
@@ -591,9 +591,9 @@ msgid "Open a keyfile to unlock the LUKS device"
 msgstr "LUKS aygıtının kilidini açmak için bir anahtar dosyası açın"
 
 #: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
-msgstr "{0.device_presentation} için parolayı girin: "
+msgstr "{0.ui_label_dialog} için parolayı girin: "
 
 #: ../udiskie/prompt.py:204
 msgid "Unknown device attribute {!r} in format string: {!r}"
