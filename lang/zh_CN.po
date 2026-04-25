@@ -584,7 +584,7 @@ msgstr "打开密钥文件以解锁 LUKS 设备"
 #: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
 #, fuzzy, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
-msgstr "输入 {0.device_presentation} 的密码: "
+msgstr "输入 {0.ui_label_dialog} 的密码: "
 
 #: ../udiskie/prompt.py:204
 msgid "Unknown device attribute {!r} in format string: {!r}"

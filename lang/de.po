@@ -594,7 +594,7 @@ msgstr "Schlüsseldatei zum Entsperren von LUKS Gerät öffnen"
 #: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
 #, fuzzy, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
-msgstr "Passwort für {0.device_presentation} eingeben: "
+msgstr "Passwort für {0.ui_label_dialog} eingeben: "
 
 #: ../udiskie/prompt.py:204
 msgid "Unknown device attribute {!r} in format string: {!r}"

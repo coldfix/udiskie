@@ -591,7 +591,7 @@ msgstr ""
 #: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
 #, fuzzy, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
-msgstr "Введите пароль для {0.device_presentation}: "
+msgstr "Введите пароль для {0.ui_label_dialog}: "
 
 #: ../udiskie/prompt.py:204
 msgid "Unknown device attribute {!r} in format string: {!r}"
