@@ -251,8 +251,8 @@ device_config:
                             # for all matched devices, and resolve action result
                             # on parent device
 
-- ignore:    True           # never mount/unmount or even show this in the GUI
-  automount: False          # show but do not automount this device
+- ignore:    true           # never mount/unmount or even show this in the GUI
+  automount: false          # show but do not automount this device
   options: []               # additional options to be passed when mounting
 
 - id_uuid: ...              # [filter] match device by UUID
