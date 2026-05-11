@@ -40,9 +40,6 @@ dependencies = [
 "Issue Tracker" = "https://github.com/coldfix/udiskie/issues"
 "Changelog" = "https://github.com/coldfix/udiskie/blob/master/CHANGES.rst"
 
-[project.optional-dependencies]
-password-cache = ["keyutils>=0.3"]
-
 [project.scripts]
 udiskie = "udiskie.cli:Daemon.main"
 udiskie-mount = "udiskie.cli:Mount.main"

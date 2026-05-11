@@ -18,7 +18,7 @@ Its features include:
 - LUKS encrypted devices
 - unlocking with keyfiles (requires udisks 2.6.4)
 - loop devices (mounting iso archives)
-- password caching (requires python keyutils 0.3)
+- password caching (requires keyutils_)
 
 All features can be individually enabled or disabled.
 
@@ -27,6 +27,7 @@ version of udiskie that supports python2, please check out the ``1.7.X``
 releases or the ``maint-1.7`` branch.
 
 .. _udisks2: https://www.freedesktop.org/wiki/Software/udisks
+.. _keyutils: https://www.man7.org/linux/man-pages/man7/keyutils.7.html
 
 Links
 -----
