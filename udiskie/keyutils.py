@@ -6,7 +6,7 @@ __all__ = [
     "add_key",
     "read_key",
     "request_key",
-    "revoke",
+    "invalidate",
     "set_timeout",
 ]
 
@@ -105,7 +105,7 @@ _keyctl_read = _declare(_keyutils, "keyctl_read", c_long, [
     c_size_t,       # [in] buflen
 ])
 
-_keyctl_revoke = _declare(_keyutils, "keyctl_revoke", c_long, [
+_keyctl_invalidate = _declare(_keyutils, "keyctl_invalidate", c_long, [
     key_serial_t,   # [in] id
 ])
 
@@ -175,14 +175,14 @@ def request_key(key: bytes, keyring: int = KEY_SPEC_PROCESS_KEYRING) -> int:
     return _errcheck(_request_key(b"user", key, c_char_p(), keyring))
 
 
-def revoke(key: int):
+def invalidate(key: int):
     """
-    Revoke the specified key.
+    Remove the specified key from the keyring.
 
     :param int key: key ID
     :raises: KeyutilsError
     """
-    _errcheck(_keyctl_revoke(key))
+    _errcheck(_keyctl_invalidate(key))
 
 
 def set_timeout(key: int, timeout: int):

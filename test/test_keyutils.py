@@ -49,7 +49,7 @@ class TestKeyutils(unittest.TestCase):
         with self.assertRaises(keyutils.KeyExpired):
             keyutils.read_key(key_id)
 
-    def test_revoke(self):
+    def test_invalidate(self):
         """A key can be deleted manually."""
         key = b'GAMMA'
         val = '{<}hëllo ωορλδ!{>}'.encode('utf-8')
@@ -57,9 +57,11 @@ class TestKeyutils(unittest.TestCase):
         self.assertEqual(keyutils.request_key(key), key_id)
         self.assertEqual(keyutils.read_key(key_id), val)
 
-        keyutils.revoke(key_id)
-        with self.assertRaises(keyutils.KeyRevoked):
+        keyutils.invalidate(key_id)
+        with self.assertRaises(keyutils.KeyutilsError):
             keyutils.read_key(key_id)
+        with self.assertRaises(keyutils.KeyNotAvailable):
+            keyutils.request_key(key)
 
     def test_update(self):
         key = b'DELTA'
@@ -71,10 +73,6 @@ class TestKeyutils(unittest.TestCase):
         key_id = keyutils.add_key(key, val + val)
         self.assertEqual(keyutils.request_key(key), key_id)
         self.assertEqual(keyutils.read_key(key_id), val + val)
-
-        keyutils.revoke(key_id)
-        with self.assertRaises(keyutils.KeyRevoked):
-            keyutils.read_key(key_id)
 
     def test_clear(self):
         key1 = b'eps'
@@ -108,7 +106,7 @@ class TestKeyutils(unittest.TestCase):
         key_id = keyutils.add_key(b"gamma", b"value")
         self.assertTrue(keyutils.is_valid(key_id))
 
-        keyutils.revoke(key_id)
+        keyutils.invalidate(key_id)
         self.assertFalse(keyutils.is_valid(key_id))
 
         key_id = keyutils.add_key(b"gamma", b"value")

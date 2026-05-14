@@ -52,7 +52,7 @@ class TestPasswordCache(unittest.TestCase):
         with self.assertRaises(KeyError):
             cache[device]
 
-    def test_revoke(self):
+    def test_invalidate(self):
         """A key can be deleted manually."""
         device = TestDev('GAMMA')
         password = '{<}hëllo ωορλδ!{>}'
@@ -71,9 +71,6 @@ class TestPasswordCache(unittest.TestCase):
         self.assertEqual(cache[device], password.encode('utf-8'))
         cache[device] = password * 2
         self.assertEqual(cache[device], password.encode('utf-8')*2)
-        del cache[device]
-        with self.assertRaises(KeyError):
-            cache[device]
 
     def test_clear(self):
         device1 = TestDev('eps')

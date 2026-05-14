@@ -51,7 +51,7 @@ class PasswordCache:
 
     def __delitem__(self, device):
         key_id = self._key_id(device)
-        keyutils.revoke(key_id)
+        keyutils.invalidate(key_id)
 
     def _touch(self, key_id):
         if self.timeout > 0:
