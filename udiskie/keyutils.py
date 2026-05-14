@@ -140,14 +140,13 @@ def read_key(key_id: int) -> bytes:
     :returns: secret content
     :raises: KeyutilsError
     """
-    buflen = 0
-    buffer = None
+    buflen = _keyctl_read(key_id, None, 0)
     while True:
+        buffer = ctypes.create_string_buffer(buflen)
         ret = _keyctl_read(key_id, buffer, buflen)
         if 0 <= ret <= buflen:
             return buffer.value
         buflen = ret
-        buffer = ctypes.create_string_buffer(buflen)
 
 
 def request_key(key: bytes, keyring: int = KEY_SPEC_PROCESS_KEYRING) -> int:
