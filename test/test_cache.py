@@ -93,6 +93,25 @@ class TestPasswordCache(unittest.TestCase):
         with self.assertRaises(KeyError):
             cache[device2]
 
+    def test_is_valid(self):
+        cache = PasswordCache(1)
+        self.assertFalse(cache)
+
+        device = TestDev('gamma')
+        password = 'value'
+
+        cache[device] = password
+        self.assertTrue(cache)
+
+        del cache[device]
+        self.assertFalse(cache)
+
+        cache[device] = password
+        self.assertTrue(cache)
+
+        time.sleep(1.2)
+        self.assertFalse(cache)
+
 
 if __name__ == '__main__':
     unittest.main()

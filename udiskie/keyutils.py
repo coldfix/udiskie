@@ -14,6 +14,7 @@ import ctypes
 import ctypes.util
 import errno
 import os
+from array import array
 from ctypes import (
     c_char_p,
     c_int32 as key_serial_t,
@@ -59,7 +60,7 @@ _errno_map = {
 }
 
 
-def _errcheck(result, func, arguments):
+def _errcheck(result):
     if result < 0:
         err_code = ctypes.get_errno()
         exc_type = _errno_map.get(err_code, KeyutilsError)
@@ -72,7 +73,6 @@ def _declare(lib, name, restype, argtypes):
         func = lib[name]
     except (AttributeError, KeyError) as e:
         raise ImportError("Missing symbol in library 'keyutils.so'.") from e
-    func.errcheck = _errcheck
     func.restype = restype
     func.argtypes = argtypes
     return func
@@ -133,7 +133,17 @@ def add_key(
     :returns: ID of the inserted key
     :raises: KeyutilsError
     """
-    return _add_key(b"user", key, value, len(value), keyring)
+    return _errcheck(_add_key(b"user", key, value, len(value), keyring))
+
+
+def is_valid(key: int) -> bool:
+    """
+    Check if the given key is available and valid.
+
+    :param int key: key ID
+    :returns: whether the key is accessible
+    """
+    return _keyctl_read(key, None, 0) >= 0
 
 
 def read_key(key_id: int) -> bytes:
@@ -144,10 +154,10 @@ def read_key(key_id: int) -> bytes:
     :returns: secret content
     :raises: KeyutilsError
     """
-    buflen = _keyctl_read(key_id, None, 0)
+    buflen = _errcheck(_keyctl_read(key_id, None, 0))
     while True:
         buffer = ctypes.create_string_buffer(buflen)
-        ret = _keyctl_read(key_id, buffer, buflen)
+        ret = _errcheck(_keyctl_read(key_id, buffer, buflen))
         if 0 <= ret <= buflen:
             return buffer.value
         buflen = ret
@@ -162,7 +172,7 @@ def request_key(key: bytes, keyring: int = KEY_SPEC_PROCESS_KEYRING) -> int:
     :returns: key ID
     :raises: KeyutilsError
     """
-    return _request_key(b"user", key, c_char_p(), keyring)
+    return _errcheck(_request_key(b"user", key, c_char_p(), keyring))
 
 
 def revoke(key: int):
@@ -172,7 +182,7 @@ def revoke(key: int):
     :param int key: key ID
     :raises: KeyutilsError
     """
-    _keyctl_revoke(key)
+    _errcheck(_keyctl_revoke(key))
 
 
 def set_timeout(key: int, timeout: int):
@@ -183,7 +193,7 @@ def set_timeout(key: int, timeout: int):
     :param int timeout: timeout in seconds
     :raises: KeyutilsError
     """
-    _keyctl_set_timeout(key, timeout)
+    _errcheck(_keyctl_set_timeout(key, timeout))
 
 
 def clear(keyring: int = KEY_SPEC_PROCESS_KEYRING):
@@ -193,4 +203,19 @@ def clear(keyring: int = KEY_SPEC_PROCESS_KEYRING):
     :param int keyring: keyring ID
     :raises: KeyutilsError
     """
-    _keyctl_clear(keyring)
+    _errcheck(_keyctl_clear(keyring))
+
+
+def list_keys(keyring: int = KEY_SPEC_PROCESS_KEYRING) -> [int]:
+    """
+    List key IDs in the specified keyring.
+
+    :param int keyring: keyring ID
+    :returns: list of key IDs
+    :raises: keyutilsError
+    """
+    try:
+        content = read_key(keyring)
+    except KeyNotAvailable:
+        return []
+    return array('I', content).tolist()

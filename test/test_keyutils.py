@@ -94,6 +94,30 @@ class TestKeyutils(unittest.TestCase):
         with self.assertRaises(keyutils.KeyutilsError):
             keyutils.read_key(id2)
 
+    def test_list_keys(self):
+        self.assertCountEqual([], keyutils.list_keys())
+
+        id1 = keyutils.add_key(b"rho1", b"val1")
+        id2 = keyutils.add_key(b"rho2", b"val2")
+        self.assertCountEqual([id1, id2], keyutils.list_keys())
+
+    def test_is_valid(self):
+        unknown_key = 123456
+        self.assertFalse(keyutils.is_valid(unknown_key))
+
+        key_id = keyutils.add_key(b"gamma", b"value")
+        self.assertTrue(keyutils.is_valid(key_id))
+
+        keyutils.revoke(key_id)
+        self.assertFalse(keyutils.is_valid(key_id))
+
+        key_id = keyutils.add_key(b"gamma", b"value")
+        self.assertTrue(keyutils.is_valid(key_id))
+
+        keyutils.set_timeout(key_id, 1)
+        time.sleep(1.2)
+        self.assertFalse(keyutils.is_valid(key_id))
+
 
 if __name__ == '__main__':
     unittest.main()

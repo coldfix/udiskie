@@ -12,6 +12,11 @@ class PasswordCache:
         self.timeout = timeout
         self.keyring = KEY_SPEC_PROCESS_KEYRING
 
+    def __bool__(self):
+        return any(
+            keyutils.is_valid(key_id)
+            for key_id in keyutils.list_keys(self.keyring))
+
     def _key(self, device):
         return device.id_uuid.encode('utf-8')
 
