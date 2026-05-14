@@ -23,12 +23,9 @@ class PasswordCache:
     def _key_id(self, device):
         key = self._key(device)
         try:
-            key_id = keyutils.request_key(key, self.keyring)
+            return keyutils.request_key(key, self.keyring)
         except keyutils.KeyutilsError:
-            raise KeyError("Key has been revoked!") from None
-        if key_id is None:
-            raise KeyError("Key not cached!")
-        return key_id
+            raise KeyError
 
     def __contains__(self, device):
         try:
