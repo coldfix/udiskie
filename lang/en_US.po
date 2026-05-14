@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie 2.6.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-14 19:58+0200\n"
+"POT-Creation-Date: 2026-05-14 22:08+0200\n"
 "PO-Revision-Date: 2026-01-13 06:20+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -582,20 +582,24 @@ msgstr "Open keyfile…"
 msgid "Cache password"
 msgstr "Cache password"
 
-#: ../udiskie/prompt.py:123
+#: ../udiskie/prompt.py:112
+msgid "Store password in memory until udiskie is closed."
+msgstr ""
+
+#: ../udiskie/prompt.py:125
 msgid "Open a keyfile to unlock the LUKS device"
 msgstr "Open a keyfile to unlock the LUKS device"
 
-#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#: ../udiskie/prompt.py:159 ../udiskie/prompt.py:169
 #, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
 msgstr "Enter password for {0.ui_label_dialog}: "
 
-#: ../udiskie/prompt.py:204
+#: ../udiskie/prompt.py:206
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "Unknown device attribute {!r} in format string: {!r}"
 
-#: ../udiskie/prompt.py:256
+#: ../udiskie/prompt.py:258
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."

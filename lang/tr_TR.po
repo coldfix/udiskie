@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-14 19:58+0200\n"
+"POT-Creation-Date: 2026-05-14 22:08+0200\n"
 "PO-Revision-Date: 2026-04-24 20:30+0300\n"
 "Last-Translator: Oğuz Ersen <oguz@ersen.moe>\n"
 "Language-Team: Turkish <tr>\n"
@@ -586,20 +586,24 @@ msgstr "Anahtar dosyasını aç…"
 msgid "Cache password"
 msgstr "Parolayı önbelleğe al"
 
-#: ../udiskie/prompt.py:123
+#: ../udiskie/prompt.py:112
+msgid "Store password in memory until udiskie is closed."
+msgstr ""
+
+#: ../udiskie/prompt.py:125
 msgid "Open a keyfile to unlock the LUKS device"
 msgstr "LUKS aygıtının kilidini açmak için bir anahtar dosyası açın"
 
-#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#: ../udiskie/prompt.py:159 ../udiskie/prompt.py:169
 #, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
 msgstr "{0.ui_label_dialog} için parolayı girin: "
 
-#: ../udiskie/prompt.py:204
+#: ../udiskie/prompt.py:206
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "Biçim dizgesinde bilinmeyen aygıt özelliği {!r}: {!r}"
 
-#: ../udiskie/prompt.py:256
+#: ../udiskie/prompt.py:258
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."
