@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie 2.6.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-13 06:20+0100\n"
+"POT-Creation-Date: 2026-05-14 19:58+0200\n"
 "PO-Revision-Date: 2026-02-26 15:47+0100\n"
 "Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
 "Language-Team: Georgian <(nothing)>\n"
@@ -25,8 +25,7 @@ msgstr "ეს პარამეტრები ურთიერთგამ�
 #: ../udiskie/cli.py:119
 msgid ""
 "\n"
-"    Note, that the options in the individual groups are mutually "
-"exclusive.\n"
+"    Note, that the options in the individual groups are mutually exclusive.\n"
 "\n"
 "    The config file can be a JSON or preferably a YAML file. For an\n"
 "    example, see the MAN page (or doc/udiskie.8.txt in the repository).\n"
@@ -152,8 +151,8 @@ msgstr "{0!r}-ის წაკითხვა ჩავარდა: {1}"
 msgid ""
 "Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
 msgstr ""
-"საჭირო დამოკიდებულება GTK 3 აღმოჩენილი არაა. პაროლისთვის გამოყენებული "
-"იქნება GTK 2"
+"საჭირო დამოკიდებულება GTK 3 აღმოჩენილი არაა. პაროლისთვის გამოყენებული იქნება "
+"GTK 2"
 
 #: ../udiskie/depend.py:65
 msgid "X server not connected!"
@@ -610,47 +609,52 @@ msgstr ""
 "ფაილების ბრაუზერი ვერ ვიპოვე: {0!r}. შეიძლება, პარამეტრისთვის'-f' "
 "მნიშვნელობის შეცვლა დაგჭირდეთ."
 
-#: ../udiskie/tray.py:182
+#: ../udiskie/tray.py:183
 msgid "Managed devices"
 msgstr "მართული მოწყობილობები"
 
-#: ../udiskie/tray.py:198
+#: ../udiskie/tray.py:199
 msgid "Mount disc image"
 msgstr "დისკის ასლის ფაილის მიმაგრება"
 
-#: ../udiskie/tray.py:204
+#: ../udiskie/tray.py:205
 msgid "Enable automounting"
 msgstr "ავტომიმაგრების ჩართვა"
 
-#: ../udiskie/tray.py:210
+#: ../udiskie/tray.py:211
 msgid "Enable notifications"
 msgstr "გაფრთხილებების ჩართვა"
 
 #: ../udiskie/tray.py:219
+#, fuzzy
+msgid "Clear password cache"
+msgstr "{0}-ის პაროლის გასუფთავება"
+
+#: ../udiskie/tray.py:227
 msgid "Quit"
 msgstr "გასვლა"
 
-#: ../udiskie/tray.py:226
+#: ../udiskie/tray.py:234
 msgid "Open disc image"
 msgstr "დისკის ასლის ფაილის გახსნა"
 
-#: ../udiskie/tray.py:228
+#: ../udiskie/tray.py:236
 msgid "Open"
 msgstr "გახსნა"
 
-#: ../udiskie/tray.py:229
+#: ../udiskie/tray.py:237
 msgid "Cancel"
 msgstr "გაუქმება"
 
-#: ../udiskie/tray.py:269
+#: ../udiskie/tray.py:277
 msgid "Invalid node!"
 msgstr "არასწორი კვანძი!"
 
-#: ../udiskie/tray.py:271
+#: ../udiskie/tray.py:279
 msgid "No external devices"
 msgstr "გარე მოწყობილობების გარეშე"
 
-#: ../udiskie/tray.py:390
+#: ../udiskie/tray.py:398
 msgid "udiskie"
 msgstr "udiskie"
 

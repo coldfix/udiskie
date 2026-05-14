@@ -17,6 +17,9 @@ class TestKeyutils(unittest.TestCase):
     # NOTE: The key names are different in each test so that they do not
     # interfere accidentally.
 
+    def setUp(self):
+        keyutils.clear()
+
     def test_add_request_read(self):
         """The cached password expires after the specified timeout."""
         key = b'ALPHA'
@@ -72,6 +75,24 @@ class TestKeyutils(unittest.TestCase):
         keyutils.revoke(key_id)
         with self.assertRaises(keyutils.KeyRevoked):
             keyutils.read_key(key_id)
+
+    def test_clear(self):
+        key1 = b'eps'
+        key2 = b'tau'
+        val1 = b'hello'
+        val2 = b'world'
+        id1 = keyutils.add_key(key1, val1)
+        id2 = keyutils.add_key(key2, val2)
+        self.assertEqual(keyutils.request_key(key1), id1)
+        self.assertEqual(keyutils.request_key(key2), id2)
+        self.assertEqual(keyutils.read_key(id1), val1)
+        self.assertEqual(keyutils.read_key(id2), val2)
+
+        keyutils.clear()
+        with self.assertRaises(keyutils.KeyutilsError):
+            keyutils.read_key(id1)
+        with self.assertRaises(keyutils.KeyutilsError):
+            keyutils.read_key(id2)
 
 
 if __name__ == '__main__':

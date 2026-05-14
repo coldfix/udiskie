@@ -5,6 +5,7 @@ Tests for the udiskie.cache module.
 import unittest
 import time
 
+import udiskie.keyutils as keyutils
 from udiskie.cache import PasswordCache
 
 
@@ -19,6 +20,9 @@ class TestPasswordCache(unittest.TestCase):
     """
     Tests for the udiskie.cache.PasswordCache class.
     """
+
+    def setUp(self):
+        keyutils.clear()
 
     # NOTE: The device names are different in each test so that they do not
     # interfere accidentally.
@@ -70,6 +74,24 @@ class TestPasswordCache(unittest.TestCase):
         del cache[device]
         with self.assertRaises(KeyError):
             cache[device]
+
+    def test_clear(self):
+        device1 = TestDev('eps')
+        device2 = TestDev('tau')
+        password1 = 'hello'
+        password2 = 'world'
+        cache = PasswordCache(0)
+        cache[device1] = password1
+        cache[device2] = password2
+
+        self.assertEqual(cache[device1], password1.encode('utf-8'))
+        self.assertEqual(cache[device2], password2.encode('utf-8'))
+
+        cache.clear()
+        with self.assertRaises(KeyError):
+            cache[device1]
+        with self.assertRaises(KeyError):
+            cache[device2]
 
 
 if __name__ == '__main__':

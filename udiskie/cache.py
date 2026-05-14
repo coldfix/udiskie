@@ -54,3 +54,6 @@ class PasswordCache:
     def _touch(self, key_id):
         if self.timeout > 0:
             keyutils.set_timeout(key_id, self.timeout)
+
+    def clear(self):
+        keyutils.clear(self.keyring)

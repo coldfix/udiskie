@@ -114,6 +114,10 @@ _keyctl_set_timeout = _declare(_keyutils, "keyctl_set_timeout", c_long, [
     c_uint,         # [in] timeout
 ])
 
+_keyctl_clear = _declare(_keyutils, "keyctl_clear", c_long, [
+    key_serial_t,   # [in] ringid
+])
+
 
 def add_key(
     key: bytes,
@@ -180,3 +184,13 @@ def set_timeout(key: int, timeout: int):
     :raises: KeyutilsError
     """
     _keyctl_set_timeout(key, timeout)
+
+
+def clear(keyring: int = KEY_SPEC_PROCESS_KEYRING):
+    """
+    Clear all keys in the specified keyring.
+
+    :param int keyring: keyring ID
+    :raises: KeyutilsError
+    """
+    _keyctl_clear(keyring)

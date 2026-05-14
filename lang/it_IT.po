@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-07 22:05+0100\n"
+"POT-Creation-Date: 2026-05-14 19:58+0200\n"
 "PO-Revision-Date: 2022-04-17 13:10+0000\n"
 "Last-Translator: Weblate Admin <weblate@coldfix.de>\n"
 "Language-Team: Italian <http://weblate.coldfix.de/projects/udiskie/udiskie/"
@@ -604,47 +604,52 @@ msgstr ""
 "Impossibile trovare esplora risorse: {0!r}. Potresti voler cambiare il "
 "valore per l'opzione '-f'."
 
-#: ../udiskie/tray.py:182
+#: ../udiskie/tray.py:183
 msgid "Managed devices"
 msgstr ""
 
-#: ../udiskie/tray.py:198
+#: ../udiskie/tray.py:199
 msgid "Mount disc image"
 msgstr "Monta l'immagine del disco"
 
-#: ../udiskie/tray.py:204
+#: ../udiskie/tray.py:205
 msgid "Enable automounting"
 msgstr "Abilita l'automontaggio"
 
-#: ../udiskie/tray.py:210
+#: ../udiskie/tray.py:211
 msgid "Enable notifications"
 msgstr "Abilita le notifiche"
 
 #: ../udiskie/tray.py:219
+#, fuzzy
+msgid "Clear password cache"
+msgstr "Dimentica la password per {0}"
+
+#: ../udiskie/tray.py:227
 msgid "Quit"
 msgstr "Esci"
 
-#: ../udiskie/tray.py:226
+#: ../udiskie/tray.py:234
 msgid "Open disc image"
 msgstr "Apri l'immagine del disco"
 
-#: ../udiskie/tray.py:228
+#: ../udiskie/tray.py:236
 msgid "Open"
 msgstr "Apri"
 
-#: ../udiskie/tray.py:229
+#: ../udiskie/tray.py:237
 msgid "Cancel"
 msgstr "Annulla"
 
-#: ../udiskie/tray.py:269
+#: ../udiskie/tray.py:277
 msgid "Invalid node!"
 msgstr "Nodo invalido!"
 
-#: ../udiskie/tray.py:271
+#: ../udiskie/tray.py:279
 msgid "No external devices"
 msgstr "Nessun dispositivo esterno"
 
-#: ../udiskie/tray.py:390
+#: ../udiskie/tray.py:398
 msgid "udiskie"
 msgstr "udiskie"
 

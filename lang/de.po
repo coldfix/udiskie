@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie 2.4.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-07 22:05+0100\n"
+"POT-Creation-Date: 2026-05-14 19:58+0200\n"
 "PO-Revision-Date: 2022-04-18 00:28+0000\n"
 "Last-Translator: Thomas G. <t_glaessle@gmx.de>\n"
 "Language-Team: German <https://weblate.coldfix.de/projects/udiskie/udiskie/"
@@ -608,47 +608,52 @@ msgstr ""
 "Dateimanager konnte nicht gefunden werden: {0!r}. Programm kann mit dem '-f' "
 "Parameter festgelegt werden."
 
-#: ../udiskie/tray.py:182
+#: ../udiskie/tray.py:183
 msgid "Managed devices"
 msgstr "Verwaltete Geräte"
 
-#: ../udiskie/tray.py:198
+#: ../udiskie/tray.py:199
 msgid "Mount disc image"
 msgstr "Abbild einhängen"
 
-#: ../udiskie/tray.py:204
+#: ../udiskie/tray.py:205
 msgid "Enable automounting"
 msgstr "Automatisches Einhängen"
 
-#: ../udiskie/tray.py:210
+#: ../udiskie/tray.py:211
 msgid "Enable notifications"
 msgstr "Benachrichtigungen"
 
 #: ../udiskie/tray.py:219
+#, fuzzy
+msgid "Clear password cache"
+msgstr "Passwort löschen für {0}"
+
+#: ../udiskie/tray.py:227
 msgid "Quit"
 msgstr "Beenden"
 
-#: ../udiskie/tray.py:226
+#: ../udiskie/tray.py:234
 msgid "Open disc image"
 msgstr "Datenträgerabbild öffnen"
 
-#: ../udiskie/tray.py:228
+#: ../udiskie/tray.py:236
 msgid "Open"
 msgstr "Öffnen"
 
-#: ../udiskie/tray.py:229
+#: ../udiskie/tray.py:237
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: ../udiskie/tray.py:269
+#: ../udiskie/tray.py:277
 msgid "Invalid node!"
 msgstr "Ungültiger Knoten!"
 
-#: ../udiskie/tray.py:271
+#: ../udiskie/tray.py:279
 msgid "No external devices"
 msgstr "Keine externen Geräte"
 
-#: ../udiskie/tray.py:390
+#: ../udiskie/tray.py:398
 msgid "udiskie"
 msgstr "udiskie"
 
