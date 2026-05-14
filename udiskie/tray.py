@@ -213,13 +213,6 @@ class TrayMenu:
             onclick=lambda _: self._daemon.notify.toggle(),
             checked=self._daemon.notify.active,
         ))
-        if self._mounter._cache:
-            menu.append(Gtk.SeparatorMenuItem())
-            menu.append(self._menuitem(
-                _("Clear password cache"),
-                self._icons.get_icon('clear_passwords', Gtk.IconSize.MENU),
-                onclick=lambda _: self._mounter._cache.clear(),
-            ))
         # append menu item for closing the application
         if self._quit_action:
             menu.append(Gtk.SeparatorMenuItem())

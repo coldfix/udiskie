@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-29 11:42+0200\n"
+"POT-Creation-Date: 2026-07-29 11:45+0200\n"
 "PO-Revision-Date: 2019-05-02 14:20+0200\n"
 "Last-Translator: Jose Riha <jose1711@gmail.com>\n"
 "Language-Team: Slovak\n"
@@ -44,7 +44,7 @@ msgstr "%(message)s"
 msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 
-#: ../udiskie/cli.py:386
+#: ../udiskie/cli.py:371
 msgid ""
 "Typelib for 'libnotify' is not available. Possible causes include:\n"
 "\t- libnotify is not installed\n"
@@ -54,13 +54,13 @@ msgid ""
 "Starting udiskie without notifications."
 msgstr ""
 
-#: ../udiskie/cli.py:400
+#: ../udiskie/cli.py:385
 msgid ""
 "Not run within X or Wayland session.\n"
 "Starting udiskie without tray icon.\n"
 msgstr ""
 
-#: ../udiskie/cli.py:407
+#: ../udiskie/cli.py:392
 msgid ""
 "Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
 "\t- GTK3 is not installed\n"
@@ -69,7 +69,7 @@ msgid ""
 "Starting udiskie without tray icon.\n"
 msgstr ""
 
-#: ../udiskie/cli.py:417
+#: ../udiskie/cli.py:402
 msgid ""
 "Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
 "\t- libappindicator is not installed\n"
@@ -78,14 +78,14 @@ msgid ""
 "Starting udiskie without appindicator icon.\n"
 msgstr ""
 
-#: ../udiskie/cli.py:436
+#: ../udiskie/cli.py:421
 msgid ""
 "The 'notify_command' option was renamed to 'event_hook'. The old name still "
 "works, but may be removed in a future version. Please change your command "
 "line and config to use the new name."
 msgstr ""
 
-#: ../udiskie/cli.py:443
+#: ../udiskie/cli.py:428
 msgid "Ignoring 'notify_command' in favor of 'event_hook'."
 msgstr ""
 
@@ -131,57 +131,57 @@ msgstr "X server nie je pripojený!"
 msgid "failed to {0} {1}: {2}"
 msgstr "chyba pri {0} {1}: {2}"
 
-#: ../udiskie/mount.py:121
+#: ../udiskie/mount.py:119
 #, python-brace-format
 msgid "not browsing {0}: not mounted"
 msgstr "neprezerám {0}: nepripojené"
 
-#: ../udiskie/mount.py:124
+#: ../udiskie/mount.py:122
 #, python-brace-format
 msgid "not browsing {0}: no program"
 msgstr "neprezerám {0}: chýba program"
 
-#: ../udiskie/mount.py:126 ../udiskie/mount.py:146
+#: ../udiskie/mount.py:124 ../udiskie/mount.py:144
 #, python-brace-format
 msgid "opening {0} on {0.mount_paths[0]}"
 msgstr "otváram {0} na {0.mount_paths[0]}"
 
-#: ../udiskie/mount.py:128 ../udiskie/mount.py:148
+#: ../udiskie/mount.py:126 ../udiskie/mount.py:146
 #, python-brace-format
 msgid "opened {0} on {0.mount_paths[0]}"
 msgstr "otvorené {0} na {0.mount_paths[0]}"
 
-#: ../udiskie/mount.py:141
+#: ../udiskie/mount.py:139
 #, fuzzy, python-brace-format
 msgid "not opening terminal {0}: not mounted"
 msgstr "neodpájam {0}: nepripojené"
 
-#: ../udiskie/mount.py:144
+#: ../udiskie/mount.py:142
 #, fuzzy, python-brace-format
 msgid "not opening terminal {0}: no program"
 msgstr "neprezerám {0}: chýba program"
 
-#: ../udiskie/mount.py:162
+#: ../udiskie/mount.py:160
 #, python-brace-format
 msgid "not mounting {0}: unhandled device"
 msgstr "nepripám {0}: nepodporované zariadenie"
 
-#: ../udiskie/mount.py:165
+#: ../udiskie/mount.py:163
 #, python-brace-format
 msgid "not mounting {0}: already mounted"
 msgstr "nepripájam {0}: už pripojené"
 
-#: ../udiskie/mount.py:169
+#: ../udiskie/mount.py:167
 #, python-brace-format
 msgid "mounting {0} with {1}"
 msgstr "pripájam {0} s {1}"
 
-#: ../udiskie/mount.py:172
+#: ../udiskie/mount.py:170
 #, python-brace-format
 msgid "mounted {0} on {1}"
 msgstr "pripojené {0} na {1}"
 
-#: ../udiskie/mount.py:178
+#: ../udiskie/mount.py:176
 msgid ""
 "Mounting NTFS device with default driver.\n"
 "Please install 'ntfs-3g' if you experience problems or the device is "
@@ -191,264 +191,239 @@ msgstr ""
 "Prosím, nainštalujte 'ntfs-3g', ak narazíte na problémy alebo nemôžete na "
 "zariadenie zapisovať."
 
-#: ../udiskie/mount.py:192
+#: ../udiskie/mount.py:190
 #, python-brace-format
 msgid "not unmounting {0}: unhandled device"
 msgstr "neodpájam {0}: nepodporované zariadenie"
 
-#: ../udiskie/mount.py:195
+#: ../udiskie/mount.py:193
 #, python-brace-format
 msgid "not unmounting {0}: not mounted"
 msgstr "neodpájam {0}: nepripojené"
 
-#: ../udiskie/mount.py:197
+#: ../udiskie/mount.py:195
 #, python-brace-format
 msgid "unmounting {0}"
 msgstr "odpájam {0}"
 
-#: ../udiskie/mount.py:199
+#: ../udiskie/mount.py:197
 #, python-brace-format
 msgid "unmounted {0}"
 msgstr "odpojené {0}"
 
-#: ../udiskie/mount.py:213
+#: ../udiskie/mount.py:211
 #, python-brace-format
 msgid "not unlocking {0}: unhandled device"
 msgstr "nezamykám {0}: nepodporované zariadenie"
 
-#: ../udiskie/mount.py:216
+#: ../udiskie/mount.py:214
 #, python-brace-format
 msgid "not unlocking {0}: already unlocked"
 msgstr "nezamykám {0}: už odomknuté"
 
-#: ../udiskie/mount.py:219
+#: ../udiskie/mount.py:217
 #, python-brace-format
 msgid "not unlocking {0}: no password prompt"
 msgstr "nezamykám {0}: chýba dialógové okno pre heslo"
 
-#: ../udiskie/mount.py:233
+#: ../udiskie/mount.py:226
 #, python-brace-format
 msgid "not unlocking {0}: cancelled by user"
 msgstr "nezamykám {0}: zrušené používateľom"
 
-#: ../udiskie/mount.py:238
+#: ../udiskie/mount.py:230
 #, python-brace-format
 msgid "unlocking {0} using keyfile"
 msgstr "odomykám {0} použitím kľúča"
 
-#: ../udiskie/mount.py:241
+#: ../udiskie/mount.py:233
 #, python-brace-format
 msgid "unlocking {0}"
 msgstr "odomykám {0}"
 
-#: ../udiskie/mount.py:244
+#: ../udiskie/mount.py:235
 #, python-brace-format
 msgid "unlocked {0}"
 msgstr "odomknuté {0}"
 
-#: ../udiskie/mount.py:253
-#, fuzzy, python-brace-format
-msgid "no cached key for {0}"
-msgstr "Nepodarilo sa nájsť zodpovedajúce pravidlo pri kľúči pre {}."
-
-#: ../udiskie/mount.py:255
-#, python-brace-format
-msgid "unlocking {0} using cached password"
-msgstr "odomykám {0} použitím kešovaného hesla"
-
-#: ../udiskie/mount.py:259
-#, python-brace-format
-msgid "failed to unlock {0} using cached password"
-msgstr "nepodarilo sa odomknúť {0} použitím kešovaného hesla"
-
-#: ../udiskie/mount.py:262
-#, python-brace-format
-msgid "unlocked {0} using cached password"
-msgstr "odomknuté {0} použitím kešovaného hesla"
-
-#: ../udiskie/mount.py:270
+#: ../udiskie/mount.py:243
 #, python-brace-format
 msgid "No matching keyfile rule for {}."
 msgstr "Nepodarilo sa nájsť zodpovedajúce pravidlo pri kľúči pre {}."
 
-#: ../udiskie/mount.py:276
+#: ../udiskie/mount.py:249
 #, python-brace-format
 msgid "keyfile for {0} not found: {1}"
 msgstr "kľúč pre {0} nebol nájdený: {1}"
 
-#: ../udiskie/mount.py:278
+#: ../udiskie/mount.py:251
 #, python-brace-format
 msgid "unlocking {0} using keyfile {1}"
 msgstr "odomykám {0} použitím kľúča {1}"
 
-#: ../udiskie/mount.py:282
+#: ../udiskie/mount.py:255
 #, python-brace-format
 msgid "failed to unlock {0} using keyfile"
 msgstr "nepodarilo sa odomknúť {0} použitím kľúča"
 
-#: ../udiskie/mount.py:285
+#: ../udiskie/mount.py:258
 #, python-brace-format
 msgid "unlocked {0} using keyfile"
 msgstr "odomknuté {0} použitím kľúča"
 
-#: ../udiskie/mount.py:311
+#: ../udiskie/mount.py:271
 #, python-brace-format
 msgid "not locking {0}: unhandled device"
 msgstr "neodomykám {0}: nepodporované zariadenie"
 
-#: ../udiskie/mount.py:314
+#: ../udiskie/mount.py:274
 #, python-brace-format
 msgid "not locking {0}: not unlocked"
 msgstr "neodomykám {0}: nie je zamknuté"
 
-#: ../udiskie/mount.py:316
+#: ../udiskie/mount.py:276
 #, python-brace-format
 msgid "locking {0}"
 msgstr "zamykám {0}"
 
-#: ../udiskie/mount.py:318
+#: ../udiskie/mount.py:278
 #, python-brace-format
 msgid "locked {0}"
 msgstr "zamknuté {0}"
 
-#: ../udiskie/mount.py:355 ../udiskie/mount.py:398
+#: ../udiskie/mount.py:315 ../udiskie/mount.py:358
 #, python-brace-format
 msgid "not adding {0}: unhandled device"
 msgstr "nepridávam {0}: nepodporované zariadenie"
 
-#: ../udiskie/mount.py:434 ../udiskie/mount.py:484
+#: ../udiskie/mount.py:394 ../udiskie/mount.py:444
 #, python-brace-format
 msgid "not removing {0}: unhandled device"
 msgstr "neodstraňujem {0}: nepodporované zariadenie"
 
-#: ../udiskie/mount.py:509
+#: ../udiskie/mount.py:469
 #, python-brace-format
 msgid "not ejecting {0}: unhandled device"
 msgstr "nevysúvam {0}: nepodporované zariadenie"
 
-#: ../udiskie/mount.py:513
+#: ../udiskie/mount.py:473
 #, python-brace-format
 msgid "not ejecting {0}: drive not ejectable"
 msgstr "nevysúvam {0}: zariadenie to nepodporuje"
 
-#: ../udiskie/mount.py:519
+#: ../udiskie/mount.py:479
 #, python-brace-format
 msgid "ejecting {0}"
 msgstr "vysúvam {0}"
 
-#: ../udiskie/mount.py:521
+#: ../udiskie/mount.py:481
 #, python-brace-format
 msgid "ejected {0}"
 msgstr "vysunuté {0}"
 
-#: ../udiskie/mount.py:535
+#: ../udiskie/mount.py:495
 #, python-brace-format
 msgid "not detaching {0}: unhandled device"
 msgstr ""
 
-#: ../udiskie/mount.py:539
+#: ../udiskie/mount.py:499
 #, python-brace-format
 msgid "not detaching {0}: drive not detachable"
 msgstr ""
 
-#: ../udiskie/mount.py:543
+#: ../udiskie/mount.py:503
 #, python-brace-format
 msgid "detaching {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:548
+#: ../udiskie/mount.py:508
 #, python-brace-format
 msgid "detached {0}"
 msgstr ""
 
-#: ../udiskie/mount.py:599
+#: ../udiskie/mount.py:559
 #, python-brace-format
 msgid "not setting up {0}: already up"
 msgstr "nenastavujem {0}: už je nastavené"
 
-#: ../udiskie/mount.py:602
+#: ../udiskie/mount.py:562
 #, python-brace-format
 msgid "not setting up {0}: not a file"
 msgstr "nenastavujem {0}: nie je to súbor"
 
-#: ../udiskie/mount.py:604
+#: ../udiskie/mount.py:564
 #, fuzzy, python-brace-format
 msgid "setting up loop device {0}"
 msgstr "nastavujem {0}"
 
-#: ../udiskie/mount.py:622
+#: ../udiskie/mount.py:582
 #, python-brace-format
 msgid ""
 "Insufficient permission to open {0} in read-write mode. Retrying in read-"
 "only mode."
 msgstr ""
 
-#: ../udiskie/mount.py:634
+#: ../udiskie/mount.py:594
 #, python-brace-format
 msgid "set up {0} as {1}"
 msgstr "nastaviť {0} ako {1}"
 
-#: ../udiskie/mount.py:649
+#: ../udiskie/mount.py:609
 #, python-brace-format
 msgid "not deleting {0}: unhandled device"
 msgstr "nemažem {0}: nepodporované zariadenie"
 
-#: ../udiskie/mount.py:653
+#: ../udiskie/mount.py:613
 #, python-brace-format
 msgid "deleting {0}"
 msgstr "mažem {0}"
 
-#: ../udiskie/mount.py:655
+#: ../udiskie/mount.py:615
 #, python-brace-format
 msgid "deleted {0}"
 msgstr "vymazané {0}"
 
-#: ../udiskie/mount.py:781
+#: ../udiskie/mount.py:741
 #, python-brace-format
 msgid "Browse {0}"
 msgstr "Prehliadať {0}"
 
-#: ../udiskie/mount.py:782
+#: ../udiskie/mount.py:742
 #, fuzzy, python-brace-format
 msgid "Hack on {0}"
 msgstr "zamykám {0}"
 
-#: ../udiskie/mount.py:783
+#: ../udiskie/mount.py:743
 #, python-brace-format
 msgid "Mount {0}"
 msgstr "Pripojiť {0}"
 
-#: ../udiskie/mount.py:784
+#: ../udiskie/mount.py:744
 #, python-brace-format
 msgid "Unmount {0}"
 msgstr "Odpojiť {0}"
 
-#: ../udiskie/mount.py:785
+#: ../udiskie/mount.py:745
 #, python-brace-format
 msgid "Unlock {0}"
 msgstr "Odomknúť {0}"
 
-#: ../udiskie/mount.py:786
+#: ../udiskie/mount.py:746
 #, python-brace-format
 msgid "Lock {0}"
 msgstr "Uzamknúť {0}"
 
-#: ../udiskie/mount.py:787
+#: ../udiskie/mount.py:747
 #, python-brace-format
 msgid "Eject {1}"
 msgstr "Vysunúť {1}"
 
-#: ../udiskie/mount.py:788
+#: ../udiskie/mount.py:748
 #, python-brace-format
 msgid "Unpower {1}"
 msgstr "Vypnúť {1}"
 
-#: ../udiskie/mount.py:789
-#, python-brace-format
-msgid "Clear password for {0}"
-msgstr "Vymazať heslo pre {0}"
-
-#: ../udiskie/mount.py:790
+#: ../udiskie/mount.py:749
 #, python-brace-format
 msgid "Detach {0}"
 msgstr ""
@@ -542,36 +517,28 @@ msgstr "Úloha skončila s chybou"
 msgid "Failed to show notification: {0}"
 msgstr "Nepodarilo sa zobraziť notifikáciu: {0}"
 
-#: ../udiskie/prompt.py:96
+#: ../udiskie/prompt.py:95
 msgid "Show password"
 msgstr ""
 
-#: ../udiskie/prompt.py:101
+#: ../udiskie/prompt.py:100
 msgid "Open keyfile…"
 msgstr ""
 
-#: ../udiskie/prompt.py:108
-msgid "Cache password"
-msgstr ""
-
-#: ../udiskie/prompt.py:112
-msgid "Store password in memory until udiskie is closed."
-msgstr ""
-
-#: ../udiskie/prompt.py:125
+#: ../udiskie/prompt.py:115
 msgid "Open a keyfile to unlock the LUKS device"
 msgstr ""
 
-#: ../udiskie/prompt.py:159 ../udiskie/prompt.py:169
+#: ../udiskie/prompt.py:148 ../udiskie/prompt.py:158
 #, fuzzy, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
 msgstr "Zadajte heslo pre {0.ui_label_dialog}: "
 
-#: ../udiskie/prompt.py:206
+#: ../udiskie/prompt.py:194
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "Neznámy atribút zariadenia {!r} vo formátovacom reťazci: {!r}"
 
-#: ../udiskie/prompt.py:258
+#: ../udiskie/prompt.py:246
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."
@@ -595,36 +562,31 @@ msgstr "Povoliť automatické pripájanie"
 msgid "Enable notifications"
 msgstr "Povoliť notifikácie"
 
-#: ../udiskie/tray.py:219
-#, fuzzy
-msgid "Clear password cache"
-msgstr "Vymazať heslo pre {0}"
-
-#: ../udiskie/tray.py:227
+#: ../udiskie/tray.py:220
 msgid "Quit"
 msgstr "Ukončiť"
 
-#: ../udiskie/tray.py:234
+#: ../udiskie/tray.py:227
 msgid "Open disc image"
 msgstr "Otvoriť obraz disku"
 
-#: ../udiskie/tray.py:236
+#: ../udiskie/tray.py:229
 msgid "Open"
 msgstr "Otvoriť"
 
-#: ../udiskie/tray.py:237
+#: ../udiskie/tray.py:230
 msgid "Cancel"
 msgstr "Zrušiť"
 
-#: ../udiskie/tray.py:277
+#: ../udiskie/tray.py:270
 msgid "Invalid node!"
 msgstr ""
 
-#: ../udiskie/tray.py:279
+#: ../udiskie/tray.py:272
 msgid "No external devices"
 msgstr "Žiadne externé zariadenia"
 
-#: ../udiskie/tray.py:398
+#: ../udiskie/tray.py:391
 msgid "udiskie"
 msgstr "udiskie"
 
@@ -652,6 +614,30 @@ msgstr "Podpora pre kľúč (keyfile): {0}"
 #, python-brace-format
 msgid "+++ {0}: {1}"
 msgstr "+++ {0}: {1}"
+
+#, fuzzy, python-brace-format
+#~ msgid "no cached key for {0}"
+#~ msgstr "Nepodarilo sa nájsť zodpovedajúce pravidlo pri kľúči pre {}."
+
+#, python-brace-format
+#~ msgid "unlocking {0} using cached password"
+#~ msgstr "odomykám {0} použitím kešovaného hesla"
+
+#, python-brace-format
+#~ msgid "failed to unlock {0} using cached password"
+#~ msgstr "nepodarilo sa odomknúť {0} použitím kešovaného hesla"
+
+#, python-brace-format
+#~ msgid "unlocked {0} using cached password"
+#~ msgstr "odomknuté {0} použitím kešovaného hesla"
+
+#, python-brace-format
+#~ msgid "Clear password for {0}"
+#~ msgstr "Vymazať heslo pre {0}"
+
+#, fuzzy
+#~ msgid "Clear password cache"
+#~ msgstr "Vymazať heslo pre {0}"
 
 #~ msgid "{0}(match={1!r}, value={2!r})"
 #~ msgstr "{0}(zhoda={1!r}, hodnota={2!r})"

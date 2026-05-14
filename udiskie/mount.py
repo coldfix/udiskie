@@ -8,7 +8,7 @@ from shutil import which
 import logging
 import os
 
-from .async_ import to_coro, gather, sleep
+from .async_ import gather, sleep
 from .common import wraps, setdefault, exc_message, format_exc
 from .config import IgnoreDevice, match_config
 from .locale import _
@@ -57,7 +57,7 @@ class Mounter:
     """
 
     def __init__(self, udisks, config=None, prompt=None, browser=None,
-                 terminal=None, cache=None, cache_hint=False):
+                 terminal=None):
         """
         Initialize mounter with the given defaults.
 
@@ -90,8 +90,6 @@ class Mounter:
         self._prompt = prompt
         self._browser = browser
         self._terminal = terminal
-        self._cache = cache
-        self._cache_hint = cache_hint
         self._log = logging.getLogger(__name__)
 
     def _find_device(self, device_or_path):
@@ -218,21 +216,15 @@ class Mounter:
         if not self._prompt:
             self._log.error(_('not unlocking {0}: no password prompt', device))
             return False
-        unlocked = await self._unlock_from_cache(device)
-        if unlocked:
-            return True
         unlocked = await self._unlock_from_keyfile(device)
         if unlocked:
             return True
-        options = dict(allow_keyfile=self.udisks.keyfile_support,
-                       allow_cache=self._cache is not None,
-                       cache_hint=self._cache_hint)
+        options = dict(allow_keyfile=self.udisks.keyfile_support)
         password = await self._prompt(device, options)
         # password is either None or udiskie.prompt.PasswordResult:
         if password is None:
             self._log.debug(_('not unlocking {0}: cancelled by user', device))
             return False
-        cache_hint = password.cache_hint
         password = password.password
         if isinstance(password, bytes):
             self._log.debug(_('unlocking {0} using keyfile', device))
@@ -240,26 +232,7 @@ class Mounter:
         else:
             self._log.debug(_('unlocking {0}', device))
             await device.unlock(password)
-        self._update_cache(device, password, cache_hint)
         self._log.info(_('unlocked {0}', device))
-        return True
-
-    async def _unlock_from_cache(self, device):
-        if self._cache is None:
-            return False
-        try:
-            password = self._cache[device]
-        except KeyError:
-            self._log.debug(_("no cached key for {0}", device))
-            return False
-        self._log.debug(_('unlocking {0} using cached password', device))
-        try:
-            await device.unlock_keyfile(password)
-        except Exception:
-            self._log.debug(_('failed to unlock {0} using cached password', device))
-            self._log.debug(format_exc())
-            return False
-        self._log.info(_('unlocked {0} using cached password', device))
         return True
 
     async def _unlock_from_keyfile(self, device):
@@ -284,19 +257,6 @@ class Mounter:
             return False
         self._log.info(_('unlocked {0} using keyfile', device))
         return True
-
-    def _update_cache(self, device, password, cache_hint):
-        if self._cache is None:
-            return
-        # TODO: could allow numeric cache_hint (=timeout)…
-        if cache_hint or cache_hint is None:
-            self._cache[device] = password
-
-    def forget_password(self, device):
-        try:
-            del self._cache[device]
-        except KeyError:
-            pass
 
     @_error_boundary
     async def lock(self, device):
@@ -786,7 +746,6 @@ class DeviceActions:
         'lock': _('Lock {0}'),
         'eject': _('Eject {1}'),
         'detach': _('Unpower {1}'),
-        'forget_password': _('Clear password for {0}'),
         'delete': _('Detach {0}'),
     }
 
@@ -802,7 +761,6 @@ class DeviceActions:
             'lock': partial(mounter.remove, force=True),
             'eject': partial(mounter.eject, force=True),
             'detach': partial(mounter.detach, force=True),
-            'forget_password': to_coro(mounter.forget_password),
             'delete': mounter.delete,
         })
 
@@ -842,9 +800,6 @@ class DeviceActions:
                 yield 'lock'
             else:
                 yield 'unlock'
-            cache = self._mounter._cache
-            if cache is not None and device in cache:
-                yield 'forget_password'
         if device.is_ejectable and device.has_media:
             yield 'eject'
         if device.is_detachable:

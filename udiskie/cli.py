@@ -290,9 +290,6 @@ class Daemon(_EntryPoint):
         --appindicator                          Use appindicator for status icon
         --no-appindicator                       Don't use appindicator
 
-        --password-cache MINUTES                Set password cache timeout
-        --no-password-cache                     Disable password cache
-
         -f PROGRAM, --file-manager PROGRAM      Set program for browsing
         -F, --no-file-manager                   Disable browsing
 
@@ -326,7 +323,6 @@ class Daemon(_EntryPoint):
         'file_manager': 'xdg-open',
         'terminal': '',
         'password_prompt': 'builtin:gui',
-        'password_cache': False,
         'notify_command': None,
         'event_hook': None,
         'menu_checkbox_workaround': None,
@@ -344,7 +340,6 @@ class Daemon(_EntryPoint):
         'appindicator': Switch('appindicator'),
         'file_manager': OptionalValue('--file-manager'),
         'password_prompt': OptionalValue('--password-prompt'),
-        'password_cache': OptionalValue('--password-cache'),
         'terminal': OptionalValue('--terminal'),
         'notify_command': OptionalValue('--notify-command'),
         'event_hook': OptionalValue('--event-hook'),
@@ -362,22 +357,12 @@ class Daemon(_EntryPoint):
         prompt = udiskie.prompt.password(options['password_prompt'])
         browser = udiskie.prompt.browser(options['file_manager'])
         terminal = udiskie.prompt.browser(options['terminal'])
-        cache = None
-
-        try:
-            import udiskie.cache
-            timeout = int(options['password_cache']) * 60
-            cache = udiskie.cache.PasswordCache(timeout)
-        except ImportError:
-            cache = None
 
         self.mounter = udiskie.mount.Mounter(
             config=config.device_config,
             prompt=prompt,
             browser=browser,
             terminal=terminal,
-            cache=cache,
-            cache_hint=options['password_cache'],
             udisks=self.udisks)
 
         # check component availability

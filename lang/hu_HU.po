@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie 2.6.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-29 11:42+0200\n"
+"POT-Creation-Date: 2026-07-29 11:45+0200\n"
 "PO-Revision-Date: 2026-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Hrotkó Gábor <hrotkogabor@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,7 +49,7 @@ msgstr "%(message)s"
 msgid "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 msgstr "%(levelname)s [%(asctime)s] %(name)s: %(message)s"
 
-#: ../udiskie/cli.py:386
+#: ../udiskie/cli.py:371
 msgid ""
 "Typelib for 'libnotify' is not available. Possible causes include:\n"
 "\t- libnotify is not installed\n"
@@ -65,7 +65,7 @@ msgstr ""
 "\n"
 "Az udiskie értesítések nélkül indul."
 
-#: ../udiskie/cli.py:400
+#: ../udiskie/cli.py:385
 msgid ""
 "Not run within X or Wayland session.\n"
 "Starting udiskie without tray icon.\n"
@@ -73,7 +73,7 @@ msgstr ""
 "Nem X vagy Wayland munkamenetben fut.\n"
 "Az udiskie tálcaikon nélkül indul.\n"
 
-#: ../udiskie/cli.py:407
+#: ../udiskie/cli.py:392
 msgid ""
 "Typelib for 'Gtk 3.0' is not available. Possible causes include:\n"
 "\t- GTK3 is not installed\n"
@@ -87,7 +87,7 @@ msgstr ""
 "\t- a GTK3 introspection támogatás nélkül lett fordítva\n"
 "Az udiskie tálcaikon nélkül indul.\n"
 
-#: ../udiskie/cli.py:417
+#: ../udiskie/cli.py:402
 msgid ""
 "Typelib for 'AppIndicator3 0.1' is not available. Possible causes include:\n"
 "\t- libappindicator is not installed\n"
@@ -101,7 +101,7 @@ msgstr ""
 "\t- introspection támogatás nélkül lett fordítva\n"
 "Az udiskie appindicator ikon nélkül indul.\n"
 
-#: ../udiskie/cli.py:436
+#: ../udiskie/cli.py:421
 msgid ""
 "The 'notify_command' option was renamed to 'event_hook'. The old name still "
 "works, but may be removed in a future version. Please change your command "
@@ -111,7 +111,7 @@ msgstr ""
 "működik, de a jövőben eltávolításra kerülhet. Kérjük, módosítsd a "
 "parancssort és a konfigurációt az új név használatára."
 
-#: ../udiskie/cli.py:443
+#: ../udiskie/cli.py:428
 msgid "Ignoring 'notify_command' in favor of 'event_hook'."
 msgstr "'notify_command' figyelmen kívül hagyva az 'event_hook' javára."
 
@@ -159,57 +159,57 @@ msgstr "Az X szerver nincs csatlakoztatva!"
 msgid "failed to {0} {1}: {2}"
 msgstr "{0} sikertelen: {1}: {2}"
 
-#: ../udiskie/mount.py:121
+#: ../udiskie/mount.py:119
 #, python-brace-format
 msgid "not browsing {0}: not mounted"
 msgstr "{0} nem böngészhető: nincs csatolva"
 
-#: ../udiskie/mount.py:124
+#: ../udiskie/mount.py:122
 #, python-brace-format
 msgid "not browsing {0}: no program"
 msgstr "{0} nem böngészhető: nincs elérhető program"
 
-#: ../udiskie/mount.py:126 ../udiskie/mount.py:146
+#: ../udiskie/mount.py:124 ../udiskie/mount.py:144
 #, python-brace-format
 msgid "opening {0} on {0.mount_paths[0]}"
 msgstr "{0} megnyitása itt: {0.mount_paths[0]}"
 
-#: ../udiskie/mount.py:128 ../udiskie/mount.py:148
+#: ../udiskie/mount.py:126 ../udiskie/mount.py:146
 #, python-brace-format
 msgid "opened {0} on {0.mount_paths[0]}"
 msgstr "{0} megnyitva itt: {0.mount_paths[0]}"
 
-#: ../udiskie/mount.py:141
+#: ../udiskie/mount.py:139
 #, python-brace-format
 msgid "not opening terminal {0}: not mounted"
 msgstr "{0} terminál nem nyitható meg: nincs csatolva"
 
-#: ../udiskie/mount.py:144
+#: ../udiskie/mount.py:142
 #, python-brace-format
 msgid "not opening terminal {0}: no program"
 msgstr "{0} terminál nem nyitható meg: nincs elérhető program"
 
-#: ../udiskie/mount.py:162
+#: ../udiskie/mount.py:160
 #, python-brace-format
 msgid "not mounting {0}: unhandled device"
 msgstr "{0} nem csatolható: nem támogatott eszköz"
 
-#: ../udiskie/mount.py:165
+#: ../udiskie/mount.py:163
 #, python-brace-format
 msgid "not mounting {0}: already mounted"
 msgstr "{0} nem csatolható: már csatolva van"
 
-#: ../udiskie/mount.py:169
+#: ../udiskie/mount.py:167
 #, python-brace-format
 msgid "mounting {0} with {1}"
 msgstr "{0} csatolása ezzel: {1}"
 
-#: ../udiskie/mount.py:172
+#: ../udiskie/mount.py:170
 #, python-brace-format
 msgid "mounted {0} on {1}"
 msgstr "{0} csatolva ide: {1}"
 
-#: ../udiskie/mount.py:178
+#: ../udiskie/mount.py:176
 msgid ""
 "Mounting NTFS device with default driver.\n"
 "Please install 'ntfs-3g' if you experience problems or the device is "
@@ -219,192 +219,172 @@ msgstr ""
 "Ha problémák adódnak, vagy az eszköz csak olvasható, telepítsd az 'ntfs-3g' "
 "csomagot."
 
-#: ../udiskie/mount.py:192
+#: ../udiskie/mount.py:190
 #, python-brace-format
 msgid "not unmounting {0}: unhandled device"
 msgstr "{0} nem választható le: nem támogatott eszköz"
 
-#: ../udiskie/mount.py:195
+#: ../udiskie/mount.py:193
 #, python-brace-format
 msgid "not unmounting {0}: not mounted"
 msgstr "{0} nem választható le: nincs csatolva"
 
-#: ../udiskie/mount.py:197
+#: ../udiskie/mount.py:195
 #, python-brace-format
 msgid "unmounting {0}"
 msgstr "{0} leválasztása"
 
-#: ../udiskie/mount.py:199
+#: ../udiskie/mount.py:197
 #, python-brace-format
 msgid "unmounted {0}"
 msgstr "{0} leválasztva"
 
-#: ../udiskie/mount.py:213
+#: ../udiskie/mount.py:211
 #, python-brace-format
 msgid "not unlocking {0}: unhandled device"
 msgstr "{0} nem oldható fel: nem támogatott eszköz"
 
-#: ../udiskie/mount.py:216
+#: ../udiskie/mount.py:214
 #, python-brace-format
 msgid "not unlocking {0}: already unlocked"
 msgstr "{0} nem oldható fel: már fel van oldva"
 
-#: ../udiskie/mount.py:219
+#: ../udiskie/mount.py:217
 #, python-brace-format
 msgid "not unlocking {0}: no password prompt"
 msgstr "{0} nem oldható fel: nincs jelszókérés"
 
-#: ../udiskie/mount.py:233
+#: ../udiskie/mount.py:226
 #, python-brace-format
 msgid "not unlocking {0}: cancelled by user"
 msgstr "{0} feloldása megszakítva a felhasználó által"
 
-#: ../udiskie/mount.py:238
+#: ../udiskie/mount.py:230
 #, python-brace-format
 msgid "unlocking {0} using keyfile"
 msgstr "{0} feloldása kulcsfájllal"
 
-#: ../udiskie/mount.py:241
+#: ../udiskie/mount.py:233
 #, python-brace-format
 msgid "unlocking {0}"
 msgstr "{0} feloldása"
 
-#: ../udiskie/mount.py:244
+#: ../udiskie/mount.py:235
 #, python-brace-format
 msgid "unlocked {0}"
 msgstr "{0} feloldva"
 
-#: ../udiskie/mount.py:253
-#, python-brace-format
-msgid "no cached key for {0}"
-msgstr "nincs gyorsítótárazott kulcs ehhez: {0}"
-
-#: ../udiskie/mount.py:255
-#, python-brace-format
-msgid "unlocking {0} using cached password"
-msgstr "{0} feloldása gyorsítótárazott jelszóval"
-
-#: ../udiskie/mount.py:259
-#, python-brace-format
-msgid "failed to unlock {0} using cached password"
-msgstr "{0} feloldása sikertelen a gyorsítótárazott jelszóval"
-
-#: ../udiskie/mount.py:262
-#, python-brace-format
-msgid "unlocked {0} using cached password"
-msgstr "{0} feloldva a gyorsítótárazott jelszóval"
-
-#: ../udiskie/mount.py:270
+#: ../udiskie/mount.py:243
 #, python-brace-format
 msgid "No matching keyfile rule for {}."
 msgstr "Nincs megfelelő kulcsfájl-szabály ehhez: {}."
 
-#: ../udiskie/mount.py:276
+#: ../udiskie/mount.py:249
 #, python-brace-format
 msgid "keyfile for {0} not found: {1}"
 msgstr "{0} kulcsfájlja nem található: {1}"
 
-#: ../udiskie/mount.py:278
+#: ../udiskie/mount.py:251
 #, python-brace-format
 msgid "unlocking {0} using keyfile {1}"
 msgstr "{0} feloldása a(z) {1} kulcsfájllal"
 
-#: ../udiskie/mount.py:282
+#: ../udiskie/mount.py:255
 #, python-brace-format
 msgid "failed to unlock {0} using keyfile"
 msgstr "{0} feloldása sikertelen a kulcsfájllal"
 
-#: ../udiskie/mount.py:285
+#: ../udiskie/mount.py:258
 #, python-brace-format
 msgid "unlocked {0} using keyfile"
 msgstr "{0} feloldva kulcsfájllal"
 
-#: ../udiskie/mount.py:311
+#: ../udiskie/mount.py:271
 #, python-brace-format
 msgid "not locking {0}: unhandled device"
 msgstr "{0} nem zárolható: nem támogatott eszköz"
 
-#: ../udiskie/mount.py:314
+#: ../udiskie/mount.py:274
 #, python-brace-format
 msgid "not locking {0}: not unlocked"
 msgstr "{0} nem zárolható: nincs feloldva"
 
-#: ../udiskie/mount.py:316
+#: ../udiskie/mount.py:276
 #, python-brace-format
 msgid "locking {0}"
 msgstr "{0} zárolása"
 
-#: ../udiskie/mount.py:318
+#: ../udiskie/mount.py:278
 #, python-brace-format
 msgid "locked {0}"
 msgstr "{0} zárolva"
 
-#: ../udiskie/mount.py:355 ../udiskie/mount.py:398
+#: ../udiskie/mount.py:315 ../udiskie/mount.py:358
 #, python-brace-format
 msgid "not adding {0}: unhandled device"
 msgstr "{0} nem adható hozzá: nem támogatott eszköz"
 
-#: ../udiskie/mount.py:434 ../udiskie/mount.py:484
+#: ../udiskie/mount.py:394 ../udiskie/mount.py:444
 #, python-brace-format
 msgid "not removing {0}: unhandled device"
 msgstr "{0} nem távolítható el: nem támogatott eszköz"
 
-#: ../udiskie/mount.py:509
+#: ../udiskie/mount.py:469
 #, python-brace-format
 msgid "not ejecting {0}: unhandled device"
 msgstr "{0} nem adható ki: nem támogatott eszköz"
 
-#: ../udiskie/mount.py:513
+#: ../udiskie/mount.py:473
 #, python-brace-format
 msgid "not ejecting {0}: drive not ejectable"
 msgstr "{0} nem adható ki: a meghajtó nem kiadható"
 
-#: ../udiskie/mount.py:519
+#: ../udiskie/mount.py:479
 #, python-brace-format
 msgid "ejecting {0}"
 msgstr "{0} kiadása"
 
-#: ../udiskie/mount.py:521
+#: ../udiskie/mount.py:481
 #, python-brace-format
 msgid "ejected {0}"
 msgstr "{0} kiadva"
 
-#: ../udiskie/mount.py:535
+#: ../udiskie/mount.py:495
 #, python-brace-format
 msgid "not detaching {0}: unhandled device"
 msgstr "{0} nem választható le: nem támogatott eszköz"
 
-#: ../udiskie/mount.py:539
+#: ../udiskie/mount.py:499
 #, python-brace-format
 msgid "not detaching {0}: drive not detachable"
 msgstr "{0} nem választható le: a meghajtó nem leválasztható"
 
-#: ../udiskie/mount.py:543
+#: ../udiskie/mount.py:503
 #, python-brace-format
 msgid "detaching {0}"
 msgstr "{0} leválasztása"
 
-#: ../udiskie/mount.py:548
+#: ../udiskie/mount.py:508
 #, python-brace-format
 msgid "detached {0}"
 msgstr "{0} leválasztva"
 
-#: ../udiskie/mount.py:599
+#: ../udiskie/mount.py:559
 #, python-brace-format
 msgid "not setting up {0}: already up"
 msgstr "{0} nem állítható be: már be van állítva"
 
-#: ../udiskie/mount.py:602
+#: ../udiskie/mount.py:562
 #, python-brace-format
 msgid "not setting up {0}: not a file"
 msgstr "{0} nem állítható be: nem fájl"
 
-#: ../udiskie/mount.py:604
+#: ../udiskie/mount.py:564
 #, python-brace-format
 msgid "setting up loop device {0}"
 msgstr "{0} loop eszköz beállítása"
 
-#: ../udiskie/mount.py:622
+#: ../udiskie/mount.py:582
 #, python-brace-format
 msgid ""
 "Insufficient permission to open {0} in read-write mode. Retrying in read-"
@@ -413,72 +393,67 @@ msgstr ""
 "Nincs elegendő jogosultság {0} olvasás‑írás módban való megnyitásához. "
 "Újrapróbálkozás csak olvasható módban."
 
-#: ../udiskie/mount.py:634
+#: ../udiskie/mount.py:594
 #, python-brace-format
 msgid "set up {0} as {1}"
 msgstr "{0} beállítva mint {1}"
 
-#: ../udiskie/mount.py:649
+#: ../udiskie/mount.py:609
 #, python-brace-format
 msgid "not deleting {0}: unhandled device"
 msgstr "{0} nem törölhető: nem támogatott eszköz"
 
-#: ../udiskie/mount.py:653
+#: ../udiskie/mount.py:613
 #, python-brace-format
 msgid "deleting {0}"
 msgstr "{0} törlése"
 
-#: ../udiskie/mount.py:655
+#: ../udiskie/mount.py:615
 #, python-brace-format
 msgid "deleted {0}"
 msgstr "{0} törölve"
 
-#: ../udiskie/mount.py:781
+#: ../udiskie/mount.py:741
 #, python-brace-format
 msgid "Browse {0}"
 msgstr "{0} böngészése"
 
-#: ../udiskie/mount.py:782
+#: ../udiskie/mount.py:742
 #, python-brace-format
 msgid "Hack on {0}"
 msgstr "{0} megnyitása fejlesztéshez"
 
-#: ../udiskie/mount.py:783
+#: ../udiskie/mount.py:743
 #, python-brace-format
 msgid "Mount {0}"
 msgstr "{0} csatolása"
 
-#: ../udiskie/mount.py:784
+#: ../udiskie/mount.py:744
 #, python-brace-format
 msgid "Unmount {0}"
 msgstr "{0} leválasztása"
 
-#: ../udiskie/mount.py:785
+#: ../udiskie/mount.py:745
 #, python-brace-format
 msgid "Unlock {0}"
 msgstr "{0} feloldása"
 
-#: ../udiskie/mount.py:786
+#: ../udiskie/mount.py:746
 #, python-brace-format
 msgid "Lock {0}"
 msgstr "{0} zárolása"
 
-#: ../udiskie/mount.py:787
+#: ../udiskie/mount.py:747
 #, python-brace-format
 msgid "Eject {1}"
 msgstr "{1} kiadása"
 
-#: ../udiskie/mount.py:788
+#: ../udiskie/mount.py:748
 #, python-brace-format
 msgid "Unpower {1}"
 msgstr "{1} kikapcsolása"
 
-#: ../udiskie/mount.py:789
-#, python-brace-format
-msgid "Clear password for {0}"
-msgstr "{0} jelszavának törlése"
-
-#: ../udiskie/mount.py:790
+#: ../udiskie/mount.py:749
 #, python-brace-format
 msgid "Detach {0}"
 msgstr "{0} leválasztása"
@@ -572,36 +547,28 @@ msgstr "A feladat sikertelen"
 msgid "Failed to show notification: {0}"
 msgstr "Az értesítés megjelenítése sikertelen: {0}"
 
-#: ../udiskie/prompt.py:96
+#: ../udiskie/prompt.py:95
 msgid "Show password"
 msgstr "Jelszó megjelenítése"
 
-#: ../udiskie/prompt.py:101
+#: ../udiskie/prompt.py:100
 msgid "Open keyfile…"
 msgstr "Kulcsfájl megnyitása…"
 
-#: ../udiskie/prompt.py:108
-msgid "Cache password"
-msgstr "Jelszó gyorsítótárazása"
-
-#: ../udiskie/prompt.py:112
-msgid "Store password in memory until udiskie is closed."
-msgstr ""
-
-#: ../udiskie/prompt.py:125
+#: ../udiskie/prompt.py:115
 msgid "Open a keyfile to unlock the LUKS device"
 msgstr "Nyiss meg egy kulcsfájlt a LUKS eszköz feloldásához"
 
-#: ../udiskie/prompt.py:159 ../udiskie/prompt.py:169
+#: ../udiskie/prompt.py:148 ../udiskie/prompt.py:158
 #, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
 msgstr "Add meg a jelszót ehhez: {0.ui_label_dialog}: "
 
-#: ../udiskie/prompt.py:206
+#: ../udiskie/prompt.py:194
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "Ismeretlen eszközattribútum {!r} a formátumstringben: {!r}"
 
-#: ../udiskie/prompt.py:258
+#: ../udiskie/prompt.py:246
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."
@@ -625,36 +592,31 @@ msgstr "Automatikus csatolás engedélyezése"
 msgid "Enable notifications"
 msgstr "Értesítések engedélyezése"
 
-#: ../udiskie/tray.py:219
-#, fuzzy
-msgid "Clear password cache"
-msgstr "{0} jelszavának törlése"
-
-#: ../udiskie/tray.py:227
+#: ../udiskie/tray.py:220
 msgid "Quit"
 msgstr "Kilépés"
 
-#: ../udiskie/tray.py:234
+#: ../udiskie/tray.py:227
 msgid "Open disc image"
 msgstr "Lemezkép megnyitása"
 
-#: ../udiskie/tray.py:236
+#: ../udiskie/tray.py:229
 msgid "Open"
 msgstr "Megnyitás"
 
-#: ../udiskie/tray.py:237
+#: ../udiskie/tray.py:230
 msgid "Cancel"
 msgstr "Mégse"
 
-#: ../udiskie/tray.py:277
+#: ../udiskie/tray.py:270
 msgid "Invalid node!"
 msgstr "Érvénytelen csomópont!"
 
-#: ../udiskie/tray.py:279
+#: ../udiskie/tray.py:272
 msgid "No external devices"
 msgstr "Nincsenek külső eszközök"
 
-#: ../udiskie/tray.py:398
+#: ../udiskie/tray.py:391
 msgid "udiskie"
 msgstr "udiskie"
 
@@ -682,3 +644,30 @@ msgstr "Kulcsfájl támogatás: {0}"
 #, python-brace-format
 msgid "+++ {0}: {1}"
 msgstr "+++ {0}: {1}"
+
+#, python-brace-format
+#~ msgid "no cached key for {0}"
+#~ msgstr "nincs gyorsítótárazott kulcs ehhez: {0}"
+
+#, python-brace-format
+#~ msgid "unlocking {0} using cached password"
+#~ msgstr "{0} feloldása gyorsítótárazott jelszóval"
+
+#, python-brace-format
+#~ msgid "failed to unlock {0} using cached password"
+#~ msgstr "{0} feloldása sikertelen a gyorsítótárazott jelszóval"
+
+#, python-brace-format
+#~ msgid "unlocked {0} using cached password"
+#~ msgstr "{0} feloldva a gyorsítótárazott jelszóval"
+
+#, python-brace-format
+#~ msgid "Clear password for {0}"
+#~ msgstr "{0} jelszavának törlése"
+
+#~ msgid "Cache password"
+#~ msgstr "Jelszó gyorsítótárazása"
+
+#, fuzzy
+#~ msgid "Clear password cache"
+#~ msgstr "{0} jelszavának törlése"

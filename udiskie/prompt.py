@@ -59,9 +59,8 @@ class Dialog(Future):
 
 
 class PasswordResult:
-    def __init__(self, password=None, cache_hint=False):
+    def __init__(self, password=None):
         self.password = password
-        self.cache_hint = cache_hint
 
 
 class PasswordDialog(Dialog):
@@ -102,15 +101,6 @@ class PasswordDialog(Dialog):
         keyfile_button.set_visible(allow_keyfile)
         keyfile_button.connect('clicked', run_bg(self.on_open_keyfile))
 
-        allow_cache = options.get('allow_cache')
-        cache_hint = options.get('cache_hint')
-        self.use_cache = builder.get_object('remember')
-        self.use_cache.set_label(_('Cache password'))
-        self.use_cache.set_visible(allow_cache)
-        self.use_cache.set_active(cache_hint)
-        self.use_cache.set_tooltip_text(_(
-            "Store password in memory until udiskie is closed."))
-
         label = builder.get_object('message')
         label.set_label(message)
         window.set_title(title)
@@ -149,8 +139,7 @@ async def password_dialog(key, title, message, options):
     with PasswordDialog.create(key, title, message, options) as dialog:
         response = await dialog
         if response == Gtk.ResponseType.OK:
-            return PasswordResult(dialog.get_text(),
-                                  dialog.use_cache.get_active())
+            return PasswordResult(dialog.get_text())
         return None
 
 
@@ -168,8 +157,7 @@ async def get_password_tty(device, options):
     # TODO: make this a TRUE async
     text = _('Enter password for {0.ui_label_dialog}: ', device)
     try:
-        return PasswordResult(getpass.getpass(text),
-                              options.get('cache_hint', False))
+        return PasswordResult(getpass.getpass(text))
     except EOFError:
         print("")
         return None
@@ -226,7 +214,7 @@ class DeviceCommand:
 
     async def password(self, device, options):
         text = await self(device)
-        return PasswordResult(text, options.get('cache_hint', False))
+        return PasswordResult(text)
 
 
 def password(password_command):
