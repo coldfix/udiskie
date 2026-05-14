@@ -39,6 +39,7 @@ jobs:
       - run: twine check dist/*
       - run: ruff check .
       - run: python test/test_match.py
+      - run: python test/test_keyutils.py
 
       - uses: actions/upload-artifact@v6
         with: {name: dist, path: dist/}
