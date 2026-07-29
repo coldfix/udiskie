@@ -1,6 +1,25 @@
 CHANGELOG
 ---------
 
+2.7.0
+~~~~~
+Date: 29.07.2026
+
+Package:
+
+- remove optional dependency on python-keyutils!
+
+Bug fixes:
+
+- gracefully handle empty (null) sections in config file (#339)
+- use device.ui_label_dialog in password dialog for non-english translations
+- ignore systemd sysexts and confexts by default
+
+Documentation:
+
+- fix typos in example config
+
+
 2.6.2
 ~~~~~
 Date: 13.01.2026
