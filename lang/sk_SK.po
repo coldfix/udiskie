@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-07 22:05+0100\n"
+"POT-Creation-Date: 2026-05-14 22:08+0200\n"
 "PO-Revision-Date: 2019-05-02 14:20+0200\n"
 "Last-Translator: Jose Riha <jose1711@gmail.com>\n"
 "Language-Team: Slovak\n"
@@ -554,20 +554,24 @@ msgstr ""
 msgid "Cache password"
 msgstr ""
 
-#: ../udiskie/prompt.py:123
+#: ../udiskie/prompt.py:112
+msgid "Store password in memory until udiskie is closed."
+msgstr ""
+
+#: ../udiskie/prompt.py:125
 msgid "Open a keyfile to unlock the LUKS device"
 msgstr ""
 
-#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#: ../udiskie/prompt.py:159 ../udiskie/prompt.py:169
 #, fuzzy, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
 msgstr "Zadajte heslo pre {0.ui_label_dialog}: "
 
-#: ../udiskie/prompt.py:204
+#: ../udiskie/prompt.py:206
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "Neznámy atribút zariadenia {!r} vo formátovacom reťazci: {!r}"
 
-#: ../udiskie/prompt.py:256
+#: ../udiskie/prompt.py:258
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."
@@ -575,47 +579,52 @@ msgstr ""
 "Nepodarilo sa nájsť prehliadač súborov: {0!r}. Možno budete chcieť zmeniť "
 "hodnotu pre voľbu '-f'."
 
-#: ../udiskie/tray.py:182
+#: ../udiskie/tray.py:183
 msgid "Managed devices"
 msgstr ""
 
-#: ../udiskie/tray.py:198
+#: ../udiskie/tray.py:199
 msgid "Mount disc image"
 msgstr "Pripojiť obraz disku"
 
-#: ../udiskie/tray.py:204
+#: ../udiskie/tray.py:205
 msgid "Enable automounting"
 msgstr "Povoliť automatické pripájanie"
 
-#: ../udiskie/tray.py:210
+#: ../udiskie/tray.py:211
 msgid "Enable notifications"
 msgstr "Povoliť notifikácie"
 
 #: ../udiskie/tray.py:219
+#, fuzzy
+msgid "Clear password cache"
+msgstr "Vymazať heslo pre {0}"
+
+#: ../udiskie/tray.py:227
 msgid "Quit"
 msgstr "Ukončiť"
 
-#: ../udiskie/tray.py:226
+#: ../udiskie/tray.py:234
 msgid "Open disc image"
 msgstr "Otvoriť obraz disku"
 
-#: ../udiskie/tray.py:228
+#: ../udiskie/tray.py:236
 msgid "Open"
 msgstr "Otvoriť"
 
-#: ../udiskie/tray.py:229
+#: ../udiskie/tray.py:237
 msgid "Cancel"
 msgstr "Zrušiť"
 
-#: ../udiskie/tray.py:269
+#: ../udiskie/tray.py:277
 msgid "Invalid node!"
 msgstr ""
 
-#: ../udiskie/tray.py:271
+#: ../udiskie/tray.py:279
 msgid "No external devices"
 msgstr "Žiadne externé zariadenia"
 
-#: ../udiskie/tray.py:390
+#: ../udiskie/tray.py:398
 msgid "udiskie"
 msgstr "udiskie"
 

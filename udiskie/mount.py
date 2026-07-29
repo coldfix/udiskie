@@ -245,7 +245,7 @@ class Mounter:
         return True
 
     async def _unlock_from_cache(self, device):
-        if not self._cache:
+        if self._cache is None:
             return False
         try:
             password = self._cache[device]
@@ -286,7 +286,7 @@ class Mounter:
         return True
 
     def _update_cache(self, device, password, cache_hint):
-        if not self._cache:
+        if self._cache is None:
             return
         # TODO: could allow numeric cache_hint (=timeout)…
         if cache_hint or cache_hint is None:
@@ -843,7 +843,7 @@ class DeviceActions:
             else:
                 yield 'unlock'
             cache = self._mounter._cache
-            if cache and device in cache:
+            if cache is not None and device in cache:
                 yield 'forget_password'
         if device.is_ejectable and device.has_media:
             yield 'eject'

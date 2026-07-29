@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie 2.6.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-01 22:20+0100\n"
+"POT-Creation-Date: 2026-05-14 22:08+0200\n"
 "PO-Revision-Date: 2026-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Hrotkó Gábor <hrotkogabor@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,7 +32,8 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Megjegyzés: az egyes csoportokon belüli opciók kölcsönösen kizárják egymást.\n"
+"    Megjegyzés: az egyes csoportokon belüli opciók kölcsönösen kizárják "
+"egymást.\n"
 "\n"
 "    A konfigurációs fájl lehet JSON, vagy inkább YAML formátumú. Példákért\n"
 "    lásd a MAN oldalt (vagy a doc/udiskie.8.txt fájlt a repóban).\n"
@@ -106,8 +107,9 @@ msgid ""
 "works, but may be removed in a future version. Please change your command "
 "line and config to use the new name."
 msgstr ""
-"A 'notify_command' opció neve 'event_hook'-ra változott. A régi név még működik, "
-"de a jövőben eltávolításra kerülhet. Kérjük, módosítsd a parancssort és a konfigurációt az új név használatára."
+"A 'notify_command' opció neve 'event_hook'-ra változott. A régi név még "
+"működik, de a jövőben eltávolításra kerülhet. Kérjük, módosítsd a "
+"parancssort és a konfigurációt az új név használatára."
 
 #: ../udiskie/cli.py:443
 msgid "Ignoring 'notify_command' in favor of 'event_hook'."
@@ -145,7 +147,8 @@ msgstr "A(z) {0!r} olvasása sikertelen: {1}"
 msgid ""
 "Missing runtime dependency GTK 3. Falling back to GTK 2 for password prompt"
 msgstr ""
-"Hiányzik a GTK 3 futásidejű függőség. A jelszókéréshez GTK 2 kerül használatra."
+"Hiányzik a GTK 3 futásidejű függőség. A jelszókéréshez GTK 2 kerül "
+"használatra."
 
 #: ../udiskie/depend.py:65
 msgid "X server not connected!"
@@ -213,7 +216,8 @@ msgid ""
 "readonly."
 msgstr ""
 "NTFS eszköz csatolása alapértelmezett meghajtóval.\n"
-"Ha problémák adódnak, vagy az eszköz csak olvasható, telepítsd az 'ntfs-3g' csomagot."
+"Ha problémák adódnak, vagy az eszköz csak olvasható, telepítsd az 'ntfs-3g' "
+"csomagot."
 
 #: ../udiskie/mount.py:188
 #, python-brace-format
@@ -580,67 +584,77 @@ msgstr "Kulcsfájl megnyitása…"
 msgid "Cache password"
 msgstr "Jelszó gyorsítótárazása"
 
-#: ../udiskie/prompt.py:123
+#: ../udiskie/prompt.py:112
+msgid "Store password in memory until udiskie is closed."
+msgstr ""
+
+#: ../udiskie/prompt.py:125
 msgid "Open a keyfile to unlock the LUKS device"
 msgstr "Nyiss meg egy kulcsfájlt a LUKS eszköz feloldásához"
 
-#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#: ../udiskie/prompt.py:159 ../udiskie/prompt.py:169
 #, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
 msgstr "Add meg a jelszót ehhez: {0.ui_label_dialog}: "
 
-#: ../udiskie/prompt.py:204
+#: ../udiskie/prompt.py:206
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "Ismeretlen eszközattribútum {!r} a formátumstringben: {!r}"
 
-#: ../udiskie/prompt.py:256
+#: ../udiskie/prompt.py:258
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."
 msgstr ""
-"A fájlkezelő nem található: {0!r}. Lehet, hogy módosítanod kell a '-f' opció értékét."
+"A fájlkezelő nem található: {0!r}. Lehet, hogy módosítanod kell a '-f' opció "
+"értékét."
 
-#: ../udiskie/tray.py:182
+#: ../udiskie/tray.py:183
 msgid "Managed devices"
 msgstr "Kezelt eszközök"
 
-#: ../udiskie/tray.py:198
+#: ../udiskie/tray.py:199
 msgid "Mount disc image"
 msgstr "Lemezkép csatolása"
 
-#: ../udiskie/tray.py:204
+#: ../udiskie/tray.py:205
 msgid "Enable automounting"
 msgstr "Automatikus csatolás engedélyezése"
 
-#: ../udiskie/tray.py:210
+#: ../udiskie/tray.py:211
 msgid "Enable notifications"
 msgstr "Értesítések engedélyezése"
 
 #: ../udiskie/tray.py:219
+#, fuzzy
+msgid "Clear password cache"
+msgstr "{0} jelszavának törlése"
+
+#: ../udiskie/tray.py:227
 msgid "Quit"
 msgstr "Kilépés"
 
-#: ../udiskie/tray.py:226
+#: ../udiskie/tray.py:234
 msgid "Open disc image"
 msgstr "Lemezkép megnyitása"
 
-#: ../udiskie/tray.py:228
+#: ../udiskie/tray.py:236
 msgid "Open"
 msgstr "Megnyitás"
 
-#: ../udiskie/tray.py:229
+#: ../udiskie/tray.py:237
 msgid "Cancel"
 msgstr "Mégse"
 
-#: ../udiskie/tray.py:269
+#: ../udiskie/tray.py:277
 msgid "Invalid node!"
 msgstr "Érvénytelen csomópont!"
 
-#: ../udiskie/tray.py:271
+#: ../udiskie/tray.py:279
 msgid "No external devices"
 msgstr "Nincsenek külső eszközök"
 
-#: ../udiskie/tray.py:390
+#: ../udiskie/tray.py:398
 msgid "udiskie"
 msgstr "udiskie"
 

@@ -12,18 +12,20 @@ class PasswordCache:
         self.timeout = timeout
         self.keyring = KEY_SPEC_PROCESS_KEYRING
 
+    def __bool__(self):
+        return any(
+            keyutils.is_valid(key_id)
+            for key_id in keyutils.list_keys(self.keyring))
+
     def _key(self, device):
         return device.id_uuid.encode('utf-8')
 
     def _key_id(self, device):
         key = self._key(device)
         try:
-            key_id = keyutils.request_key(key, self.keyring)
+            return keyutils.request_key(key, self.keyring)
         except keyutils.KeyutilsError:
-            raise KeyError("Key has been revoked!") from None
-        if key_id is None:
-            raise KeyError("Key not cached!")
-        return key_id
+            raise KeyError
 
     def __contains__(self, device):
         try:
@@ -49,8 +51,11 @@ class PasswordCache:
 
     def __delitem__(self, device):
         key_id = self._key_id(device)
-        keyutils.revoke(key_id)
+        keyutils.invalidate(key_id)
 
     def _touch(self, key_id):
         if self.timeout > 0:
             keyutils.set_timeout(key_id, self.timeout)
+
+    def clear(self):
+        keyutils.clear(self.keyring)

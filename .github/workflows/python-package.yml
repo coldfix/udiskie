@@ -40,6 +40,7 @@ jobs:
       - run: ruff check .
       - run: python test/test_match.py
       - run: python test/test_keyutils.py
+      - run: python test/test_cache.py
 
       - uses: actions/upload-artifact@v6
         with: {name: dist, path: dist/}

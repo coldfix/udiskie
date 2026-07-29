@@ -108,6 +108,8 @@ class PasswordDialog(Dialog):
         self.use_cache.set_label(_('Cache password'))
         self.use_cache.set_visible(allow_cache)
         self.use_cache.set_active(cache_hint)
+        self.use_cache.set_tooltip_text(_(
+            "Store password in memory until udiskie is closed."))
 
         label = builder.get_object('message')
         label.set_label(message)

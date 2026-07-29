@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udiskie 2.5.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-07 22:05+0100\n"
+"POT-Creation-Date: 2026-05-14 22:08+0200\n"
 "PO-Revision-Date: 2024-09-04 05:17+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: Chinese\n"
@@ -577,66 +577,75 @@ msgstr "打开密钥文件…"
 msgid "Cache password"
 msgstr "缓存密码"
 
-#: ../udiskie/prompt.py:123
+#: ../udiskie/prompt.py:112
+msgid "Store password in memory until udiskie is closed."
+msgstr ""
+
+#: ../udiskie/prompt.py:125
 msgid "Open a keyfile to unlock the LUKS device"
 msgstr "打开密钥文件以解锁 LUKS 设备"
 
-#: ../udiskie/prompt.py:157 ../udiskie/prompt.py:167
+#: ../udiskie/prompt.py:159 ../udiskie/prompt.py:169
 #, fuzzy, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
 msgstr "输入 {0.ui_label_dialog} 的密码: "
 
-#: ../udiskie/prompt.py:204
+#: ../udiskie/prompt.py:206
 msgid "Unknown device attribute {!r} in format string: {!r}"
 msgstr "未知设备属性 {!r} 格式字符串： {!r}"
 
-#: ../udiskie/prompt.py:256
+#: ../udiskie/prompt.py:258
 msgid ""
 "Can't find file browser: {0!r}. You may want to change the value for the '-"
 "f' option."
 msgstr "找不到文件浏览器： {0!r}. 您可能需要更改'-f'选项的值。"
 
-#: ../udiskie/tray.py:182
+#: ../udiskie/tray.py:183
 msgid "Managed devices"
 msgstr "托管设备"
 
-#: ../udiskie/tray.py:198
+#: ../udiskie/tray.py:199
 msgid "Mount disc image"
 msgstr "挂载光盘镜像"
 
-#: ../udiskie/tray.py:204
+#: ../udiskie/tray.py:205
 msgid "Enable automounting"
 msgstr "启用自动挂载"
 
-#: ../udiskie/tray.py:210
+#: ../udiskie/tray.py:211
 msgid "Enable notifications"
 msgstr "启用通知"
 
 #: ../udiskie/tray.py:219
+#, fuzzy
+msgid "Clear password cache"
+msgstr "清除 {0} 的密码"
+
+#: ../udiskie/tray.py:227
 msgid "Quit"
 msgstr "退出"
 
-#: ../udiskie/tray.py:226
+#: ../udiskie/tray.py:234
 msgid "Open disc image"
 msgstr "打开光盘镜像"
 
-#: ../udiskie/tray.py:228
+#: ../udiskie/tray.py:236
 msgid "Open"
 msgstr "打开"
 
-#: ../udiskie/tray.py:229
+#: ../udiskie/tray.py:237
 msgid "Cancel"
 msgstr "取消"
 
-#: ../udiskie/tray.py:269
+#: ../udiskie/tray.py:277
 msgid "Invalid node!"
 msgstr "无效节点！"
 
-#: ../udiskie/tray.py:271
+#: ../udiskie/tray.py:279
 msgid "No external devices"
 msgstr "无外置设备"
 
-#: ../udiskie/tray.py:390
+#: ../udiskie/tray.py:398
 msgid "udiskie"
 msgstr "udiskie"
 
