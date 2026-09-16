@@ -1,5 +1,6 @@
 [Unit]
 Description=Automounter for removable media
+ConditionUser=!@system
 
 [Service]
 ExecStart=/usr/bin/udiskie
