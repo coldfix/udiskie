@@ -3,6 +3,8 @@ Description=Automounter for removable media
 
 [Service]
 ExecStart=/usr/bin/udiskie
+ExecStopPost=/usr/bin/udiskie-umount -a
+
 Type=simple
 
 [Install]
