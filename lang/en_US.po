@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: udiskie 2.6.1\n"
+"Project-Id-Version: udiskie 2.7.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-07-29 11:54+0200\n"
-"PO-Revision-Date: 2026-01-13 06:20+0100\n"
+"PO-Revision-Date: 2026-07-29 11:54+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en_US\n"
@@ -584,7 +584,7 @@ msgstr "Cache password"
 
 #: ../udiskie/prompt.py:112
 msgid "Store password in memory until udiskie is closed."
-msgstr ""
+msgstr "Store password in memory until udiskie is closed."
 
 #: ../udiskie/prompt.py:125
 msgid "Open a keyfile to unlock the LUKS device"
@@ -624,10 +624,8 @@ msgid "Enable notifications"
 msgstr "Enable notifications"
 
 #: ../udiskie/tray.py:219
-#, fuzzy
-#| msgid "Clear password for {0}"
 msgid "Clear password cache"
-msgstr "Clear password for {0}"
+msgstr "Clear password cache"
 
 #: ../udiskie/tray.py:227
 msgid "Quit"
