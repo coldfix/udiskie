@@ -1,5 +1,10 @@
 [Unit]
 Description=Automounter for removable media
+
+# Condition to only start for non-system users. If removable media is
+# mounted for system users created for services that are started automatically
+# the media will already be mounted once a real user logs in and won't be
+# mounted for the interactive session
 ConditionUser=!@system
 
 [Service]
