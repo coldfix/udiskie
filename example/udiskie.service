@@ -1,8 +1,15 @@
+# unit file for systemd to activate udiskie as a systemd service for a 
+# user system wide (/lib/systemd/user, /etc/systemd/user) or individually 
+# (~/.config/systemd/user)
+
 [Unit]
 Description=Automounter for removable media
 
 [Service]
 ExecStart=/usr/bin/udiskie
+
+# on logout after systemd stopped udiskie un-mount automounted media so that 
+# it will be available for the next user logging in
 ExecStopPost=/usr/bin/udiskie-umount -a
 
 Type=simple
