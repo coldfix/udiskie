@@ -4,6 +4,8 @@ ConditionUser=!@system
 
 [Service]
 ExecStart=/usr/bin/udiskie
+ExecStopPost=/usr/bin/udiskie-umount -a
+
 Type=simple
 
 [Install]
