@@ -42,7 +42,7 @@ jobs:
       - run: python test/test_keyutils.py
       - run: python test/test_cache.py
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with: {name: dist, path: dist/}
         if: matrix.python == '3.12'
 
