@@ -159,7 +159,7 @@ def read_key(key_id: int) -> bytes:
         buffer = ctypes.create_string_buffer(buflen)
         ret = _errcheck(_keyctl_read(key_id, buffer, buflen))
         if 0 <= ret <= buflen:
-            return buffer.value
+            return buffer.raw[:ret]
         buflen = ret
 
 
