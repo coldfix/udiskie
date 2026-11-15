@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+2.8.1
+~~~~~
+Date: 15.11.2026
+
+Update release number.
+
+
 2.8.0
 ~~~~~
 Date: 15.11.2026
