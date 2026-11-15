@@ -1,6 +1,24 @@
 CHANGELOG
 ---------
 
+2.8.0
+~~~~~
+Date: 15.11.2026
+
+Bug fixes:
+
+- Fix keyutils.read_key truncating at NUL bytes (#362)
+
+Language files:
+
+- Update German translations
+- Update and fix Simplified Chinese (zh_CN) translation
+
+Documentation:
+
+- improve and document udiskie.service example file
+
+
 2.7.0
 ~~~~~
 Date: 29.07.2026
