@@ -112,10 +112,13 @@ msgid ""
 "works, but may be removed in a future version. Please change your command "
 "line and config to use the new name."
 msgstr ""
+"Die Option 'notify_command' wurde in 'event_hook' umbenannt. Der alte Name "
+"ist derzeit noch verfügbar, wird aber möglicherweise in einer zukünftigen "
+"Version entfernt. Bitte Kommandozeile und Konfiguration anpassen."
 
 #: ../udiskie/cli.py:443
 msgid "Ignoring 'notify_command' in favor of 'event_hook'."
-msgstr ""
+msgstr "Die Option 'notify_command' wird ignoriert, da 'event_hook' angegeben ist."
 
 #: ../udiskie/config.py:132
 msgid "Unknown matching attribute: {!r}"
@@ -589,14 +592,14 @@ msgstr "Passwort merken"
 
 #: ../udiskie/prompt.py:112
 msgid "Store password in memory until udiskie is closed."
-msgstr ""
+msgstr "Passwort merken bis udiskie beendet wird."
 
 #: ../udiskie/prompt.py:125
 msgid "Open a keyfile to unlock the LUKS device"
 msgstr "Schlüsseldatei zum Entsperren von LUKS Gerät öffnen"
 
 #: ../udiskie/prompt.py:159 ../udiskie/prompt.py:169
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
 msgstr "Passwort für {0.ui_label_dialog} eingeben: "
 
@@ -629,9 +632,8 @@ msgid "Enable notifications"
 msgstr "Benachrichtigungen"
 
 #: ../udiskie/tray.py:219
-#, fuzzy
 msgid "Clear password cache"
-msgstr "Passwort löschen für {0}"
+msgstr "Gemerktes Passwort für {0} löschen"
 
 #: ../udiskie/tray.py:227
 msgid "Quit"
