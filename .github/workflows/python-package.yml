@@ -15,8 +15,8 @@ jobs:
           - "3.13"
 
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
         with:
           python-version: ${{ matrix.python }}
 
@@ -42,7 +42,7 @@ jobs:
       - run: python test/test_keyutils.py
       - run: python test/test_cache.py
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.2
         with: {name: dist, path: dist/}
         if: matrix.python == '3.12'
 
