@@ -60,7 +60,9 @@ class TestKeyutils(unittest.TestCase):
         keyutils.invalidate(key_id)
         with self.assertRaises(keyutils.KeyutilsError):
             keyutils.read_key(key_id)
-        with self.assertRaises(keyutils.KeyNotAvailable):
+        # The kernel may still report the invalidated key as revoked until
+        # its garbage collector has removed it.
+        with self.assertRaises((keyutils.KeyNotAvailable, keyutils.KeyRevoked)):
             keyutils.request_key(key)
 
     def test_update(self):
