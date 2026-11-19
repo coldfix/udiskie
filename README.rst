@@ -93,7 +93,6 @@ The hooks require ruff, GNU make and the GNU gettext tools.
 
 Further resources:
 
-- `UDisks1 API`_
 - `UDisks2 API`_
 - `PyGObject APIs`_
 
@@ -101,7 +100,6 @@ Further resources:
 .. _PEP8: http://www.python.org/dev/peps/pep-0008/
 .. _`unit tests`: http://docs.python.org/2/library/unittest.html
 
-.. _`UDisks1 API`: http://udisks.freedesktop.org/docs/1.0.5/
 .. _`UDisks2 API`: http://udisks.freedesktop.org/docs/latest/
 .. _`PyGObject APIs`: http://lazka.github.io/pgi-docs/index.html
 
