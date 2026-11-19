@@ -24,6 +24,10 @@ update-po-date:
 	sed -i -e 's/^"PO-Revision-Date: .*$$/"PO-Revision-Date: '"$$revision_date"'\\n"/' \
 		$(wildcard *.po)
 
+.PHONY: report
+report:
+	./report.sh | column -t
+
 clean:
 	rm -rf *.po~ *.mo locale
 
