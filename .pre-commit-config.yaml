@@ -1,0 +1,22 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: Ruff
+        entry: ruff check --force-exclude
+        language: system
+        types: [python]
+      - id: update-translations
+        name: Update translation files
+        entry: make -BC lang
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: validate-catalogs
+        name: Validate translation catalogs
+        entry: >-
+          sh -c 'for catalog in "$@"; do
+          msgfmt --check --output-file=/dev/null "$catalog" || exit;
+          done' --
+        language: system
+        files: ^lang/.*\.po$

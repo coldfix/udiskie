@@ -84,6 +84,13 @@ Contributing
 requests here. If you don't have nor want a github account, you can send me
 the relevant files via email.
 
+To enable pre-commit hooks install ``pre-commit`` (or ``prek``) and
+enable the Git hook::
+
+    pre-commit install
+
+The hooks require ruff, GNU make and the GNU gettext tools.
+
 Further resources:
 
 - `UDisks1 API`_
