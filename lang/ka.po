@@ -590,7 +590,7 @@ msgstr "პაროლის დაკეშვა"
 
 #: ../udiskie/prompt.py:112
 msgid "Store password in memory until udiskie is closed."
-msgstr ""
+msgstr "პაროლის მეხსიერებაში შენახვა udiskie-ის დახურვამდე."
 
 #: ../udiskie/prompt.py:125
 msgid "Open a keyfile to unlock the LUKS device"
@@ -630,9 +630,8 @@ msgid "Enable notifications"
 msgstr "გაფრთხილებების ჩართვა"
 
 #: ../udiskie/tray.py:219
-#, fuzzy
 msgid "Clear password cache"
-msgstr "{0}-ის პაროლის გასუფთავება"
+msgstr "პაროლების კეშის გასუფთავება"
 
 #: ../udiskie/tray.py:227
 msgid "Quit"

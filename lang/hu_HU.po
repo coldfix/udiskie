@@ -586,7 +586,7 @@ msgstr "Jelszó gyorsítótárazása"
 
 #: ../udiskie/prompt.py:112
 msgid "Store password in memory until udiskie is closed."
-msgstr ""
+msgstr "A jelszó tárolása a memóriában az udiskie bezárásáig."
 
 #: ../udiskie/prompt.py:125
 msgid "Open a keyfile to unlock the LUKS device"
@@ -626,9 +626,8 @@ msgid "Enable notifications"
 msgstr "Értesítések engedélyezése"
 
 #: ../udiskie/tray.py:219
-#, fuzzy
 msgid "Clear password cache"
-msgstr "{0} jelszavának törlése"
+msgstr "Jelszó-gyorsítótár törlése"
 
 #: ../udiskie/tray.py:227
 msgid "Quit"

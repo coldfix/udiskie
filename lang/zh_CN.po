@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: udiskie 2.5.3\n"
+"Project-Id-Version: udiskie 2.8.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-07-29 11:42+0200\n"
-"PO-Revision-Date: 2024-09-04 05:17+0000\n"
+"PO-Revision-Date: 2026-11-19 00:00+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: Chinese\n"
 "Language: zh_CN\n"
@@ -35,7 +35,7 @@ msgstr ""
 "    请注意，各组中的选项是互斥的。\n"
 "\n"
 "    配置文件可以是 JSON 文件，最好是 YAML 文件。\n"
-"   例如，请参阅 MAN 页面（或代码仓库中的 doc/udiskie.8.txt）。\n"
+"    例如，请参阅 MAN 页面（或代码仓库中的 doc/udiskie.8.txt）。\n"
 "    "
 
 #: ../udiskie/cli.py:139
@@ -57,7 +57,7 @@ msgid ""
 "\n"
 "Starting udiskie without notifications."
 msgstr ""
-"'libnotify' 的类型库不可用。可能的原因包括:\n"
+"'libnotify' 的类型库不可用。可能的原因包括：\n"
 "\t- 没有安装 libnotify\n"
 "\t- 类型库由一个单独的软件包提供\n"
 "\t- 编译 libnotify 时禁用了对象自省\n"
@@ -98,7 +98,7 @@ msgstr ""
 "\t- 未安装 libappindicator\n"
 "\t- 类型库由一个单独的软件包提供\n"
 "\t- 在编译时禁用了对象自省功能\n"
-"启动不带托盘图标的 udiskie。\n"
+"启动不带 appindicator 图标的 udiskie。\n"
 
 #: ../udiskie/cli.py:436
 msgid ""
@@ -120,7 +120,7 @@ msgstr "未知匹配属性：{!r}"
 #: ../udiskie/config.py:134
 #, python-brace-format
 msgid "new rule: {0}"
-msgstr "新规则: {0}"
+msgstr "新规则：{0}"
 
 #: ../udiskie/config.py:137
 #, python-brace-format
@@ -135,7 +135,7 @@ msgstr "{0} 匹配 {1}"
 #: ../udiskie/config.py:233
 #, python-brace-format
 msgid "Failed to read config file: {0}"
-msgstr "读取配置文件失败: {0}"
+msgstr "读取配置文件失败：{0}"
 
 #: ../udiskie/config.py:236
 msgid "Failed to read {0!r}: {1}"
@@ -148,7 +148,7 @@ msgstr "缺少 GTK 3 运行时依赖。密码提示回退到 GTK 2"
 
 #: ../udiskie/depend.py:65
 msgid "X server not connected!"
-msgstr "X 服务器未连接!"
+msgstr "X 服务器未连接！"
 
 #: ../udiskie/mount.py:29
 #, python-brace-format
@@ -212,7 +212,7 @@ msgid ""
 "readonly."
 msgstr ""
 "使用默认驱动程序挂载 NTFS 设备。\n"
-"若遇到问题或设备处于只读状态，请安装 `ntfs-3g`。"
+"若遇到问题或设备处于只读状态，请安装 'ntfs-3g'。"
 
 #: ../udiskie/mount.py:192
 #, python-brace-format
@@ -237,7 +237,7 @@ msgstr "已卸载 {0}"
 #: ../udiskie/mount.py:213
 #, python-brace-format
 msgid "not unlocking {0}: unhandled device"
-msgstr "无法解锁 {0}：未处理设备"
+msgstr "未解锁 {0}：未处理设备"
 
 #: ../udiskie/mount.py:216
 #, python-brace-format
@@ -307,12 +307,12 @@ msgstr "使用密钥文件 {1} 解锁 {0}"
 #: ../udiskie/mount.py:282
 #, python-brace-format
 msgid "failed to unlock {0} using keyfile"
-msgstr "用密钥文件解锁 {0} 失败"
+msgstr "使用密钥文件解锁 {0} 失败"
 
 #: ../udiskie/mount.py:285
 #, python-brace-format
 msgid "unlocked {0} using keyfile"
-msgstr "已用密钥文件解锁 {0}"
+msgstr "已使用密钥文件解锁 {0}"
 
 #: ../udiskie/mount.py:311
 #, python-brace-format
@@ -347,7 +347,7 @@ msgstr "未移除 {0}：未处理设备"
 #: ../udiskie/mount.py:509
 #, python-brace-format
 msgid "not ejecting {0}: unhandled device"
-msgstr "无法弹出 {0}：未处理设备"
+msgstr "未弹出 {0}：未处理设备"
 
 #: ../udiskie/mount.py:513
 #, python-brace-format
@@ -464,7 +464,7 @@ msgstr "弹出 {1}"
 #: ../udiskie/mount.py:788
 #, python-brace-format
 msgid "Unpower {1}"
-msgstr "断电 {1}"
+msgstr "为 {1} 断电"
 
 #: ../udiskie/mount.py:789
 #, python-brace-format
@@ -588,7 +588,7 @@ msgstr "打开密钥文件以解锁 LUKS 设备"
 #: ../udiskie/prompt.py:159 ../udiskie/prompt.py:169
 #, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
-msgstr "输入 {0.ui_label_dialog} 的密码: "
+msgstr "输入 {0.ui_label_dialog} 的密码： "
 
 #: ../udiskie/prompt.py:206
 msgid "Unknown device attribute {!r} in format string: {!r}"
@@ -661,12 +661,12 @@ msgstr "未找到包含 \"{0}\" 的设备"
 #: ../udiskie/udisks2.py:695
 #, python-brace-format
 msgid "Daemon version: {0}"
-msgstr "守护程序版本: {0}"
+msgstr "守护程序版本：{0}"
 
 #: ../udiskie/udisks2.py:700
 #, python-brace-format
 msgid "Keyfile support: {0}"
-msgstr "支持密钥文件: {0}"
+msgstr "支持密钥文件：{0}"
 
 #: ../udiskie/udisks2.py:779
 #, python-brace-format

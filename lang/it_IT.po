@@ -10,8 +10,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-29 11:42+0200\n"
 "PO-Revision-Date: 2022-04-17 13:10+0000\n"
 "Last-Translator: Weblate Admin <weblate@coldfix.de>\n"
-"Language-Team: Italian <http://weblate.coldfix.de/projects/udiskie/udiskie/"
-"it/>\n"
+"Language-Team: Italian <http://weblate.coldfix.de/projects/udiskie/udiskie/it/>\n"
 "Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -34,13 +33,10 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Attenzione, le opzioni nei gruppi individuali sono mutualmente "
-"esclusive\n"
+"    Attenzione, le opzioni nei gruppi individuali sono mutualmente esclusive\n"
 "\n"
-"    Il file di configurazione può essere un file JSON o preferibilmente un "
-"file YAML.\n"
-"    Per un esempio, guarda la pagina MAN (oppure doc/udiskie.8.txt nella "
-"repository).\n"
+"    Il file di configurazione può essere un file JSON o preferibilmente un file YAML.\n"
+"    Per un esempio, guarda la pagina MAN (oppure doc/udiskie.8.txt nella repository).\n"
 "    "
 
 #: ../udiskie/cli.py:139
@@ -70,12 +66,11 @@ msgstr ""
 "Avvio di udiskie con notifiche disattivate."
 
 #: ../udiskie/cli.py:400
-#, fuzzy
 msgid ""
 "Not run within X or Wayland session.\n"
 "Starting udiskie without tray icon.\n"
 msgstr ""
-"Non è stata rilevata una sessione X. \n"
+"Non è stata rilevata una sessione X o Wayland.\n"
 "Avvio di udiskie senza icona di sistema.\n"
 
 #: ../udiskie/cli.py:407
@@ -112,14 +107,18 @@ msgid ""
 "works, but may be removed in a future version. Please change your command "
 "line and config to use the new name."
 msgstr ""
+"L'opzione 'notify_command' è stata rinominata in 'event_hook'. Il vecchio "
+"nome funziona ancora, ma potrebbe essere rimosso in una versione futura. Per"
+" favore modifica la riga di comando e la configurazione per usare il nuovo "
+"nome."
 
 #: ../udiskie/cli.py:443
 msgid "Ignoring 'notify_command' in favor of 'event_hook'."
-msgstr ""
+msgstr "Ignoro 'notify_command' in favore di 'event_hook'."
 
 #: ../udiskie/config.py:132
 msgid "Unknown matching attribute: {!r}"
-msgstr ""
+msgstr "Attributo di corrispondenza sconosciuto: {!r}"
 
 #: ../udiskie/config.py:134
 #, python-brace-format
@@ -213,12 +212,10 @@ msgstr "montato {0} in {1}"
 #: ../udiskie/mount.py:178
 msgid ""
 "Mounting NTFS device with default driver.\n"
-"Please install 'ntfs-3g' if you experience problems or the device is "
-"readonly."
+"Please install 'ntfs-3g' if you experience problems or the device is readonly."
 msgstr ""
 "Montatura dispositivo NTFS con il driver di default.\n"
-"Per favore, installa 'ntfs-3g' se riscontri problemi o il dispositivo è di "
-"sola lettura."
+"Per favore, installa 'ntfs-3g' se riscontri problemi o il dispositivo è di sola lettura."
 
 #: ../udiskie/mount.py:192
 #, python-brace-format
@@ -236,7 +233,7 @@ msgid "unmounting {0}"
 msgstr "Smontando {0}"
 
 #: ../udiskie/mount.py:199
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "unmounted {0}"
 msgstr "Smontato {0}"
 
@@ -401,9 +398,9 @@ msgid "not setting up {0}: not a file"
 msgstr "Impossibile impostare {0}: non è un file"
 
 #: ../udiskie/mount.py:604
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "setting up loop device {0}"
-msgstr "Sto impostando {0}"
+msgstr "Sto impostando il dispositivo loop {0}"
 
 #: ../udiskie/mount.py:622
 #, python-brace-format
@@ -411,6 +408,8 @@ msgid ""
 "Insufficient permission to open {0} in read-write mode. Retrying in read-"
 "only mode."
 msgstr ""
+"Permesso insufficiente per aprire {0} in modalità lettura-scrittura. Riprovo"
+" in modalità sola lettura."
 
 #: ../udiskie/mount.py:634
 #, python-brace-format
@@ -440,7 +439,7 @@ msgstr "Apri {0}"
 #: ../udiskie/mount.py:782
 #, python-brace-format
 msgid "Hack on {0}"
-msgstr ""
+msgstr "Apri un terminale su {0}"
 
 #: ../udiskie/mount.py:783
 #, python-brace-format
@@ -585,14 +584,14 @@ msgstr "Memorizza password"
 
 #: ../udiskie/prompt.py:112
 msgid "Store password in memory until udiskie is closed."
-msgstr ""
+msgstr "Conserva la password in memoria fino alla chiusura di udiskie."
 
 #: ../udiskie/prompt.py:125
 msgid "Open a keyfile to unlock the LUKS device"
 msgstr "Apri un keyfile per sbloccare il dispositivo LUKS"
 
 #: ../udiskie/prompt.py:159 ../udiskie/prompt.py:169
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Enter password for {0.ui_label_dialog}: "
 msgstr "Immetti la password per {0.ui_label_dialog}: "
 
@@ -602,15 +601,15 @@ msgstr "Attributo dispositivo sconosciuto {!r} nella stringa di formato: {!r}"
 
 #: ../udiskie/prompt.py:258
 msgid ""
-"Can't find file browser: {0!r}. You may want to change the value for the '-"
-"f' option."
+"Can't find file browser: {0!r}. You may want to change the value for the "
+"'-f' option."
 msgstr ""
 "Impossibile trovare esplora risorse: {0!r}. Potresti voler cambiare il "
 "valore per l'opzione '-f'."
 
 #: ../udiskie/tray.py:183
 msgid "Managed devices"
-msgstr ""
+msgstr "Dispositivi gestiti"
 
 #: ../udiskie/tray.py:199
 msgid "Mount disc image"
@@ -625,9 +624,8 @@ msgid "Enable notifications"
 msgstr "Abilita le notifiche"
 
 #: ../udiskie/tray.py:219
-#, fuzzy
 msgid "Clear password cache"
-msgstr "Dimentica la password per {0}"
+msgstr "Dimentica le password memorizzate"
 
 #: ../udiskie/tray.py:227
 msgid "Quit"

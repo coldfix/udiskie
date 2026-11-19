@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: udiskie\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-07-29 11:42+0200\n"
-"PO-Revision-Date: 2026-04-24 20:30+0300\n"
+"PO-Revision-Date: 2026-11-19 22:16+0100\n"
 "Last-Translator: Oğuz Ersen <oguz@ersen.moe>\n"
 "Language-Team: Turkish <tr>\n"
 "Language: tr\n"
@@ -588,7 +588,7 @@ msgstr "Parolayı önbelleğe al"
 
 #: ../udiskie/prompt.py:112
 msgid "Store password in memory until udiskie is closed."
-msgstr ""
+msgstr "udiskie kapatılana kadar parolayı bellekte sakla."
 
 #: ../udiskie/prompt.py:125
 msgid "Open a keyfile to unlock the LUKS device"
@@ -628,9 +628,8 @@ msgid "Enable notifications"
 msgstr "Bildirimleri etkinleştir"
 
 #: ../udiskie/tray.py:219
-#, fuzzy
 msgid "Clear password cache"
-msgstr "{0} için parolayı temizle"
+msgstr "Parola önbelleğini temizle"
 
 #: ../udiskie/tray.py:227
 msgid "Quit"
