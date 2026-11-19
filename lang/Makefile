@@ -12,6 +12,18 @@ mo: $(addsuffix .mo, $(basename $(wildcard *.po)))
 		echo     export TEXTDOMAINDIR=\"$$(readlink -f ../build/locale)\"; \
 	fi
 
+.PHONY: update-po-version
+# Explicitly mark all translations as revised for the current package version.
+update-po-version:
+	sed -i -e 's/^"Project-Id-Version: .*$$/"Project-Id-Version: udiskie '$(version)'\\n"/' \
+		$(wildcard *.po)
+
+.PHONY: update-po-date
+update-po-date:
+	@revision_date=$$(date '+%Y-%m-%d %H:%M%z'); \
+	sed -i -e 's/^"PO-Revision-Date: .*$$/"PO-Revision-Date: '"$$revision_date"'\\n"/' \
+		$(wildcard *.po)
+
 clean:
 	rm -rf *.po~ *.mo locale
 
