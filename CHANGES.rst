@@ -1,6 +1,20 @@
 CHANGELOG
 ---------
 
+2.8.2
+~~~~~
+Date: 19.11.2026
+
+Translations:
+
+- Update all translations using AI
+
+Tooling:
+
+- Add pre-commit hooks
+- Remove translations workflow
+
+
 2.8.1
 ~~~~~
 Date: 15.11.2026
