@@ -1,17 +1,20 @@
 repos:
   - repo: local
     hooks:
+
       - id: ruff
         name: Ruff
         entry: ruff check --force-exclude
         language: system
         types: [python]
+
       - id: update-translations
         name: Update translation files
         entry: make -BC lang
         language: system
         pass_filenames: false
         always_run: true
+
       - id: validate-catalogs
         name: Validate translation catalogs
         entry: >-
@@ -20,3 +23,10 @@ repos:
           done' --
         language: system
         files: ^lang/.*\.po$
+
+      - id: github-actions-lock
+        name: GitHub Actions lockfile
+        entry: gh actions-lock --verify-local
+        language: system
+        pass_filenames: false
+        files: ^\.github/workflows/
