@@ -68,10 +68,6 @@ Links
    :target:            https://github.com/coldfix/udiskie/blob/master/COPYING
    :alt:               License: MIT
 
-.. |Translations| image:: http://weblate.coldfix.de/widgets/udiskie/-/udiskie/svg-badge.svg
-   :target:               http://weblate.coldfix.de/engage/udiskie/
-   :alt:                  Translations
-
 .. |Screenshot| image:: https://raw.githubusercontent.com/coldfix/udiskie/master/screenshot.png
    :target:             https://raw.githubusercontent.com/coldfix/udiskie/master/screenshot.png
    :alt:                Screenshot
@@ -107,22 +103,24 @@ Further resources:
 Translations
 ------------
 
-Translations by users are always welcome. There are currently two main ways
-to edit translations:
+Udiskie supports translations to different languages. The corresponding files
+are in the `lang`_ subfolder.
 
-Weblate
-~~~~~~~
+If your favorite language is not yet in there, you can request it via issue or
+email. I will then draft the translation using AI and invite you for review.
 
-I have setup a Weblate_ UI to make translation editing more convenient. This
-is so far experimental. Please let me know if you encounter any issues. I may
-decide remove this interface in the future because it sucks the RAM out of my
-server.
+Alternatively, you can edit the files manually and submit a pull-request.
 
-Manually
-~~~~~~~~
+There was a self-hosted weblate instance for in-browser editing, but I have
+since then removed it, in order to decrease the memory usage, attack-surface
+and maintenance overhead on my server. It was also sometimes slow and its
+benefits have decreased due to the emergence of AI.
 
-The corresponding files are in the
-`lang`_ subfolder. In order to create a new translation, find out the locale
+
+Manually editting
+~~~~~~~~~~~~~~~~~
+
+In order to create a new translation, find out the locale
 name for your language, e.g. ``es_ES`` for Spanish, and create a translation
 file in the ``lang`` folder as follows::
 
